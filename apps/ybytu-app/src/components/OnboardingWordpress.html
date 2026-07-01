@@ -1,0 +1,416 @@
+<div id="onboarding-app" class="bg-[#121212] min-h-screen font-sans text-white flex justify-center items-center p-4">
+  <div class="w-full max-w-2xl bg-[#1A1A1A] rounded-3xl shadow-2xl border border-[#333] flex flex-col overflow-hidden relative">
+    
+    <div id="loading-screen" class="absolute inset-0 z-50 bg-[#1A1A1A] flex flex-col justify-center items-center transition-opacity duration-300">
+      <svg class="animate-spin h-12 w-12 text-[#F55F16] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p class="text-[#A0A0A0] font-medium" id="loading-text">A carregar...</p>
+    </div>
+
+    <div class="px-8 pt-10 pb-4">
+      <div class="h-2 w-full bg-[#333] rounded-full overflow-hidden mb-4">
+        <div id="progress-bar" class="h-full bg-[#F55F16] transition-all duration-500 ease-out" style="width: 0%;"></div>
+      </div>
+      <p id="step-counter" class="text-xs font-bold text-[#A0A0A0] uppercase tracking-widest transition-all">Passo 1/1</p>
+    </div>
+
+    <div class="px-8 pb-6 flex-1 overflow-y-auto custom-scrollbar" id="content-area">
+      <h2 id="step-title" class="text-3xl font-black text-white mb-2 tracking-tight">Título</h2>
+      <p id="step-subtitle" class="text-[#A0A0A0] mb-8 text-lg">Subtítulo</p>
+      
+      <div id="input-container" class="space-y-4"></div>
+    </div>
+
+    <div class="p-6 flex gap-4 border-t border-[#333] bg-[#1A1A1A]">
+      <button id="btn-back" class="flex-1 py-4 px-6 bg-[#2A2A2A] hover:bg-[#333] text-[#A0A0A0] font-bold rounded-xl transition-colors hidden">
+        VOLTAR
+      </button>
+      <button id="btn-next" class="flex-[2] py-4 px-6 bg-[#F55F16] hover:bg-[#E05010] text-white font-black text-lg rounded-xl shadow-lg shadow-[#F55F16]/20 transition-all transform hover:scale-[1.02] active:scale-95">
+        PRÓXIMO
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+  
+  /* Estilo Moderno para o Input Range (Slider) */
+  input[type=range] {
+    -webkit-appearance: none; width: 100%; background: transparent;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%;
+    background: #F55F16; cursor: pointer; margin-top: -10px; box-shadow: 0 0 10px rgba(245, 95, 22, 0.5);
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%; height: 6px; cursor: pointer; background: #333; border-radius: 3px;
+  }
+</style>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// ==========================================================
+// CONFIGURAÇÕES INICIAIS
+// ==========================================================
+// AVISO: Substitua pelos seus dados reais do Supabase
+const SUPABASE_URL = 'https://SUA_URL_AQUI.supabase.co';
+const SUPABASE_ANON_KEY = 'SUA_CHAVE_ANON_AQUI';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Simulação da Sessão que viria do seu sistema de Auth no WP
+// Certifique-se de preencher esta variável com os dados reais do utilizador logado.
+let session = {
+  user: {
+    id: 'USER_ID_PLACEHOLDER', // ID do utilizador atual
+    user_metadata: { full_name: 'Utilizador' }
+  }
+};
+
+const userName = session?.user?.user_metadata?.full_name || session?.user?.user_metadata?.name || 'Utilizador';
+
+// ==========================================================
+// A FONTE ÚNICA DE VERDADE PARA OS PLANOS
+// ==========================================================
+const SUBSCRIPTION_PLANS = {
+  TRAINING: '3a5ccc00-77ed-4b87-8e83-bc35be63a862',
+  MEAL: '7458939c-ed4b-4a16-960e-b647f94e6a9b',
+  COMPLETE: '7b5502f1-eeed-4640-8c4f-0ebc0502481e',
+};
+
+// ==========================================================
+// ESTADO DA APLICAÇÃO
+// ==========================================================
+let currentStep = 0;
+let loading = true;
+let answers = {};
+let steps = [];
+
+// ==========================================================
+// HELPER LOGIC (Mantido exato)
+// ==========================================================
+const checkCondition = (currentAnswers, stepsData, field, matchTerm) => {
+  const step = stepsData.find(s => s.dbField === field);
+  if (!step || !step.options) return false;
+  
+  const target = step.options.find(o => 
+    String(o.name_ptbr || o.name || '').toLowerCase().includes(matchTerm.toLowerCase()) ||
+    String(o.id).toLowerCase() === matchTerm.toLowerCase()
+  );
+  if (!target) return false;
+
+  const selection = currentAnswers[field];
+  if (!selection) return false;
+
+  return Array.isArray(selection) ? selection.includes(target.id) : selection === target.id;
+};
+
+// ==========================================================
+// DEFINIÇÃO DOS PASSOS (Mantido exato)
+// ==========================================================
+const initialSteps = [
+  { id: 'plan_selection', title: "Como vamos transformar a sua vida?", subtitle: "Escolha o plano ideal para si", type: 'single', dbField: 'subscription_type_id', options: [
+      { id: SUBSCRIPTION_PLANS.TRAINING, name_ptbr: '💪 Apenas Treinos' },
+      { id: SUBSCRIPTION_PLANS.MEAL, name_ptbr: '🥗 Apenas Nutrição' },
+      { id: SUBSCRIPTION_PLANS.COMPLETE, name_ptbr: '🏆 Treino + Nutrição (Completo)' }
+  ]},
+  { id: 'goals', title: "Qual é o seu principal objetivo?", subtitle: "Múltipla escolha", type: 'multiple', dbField: 'goals_ids', table: 'goals', condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'gender', title: "Qual o seu género?", subtitle: "Escolha única", type: 'single', dbField: 'gender_id', table: 'genders', condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'age', title: "Qual a sua idade?", subtitle: "Digite a sua idade", type: 'number', dbField: 'age', placeholder: "Ex: 38", condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'weight', title: "Qual o seu peso atual?", subtitle: "Peso em kg", type: 'number', dbField: 'weight_kg', placeholder: "Ex: 70", condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'height', title: "Qual a sua altura?", subtitle: "Altura em cm", type: 'number', dbField: 'height_cm', placeholder: "Ex: 155", condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'activity_level', title: "Considera-se uma pessoa ativa?", subtitle: "Escolha única", type: 'single', dbField: 'activity_level_id', table: 'activity_levels', condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'health_conditions', title: "Possui alguma condição de saúde?", subtitle: "Múltipla escolha", type: 'multiple', dbField: 'health_conditions_ids', table: 'health_conditions', condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'pregnancy_trimester', title: "Em qual trimestre da gestação está?", subtitle: "Escolha única", type: 'single', dbField: 'pregnancy_trimester', options: [{ id: 1, name_ptbr: '1º trimestre' }, { id: 2, name_ptbr: '2º trimestre' }, { id: 3, name_ptbr: '3º trimestre' }], condition: (ans, stp) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) && checkCondition(ans, stp, 'health_conditions_ids', 'Gravidez') },
+
+  // TREINO
+  { id: 'physical_conditions', title: "Possui alguma dor ou limitação física?", subtitle: "Múltipla escolha", type: 'multiple', dbField: 'physical_conditions_ids', table: 'onboarding_physical_conditions', condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'muscle_groups', title: "Qual parte do corpo gostaria de focar?", subtitle: "Múltipla escolha", type: 'multiple', dbField: 'muscle_groups_ids', table: 'onboarding_muscle_groups', condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'exercise_environment', title: "Onde pretende treinar?", subtitle: "Escolha única", type: 'single', dbField: 'exercise_environment_id', table: 'exercise_environment', condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'exercise_equipments', title: "Que equipamentos possui?", subtitle: "Múltipla escolha", type: 'multiple', dbField: 'exercise_equipment_ids', table: 'onboarding_exercise_equipments', condition: (answers, stepsData) => {
+      const isTrainingPlan = [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
+      const environmentAnswer = answers.exercise_environment_id;
+      if (!environmentAnswer) return false;
+      const environmentStep = stepsData.find(step => step.dbField === 'exercise_environment_id');
+      const chosenOption = environmentStep?.options?.find(opt => opt.id === environmentAnswer);
+      const selectedHomeWithEquipment = environmentAnswer === 'home_with_equipment' || (chosenOption && Object.values(chosenOption).some(value => String(value).includes('home_with_equipment')));
+      return isTrainingPlan && selectedHomeWithEquipment;
+  }},
+  { id: 'training_days_per_week', title: "Quantos dias por semana pretende treinar?", subtitle: "Escolha única", type: 'single', dbField: 'training_days_per_week', options: [{id: 2, name_ptbr: '2 dias'}, {id: 3, name_ptbr: '3 dias'}, {id: 4, name_ptbr: '4 dias'}, {id: 5, name_ptbr: '5 dias'}, {id: 6, name_ptbr: '6 dias'}, {id: 7, name_ptbr: '7 dias'}], condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'training_duration_minutes', title: "Quanto tempo tem por treino?", subtitle: "Deslize para definir o tempo", type: 'slider', dbField: 'training_duration_minutes', min: 15, max: 90, step: 15, recommended: 45, condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'exercise_level', title: "Qual a sua experiência com treinos?", subtitle: "Escolha única", type: 'single', dbField: 'exercise_level_id', table: 'exercise_levels', condition: (ans) => [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+
+  // NUTRIÇÃO
+  { id: 'nutrition_days_per_week', title: "Quantos dias por semana pretende seguir a dieta?", subtitle: "Escolha única", type: 'single', dbField: 'nutrition_days_per_week', options: [{id: 2, name_ptbr: '2 dias'}, {id: 3, name_ptbr: '3 dias'}, {id: 4, name_ptbr: '4 dias'}, {id: 5, name_ptbr: '5 dias'}, {id: 6, name_ptbr: '6 dias'}, {id: 7, name_ptbr: '7 dias (A semana toda)'}], condition: (ans) => [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'meals_per_day', title: "Quantas refeições prefere fazer por dia?", subtitle: "Escolha única", type: 'single', dbField: 'meals_per_day', options: [{id: 3, name_ptbr: '3 refeições (Ex: Pequeno-almoço, Almoço, Jantar)'}, {id: 4, name_ptbr: '4 refeições (+ 1 Lanche)'}, {id: 5, name_ptbr: '5 refeições (+ 2 Lanches)'}, {id: 6, name_ptbr: '6 refeições (Comer de 3 em 3 horas)'}], condition: (ans) => [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'dietary_preferences', title: "Qual opção define melhor sua alimentação?", subtitle: "Escolha única", type: 'single', dbField: 'dietary_preference_id', table: 'dietary_preferences', condition: (ans) => [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'dietary_restrictions', title: "Possui alguma restrição ou intolerância alimentar?", subtitle: "Múltipla escolha", type: 'multiple', dbField: 'dietary_restrictions_ids', table: 'dietary_restrictions', condition: (ans) => [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) },
+  { id: 'disliked_foods', title: "Existe algum alimento que prefere evitar?", subtitle: "Deixe em branco se comer de tudo", type: 'text', dbField: 'disliked_foods', placeholder: "Ex: fígado, cebola, brócolis…", condition: (ans) => [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(ans.subscription_type_id) }
+];
+
+// ==========================================================
+// FUNÇÕES DE UI E LÓGICA CORE
+// ==========================================================
+
+const getVisibleSteps = () => {
+  return steps.filter(step => step.condition ? step.condition(answers, steps) : true);
+};
+
+const setLoading = (isLoading, text = "A carregar...") => {
+  const loader = document.getElementById('loading-screen');
+  document.getElementById('loading-text').innerText = text;
+  if (isLoading) {
+    loader.classList.remove('hidden');
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'auto';
+  } else {
+    loader.style.opacity = '0';
+    loader.style.pointerEvents = 'none';
+    setTimeout(() => loader.classList.add('hidden'), 300);
+  }
+};
+
+const handleSelect = (optionId, type, dbField) => {
+  if (type === 'multiple') {
+    const selections = answers[dbField] || [];
+    if (selections.includes(optionId)) {
+      answers[dbField] = selections.filter(i => i !== optionId);
+    } else {
+      answers[dbField] = [...selections, optionId];
+    }
+  } else {
+    answers[dbField] = optionId;
+  }
+  renderStep(); // Re-renderiza para atualizar visualmente as opções selecionadas
+};
+
+const handleTextInput = (val, dbField) => {
+  answers[dbField] = val;
+};
+
+const renderStep = () => {
+  const visibleSteps = getVisibleSteps();
+  const currentData = visibleSteps[currentStep];
+  
+  if (!currentData) return;
+
+  // UI Updates: Progresso & Cabeçalho
+  document.getElementById('progress-bar').style.width = `${((currentStep + 1) / visibleSteps.length) * 100}%`;
+  document.getElementById('step-counter').innerText = `Passo ${currentStep + 1}/${visibleSteps.length}`;
+  document.getElementById('step-title').innerText = currentData.title;
+  document.getElementById('step-subtitle').innerText = currentData.subtitle;
+
+  // Lógica dos Botões
+  const btnBack = document.getElementById('btn-back');
+  const btnNext = document.getElementById('btn-next');
+  
+  if (currentStep === 0) {
+    btnBack.classList.add('hidden');
+    btnBack.classList.remove('block');
+  } else {
+    btnBack.classList.add('block');
+    btnBack.classList.remove('hidden');
+  }
+
+  btnNext.innerText = currentStep === visibleSteps.length - 1 ? 'FINALIZAR' : 'PRÓXIMO';
+
+  // Renderização Dinâmica dos Inputs
+  const container = document.getElementById('input-container');
+  container.innerHTML = ''; // Limpa atual
+
+  if (currentData.type === 'number' || currentData.type === 'text') {
+    const isText = currentData.type === 'text';
+    const input = document.createElement(isText ? 'textarea' : 'input');
+    
+    if(!isText) input.type = "number";
+    input.placeholder = currentData.placeholder || '';
+    input.value = answers[currentData.dbField] || '';
+    input.className = "w-full bg-[#2A2A2A] text-white p-5 rounded-2xl text-xl border border-[#444] focus:border-[#F55F16] focus:outline-none transition-colors shadow-inner" + (isText ? " min-h-[120px] resize-none" : "");
+    
+    input.oninput = (e) => handleTextInput(e.target.value, currentData.dbField);
+    container.appendChild(input);
+
+  } else if (currentData.type === 'slider') {
+    const val = answers[currentData.dbField] || currentData.recommended;
+    answers[currentData.dbField] = val; // Set default in state
+
+    container.innerHTML = `
+      <div class="bg-[#2A2A2A] p-8 rounded-3xl border border-[#444] flex flex-col items-center shadow-sm">
+        <div class="text-[#F55F16] text-6xl font-black mb-6 flex items-baseline">
+          <span id="slider-val">${val}</span><span class="text-2xl text-[#A0A0A0] font-bold ml-2">min</span>
+        </div>
+        <input type="range" id="slider-input" min="${currentData.min}" max="${currentData.max}" step="${currentData.step}" value="${val}">
+      </div>
+    `;
+    
+    // Bind Realtime slider update
+    setTimeout(() => {
+        document.getElementById('slider-input').oninput = (e) => {
+            const newVal = e.target.value;
+            document.getElementById('slider-val').innerText = newVal;
+            handleTextInput(newVal, currentData.dbField);
+        };
+    }, 0);
+
+  } else {
+    // Opções (Single / Multiple)
+    currentData.options?.forEach((opt) => {
+      const isSelected = currentData.type === 'multiple' 
+        ? (answers[currentData.dbField] || []).includes(opt.id) 
+        : answers[currentData.dbField] === opt.id;
+
+      const btn = document.createElement('button');
+      btn.className = `w-full p-5 rounded-2xl flex justify-between items-center border transition-all duration-200 text-left ${isSelected ? 'border-[#F55F16] bg-[#F55F16]/10 shadow-[0_0_15px_rgba(245,95,22,0.1)]' : 'border-[#444] bg-[#2A2A2A] hover:border-[#666]'}`;
+      
+      btn.innerHTML = `
+        <span class="text-lg font-medium ${isSelected ? 'text-[#F55F16]' : 'text-white'}">${opt.name_ptbr || opt.name}</span>
+        <div class="w-6 h-6 border flex justify-center items-center flex-shrink-0 ${currentData.type === 'multiple' ? 'rounded-md' : 'rounded-full'} ${isSelected ? 'border-[#F55F16] bg-[#F55F16]' : 'border-gray-500'}">
+          ${isSelected ? '<div class="w-2.5 h-2.5 bg-white rounded-sm"></div>' : ''}
+        </div>
+      `;
+      
+      btn.onclick = () => handleSelect(opt.id, currentData.type, currentData.dbField);
+      container.appendChild(btn);
+    });
+  }
+};
+
+// ==========================================================
+// LÓGICA DE NAVEGAÇÃO E SUBMISSÃO (Mantido exato)
+// ==========================================================
+
+const prevStep = () => {
+  if (currentStep > 0) {
+    currentStep--;
+    renderStep();
+  }
+};
+
+const nextStep = async () => {
+  const visibleSteps = getVisibleSteps();
+  
+  if (currentStep < visibleSteps.length - 1) {
+    currentStep++;
+    renderStep();
+  } else {
+    setLoading(true, "A guardar o seu perfil...");
+    try {
+      if (!session?.user?.id) throw new Error("Utilizador não autenticado.");
+      const userId = session.user.id;
+
+      // PASSO 1: GUARDAR TODOS OS DADOS
+      const { error: profileError } = await supabase.from('profiles').update({
+        subscription_type_id: answers.subscription_type_id, 
+        goals_ids: answers.goals_ids || [], 
+        gender_id: answers.gender_id || null,
+        age: answers.age ? parseInt(answers.age) : null,
+        weight_kg: answers.weight_kg ? parseFloat(answers.weight_kg) : null,
+        height_cm: answers.height_cm ? parseInt(answers.height_cm) : null,
+        activity_level_id: answers.activity_level_id || null,
+        health_conditions_ids: answers.health_conditions_ids || [], 
+        pregnancy_trimester: answers.pregnancy_trimester ? parseInt(answers.pregnancy_trimester) : null, 
+        physical_conditions_ids: answers.physical_conditions_ids || [], 
+        muscle_groups_ids: answers.muscle_groups_ids || [],
+        exercise_environment_id: answers.exercise_environment_id || null, 
+        exercise_equipments_ids: answers.exercise_equipment_ids || [], 
+        training_days_per_week: answers.training_days_per_week ? parseInt(answers.training_days_per_week) : null, 
+        training_duration_minutes: answers.training_duration_minutes || null, 
+        exercise_level_id: answers.exercise_level_id || null,
+        nutrition_days_per_week: answers.nutrition_days_per_week ? parseInt(answers.nutrition_days_per_week) : null,
+        meals_per_day: answers.meals_per_day ? parseInt(answers.meals_per_day) : null,
+        dietary_preference_id: answers.dietary_preference_id || null,
+        dietary_restrictions_ids: answers.dietary_restrictions_ids || [],
+        disliked_foods: answers.disliked_foods || null,
+      }).eq('id', userId);
+
+      if (profileError) throw new Error(`Erro ao guardar perfil: ${profileError.message}`);
+
+      // PASSO 2: IA
+      setLoading(true, "A gerar o seu plano com Inteligência Artificial...");
+      const isTraining = [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
+      const isMeal = [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
+
+      const aiPromises = []; 
+
+      if (isTraining) {
+        aiPromises.push(
+          supabase.functions.invoke('plan-generation', { body: { userId: userId } })
+            .then(({ error }) => { if (error) throw new Error("Aviso (Treino): " + error.message); })
+        );
+      }
+
+      if (isMeal) {
+        aiPromises.push(
+          supabase.functions.invoke('meal-plan-generation', { body: { userId: userId } })
+            .then(({ error }) => { if (error) throw new Error("Aviso (Nutrição): " + error.message); })
+        );
+      }
+
+      if (aiPromises.length > 0) {
+        await Promise.all(aiPromises)
+          .then(() => {
+             alert(`🏆 Fantástico, ${userName}! O seu perfil foi configurado com sucesso e os planos estão prontos!`);
+             // onComplete() -> Aqui pode redirecionar via window.location.href = '/dashboard'
+          })
+          .catch((aiError) => {
+             console.error("Erro numa das IAs:", aiError);
+             alert("O seu perfil foi salvo, mas a IA demorou muito a responder. Os planos aparecerão em breve.");
+          });
+      } else {
+         alert(`🏆 Fantástico, ${userName}! Perfil configurado.`);
+      }
+
+    } catch (e) {
+      alert(e.message || "Ocorreu um erro inesperado ao salvar o perfil.");
+      console.error("Erro de Base de Dados:", e);
+    } finally {
+      setLoading(false);
+    }
+  }
+};
+
+// ==========================================================
+// INICIALIZAÇÃO E FETCH DE DADOS
+// ==========================================================
+async function initApp() {
+  try {
+    const updatedSteps = await Promise.all(initialSteps.map(async (step) => {
+      if (step.table) {
+        const { data, error } = await supabase.from(step.table).select('*');
+        if (error || !data) return step;
+        return {
+          ...step,
+          options: data.map(item => ({
+            ...item, 
+            id: item.id || item[Object.keys(item).find(k => k.includes('id'))],
+            name_ptbr: item.name_ptbr || item.label_ptbr || item.name || item.title,
+            name: item.name_ptbr || item.label_ptbr || item.name || item.title
+          }))
+        };
+      }
+      return step;
+    }));
+    
+    steps = updatedSteps;
+    
+    // Bind Event Listeners aos botões
+    document.getElementById('btn-back').addEventListener('click', prevStep);
+    document.getElementById('btn-next').addEventListener('click', nextStep);
+    
+    renderStep();
+  } catch (e) {
+    console.error("Erro na busca das opções:", e);
+  } finally {
+    setLoading(false);
+  }
+}
+
+// Inicia
+document.addEventListener('DOMContentLoaded', initApp);
+</script>
