@@ -36,17 +36,154 @@ const HOME_EQUIPMENT_WHITELIST = [
 // preenchidos no banco — é uma lista solta de 79 exercícios, não um plano
 // estruturado por dia. Por isso o esqueleto de dias vem SEMPRE de um Original
 // de academia, para qualquer ambiente: a estrutura (quais grupos musculares em
-// qual dia, quantos slots, sets/reps) é agnóstica de equipamento — só o
-// exercício que preenche cada slot muda pelo pool seguro (casa vs. academia).
-const CANONICAL_MOLDE_BY_DAYS: Record<number, string> = {
-  3: 'tr_202',
-  4: 'tr_204',
-  5: 'tr_206',
-}
+// qual dia, quantos slots) é agnóstica de equipamento — só o exercício que
+// preenche cada slot muda pelo pool seguro (casa vs. academia).
 
 function nearestMoldeDays(days: number): number {
   const options = [3, 4, 5]
   return options.reduce((best, opt) => (Math.abs(opt - days) < Math.abs(best - days) ? opt : best))
+}
+
+// ─── REGRA 0: seleção do molde por (objetivo × dias) ──────────────────────────
+// Confirmado por query real do banco (goals_ids): weight_loss e hypertrophy têm
+// moldes próprios de academia por dias (3/4/5). conditioning e health_routine
+// NÃO têm molde próprio — usam a MESMA estrutura do molde weight_loss (decisão
+// da Taina: ritmo moderado/sustentável pra saúde geral, não emagrecimento
+// intenso — só a matriz de séries muda, não o esqueleto de dias, ver abaixo).
+// tr_201 (o único Original "home", health_routine) fica FORA da REGRA 0:
+// day_number nulo, gaps, exercício repetido 3x — pendente de revisão
+// profissional, nunca é selecionado aqui.
+const MOLDE_BY_GOAL_AND_DAYS: Record<string, Record<number, string>> = {
+  weight_loss:    { 3: 'tr_202', 4: 'tr_204', 5: 'tr_206' },
+  hypertrophy:    { 3: 'tr_203', 4: 'tr_205', 5: 'tr_207' },
+  conditioning:   { 3: 'tr_202', 4: 'tr_204', 5: 'tr_206' }, // empresta estrutura do weight_loss
+  health_routine: { 3: 'tr_202', 4: 'tr_204', 5: 'tr_206' }, // empresta estrutura do weight_loss
+}
+
+function moldeForGoal(goal: string, requestedDays: number): { moldeDays: number; moldeTrainingPlanId: string } {
+  const moldeDays = nearestMoldeDays(requestedDays)
+  const byGoal = MOLDE_BY_GOAL_AND_DAYS[goal] ?? MOLDE_BY_GOAL_AND_DAYS.health_routine
+  return { moldeDays, moldeTrainingPlanId: byGoal[moldeDays] }
+}
+
+// ─── REGRA 0: matriz de séries/reps/descanso — SÓ para objetivos sem molde
+// dedicado ──────────────────────────────────────────────────────────────────
+// weight_loss (tr_202/204/206) e hypertrophy (tr_203/205/207) JÁ têm
+// sets/reps/rest_seconds curados por exercício no banco (confirmado: ex_031 é
+// rest 60s em tr_202 vs 120s em tr_203 pro MESMO exercício; ex_098 é 1x25 em
+// ambos — um finisher deliberado, não um "3 séries" genérico). Sobrescrever
+// isso com uma matriz genérica seria regressão, não melhoria — por isso essa
+// matriz NUNCA se aplica a esses dois objetivos, e o ajuste de nível (abaixo)
+// também não mexe neles: a única molde por (objetivo × dias) já serve todo
+// nível — a personalização por nível acontece na SELEÇÃO do exercício (pool
+// filtrado por exercise_level_id), não nas séries. Rebaixar ex_098 de 1→2
+// séries pra um beginner, por exemplo, destruiria o finisher curado.
+//
+// conditioning/health_routine tomam emprestada a ESTRUTURA do molde
+// weight_loss, mas os números emprestados são a curadoria do weight_loss —
+// não fariam o objetivo pesar de verdade. Aqui sim a matriz sobrescreve, com
+// ajuste de séries por nível: beginner -1 (mín. 2), intermediate = base,
+// advanced +1. Reps e descanso são fixos por objetivo, não variam por nível.
+const SETS_REPS_REST_BY_GOAL: Record<string, { sets: number; reps: number; rest_seconds: number }> = {
+  conditioning:   { sets: 3, reps: 12, rest_seconds: 50 },
+  health_routine: { sets: 3, reps: 12, rest_seconds: 50 }, // mesma matriz do conditioning (decisão da Taina)
+}
+
+const GOALS_WITH_DEDICATED_MOLDE = new Set(['weight_loss', 'hypertrophy'])
+
+function setsRepsRestForSlot(
+  goal: string,
+  level: string,
+  moldeSlot: { sets: number; reps: number; rest_seconds: number },
+): { sets: number; reps: number; rest_seconds: number } {
+  if (GOALS_WITH_DEDICATED_MOLDE.has(goal)) return moldeSlot // preserva curadoria real do banco
+
+  const base = SETS_REPS_REST_BY_GOAL[goal] ?? SETS_REPS_REST_BY_GOAL.health_routine
+  const levelDelta = level === 'beginner' ? -1 : level === 'advanced' ? 1 : 0
+  return { sets: Math.max(2, base.sets + levelDelta), reps: base.reps, rest_seconds: base.rest_seconds }
+}
+
+// ─── REGRA 1: duração → nº de slots por dia ────────────────────────────────────
+// Fórmula calibrada nos moldes reais (~7min/slot, 5min fixos de aquecimento já
+// embutidos na instruction_pt): round((duração-5)/7), piso 3 slots/dia.
+// Confere com os nativos: 15→3, 30→4, 45→6, 60→8, 75→10, 90→12. O piso é um
+// mínimo da FÓRMULA, não um mínimo forçado no dia — se o molde nativo tiver
+// menos slots que o piso, ele não é esticado (ver cutSlotsForDuration abaixo).
+function targetSlotsPerDay(durationMinutes: number): number {
+  return Math.max(3, Math.round((durationMinutes - 5) / 7))
+}
+
+// ─── REGRA 1 + REGRA 2 (parte 1 — proteção): corta slots por dia até bater com
+// targetSlotsPerDay. NUNCA estende além do nativo do molde (dia com 7 slots e
+// duração pedindo 8 fica em 7 — mais curto, mas honesto).
+//
+// Prioridade de corte (quem sai primeiro):
+//   1. slot NÃO focado sai antes de um focado — foco fica imune ao corte
+//      ENQUANTO houver outro slot cortável. Essa imunidade é RELATIVA: se só
+//      sobrarem slots focados e ainda faltar cortar, o corte invade eles
+//      também — a duração é o teto físico e nunca cede pro foco.
+//   2. dentro do mesmo grupo (focado/não-focado), sai primeiro quem cobre
+//      MENOS grupos musculares (isolado antes de composto).
+//   3. empate → sai primeiro quem tem order_within_day MAIOR (o molde já põe
+//      compostos no início do dia, isolados no fim).
+function cutSlotsForDuration<
+  T extends { day_number: number; order_within_day: number; target_muscle_groups: string[] }
+>(slots: T[], targetSlots: number, focusMuscleGroups: string[]): { survivors: T[]; anyDayTrimmed: boolean } {
+  const byDay = new Map<number, T[]>()
+  for (const slot of slots) {
+    const list = byDay.get(slot.day_number) ?? []
+    list.push(slot)
+    byDay.set(slot.day_number, list)
+  }
+
+  let anyDayTrimmed = false
+  const survivors: T[] = []
+
+  for (const daySlots of byDay.values()) {
+    const native = daySlots.length
+    if (native <= targetSlots) {
+      survivors.push(...daySlots) // não estende além do nativo — piso da fórmula não força slot extra
+      continue
+    }
+    anyDayTrimmed = true
+    const toRemove = native - targetSlots
+
+    const isFocused = (s: T) =>
+      focusMuscleGroups.length > 0 && s.target_muscle_groups.some(m => focusMuscleGroups.includes(m))
+
+    // Ordenado do "sai primeiro" pro "sai por último". Quando todos os slots
+    // restantes são focados (isFocused empata em true), o critério cai pra
+    // cobertura/order_within_day normalmente — o corte continua acontecendo,
+    // só não prioriza QUEM entre eles sai. toRemove sempre é respeitado.
+    const removalOrder = [...daySlots].sort((a, b) => {
+      if (isFocused(a) !== isFocused(b)) return isFocused(a) ? 1 : -1
+      if (a.target_muscle_groups.length !== b.target_muscle_groups.length)
+        return a.target_muscle_groups.length - b.target_muscle_groups.length
+      return b.order_within_day - a.order_within_day
+    })
+
+    const removed = new Set(removalOrder.slice(0, toRemove).map(s => s.order_within_day))
+    survivors.push(...daySlots.filter(s => !removed.has(s.order_within_day)))
+  }
+
+  return { survivors, anyDayTrimmed }
+}
+
+// ─── REGRA 2 (parte 2 — reforço): +1 set nos slots focados sobreviventes. Só
+// entra pra conditioning/health_routine (matriz genérica) — pra
+// weight_loss/hypertrophy (molde curado), foco já atuou como proteção no corte
+// acima e NÃO soma set: mesma razão do ex_098 na REGRA 0 (nível também não
+// mexe no molde curado). Sets curados não levam patches acumuláveis de nível
+// nem de foco — só a proteção contra corte conta como reforço nesses casos.
+function applyFocusBonus<T extends { sets: number; target_muscle_groups: string[] }>(
+  slots: T[],
+  goal: string,
+  focusMuscleGroups: string[],
+): T[] {
+  if (GOALS_WITH_DEDICATED_MOLDE.has(goal) || focusMuscleGroups.length === 0) return slots
+  return slots.map(slot =>
+    slot.target_muscle_groups.some(m => focusMuscleGroups.includes(m)) ? { ...slot, sets: slot.sets + 1 } : slot,
+  )
 }
 
 // ─── Mensagens fixas de caution (dicionário, não IA — segurança não pode variar) ─
@@ -169,7 +306,7 @@ serve(async (req) => {
     // ── PASSO 0: ler perfil ──────────────────────────────────────────────────
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, exercise_level_id, exercise_environment_id, exercise_equipments_ids, goals_ids, physical_conditions_ids, health_conditions_ids, training_days_per_week, training_duration_minutes')
+      .select('id, exercise_level_id, exercise_environment_id, exercise_equipments_ids, goals_ids, physical_conditions_ids, health_conditions_ids, training_days_per_week, training_duration_minutes, muscle_groups_ids, age, activity_level_id')
       .eq('id', userId)
       .single()
 
@@ -186,7 +323,7 @@ serve(async (req) => {
     }
 
     // ── PASSO 0: traduzir UUIDs → slugs (1 hop) em paralelo ──────────────────
-    const [levelRes, envRes, goalsRes, healthRes] = await Promise.all([
+    const [levelRes, envRes, goalsRes, healthRes, activityRes] = await Promise.all([
       profile.exercise_level_id
         ? supabase.from('exercise_levels').select('exercise_level_id').eq('id', profile.exercise_level_id).single()
         : Promise.resolve({ data: { exercise_level_id: 'beginner' }, error: null }),
@@ -202,6 +339,14 @@ serve(async (req) => {
       profile.health_conditions_ids?.length > 0
         ? supabase.from('health_conditions').select('health_condition_id').in('id', profile.health_conditions_ids)
         : Promise.resolve({ data: [], error: null }),
+
+      // BLOCO 2 (ponto 2): sinal de personalização pra IA, NÃO um novo filtro
+      // de segurança — se ausente, fica null e a IA simplesmente não recebe
+      // esse sinal (nunca inventa um default, ao contrário de level/environment
+      // acima que precisam de fallback pro pool não quebrar).
+      profile.activity_level_id
+        ? supabase.from('activity_levels').select('name').eq('id', profile.activity_level_id).single()
+        : Promise.resolve({ data: null, error: null }),
     ])
 
     const levelSlug = levelRes.data?.exercise_level_id ?? 'beginner'
@@ -210,6 +355,9 @@ serve(async (req) => {
     const healthConditionSlugs = (healthRes.data ?? [])
       .map((h: any) => h.health_condition_id)
       .filter((s: string) => s && s !== 'none' && s !== 'other')
+
+    const userAge: number | null = profile.age ?? null
+    const activityLevelSlug: string | null = activityRes.data?.name ?? null
 
     // ── PASSO 0: equipamento — 2 hops (onboarding grouping → equipamento fino) ─
     let equipmentSlugs: string[] = []
@@ -271,6 +419,27 @@ serve(async (req) => {
     const userConditionSlugs = [...new Set([...healthConditionSlugs, ...physicalConditionSlugs])]
       .filter(s => s && s !== 'none' && s !== 'other')
 
+    // ── PASSO 0: foco muscular (REGRA 2) — 2 hops (onboarding grouping → slug fino) ─
+    let focusMuscleGroupSlugs: string[] = []
+    if (profile.muscle_groups_ids?.length > 0) {
+      const { data: onboardingMuscle } = await supabase
+        .from('onboarding_muscle_groups')
+        .select('main_muscle_groups_ids')
+        .in('id', profile.muscle_groups_ids)
+
+      const fineMuscleIds = [...new Set(
+        (onboardingMuscle ?? []).flatMap((row: any) => row.main_muscle_groups_ids ?? [])
+      )]
+
+      if (fineMuscleIds.length > 0) {
+        const { data: fineMuscle } = await supabase
+          .from('muscle_groups')
+          .select('muscle_group_id')
+          .in('id', fineMuscleIds)
+        focusMuscleGroupSlugs = (fineMuscle ?? []).map((m: any) => m.muscle_group_id)
+      }
+    }
+
     const requestedDays = profile.training_days_per_week ?? 3
     const trainingDuration = profile.training_duration_minutes ?? 45
     const primaryGoal = goalSlugs[0] ?? 'health_routine'
@@ -327,13 +496,12 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // ── MOLDE: esqueleto de dias vindo de um Original de academia ────────────
-    const moldeDaysCount = nearestMoldeDays(requestedDays)
-    const moldeTrainingPlanId = CANONICAL_MOLDE_BY_DAYS[moldeDaysCount]
+    // ── MOLDE: esqueleto de dias vindo de um Original de academia (REGRA 0) ──
+    const { moldeDays: moldeDaysCount, moldeTrainingPlanId } = moldeForGoal(primaryGoal, requestedDays)
 
     const { data: moldeSlotsRaw, error: moldeError } = await supabase
       .from('training_plan_exercises')
-      .select('day_number, order_within_day, sets, reps, exercise_id')
+      .select('day_number, order_within_day, sets, reps, rest_seconds, exercise_id')
       .eq('training_plan_id', moldeTrainingPlanId)
       .order('day_number', { ascending: true })
       .order('order_within_day', { ascending: true })
@@ -350,18 +518,34 @@ serve(async (req) => {
       (moldeExercises ?? []).map((e: any) => [e.exercise_id, e.muscle_groups_ids ?? []])
     )
 
-    const slots = moldeSlotsRaw.map((s: any) => ({
-      day_number: s.day_number,
-      order_within_day: s.order_within_day,
-      sets: s.sets,
-      reps: s.reps,
-      target_muscle_groups: moldeMuscleGroupsById.get(s.exercise_id) ?? [],
-    }))
+    const slots = moldeSlotsRaw.map((s: any) => {
+      const { sets, reps, rest_seconds } = setsRepsRestForSlot(primaryGoal, levelSlug, {
+        sets: s.sets,
+        reps: s.reps,
+        rest_seconds: s.rest_seconds,
+      })
+      return {
+        day_number: s.day_number,
+        order_within_day: s.order_within_day,
+        sets,
+        reps,
+        rest_seconds,
+        target_muscle_groups: moldeMuscleGroupsById.get(s.exercise_id) ?? [],
+      }
+    })
+
+    // ── REGRA 1: corta slots por duração ANTES de escolher exercício — não faz
+    // sentido montar candidatos pra um slot que vai ser cortado. REGRA 2 entra
+    // aqui como proteção (imunidade relativa no corte) e depois como reforço
+    // (+1 set nos focados sobreviventes, só onde a matriz genérica rege).
+    const targetSlots = targetSlotsPerDay(trainingDuration)
+    const { survivors: slotsAfterDurationCut, anyDayTrimmed } = cutSlotsForDuration(slots, targetSlots, focusMuscleGroupSlugs)
+    const focusedSlots = applyFocusBonus(slotsAfterDurationCut, primaryGoal, focusMuscleGroupSlugs)
 
     // ── CANDIDATOS POR SLOT (base do determinístico E do que a IA vê) ────────
     // Cada slot ganha sua lista de candidatos já ranqueada e cortada — a mesma
     // lista serve pra montar o prompt da IA e pra validar a resposta dela.
-    const slotsWithCandidates = slots.map(slot => ({
+    const slotsWithCandidates = focusedSlots.map(slot => ({
       ...slot,
       candidates: rankedCandidates(slot.target_muscle_groups, safePool),
     }))
@@ -399,13 +583,22 @@ serve(async (req) => {
         })),
       }))
 
+      // BLOCO 2 (ponto 2): age/activity level só entram na linha quando o
+      // usuário preencheu — nunca fabrica um valor pra não enviesar a IA com
+      // um sinal que não existe.
+      const profileLines = [
+        `- level: ${levelSlug}`,
+        `- environment: ${environmentSlug}`,
+        `- goals: ${goalSlugs.join(', ') || 'general fitness'}`,
+        `- requested days per week: ${requestedDays}`,
+        userAge !== null ? `- age: ${userAge}` : null,
+        activityLevelSlug !== null ? `- activity level: ${activityLevelSlug}` : null,
+      ].filter((line): line is string => line !== null).join('\n')
+
       const aiPrompt = `You are an expert personal trainer composing a ${moldeDaysCount}-day training plan personalized to this user.
 
 USER PROFILE:
-- level: ${levelSlug}
-- environment: ${environmentSlug}
-- goals: ${goalSlugs.join(', ') || 'general fitness'}
-- requested days per week: ${requestedDays}
+${profileLines}
 (safety is already enforced upstream — every candidate below is pre-validated safe for this user; you never need to filter for conditions)
 
 PLAN STRUCTURE (fixed — sets/reps/day layout already defined, you only choose which exercise fills each slot):
@@ -413,7 +606,7 @@ ${JSON.stringify(slotsForPrompt, null, 2)}
 
 Rules:
 1. For each slot, pick exactly one exercise_id from THAT SLOT'S OWN "candidates" list only. Never invent ids, never use a candidate offered to a different slot.
-2. Personalize to the user profile — e.g. beginner/sedentary users get more accessible candidates; advanced users with hypertrophy goals get candidates that maximize stimulus for the target muscles.
+2. Personalize using ALL profile signals together — level and goals are the primary drivers; age and activity level (when provided) are secondary PREFERENCE signals for choosing AMONG the candidates already offered for each slot. They are never a reason to exclude a candidate or invent one outside the list — every candidate in a slot's list is already safe and level-appropriate. Older and/or sedentary/lightly_active users: prefer the more accessible, lower-complexity candidate in the slot's list. Younger and/or active/very_active users: you may prefer the more challenging candidate that maximizes stimulus for the target muscles. If age/activity level are absent, personalize using level and goals alone.
 3. Consider the plan as a whole: avoid repeating the same exercise across different days when a slot's candidate list offers a good alternative. Repetition is fine and expected when a slot's candidate list is shallow (few or one viable option) — do not sacrifice match quality just to avoid repetition.
 4. You must return one selection per slot listed above.
 
@@ -519,6 +712,7 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
       order_within_day: s.order_within_day,
       sets: s.sets,
       reps: s.reps,
+      rest_seconds: s.rest_seconds,
     }))
 
     const { error: tpeErr } = await supabase.from('training_plan_exercises').insert(tpeRows)
@@ -547,6 +741,7 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
         exercise_id: s.chosen_exercise_id,
         sets: s.sets,
         reps: s.reps,
+        rest_seconds: s.rest_seconds,
         degraded: s.degraded,
         filled_by: s.filled_by,
       })),
@@ -564,6 +759,10 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
         requested_days: requestedDays,
         plan_days: moldeDaysCount,
         days_adjusted: requestedDays !== moldeDaysCount,
+        requested_duration_minutes: trainingDuration,
+        target_slots_per_day: targetSlots,
+        duration_adjusted: anyDayTrimmed,
+        focus_muscle_groups: focusMuscleGroupSlugs,
       },
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
