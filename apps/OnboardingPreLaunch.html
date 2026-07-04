@@ -1,0 +1,534 @@
+<!-- 1. Container blindado onde o App vai renderizar -->
+<div id="onboarding-root"></div>
+
+<!-- 2. Importação das Bibliotecas via CDN -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 3. Blindagem NUCLEAR DE VERDADE contra o Elementor -->
+<style>
+  /* Reset global absoluto dentro do nosso container */
+  #onboarding-root * {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  
+  #onboarding-root button,
+  #onboarding-root input,
+  #onboarding-root button:focus,
+  #onboarding-root button:active,
+  #onboarding-root button:focus-visible,
+  #onboarding-root input:focus {
+    outline: 0 !important;
+    outline-offset: 0 !important;
+    box-shadow: none !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+    --tw-ring-color: transparent !important;
+  }
+
+  /* Remove bordas nativas internas do Firefox que geram contornos */
+  #onboarding-root button::-moz-focus-inner {
+    border: 0 !important;
+  }
+
+  /* Força a nossa cor em inputs focados */
+  #onboarding-root input:focus {
+    border-color: #F55F16 !important;
+  }
+</style>
+
+<!-- 4. Configuração do Tailwind -->
+<script>
+  tailwind.config = {
+    important: '#onboarding-root',
+    theme: {
+      extend: {
+        colors: {
+          brand: '#F55F16',
+          bgBody: '#ffffff',
+          surface: '#f8fafc',
+          borderColor: '#e2e8f0',
+          textMain: '#0f172a',
+          textMuted: '#64748b'
+        }
+      }
+    }
+  }
+</script>
+
+<!-- 5. App Completo (Babel compila no navegador) -->
+<script type="text/babel">
+  const { useState, useEffect, useMemo } = React;
+
+  const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co'; 
+  const SUPABASE_KEY = 'SUA_CHAVE_ANON_PUBLIC';           
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const SUBSCRIPTION_PLANS = {
+    TRAINING: '3a5ccc00-77ed-4b87-8e83-bc35be63a862',
+    MEAL: '7458939c-ed4b-4a16-960e-b647f94e6a9b',
+    COMPLETE: '7b5502f1-eeed-4640-8c4f-0ebc0502481e',
+  };
+
+  const WHATSAPP_NUMBER = '351999999999';
+
+  function OnboardingApp() {
+    const [currentStep, setCurrentStep] = useState(0);
+    const [loading, setLoading] = useState(true);
+    
+    const [answers, setAnswers] = useState({
+      subscription_type_id: SUBSCRIPTION_PLANS.COMPLETE
+    });
+
+    const userName = answers.first_name || 'Futuro Aluno'; 
+
+    const checkCondition = (currentAnswers, stepsData, field, matchTerm) => {
+      const step = stepsData.find(s => s.dbField === field);
+      if (!step || !step.options) return false;
+      
+      const target = step.options.find(o => 
+        String(o.name_ptbr || o.name || '').toLowerCase().includes(matchTerm.toLowerCase()) ||
+        String(o.id).toLowerCase() === matchTerm.toLowerCase()
+      );
+      if (!target) return false;
+
+      const selection = currentAnswers[field];
+      if (!selection) return false;
+
+      return Array.isArray(selection) ? selection.includes(target.id) : selection === target.id;
+    };
+
+    const [steps, setSteps] = useState([
+      // ==========================================================
+      // CADASTRO INICIAL
+      // ==========================================================
+      { 
+        id: 'registration', 
+        title: "Vamos começar!", 
+        subtitle: "Preencha seus dados para criarmos o seu perfil", 
+        type: 'form', 
+        fields: [
+          { id: 'first_name', placeholder: 'Nome', type: 'text' },
+          { id: 'last_name', placeholder: 'Sobrenome', type: 'text' },
+          { id: 'email', placeholder: 'E-mail', type: 'email' },
+          { id: 'whatsapp_phone', placeholder: 'WhatsApp (Ex: +351...)', type: 'tel' }
+        ],
+        condition: () => true
+      },
+      { 
+        id: 'goals', 
+        title: "Qual é o seu principal objetivo?", 
+        subtitle: "Múltipla escolha", 
+        type: 'multiple', 
+        dbField: 'goals_ids', 
+        table: 'goals',
+        condition: (ans) => true
+      },
+      { 
+        id: 'gender', 
+        title: "Qual o seu género?", 
+        subtitle: "Escolha única", 
+        type: 'single', 
+        dbField: 'gender_id', 
+        table: 'genders',
+        condition: (ans) => true
+      },
+      { 
+        id: 'age', 
+        title: "Qual a sua idade?", 
+        subtitle: "Digite a sua idade", 
+        type: 'number', 
+        dbField: 'age', placeholder: "Ex: 38",
+        condition: (ans) => true
+      },
+      { 
+        id: 'weight', 
+        title: "Qual o seu peso atual?", 
+        subtitle: "Peso em kg", type: 'number', 
+        dbField: 'weight_kg', placeholder: "Ex: 70",
+        condition: (ans) => true
+      },
+      { 
+        id: 'height', 
+        title: "Qual a sua altura?", 
+        subtitle: "Altura em cm", 
+        type: 'number', 
+        dbField: 'height_cm', 
+        placeholder: "Ex: 155",
+        condition: (ans) => true
+      },
+      { 
+        id: 'activity_level', 
+        title: "Considera-se uma pessoa ativa?", 
+        subtitle: "Escolha única", type: 'single', 
+        dbField: 'activity_level_id', table: 'activity_levels',
+        condition: (ans) => true
+      },
+      { 
+        id: 'health_conditions', 
+        title: "Possui alguma condição de saúde?", 
+        subtitle: "Múltipla escolha", 
+        type: 'multiple', 
+        dbField: 'health_conditions_ids', 
+        table: 'health_conditions',
+        condition: (ans) => true
+      },
+      { 
+        id: 'pregnancy_trimester', 
+        title: "Em qual trimestre da gestação está?", 
+        subtitle: "Escolha única", 
+        type: 'single', 
+        dbField: 'pregnancy_trimester', 
+        options: [{ id: 1, name_ptbr: '1º trimestre' }, { id: 2, name_ptbr: '2º trimestre' }, { id: 3, name_ptbr: '3º trimestre' }],
+        condition: (ans, stp) => checkCondition(ans, stp, 'health_conditions_ids', 'Gravidez')
+      },
+      // ==========================================================
+      // ETAPAS UNIFICADAS & TREINO
+      // ==========================================================
+      { 
+        id: 'dedicated_days_per_week', 
+        title: "Quantos dias por semana pretende se dedicar ao plano?", 
+        subtitle: "Isso definirá a frequência dos seus treinos e da dieta", 
+        type: 'single', 
+        dbField: 'dedicated_days_per_week', 
+        options: [
+          {id: 2, name_ptbr: '2 dias'}, 
+          {id: 3, name_ptbr: '3 dias'}, 
+          {id: 4, name_ptbr: '4 dias'}, 
+          {id: 5, name_ptbr: '5 dias'}, 
+          {id: 6, name_ptbr: '6 dias'}, 
+          {id: 7, name_ptbr: '7 dias (Todos os dias)'}
+        ],
+        condition: (ans) => true
+      },
+      { 
+        id: 'physical_conditions', 
+        title: "Possui alguma dor ou limitação física?", 
+        subtitle: "Múltipla escolha", 
+        type: 'multiple', 
+        dbField: 'physical_conditions_ids', 
+        table: 'onboarding_physical_conditions', 
+        condition: (ans) => true
+      },
+      { 
+        id: 'muscle_groups', 
+        title: "Qual parte do corpo gostaria de focar?", 
+        subtitle: "Múltipla escolha", type: 'multiple', 
+        dbField: 'muscle_groups_ids', 
+        table: 'onboarding_muscle_groups',
+        condition: (ans) => true
+      },
+      { 
+        id: 'exercise_environment', 
+        title: "Onde pretende treinar?", 
+        subtitle: "Escolha única", 
+        type: 'single', 
+        dbField: 'exercise_environment_id', 
+        table: 'exercise_environment',
+        condition: (ans) => true
+      },
+      { 
+        id: 'exercise_equipments', 
+        title: "Que equipamentos possui?", 
+        subtitle: "Múltipla escolha", 
+        type: 'multiple', 
+        dbField: 'exercise_equipment_ids', 
+        table: 'onboarding_exercise_equipments', 
+        condition: (answers, stepsData) => {
+          const environmentAnswer = answers.exercise_environment_id;
+          if (!environmentAnswer) return false;
+
+          const environmentStep = stepsData.find(step => step.dbField === 'exercise_environment_id');
+          const chosenOption = environmentStep?.options?.find(opt => opt.id === environmentAnswer);
+
+          const selectedHomeWithEquipment = 
+            environmentAnswer === 'home_with_equipment' || 
+            (chosenOption && Object.values(chosenOption).some(value => String(value).includes('home_with_equipment')));
+
+          return selectedHomeWithEquipment;
+        }
+      },
+      { 
+        id: 'training_duration_minutes', 
+        title: "Quanto tempo tem por treino?", 
+        subtitle: "Deslize para definir o tempo", 
+        type: 'slider', 
+        dbField: 'training_duration_minutes', min: 15, max: 90, step: 15, recommended: 45,
+        condition: (ans) => true
+      },
+      { 
+        id: 'exercise_level', 
+        title: "Qual a sua experiência com treinos?", 
+        subtitle: "Escolha única", 
+        type: 'single', 
+        dbField: 'exercise_level_id', 
+        table: 'exercise_levels',
+        condition: (ans) => true
+      },
+      // ==========================================================
+      // ETAPAS DE NUTRIÇÃO
+      // ==========================================================
+      { 
+        id: 'meals_per_day', 
+        title: "Quantas refeições prefere fazer por dia?", 
+        subtitle: "Escolha única", 
+        type: 'single', 
+        dbField: 'meals_per_day', 
+        options: [
+          {id: 3, name_ptbr: '3 refeições (Ex: Pequeno-almoço, Almoço, Jantar)'}, 
+          {id: 4, name_ptbr: '4 refeições (+ 1 Lanche)'}, 
+          {id: 5, name_ptbr: '5 refeições (+ 2 Lanches)'}, 
+          {id: 6, name_ptbr: '6 refeições (Comer de 3 em 3 horas)'}
+        ],
+        condition: (ans) => true
+      },
+      { 
+        id: 'dietary_preferences', 
+        title: "Qual opção define melhor sua alimentação?", 
+        subtitle: "Escolha única", 
+        type: 'single', 
+        dbField: 'dietary_preference_id', 
+        table: 'dietary_preferences', 
+        condition: (ans) => true
+      },
+      { 
+        id: 'dietary_restrictions', 
+        title: "Possui alguma restrição ou intolerância alimentar?", 
+        subtitle: "Múltipla escolha", 
+        type: 'multiple', 
+        dbField: 'dietary_restrictions_ids', 
+        table: 'dietary_restrictions', 
+        condition: (ans) => true
+      },
+      { 
+        id: 'disliked_foods', 
+        title: "Existe algum alimento que prefere evitar?", 
+        subtitle: "Deixe em branco se comer de tudo", 
+        type: 'text', 
+        dbField: 'disliked_foods', 
+        placeholder: "Ex: fígado, cebola, brócolis…",
+        condition: (ans) => true
+      }
+    ]);
+
+    useEffect(() => {
+      async function fetchAllOptions() {
+        try {
+          const updatedSteps = await Promise.all(steps.map(async (step) => {
+            if (step.table) {
+              const { data, error } = await supabase.from(step.table).select('*');
+              if (error || !data) return step;
+              return {
+                ...step,
+                options: data.map(item => ({
+                  ...item, 
+                  id: item.id || item[Object.keys(item).find(k => k.includes('id'))],
+                  name_ptbr: item.name_ptbr || item.label_ptbr || item.name || item.title,
+                  name: item.name_ptbr || item.label_ptbr || item.name || item.title
+                }))
+              };
+            }
+            return step;
+          }));
+          setSteps(updatedSteps);
+        } catch (e) { 
+          console.error("Erro na busca das opções:", e); 
+        } finally { 
+          setLoading(false); 
+        }
+      }
+      fetchAllOptions();
+    }, []);
+
+    const visibleSteps = useMemo(() => steps.filter(step => step.condition ? step.condition(answers, steps) : true), [answers, steps]);
+
+    const handleSelect = (optionId) => {
+      const field = visibleSteps[currentStep].dbField;
+      if (visibleSteps[currentStep].type === 'multiple') {
+        const selections = answers[field] || [];
+        setAnswers({ ...answers, [field]: selections.includes(optionId) ? selections.filter(i => i !== optionId) : [...selections, optionId] });
+      } else {
+        setAnswers({ ...answers, [field]: optionId });
+      }
+    };
+
+    const isNextDisabled = () => {
+      const stepData = visibleSteps[currentStep];
+      if (stepData.type === 'form') {
+        return !answers.first_name || !answers.last_name || !answers.email || !answers.whatsapp_phone;
+      }
+      return false;
+    };
+
+    const redirectToWhatsApp = () => {
+      const message = encodeURIComponent(`Olá! Sou o ${userName} e acabei de finalizar meu perfil na plataforma. Gostaria de ativar meu plano!`);
+      window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    };
+
+    const nextStep = async () => {
+      if (isNextDisabled()) return;
+
+      if (currentStep < visibleSteps.length - 1) {
+        setCurrentStep(currentStep + 1);
+      } else {
+        setLoading(true);
+        try {
+          // Prepara o payload duplicando os dias de dedicação para Treino e Nutrição
+          const finalPayload = {
+            ...answers,
+            training_days_per_week: answers.dedicated_days_per_week,
+            nutrition_days_per_week: answers.dedicated_days_per_week
+          };
+
+          console.log("DADOS DO FORMULÁRIO PRONTOS PARA IA:", finalPayload);
+          
+          /* Exemplo de inserção no Supabase
+          const { data: newLead, error: leadError } = await supabase.from('leads').insert({ ... });
+          */
+
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          redirectToWhatsApp();
+        } catch (e) {
+          alert("Ocorreu um erro ao salvar o perfil.");
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    if (loading) {
+      return (
+        <div className="flex w-full py-20 bg-bgBody justify-center items-center rounded-xl">
+          <div className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      );
+    }
+
+    const currentData = visibleSteps[currentStep];
+
+    return (
+      <div className="flex w-full bg-bgBody justify-center items-center font-sans p-2 rounded-xl">
+        <div className="flex flex-col w-full max-w-2xl bg-bgBody shadow-lg rounded-xl sm:border sm:border-borderColor overflow-hidden">
+          
+          <div className="px-6 pt-8 pb-4">
+            <div className="h-1.5 w-full bg-surface rounded-full overflow-hidden mb-6 relative">
+              <div 
+                className="h-full bg-brand transition-all duration-300 ease-in-out" 
+                style={{ width: `${((currentStep + 1) / visibleSteps.length) * 100}%` }} 
+              />
+            </div>
+            <span className="text-xs font-bold text-textMuted uppercase tracking-widest">
+              Passo {currentStep + 1}/{visibleSteps.length}
+            </span>
+          </div>
+
+          <div className="px-6 pb-6 flex-grow overflow-y-auto max-h-[60vh]">
+            <h2 className="text-3xl font-black text-textMain mb-2 leading-tight">{currentData.title}</h2>
+            <p className="text-textMuted mb-8">{currentData.subtitle}</p>
+
+            {currentData.type === 'form' ? (
+              <div className="flex flex-col gap-4">
+                {currentData.fields.map((field) => (
+                  <input 
+                    key={field.id}
+                    type={field.type}
+                    value={answers[field.id] || ''} 
+                    onChange={(e) => setAnswers({...answers, [field.id]: e.target.value})} 
+                    placeholder={field.placeholder} 
+                    className="w-full bg-surface text-textMain p-5 rounded-2xl text-xl border border-borderColor transition-all min-h-[60px]" 
+                  />
+                ))}
+              </div>
+            ) : currentData.type === 'number' || currentData.type === 'text' ? (
+              <input 
+                type={currentData.type === 'number' ? "number" : "text"}
+                value={answers[currentData.dbField] || ''} 
+                onChange={(e) => setAnswers({...answers, [currentData.dbField]: e.target.value})} 
+                placeholder={currentData.placeholder} 
+                className="w-full bg-surface text-textMain p-5 rounded-2xl text-xl border border-borderColor transition-all min-h-[60px]" 
+              />
+            ) : currentData.type === 'slider' ? (
+              <div className="bg-surface p-8 rounded-3xl border border-borderColor flex flex-col items-center shadow-sm">
+                <div className="text-brand text-6xl font-black mb-4">
+                  {answers[currentData.dbField] || currentData.recommended}
+                  <span className="text-2xl text-textMuted font-bold"> min</span>
+                </div>
+                <input
+                  type="range"
+                  min={currentData.min}
+                  max={currentData.max}
+                  step={currentData.step}
+                  value={answers[currentData.dbField] || currentData.recommended}
+                  onChange={(e) => setAnswers({...answers, [currentData.dbField]: Number(e.target.value)})}
+                  className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-brand"
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {currentData.options?.map((opt, i) => {
+                  const isSelected = currentData.type === 'multiple' 
+                    ? (answers[currentData.dbField] || []).includes(opt.id) 
+                    : answers[currentData.dbField] === opt.id;
+                  return (
+                    <button 
+                      key={i} 
+                      onClick={() => handleSelect(opt.id)} 
+                      className={`p-5 rounded-2xl flex justify-between items-center border transition-all duration-300 cursor-pointer w-full text-left
+                        ${isSelected ? 'border-brand bg-brand/10 shadow-sm' : 'border-borderColor bg-surface hover:bg-gray-50'}`}
+                    >
+                      <span className={`text-lg font-medium transition-colors ${isSelected ? 'text-brand' : 'text-textMain'}`}>
+                        {opt.name_ptbr || opt.name}
+                      </span>
+                      
+                      <div className={`w-6 h-6 flex justify-center items-center flex-shrink-0 transition-all duration-300
+                        ${currentData.type === 'multiple' ? 'rounded-md' : 'rounded-full'} 
+                        ${isSelected ? 'bg-brand border-brand shadow-[0_0_8px_rgba(245,95,22,0.4)]' : 'border-2 border-gray-300 bg-surface'}`}>
+                        
+                        <svg 
+                          className={`w-3.5 h-3.5 text-white transition-transform duration-300 ease-out ${isSelected ? 'scale-100 opacity-100' : 'scale-50 opacity-0'}`} 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor" 
+                          strokeWidth="3"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="p-6 flex gap-4 border-t border-borderColor bg-bgBody">
+            <button 
+              onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+              disabled={currentStep === 0}
+              className={`flex-1 p-4 rounded-xl items-center justify-center font-bold transition-opacity ${currentStep === 0 ? 'opacity-50 cursor-not-allowed bg-gray-200 text-gray-500' : 'bg-surface hover:bg-gray-100 text-textMuted'}`}
+            >
+              VOLTAR
+            </button>
+            <button 
+              onClick={nextStep} 
+              disabled={isNextDisabled()}
+              className={`flex-[2] p-4 rounded-xl flex items-center justify-center transition-all ${isNextDisabled() ? 'bg-gray-300 cursor-not-allowed text-gray-500' : 'bg-brand hover:bg-brand/90 text-white shadow-md'}`}
+            >
+              <span className="font-black text-lg">
+                {currentStep === visibleSteps.length - 1 ? 'FINALIZAR' : 'PRÓXIMO'}
+              </span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById('onboarding-root'));
+  root.render(<OnboardingApp />);
+</script>
