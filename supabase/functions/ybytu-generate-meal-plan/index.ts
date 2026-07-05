@@ -141,11 +141,25 @@ function derivePlanTags(meals: Array<{ restriction_tags: string[] | null }>): st
 // NUNCA olha pra fora desse pool já seguro — só reordena o que já está dentro
 // dele. É estruturalmente impossível a preferência reintroduzir um alérgeno,
 // porque ela nunca vê nada que a restrição já excluiu.
+// Normaliza acento pra matching: lowercase + NFD (separa base do diacritico) +
+// remove os diacriticos (faixa Unicode U+0300 a U+036F) + trim. Aplicado nos
+// DOIS lados (token do usuario E nome do alimento) - sem isso, "figado" (como
+// o usuario digita, sem acento) nunca batia com "Figado bovino grelhado" (nome
+// do banco, com acento), e a preferencia silenciosamente nao pesava nada.
+function normalizeForMatch(s: string): string {
+  const COMBINING_DIACRITICS = new RegExp('[' + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + ']', 'g')
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(COMBINING_DIACRITICS, '')
+    .trim()
+}
+
 function parseDislikedTokens(dislikedFoodsText: string | null): string[] {
   if (!dislikedFoodsText) return []
   return dislikedFoodsText
     .split(/,| e /i)
-    .map(t => t.trim().toLowerCase())
+    .map(t => normalizeForMatch(t))
     .filter(t => t.length > 0)
 }
 
@@ -158,7 +172,7 @@ function mealMatchesDislikedTokens(
   if (dislikedTokens.length === 0) return false
   const ingredients = ingredientsByMealId.get(mealId) ?? []
   return ingredients.some(ing => {
-    const name = foodNameById.get(ing.id) ?? ''
+    const name = foodNameById.get(ing.id) ?? '' // já normalizado na construção do map
     return dislikedTokens.some(tok => name.includes(tok))
   })
 }
@@ -317,7 +331,7 @@ serve(async (req) => {
       .select('food_id, name_ptbr')
       .in('food_id', allFoodIds)
     const foodNameById = new Map<string, string>(
-      (foodRows ?? []).map((f: any) => [f.food_id, (f.name_ptbr ?? '').toLowerCase()])
+      (foodRows ?? []).map((f: any) => [f.food_id, normalizeForMatch(f.name_ptbr ?? '')])
     )
 
     const pool = (poolRaw ?? []).map((m: any) => ({
