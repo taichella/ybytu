@@ -91,6 +91,17 @@ const SETS_REPS_REST_BY_GOAL: Record<string, { sets: number; reps: number; rest_
 
 const GOALS_WITH_DEDICATED_MOLDE = new Set(['weight_loss', 'hypertrophy'])
 
+// ─── Nome amigável — rótulo curto em PT-BR pro usuário, nunca o slug em inglês ─
+const GOAL_LABEL_PTBR: Record<string, string> = {
+  weight_loss:    'Emagrecimento',
+  hypertrophy:    'Hipertrofia',
+  conditioning:   'Condicionamento',
+  health_routine: 'Rotina Saudável',
+}
+function goalLabelPtbr(goal: string): string {
+  return GOAL_LABEL_PTBR[goal] ?? goal
+}
+
 function setsRepsRestForSlot(
   goal: string,
   level: string,
@@ -676,7 +687,7 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
 
     // ── SALVA: training_plans (derivado, nunca mente) ────────────────────────
     const aiPlanSlug = `tr_ai_${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`
-    const planName = `Treino IA – ${moldeDaysCount}x (${primaryGoal})`
+    const planName = `Treino IA – ${goalLabelPtbr(primaryGoal)} – ${moldeDaysCount}x/semana`
 
     const { data: newPlan, error: planErr } = await supabase
       .from('training_plans')

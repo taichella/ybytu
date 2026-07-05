@@ -342,7 +342,7 @@ export function Onboarding({ session, onComplete }) {
 
         if (isTraining) {
           aiPromises.push(
-            supabase.functions.invoke('plan-generation', { body: { userId: userId } })
+            supabase.functions.invoke('ybytu-generate-training-plan')
               .then(({ error }) => {
                 if (error) throw new Error("Aviso (Treino): " + error.message);
               })
@@ -351,7 +351,7 @@ export function Onboarding({ session, onComplete }) {
 
         if (isMeal) {
           aiPromises.push(
-            supabase.functions.invoke('meal-plan-generation', { body: { userId: userId } })
+            supabase.functions.invoke('ybytu-generate-meal-plan')
               .then(({ error }) => {
                 if (error) throw new Error("Aviso (Nutrição): " + error.message);
               })

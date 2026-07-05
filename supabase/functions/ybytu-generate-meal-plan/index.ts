@@ -40,10 +40,9 @@ function calcTargetCalories(p: {
 // ─── Meta de proteína por objetivo — SINAL pra IA, nunca filtro ──────────────
 // Mesma precedência do goalFactor calórico acima (weight_loss bate hypertrophy
 // em conflito) — as duas metas do mesmo perfil não podem discordar sobre qual
-// objetivo "venceu". Só entra no prompt da Camada 2 (composição meal a meal);
-// não pontua a RPC nem o fallback determinístico — mesmo desenho do reforço de
-// idade/atividade no treino (BLOCO 2): contexto que ordena preferência dentro
-// do pool já seguro, nunca um motivo pra excluir ou inventar uma meal.
+// objetivo "venceu". Contexto que ordena preferência dentro do pool já seguro,
+// nunca um motivo pra excluir ou inventar uma meal (mesmo desenho do reforço de
+// idade/atividade no treino).
 const PROTEIN_G_PER_KG_BY_GOAL: Record<string, number> = {
   weight_loss: 1.6, // preserva massa magra no déficit
   hypertrophy: 1.8, // suporta síntese proteica no superávit
@@ -55,6 +54,19 @@ function calcTargetProteinG(weight_kg: number, goal_slugs: string[]): number {
                : goal_slugs.includes('hypertrophy') ? PROTEIN_G_PER_KG_BY_GOAL.hypertrophy
                : DEFAULT_PROTEIN_G_PER_KG
   return Math.round(weight_kg * gPerKg)
+}
+
+// ─── Nome amigável — rótulo curto em PT-BR pro usuário, nunca o slug em inglês
+// (espelha o mesmo mapa no gerador de treino — cada função mantém sua própria
+// cópia, mesmo padrão de duplicação já usado pra corsHeaders/callGemini) ─────
+const GOAL_LABEL_PTBR: Record<string, string> = {
+  weight_loss:    'Emagrecimento',
+  hypertrophy:    'Hipertrofia',
+  conditioning:   'Condicionamento',
+  health_routine: 'Rotina Saudável',
+}
+function goalLabelPtbr(goal: string): string {
+  return GOAL_LABEL_PTBR[goal] ?? goal
 }
 
 // ─── Subscription gate ────────────────────────────────────────────────────────
@@ -129,10 +141,6 @@ function derivePlanTags(meals: Array<{ restriction_tags: string[] | null }>): st
 // NUNCA olha pra fora desse pool já seguro — só reordena o que já está dentro
 // dele. É estruturalmente impossível a preferência reintroduzir um alérgeno,
 // porque ela nunca vê nada que a restrição já excluiu.
-// disliked_foods é texto livre (ex: "fígado, cebola, brócolis") — categorias
-// inteiras (peixe, carne vermelha, porco) já têm seu próprio filtro DURO via
-// dietary_preference_id (no_seafood/no_red_meat/no_pork); este campo é só pra
-// itens específicos que a preferência de categoria não cobre.
 function parseDislikedTokens(dislikedFoodsText: string | null): string[] {
   if (!dislikedFoodsText) return []
   return dislikedFoodsText
@@ -153,6 +161,20 @@ function mealMatchesDislikedTokens(
     const name = foodNameById.get(ing.id) ?? ''
     return dislikedTokens.some(tok => name.includes(tok))
   })
+}
+
+// ─── Rodízio — opções por tipo × N dias (o "caminho do meio" pro multi-dia) ──
+// Em vez de compor um dia único (perderia a variedade semanal do catálogo) ou
+// compor N dias via N chamadas de IA (N× custo/latência), a IA escolhe 2-3
+// OPÇÕES intercambiáveis por tipo NUMA chamada só, e o código distribui essas
+// opções pelos dias em rodízio determinístico (dia 1 → opção 0, dia 2 → opção
+// 1, ... módulo o nº de opções daquele tipo). Pool raso (1 opção segura) faz o
+// rodízio repetir a mesma meal todo dia — aceito, mesmo princípio do treino
+// (bom exercício repetido > variedade forçada).
+const OPTIONS_PER_TYPE_MAX = 3
+
+function pickForDay(options: any[], dayIndexZeroBased: number): any {
+  return options[dayIndexZeroBased % options.length]
 }
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
@@ -183,7 +205,7 @@ serve(async (req) => {
     // ── PASSO 0: ler perfil ──────────────────────────────────────────────────
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, age, weight_kg, height_cm, meals_per_day, gender_id, activity_level_id, dietary_preference_id, dietary_restrictions_ids, goals_ids, subscription_type_id, disliked_foods')
+      .select('id, age, weight_kg, height_cm, meals_per_day, nutrition_days_per_week, gender_id, activity_level_id, dietary_preference_id, dietary_restrictions_ids, goals_ids, subscription_type_id, disliked_foods')
       .eq('id', userId)
       .single()
 
@@ -224,6 +246,7 @@ serve(async (req) => {
     const preferenceSlug   = preferenceRes.data?.dietary_preference_id  ?? 'omnivore'
     const restrictionSlugs = (restrictionsRes.data ?? []).map((r: any) => r.dietary_restriction_id)
     const goalSlugs        = (goalsRes.data        ?? []).map((g: any) => g.goal_id)
+    const primaryGoal      = goalSlugs[0] ?? 'health_routine'
 
     const targetCalories = calcTargetCalories({
       gender_slug:   genderSlug,
@@ -234,62 +257,25 @@ serve(async (req) => {
       goal_slugs:    goalSlugs,
     })
 
-    const mealsPerDay = profile.meals_per_day ?? 3
+    const mealsPerDay    = profile.meals_per_day ?? 3
+    const nutritionDays  = profile.nutrition_days_per_week ?? 7 // full-week default — espelha o padrão de 7 dias do catálogo
     const targetProteinG = calcTargetProteinG(profile.weight_kg ?? 70, goalSlugs)
 
     const profileContext = {
-      target_calories:    targetCalories,
-      target_protein_g:   targetProteinG,
-      dietary_preference: preferenceSlug,
-      restriction_ids:    restrictionSlugs,
-      goal_slugs:         goalSlugs,
-      meals_per_day:      mealsPerDay,
+      target_calories:       targetCalories,
+      target_protein_g:      targetProteinG,
+      dietary_preference:    preferenceSlug,
+      restriction_ids:       restrictionSlugs,
+      goal_slugs:            goalSlugs,
+      meals_per_day:         mealsPerDay,
+      nutrition_days_per_week: nutritionDays,
     }
 
-    // ── CAMADA 1: plano pronto do catálogo ───────────────────────────────────
-    const { data: plans, error: plansError } = await supabase.rpc('ybytu_match_meal_plans', {
-      p_dietary_preference: preferenceSlug,
-      p_restriction_ids:    restrictionSlugs,
-      p_target_calories:    targetCalories,
-      p_goal_slugs:         goalSlugs,
-      p_meals_per_day:      mealsPerDay,
-      p_limit:              1,
-    })
-
-    if (plansError) throw new Error('ybytu_match_meal_plans: ' + plansError.message)
-
-    if (plans && plans.length > 0) {
-      const chosen = plans[0]
-
-      const [insertRes, updateRes] = await Promise.all([
-        supabase.from('user_meal_plans').insert({ user_id: userId, meal_plan_id: chosen.id }),
-        supabase.from('profiles').update({ current_meal_plan_id: chosen.id }).eq('id', userId),
-      ])
-      if (insertRes.error) throw new Error('Failed to save plan: '    + insertRes.error.message)
-      if (updateRes.error) throw new Error('Failed to update profile: ' + updateRes.error.message)
-
-      return new Response(JSON.stringify({
-        success:   true,
-        layer:     1,
-        meal_plan: {
-          id:           chosen.id,
-          meal_plan_id: chosen.meal_plan_id,
-          name:         chosen.name_ptbr,
-          calories:     chosen.calories,
-          score:        chosen.score,
-        },
-        profile_context: profileContext,
-      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-    }
-
-    // ── CAMADA 2: IA compõe do pool seguro ───────────────────────────────────
-    const geminiKey = Deno.env.get('GEMINI_API_KEY')
-    if (!geminiKey) throw new Error('GEMINI_API_KEY not configured')
-
-    // 2a. Pool seguro por tipo de refeição — a RPC já aplicou o filtro DURO de
-    // segurança (preferência + restrições) antes de devolver uma linha sequer.
-    // Tudo que vem depois disto (protein_g, preferência leve) enriquece ou
-    // reordena ESTE pool já seguro — nunca amplia pra fora dele.
+    // ── CAMADA PRINCIPAL: compor do pool seguro (invertida — antes era fallback) ─
+    // 1. Pool seguro por tipo — a RPC já aplicou o filtro DURO de segurança
+    // (preferência + restrições) antes de devolver uma linha sequer. Tudo que
+    // vem depois (protein_g, preferência leve) enriquece ou reordena ESTE pool
+    // já seguro — nunca amplia pra fora dele.
     const { data: poolRaw, error: poolError } = await supabase.rpc('ybytu_match_meals', {
       p_dietary_preference: preferenceSlug,
       p_restriction_ids:    restrictionSlugs,
@@ -312,8 +298,7 @@ serve(async (req) => {
     // Enriquece com o sinal de preferência (disliked_foods) — HIERARQUIA: isto
     // roda sobre `poolRaw`, que já é o resultado DEPOIS do filtro duro de
     // restrição da RPC acima. Preferência nunca vê o que a restrição já barrou;
-    // ela só reordena dentro do que sobrou. Zero chance de reintroduzir um item
-    // restrito, porque a preferência não tem acesso a nada fora deste pool.
+    // ela só reordena dentro do que sobrou.
     const dislikedTokens = parseDislikedTokens(profile.disliked_foods ?? null)
 
     const { data: ingredientRows } = await supabase
@@ -341,7 +326,7 @@ serve(async (req) => {
       disliked:  mealMatchesDislikedTokens(m.meal_id, dislikedTokens, ingredientsByMealId, foodNameById),
     }))
 
-    // 2b. Agrupa por tipo
+    // 2. Agrupa por tipo
     const byType: Record<string, any[]> = {}
     for (const meal of (pool ?? [])) {
       if (!byType[meal.meal_type]) byType[meal.meal_type] = []
@@ -349,123 +334,213 @@ serve(async (req) => {
     }
 
     // Reordena CADA tipo: não-evitado primeiro (sort estável — preserva a
-    // ordem de score que a RPC já trouxe dentro de cada grupo). NUNCA remove
-    // nada — se todas as opções de um tipo forem "disliked", a lista continua
-    // com o mesmo tamanho, só que 100% marcada; o fallback abaixo ainda
-    // escolhe uma delas (degradação graciosa, nunca falha).
+    // ordem de score que a RPC já trouxe dentro de cada grupo).
     for (const type of Object.keys(byType)) {
       byType[type].sort((a, b) => Number(a.disliked) - Number(b.disliked))
     }
 
-    // 2c. Verifica viabilidade: B+L+D obrigatórios; snack só se meals_per_day > 3
+    // 3. Verifica viabilidade: B+L+D obrigatórios; snack só se meals_per_day > 3
     const requiredTypes = ['breakfast', 'lunch', 'dinner']
     if (mealsPerDay > 3) requiredTypes.push('snack')
 
     const missingTypes = requiredTypes.filter(t => !byType[t]?.length)
+
     if (missingTypes.length > 0) {
+      // ── FALLBACK FINAL: casar plano pronto do catálogo (a antiga Camada 1) ──
+      // Só chega aqui se a composição não tem nem uma meal segura pra algum
+      // tipo obrigatório — situação rara (restrição muito agressiva).
+      const { data: plans, error: plansError } = await supabase.rpc('ybytu_match_meal_plans', {
+        p_dietary_preference: preferenceSlug,
+        p_restriction_ids:    restrictionSlugs,
+        p_target_calories:    targetCalories,
+        p_goal_slugs:         goalSlugs,
+        p_meals_per_day:      mealsPerDay,
+        p_limit:              1,
+      })
+      if (plansError) throw new Error('ybytu_match_meal_plans: ' + plansError.message)
+
+      if (!plans || plans.length === 0) {
+        return new Response(JSON.stringify({
+          success: false,
+          status:  'no_safe_meals',
+          message: `No safe meals for types: ${missingTypes.join(', ')}, and no catalog plan matched as fallback. Cannot compose a complete day.`,
+          profile_context: profileContext,
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+
+      const chosen = plans[0]
+
+      const { data: catalogRows, error: catalogErr } = await supabase
+        .from('meal_plan_meals')
+        .select('day_order, meal_order, meal_type_id, meals ( meal_id, name_ptbr, calories, protein_g )')
+        .eq('meal_plan_id', chosen.id)
+        .order('day_order', { ascending: true })
+        .order('meal_order', { ascending: true })
+      if (catalogErr) throw new Error('Catalog composition lookup failed: ' + catalogErr.message)
+
+      // ybytu_match_meal_plans não retorna days_per_week — deriva do maior
+      // day_order realmente presente na composição, em vez de mentir com null
+      // ou fazer um round-trip extra só pra essa coluna.
+      const catalogDaysPerWeek = (catalogRows ?? []).length > 0
+        ? Math.max(...catalogRows!.map((r: any) => r.day_order))
+        : null
+
+      const [insertRes, updateRes] = await Promise.all([
+        supabase.from('user_meal_plans').insert({ user_id: userId, meal_plan_id: chosen.id }),
+        supabase.from('profiles').update({ current_meal_plan_id: chosen.id }).eq('id', userId),
+      ])
+      if (insertRes.error) throw new Error('Failed to save plan: '    + insertRes.error.message)
+      if (updateRes.error) throw new Error('Failed to update profile: ' + updateRes.error.message)
+
       return new Response(JSON.stringify({
-        success: false,
-        status:  'no_safe_meals',
-        message: `No safe meals for types: ${missingTypes.join(', ')}. Cannot compose a complete day.`,
+        success:   true,
+        ai_layer:  false,
+        layer:     'catalog_fallback',
+        meal_plan: {
+          id:                 chosen.id,
+          meal_plan_id:       chosen.meal_plan_id,
+          name:               chosen.name_ptbr,
+          calories:           chosen.calories,
+          days_per_week:      catalogDaysPerWeek,
+          dietary_preference: chosen.dietary_preference,
+          restriction_tags:   chosen.restriction_tags,
+        },
+        composition: (catalogRows ?? []).map((r: any) => ({
+          day_number: r.day_order,
+          meal_type:  r.meal_type_id,
+          meal_id:    r.meals?.meal_id,
+          name:       r.meals?.name_ptbr,
+          calories:   r.meals?.calories,
+          protein_g:  r.meals?.protein_g,
+          filled_by:  'catalog_fallback' as const,
+        })),
+        preference_conflicts: [],
+        ai_filled_slots: 0,
+        deterministic_fallback_slots: 0,
+        catalog_fallback_slots: (catalogRows ?? []).length,
         profile_context: profileContext,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // 2d. Caloric target por tipo (replica a lógica de cotas da ybytu_match_meals)
+    // ── 4. Caloric target por tipo (cotas que a ybytu_match_meals já usa) ────
     const quotaMain  = mealsPerDay > 3 ? Math.round(targetCalories * 0.20) : Math.round(targetCalories / 3)
     const quotaSnack = mealsPerDay > 3 ? Math.round(targetCalories * 0.40 / (mealsPerDay - 3)) : 0
 
     const poolSummary = requiredTypes.map(type => ({
       type,
       target_kcal: type === 'snack' ? quotaSnack : quotaMain,
-      options: byType[type].map((m: any) => ({
+      options: byType[type].slice(0, 10).map((m: any) => ({
         meal_id:    m.meal_id,
         name:       m.name_ptbr,
         calories:   m.calories,
         protein_g:  m.protein_g,
         score:      m.score,
-        disliked:   m.disliked, // sinal de preferência — NÃO uma exclusão; ver regra 4
+        disliked:   m.disliked, // sinal de preferência — NÃO uma exclusão
       })),
     }))
 
-    // 2e. IA escolhe 1 meal_id por tipo do pool
-    const selectionsSchema = requiredTypes.map(t => `"${t}": "meal_id_here"`).join(', ')
-    const aiPrompt = `You are a clinical nutrition composer. Select exactly one meal per required type to build a ${mealsPerDay}-meal day targeting ${targetCalories} kcal total and approximately ${targetProteinG}g of protein (secondary goal — see rule 3).
+    // ── 5. IA: UMA chamada pedindo 2-3 opções intercambiáveis POR TIPO ───────
+    const geminiKey = Deno.env.get('GEMINI_API_KEY')
+
+    const optionsSchema = requiredTypes.map(t => `"${t}": ["meal_id_1", "meal_id_2", "meal_id_3"]`).join(', ')
+    const aiPrompt = `You are a clinical nutrition composer. Build a rotating weekly menu for ${mealsPerDay} meals/day targeting ${targetCalories} kcal total and approximately ${targetProteinG}g of protein (secondary goal — see rule 3).
 
 POOL (all options are pre-validated safe for this user — do not add restrictions):
 ${JSON.stringify(poolSummary, null, 2)}
 
 Rules:
-1. Select exactly ONE meal_id per required type from the options listed for that type only.
-2. Choose combinations whose calories sum closest to ${targetCalories} kcal — this is the PRIMARY target.
-3. Among combinations that fit the calorie target well, prefer the one whose total protein_g is closest to ${targetProteinG}g. Protein is a preference signal, not a hard requirement — never sacrifice calorie fit, and never pick a meal outside a slot's own list just to hit the protein number.
-4. "disliked: true" means the user asked to avoid this item — prefer "disliked: false" options for that type when one fits the calorie/protein targets reasonably well. If every option for a type is "disliked: true", pick the best one anyway (by score) — a disliked-but-safe meal is always better than no meal.
-5. Prefer higher score when calories are similar.
-6. ONLY use meal_ids listed above — do not invent new ones.
+1. For EACH required type, select 2 to 3 meal_ids from that type's own "options" list — these become the rotating choices used across the week (day 1 uses option 1, day 2 uses option 2, etc.), so they must all be independently reasonable for that meal type and target.
+2. Choose meal_ids whose calories are close to that type's target_kcal — this is the PRIMARY criterion. All 2-3 options for a type should be roughly interchangeable in caloric fit, so any day's combination lands close to ${targetCalories} kcal total.
+3. Among options that fit calories well, prefer ones whose protein_g is closest to a proportional share of ${targetProteinG}g. Protein is a preference signal, not a hard requirement.
+4. "disliked: true" means the user asked to avoid this item — prefer "disliked: false" options when they fit the calorie/protein targets reasonably well. Only include a disliked option if there aren't enough non-disliked ones to reach 2 options for that type.
+5. ONLY use meal_ids listed in that type's own "options" — never invent ids, never borrow a meal_id from another type's list.
+6. If a type's list has fewer than 2 safe options, return all of them (1 is acceptable when the pool is shallow).
 
-Return ONLY valid JSON: { "selections": { ${selectionsSchema} } }`
+Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
 
     // Any Gemini failure (parse error, empty candidates, 503 exhausted, network)
-    // leaves aiSelections={} → re-validation fills every slot with top-score from pool.
+    // leaves aiOptions={} → re-validation fills every type with top-N from pool.
     // User always receives a plan; Gemini is best-effort, not a hard dependency.
-    let aiSelections: Record<string, string> = {}
-    try {
-      const aiResult = await callGemini(aiPrompt, geminiKey)
-      aiSelections   = (aiResult?.selections ?? {}) as Record<string, string>
-    } catch {
-      // intentionally silent — 2f handles missing picks via top-score fallback
-    }
-
-    // 2f. RE-VALIDAÇÃO: filtra hallucinations e tipos errados
-    // Estratégia: se o pick da IA não existe no pool OU é do tipo errado →
-    // substitui pelo top-score do tipo (índice 0 — já ordenado pela RPC por
-    // score E depois reordenado por preferência: não-evitado primeiro dentro
-    // de cada faixa de score). Nunca aborta: viabilidade já garantida no 2c.
-    const poolBySlug = new Map<string, any>(pool.map((m: any) => [m.meal_id, m]))
-    const validatedMeals: Record<string, any> = {}
-
-    for (const type of requiredTypes) {
-      const aiPick   = aiSelections[type]
-      const candidate = aiPick ? poolBySlug.get(aiPick) : null
-      if (candidate && candidate.meal_type === type) {
-        validatedMeals[type] = candidate
-      } else {
-        // Fallback: topo do tipo já reordenado (preferência dentro do pool seguro)
-        validatedMeals[type] = byType[type][0]
+    let aiOptions: Record<string, string[]> = {}
+    if (geminiKey) {
+      try {
+        const aiResult = await callGemini(aiPrompt, geminiKey)
+        aiOptions      = (aiResult?.options ?? {}) as Record<string, string[]>
+      } catch {
+        // intentionally silent — re-validation below fills every type via deterministic top-N
       }
     }
 
-    // Preferência é degradação graciosa, não falha: se a meal escolhida (por
-    // IA ou fallback) ainda assim é "disliked" — só acontece quando TODAS as
-    // opções seguras daquele tipo eram evitadas — avisa em vez de esconder.
-    const preferenceConflicts = requiredTypes
-      .filter(type => validatedMeals[type].disliked)
-      .map(type => ({
-        type,
-        meal_id: validatedMeals[type].meal_id,
-        name:    validatedMeals[type].name_ptbr,
-        message: 'Incluímos esta opção por falta de alternativas seguras compatíveis com suas preferências — nenhuma restrição de segurança foi violada.',
-      }))
+    // ── 6. RE-VALIDAÇÃO por tipo (a cerca): filtra hallucinations e ids de
+    // outro tipo. Pick da IA só conta se está no pool DAQUELE tipo. Se a IA
+    // não deu nenhuma opção válida pro tipo, cai 100% no determinístico (topo
+    // do ranking, já ordenado por score + preferência). Se deu ALGUMA válida,
+    // completa até OPTIONS_PER_TYPE_MAX com o próximo determinístico não
+    // repetido — maximiza variedade sem inventar nada fora do pool. ─────────
+    const optionsByType: Record<string, any[]> = {}
+    const sourceByType: Record<string, 'ai' | 'deterministic'> = {}
 
-    // 2g. Lookup slug → UUID (meal_plan_meals guarda UUIDs, não slugs)
-    const slugsNeeded = requiredTypes.map(t => validatedMeals[t].meal_id)
+    for (const type of requiredTypes) {
+      const poolForType = byType[type]
+      const poolBySlugForType = new Map<string, any>(poolForType.map((m: any) => [m.meal_id, m]))
+
+      const aiPicksRaw = Array.isArray(aiOptions[type]) ? aiOptions[type] : []
+      const aiValid: any[] = []
+      const seen = new Set<string>()
+      for (const pick of aiPicksRaw) {
+        const meal = poolBySlugForType.get(pick)
+        if (meal && !seen.has(meal.meal_id)) {
+          aiValid.push(meal)
+          seen.add(meal.meal_id)
+        }
+      }
+
+      if (aiValid.length > 0) {
+        sourceByType[type] = 'ai'
+        const filled = [...aiValid]
+        for (const candidate of poolForType) {
+          if (filled.length >= OPTIONS_PER_TYPE_MAX) break
+          if (!seen.has(candidate.meal_id)) {
+            filled.push(candidate)
+            seen.add(candidate.meal_id)
+          }
+        }
+        optionsByType[type] = filled
+      } else {
+        sourceByType[type] = 'deterministic'
+        optionsByType[type] = poolForType.slice(0, OPTIONS_PER_TYPE_MAX)
+      }
+    }
+
+    // ── 7. RODÍZIO: distribui as opções de cada tipo pelos N dias ────────────
+    const dayMealTypeOrder = requiredTypes // ordem fixa dentro do dia
+    const rotationRows: Array<{ day: number; type: string; meal: any }> = []
+    for (let day = 1; day <= nutritionDays; day++) {
+      for (const type of dayMealTypeOrder) {
+        rotationRows.push({ day, type, meal: pickForDay(optionsByType[type], day - 1) })
+      }
+    }
+
+    // ── 8. Lookup slug → UUID (meal_plan_meals guarda UUIDs, não slugs) ──────
+    const allChosenSlugs = [...new Set(rotationRows.map(r => r.meal.meal_id))]
     const { data: mealRows, error: mealErr } = await supabase
       .from('meals')
       .select('id, meal_id, restriction_tags, dietary_preference')
-      .in('meal_id', slugsNeeded)
+      .in('meal_id', allChosenSlugs)
     if (mealErr) throw new Error('Meal UUID lookup: ' + mealErr.message)
 
     const mealBySlug = new Map<string, any>(mealRows.map((m: any) => [m.meal_id, m]))
 
-    // 2h. DERIVA dietary_preference e restriction_tags das meals selecionadas — NUNCA hardcoded.
-    // Garante que o plano não mente mesmo se promovido para is_active=true futuramente.
+    // ── 9. DERIVA dietary_preference e restriction_tags de TODAS as meals
+    // realmente usadas no rodízio (não só a 1ª opção) — nunca hardcoded.
+    // Garante que o plano não mente mesmo se promovido para is_active=true.
     const derivedPreference = derivePlanPreference(mealRows)
     const derivedTags       = derivePlanTags(mealRows)
 
-    // 2i. Cria meal_plan: is_active=false não entra no pool da Camada 1;
-    // created_by_ai=true marca para auditoria e promoção manual futura.
+    // ── 10. Cria meal_plan: is_active=false não entra no pool de match direto;
+    // created_by_ai=true marca para auditoria e o gate de revisão do nutricionista.
     const aiPlanSlug = `mp_ai_${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`
-    const planName   = `Plano IA – ${targetCalories} kcal (${derivedPreference})`
+    const planName   = `Plano IA – ${goalLabelPtbr(primaryGoal)} – ${targetCalories} kcal`
 
     const { data: newPlan, error: planErr } = await supabase
       .from('meal_plans')
@@ -475,6 +550,8 @@ Return ONLY valid JSON: { "selections": { ${selectionsSchema} } }`
         name_en:            planName,
         calories:           targetCalories,
         meals_per_day:      mealsPerDay,
+        days_per_week:      nutritionDays,
+        goals_ids:          goalSlugs,
         dietary_preference: derivedPreference,
         restriction_tags:   derivedTags,
         created_by_ai:      true,
@@ -485,27 +562,25 @@ Return ONLY valid JSON: { "selections": { ${selectionsSchema} } }`
       .single()
     if (planErr) throw new Error('Failed to create AI meal plan: ' + planErr.message)
 
-    // 2j. Insere meal_plan_meals
-    // ATENÇÃO: meal_plan_meals.meal_plan_id e .meal_id são TEXT que guardam UUIDs
-    // (não os slugs mp_NNN / meal_NNN — convenção confirmada no schema).
-    const mpmRows: any[] = []
-    for (const [i, type] of requiredTypes.entries()) {
-      const poolMeal = validatedMeals[type]
-      const dbMeal   = mealBySlug.get(poolMeal.meal_id)
-      if (!dbMeal) throw new Error(`Meal UUID not found for slug: ${poolMeal.meal_id}`)
-      mpmRows.push({
-        meal_plan_id: newPlan.id,  // UUID do meal_plan (TEXT)
-        meal_id:      dbMeal.id,   // UUID do meal (TEXT)
-        day_order:    1,
-        meal_order:   i + 1,
-        meal_type_id: type,
-      })
-    }
+    // ── 11. Insere meal_plan_meals — um por (dia, tipo) do rodízio.
+    // ATENÇÃO: meal_plan_meals.meal_plan_id e .meal_id são TEXT que guardam
+    // UUIDs (não os slugs mp_NNN / meal_NNN).
+    const mpmRows = rotationRows.map(r => {
+      const dbMeal = mealBySlug.get(r.meal.meal_id)
+      if (!dbMeal) throw new Error(`Meal UUID not found for slug: ${r.meal.meal_id}`)
+      return {
+        meal_plan_id: newPlan.id,                                   // UUID do meal_plan (TEXT)
+        meal_id:      dbMeal.id,                                    // UUID do meal (TEXT)
+        day_order:    r.day,
+        meal_order:   dayMealTypeOrder.indexOf(r.type) + 1,
+        meal_type_id: r.type,
+      }
+    })
 
     const { error: mpmErr } = await supabase.from('meal_plan_meals').insert(mpmRows)
     if (mpmErr) throw new Error('Failed to insert meal_plan_meals: ' + mpmErr.message)
 
-    // 2k. Salva nas 2 tabelas de vínculo (igual à Camada 1)
+    // ── 12. Salva nas 2 tabelas de vínculo ────────────────────────────────────
     const [insertRes, updateRes] = await Promise.all([
       supabase.from('user_meal_plans').insert({ user_id: userId, meal_plan_id: newPlan.id }),
       supabase.from('profiles').update({ current_meal_plan_id: newPlan.id }).eq('id', userId),
@@ -513,24 +588,48 @@ Return ONLY valid JSON: { "selections": { ${selectionsSchema} } }`
     if (insertRes.error) throw new Error('Failed to save plan link: '  + insertRes.error.message)
     if (updateRes.error) throw new Error('Failed to update profile: '  + updateRes.error.message)
 
+    // ── 13. Degradação graciosa, não falha: opção usada em algum dia ainda
+    // era "disliked" — só acontece quando não havia opções suficientes
+    // não-evitadas pra aquele tipo. Reporta 1x por (tipo, meal_id) distinto.
+    const conflictSeen = new Set<string>()
+    const preferenceConflicts = rotationRows
+      .filter(r => r.meal.disliked && !conflictSeen.has(`${r.type}:${r.meal.meal_id}`))
+      .map(r => {
+        conflictSeen.add(`${r.type}:${r.meal.meal_id}`)
+        return {
+          type:    r.type,
+          meal_id: r.meal.meal_id,
+          name:    r.meal.name_ptbr,
+          message: 'Incluímos esta opção por falta de alternativas seguras compatíveis com suas preferências — nenhuma restrição de segurança foi violada.',
+        }
+      })
+
     return new Response(JSON.stringify({
       success:   true,
-      layer:     2,
+      ai_layer:  !!geminiKey,
+      layer:     'compose',
       meal_plan: {
         id:                 newPlan.id,
         meal_plan_id:       aiPlanSlug,
         name:               planName,
         calories:           targetCalories,
+        days_per_week:      nutritionDays,
         dietary_preference: derivedPreference,
         restriction_tags:   derivedTags,
       },
-      composition: Object.fromEntries(
-        requiredTypes.map(type => {
-          const m = validatedMeals[type]
-          return [type, { meal_id: m.meal_id, name: m.name_ptbr, calories: m.calories, protein_g: m.protein_g }]
-        })
-      ),
+      composition: rotationRows.map(r => ({
+        day_number: r.day,
+        meal_type:  r.type,
+        meal_id:    r.meal.meal_id,
+        name:       r.meal.name_ptbr,
+        calories:   r.meal.calories,
+        protein_g:  r.meal.protein_g,
+        filled_by:  sourceByType[r.type],
+      })),
       preference_conflicts: preferenceConflicts,
+      ai_filled_slots:              rotationRows.filter(r => sourceByType[r.type] === 'ai').length,
+      deterministic_fallback_slots: rotationRows.filter(r => sourceByType[r.type] === 'deterministic').length,
+      catalog_fallback_slots: 0,
       profile_context: profileContext,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 

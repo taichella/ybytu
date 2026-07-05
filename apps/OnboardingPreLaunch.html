@@ -62,8 +62,8 @@
 <script type="text/babel">
   const { useState, useEffect, useMemo } = React;
 
-  const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co'; 
-  const SUPABASE_KEY = 'SUA_CHAVE_ANON_PUBLIC';           
+  const SUPABASE_URL = 'https://jwjfmvkfzelbdvyqetyb.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_NPp7sXlnySRgcATvV2K2fA_FD-kgfsx';           
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const SUBSCRIPTION_PLANS = {
@@ -375,23 +375,114 @@
       } else {
         setLoading(true);
         try {
-          // Prepara o payload duplicando os dias de dedicação para Treino e Nutrição
-          const finalPayload = {
-            ...answers,
+          const email = answers.email?.trim();
+          const firstName = answers.first_name?.trim();
+          const lastName = answers.last_name?.trim();
+          const whatsappPhone = answers.whatsapp_phone?.trim();
+
+          // 1. Criar conta — senha gerada, invisível, nunca guardada por nós.
+          // Se o usuário precisar voltar depois, o caminho é reset de senha por
+          // e-mail (ele nunca soube esta senha pra "lembrar" dela).
+          const generatedPassword = crypto.randomUUID();
+
+          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password: generatedPassword,
+            options: {
+              data: {
+                full_name: `${firstName} ${lastName}`.trim(),
+                first_name: firstName,
+                last_name: lastName,
+              }
+            }
+          });
+
+          if (signUpError) {
+            if (signUpError.message?.toLowerCase().includes('already registered')) {
+              alert('Este e-mail já tem um perfil por aqui. Verifique seu WhatsApp ou fale com a gente.');
+              return;
+            }
+            throw new Error('Erro ao criar conta: ' + signUpError.message);
+          }
+
+          // Supabase pode "suceder" com identities vazio quando o e-mail já
+          // existe (proteção anti-enumeração) — mesmo caso do erro acima.
+          if (signUpData?.user?.identities && signUpData.user.identities.length === 0) {
+            alert('Este e-mail já tem um perfil por aqui. Verifique seu WhatsApp ou fale com a gente.');
+            return;
+          }
+
+          if (!signUpData?.session) {
+            alert('Conta criada! Confirme seu e-mail para continuar.');
+            return;
+          }
+
+          const userId = signUpData.user.id;
+
+          // 2. A linha de profile não nasce sozinha — upsert inicial primeiro.
+          const { error: upsertError } = await supabase.from('profiles').upsert({
+            id: userId,
+            full_name: `${firstName} ${lastName}`.trim(),
+            first_name: firstName,
+            last_name: lastName,
+            whatsapp_phone: whatsappPhone,
+          });
+          if (upsertError) throw new Error('Erro ao criar perfil: ' + upsertError.message);
+
+          // 3. Atualiza com os campos do onboarding — remapeamentos:
+          // exercise_equipment_ids (form) -> exercise_equipments_ids (coluna),
+          // dedicated_days_per_week (form) -> alimenta os dois generators.
+          const { error: profileError } = await supabase.from('profiles').update({
+            subscription_type_id: answers.subscription_type_id,
+            goals_ids: answers.goals_ids || [],
+            gender_id: answers.gender_id,
+            age: answers.age,
+            weight_kg: answers.weight_kg,
+            height_cm: answers.height_cm,
+            activity_level_id: answers.activity_level_id,
+            health_conditions_ids: answers.health_conditions_ids || [],
+            pregnancy_trimester: answers.pregnancy_trimester,
+            physical_conditions_ids: answers.physical_conditions_ids || [],
+            muscle_groups_ids: answers.muscle_groups_ids || [],
+            exercise_environment_id: answers.exercise_environment_id,
+            exercise_equipments_ids: answers.exercise_equipment_ids || [],
+            training_duration_minutes: answers.training_duration_minutes,
+            exercise_level_id: answers.exercise_level_id,
             training_days_per_week: answers.dedicated_days_per_week,
-            nutrition_days_per_week: answers.dedicated_days_per_week
-          };
+            nutrition_days_per_week: answers.dedicated_days_per_week,
+            meals_per_day: answers.meals_per_day,
+            dietary_preference_id: answers.dietary_preference_id,
+            dietary_restrictions_ids: answers.dietary_restrictions_ids || [],
+            disliked_foods: answers.disliked_foods,
+          }).eq('id', userId);
 
-          console.log("DADOS DO FORMULÁRIO PRONTOS PARA IA:", finalPayload);
-          
-          /* Exemplo de inserção no Supabase
-          const { data: newLead, error: leadError } = await supabase.from('leads').insert({ ... });
-          */
+          if (profileError) throw new Error('Erro ao salvar perfil: ' + profileError.message);
 
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          // 4. Dispara os geradores novos — fail-soft: erro não trava o
+          // redirect (não perde o lead), só marca a flag pra suporte ver depois.
+          const isTraining = [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
+          const isMeal = [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
+
+          const aiCalls = [];
+          if (isTraining) aiCalls.push(supabase.functions.invoke('ybytu-generate-training-plan'));
+          if (isMeal) aiCalls.push(supabase.functions.invoke('ybytu-generate-meal-plan'));
+
+          let generationFailed = false;
+          if (aiCalls.length > 0) {
+            const results = await Promise.all(
+              aiCalls.map(call => call.catch(e => ({ error: e })))
+            );
+            generationFailed = results.some(r => r.error);
+          }
+
+          await supabase.from('profiles')
+            .update({ plan_generation_status: generationFailed ? 'failed' : 'ok' })
+            .eq('id', userId);
+
+          // 5. WhatsApp sempre — mesmo se o gerador falhou (fail-soft).
           redirectToWhatsApp();
         } catch (e) {
-          alert("Ocorreu um erro ao salvar o perfil.");
+          alert(e.message || "Ocorreu um erro ao salvar o perfil.");
           console.error(e);
         } finally {
           setLoading(false);
