@@ -77,16 +77,11 @@ const MEAL_SUBSCRIPTION_IDS = new Set([
 
 // ─── Gemini flash ─────────────────────────────────────────────────────────────
 async function callGemini(prompt: string, apiKey: string): Promise<any> {
-  const listRes  = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
-  const listData = await listRes.json()
-  const models   = (listData.models ?? []).filter((m: any) =>
-    m.supportedGenerationMethods?.includes('generateContent')
-  )
-  const model = models.find((m: any) => m.name.includes('flash'))
-             ?? models.find((m: any) => m.name.includes('pro'))
-  if (!model) throw new Error('No Gemini model available')
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/${model.name}:generateContent?key=${apiKey}`
+  // 'gemini-flash-latest' é um alias mantido pelo Google que sempre aponta pro
+  // flash recomendado atual — evita escolher um nome versionado (ex.: 2.5-flash)
+  // que a própria API de listagem ainda anuncia mas já responde 404 "no longer
+  // available to new users" em generateContent (visto em teste real com chave nova).
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     const res  = await fetch(url, {
@@ -114,18 +109,19 @@ async function callGemini(prompt: string, apiKey: string): Promise<any> {
 }
 
 // ─── Dietary hierarchy helpers ────────────────────────────────────────────────
-// Lower rank = more restrictive. Used to derive the plan's dietary_preference
-// from the selected meals (most restrictive wins).
+// Lower rank = more restrictive. Plan label = the LEAST restrictive tier that
+// still covers every selected meal (maxRank) — if even one meal is omnivore,
+// the plan can only promise "omnivore", never a stricter label it would break.
 const PREF_RANK: Record<string, number> = { vegan: 1, vegetarian: 2, pescetarian: 3 }
 const RANK_PREF: Record<number, string> = { 1: 'vegan', 2: 'vegetarian', 3: 'pescetarian', 4: 'omnivore' }
 
 function derivePlanPreference(meals: Array<{ dietary_preference: string | null }>): string {
-  let minRank = 4
+  let maxRank = 1
   for (const m of meals) {
     const rank = PREF_RANK[m.dietary_preference ?? ''] ?? 4
-    if (rank < minRank) minRank = rank
+    if (rank > maxRank) maxRank = rank
   }
-  return RANK_PREF[minRank] ?? 'omnivore'
+  return RANK_PREF[maxRank] ?? 'omnivore'
 }
 
 // Union of all restriction_tags present in the selected meals — never hardcoded.
@@ -480,8 +476,8 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
       try {
         const aiResult = await callGemini(aiPrompt, geminiKey)
         aiOptions      = (aiResult?.options ?? {}) as Record<string, string[]>
-      } catch {
-        // intentionally silent — re-validation below fills every type via deterministic top-N
+      } catch (err) {
+        console.error('[ybytu-generate-meal-plan] Gemini call failed, falling back to deterministic top-N:', err)
       }
     }
 

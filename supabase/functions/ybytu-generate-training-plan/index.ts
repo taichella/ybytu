@@ -235,16 +235,11 @@ function pgArrayLiteral(values: string[]): string {
 // Camada opcional — qualquer falha aqui é absorvida pela re-validação por slot
 // mais abaixo, que cai no determinístico da Etapa 1. Nunca é dependência dura.
 async function callGemini(prompt: string, apiKey: string, retries = 3): Promise<any> {
-  const listRes  = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
-  const listData = await listRes.json()
-  const models   = (listData.models ?? []).filter((m: any) =>
-    m.supportedGenerationMethods?.includes('generateContent')
-  )
-  const model = models.find((m: any) => m.name.includes('flash'))
-             ?? models.find((m: any) => m.name.includes('pro'))
-  if (!model) throw new Error('No Gemini model available')
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/${model.name}:generateContent?key=${apiKey}`
+  // 'gemini-flash-latest' é um alias mantido pelo Google que sempre aponta pro
+  // flash recomendado atual — evita escolher um nome versionado (ex.: 2.5-flash)
+  // que a própria API de listagem ainda anuncia mas já responde 404 "no longer
+  // available to new users" em generateContent (visto em teste real com chave nova).
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     const res  = await fetch(url, {
@@ -626,8 +621,8 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
       try {
         const aiResult = await callGemini(aiPrompt, geminiKey)
         aiSelections   = (aiResult?.selections ?? {}) as Record<string, string>
-      } catch {
-        // intentionally silent — re-validation below fills every slot via deterministicPick
+      } catch (err) {
+        console.error('[ybytu-generate-training-plan] Gemini call failed, falling back to deterministicPick:', err)
       }
     }
 
