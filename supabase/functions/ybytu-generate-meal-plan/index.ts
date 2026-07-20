@@ -523,12 +523,30 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
     }
 
     // ── 7. RODÍZIO: distribui as opções de cada tipo pelos N dias ────────────
-    const dayMealTypeOrder = requiredTypes // ordem fixa dentro do dia
-    const rotationRows: Array<{ day: number; type: string; meal: any }> = []
+    // requiredTypes tem no máximo 1 'snack' (é o único tipo que existe na base),
+    // mas mealsPerDay pode pedir vários lanches (ex: 5 refeições = 2 lanches).
+    // daySlots é a lista de SLOTS do dia (pode repetir 'snack'), diferente de
+    // requiredTypes (tipos ÚNICOS pra consultar pool/prompt da IA) — sem essa
+    // separação, mealsPerDay=5 sempre virava 4 refeições entregues.
+    const snackSlotsPerDay = mealsPerDay > 3 ? mealsPerDay - 3 : 0
+    const daySlots: string[] = []
+    if (snackSlotsPerDay <= 1) {
+      daySlots.push('breakfast', 'lunch', 'dinner')
+      if (snackSlotsPerDay === 1) daySlots.push('snack')
+    } else {
+      daySlots.push('breakfast', 'snack', 'lunch', 'snack', 'dinner')
+      for (let extra = 2; extra < snackSlotsPerDay; extra++) daySlots.push('snack')
+    }
+    const dayMealTypeOrder = daySlots // ordem fixa dentro do dia (pode repetir 'snack')
+    const rotationRows: Array<{ day: number; type: string; meal: any; slotIndex: number }> = []
     for (let day = 1; day <= nutritionDays; day++) {
-      for (const type of dayMealTypeOrder) {
-        rotationRows.push({ day, type, meal: pickForDay(optionsByType[type], day - 1) })
-      }
+      let snackOccurrence = 0
+      dayMealTypeOrder.forEach((type, slotIndex) => {
+        // Cada ocorrência de 'snack' no MESMO dia usa um offset diferente pro
+        // rodízio, senão os 2 lanches do dia puxariam a mesma refeição.
+        const pickIndex = type === 'snack' ? (day - 1) + snackOccurrence++ : day - 1
+        rotationRows.push({ day, type, meal: pickForDay(optionsByType[type], pickIndex), slotIndex })
+      })
     }
 
     // ── 8. Lookup slug → UUID (meal_plan_meals guarda UUIDs, não slugs) ──────
@@ -582,7 +600,7 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
         meal_plan_id: newPlan.id,                                   // UUID do meal_plan (TEXT)
         meal_id:      dbMeal.id,                                    // UUID do meal (TEXT)
         day_order:    r.day,
-        meal_order:   dayMealTypeOrder.indexOf(r.type) + 1,
+        meal_order:   r.slotIndex + 1, // posição real do slot no dia — indexOf colidiria com 2 'snack' no mesmo dia
         meal_type_id: r.type,
       }
     })
