@@ -507,7 +507,7 @@ serve(async (req) => {
 
     const { data: moldeSlotsRaw, error: moldeError } = await supabase
       .from('training_plan_exercises')
-      .select('day_number, order_within_day, sets, reps, rest_seconds, exercise_id')
+      .select('day_number, order_within_day, sets, reps, rest_seconds, exercise_id, cadence_eccentric, cadence_isometric_bottom, cadence_concentric, cadence_isometric_top')
       .eq('training_plan_id', moldeTrainingPlanId)
       .order('day_number', { ascending: true })
       .order('order_within_day', { ascending: true })
@@ -536,6 +536,10 @@ serve(async (req) => {
         sets,
         reps,
         rest_seconds,
+        cadence_eccentric: s.cadence_eccentric,
+        cadence_isometric_bottom: s.cadence_isometric_bottom,
+        cadence_concentric: s.cadence_concentric,
+        cadence_isometric_top: s.cadence_isometric_top,
         target_muscle_groups: moldeMuscleGroupsById.get(s.exercise_id) ?? [],
       }
     })
@@ -719,6 +723,10 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
       sets: s.sets,
       reps: s.reps,
       rest_seconds: s.rest_seconds,
+      cadence_eccentric: s.cadence_eccentric,
+      cadence_isometric_bottom: s.cadence_isometric_bottom,
+      cadence_concentric: s.cadence_concentric,
+      cadence_isometric_top: s.cadence_isometric_top,
     }))
 
     const { error: tpeErr } = await supabase.from('training_plan_exercises').insert(tpeRows)
