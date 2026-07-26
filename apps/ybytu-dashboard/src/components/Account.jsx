@@ -237,7 +237,6 @@ export default function Account() {
 
         </div>
       </main>
-    </div>
 
     {/* SNACKBAR (TOAST)[cite: 17] */}
     {toast && (
