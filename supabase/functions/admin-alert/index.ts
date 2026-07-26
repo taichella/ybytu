@@ -1,46 +1,110 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
-// Setup type definitions for built-in Supabase Runtime APIs
-import "@supabase/functions-js/edge-runtime.d.ts";
-import { withSupabase } from "@supabase/server";
+// Configuração de Headers para permitir chamadas externas (CORS) caso necessário
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
-console.log("Hello from Functions!");
+serve(async (req) => {
+  // Trata requisições de preflight do CORS
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
 
-// This endpoint uses 'publishable' | 'secret' access, apiKey is required.
-// Use publishable for Client-facing, key-validated endpoints
-// Use secret for Server-to-server, internal calls
-export default {
-  fetch: withSupabase({ auth: ["publishable", "secret"] }, async (req, ctx) => {
-    // Called by another service with a secret key
-    // ctx.supabaseAdmin bypasses RLS — use for privileged operations
-    /*
-    if (ctx.authMode === "secret") {
-      const { user_id } = await req.json();
-      const { data } = await ctx.supabaseAdmin.auth.admin.getUserById(user_id);
+  try {
+    // 1. Lendo os dados enviados na requisição
+    const { type, message } = await req.json()
 
-      return Response.json({
-        email: data?.user?.email,
-      });
+    if (!type || !message) {
+      return new Response(
+        JSON.stringify({ error: "Os campos 'type' e 'message' são obrigatórios." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      )
     }
-    */
 
-    const { name } = await req.json();
+    // 2. Mapeamento dinâmico do número de telefone baseado no tipo de alerta
+    let targetPhone = ""
+    const alertType = type.toLowerCase().trim()
 
-    return Response.json({
-      message: `Hello ${name}!`,
-    });
-  }),
-};
+    switch (alertType) {
+      case "trainer":
+      case "coach":
+        targetPhone = Deno.env.get("PHONE_ADMIN_TRAINER") ?? ""
+        break
+      case "nutri":
+      case "nutritionist":
+        targetPhone = Deno.env.get("PHONE_ADMIN_NUTRI") ?? ""
+        break
+      case "sale":
+      case "sales":
+      case "vendas":
+        targetPhone = Deno.env.get("PHONE_ADMIN_SALE") ?? ""
+        break
+      case "dev":
+      case "developer":
+      case "suporte":
+        targetPhone = Deno.env.get("PHONE_ADMIN_DEV") ?? ""
+        break
+      default:
+        return new Response(
+          JSON.stringify({ error: `O tipo de alerta '${type}' não é válido.` }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        )
+    }
 
-/* To invoke locally:
+    // 3. Validação dos Secrets obrigatórios
+    if (!targetPhone) {
+      return new Response(
+        JSON.stringify({ error: `O número de telefone para o tipo '${alertType}' não foi configurado nos Secrets.` }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      )
+    }
 
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
+    const salvyApiKey = Deno.env.get("SALVY_API_KEY")
+    if (!salvyApiKey) {
+      return new Response(
+        JSON.stringify({ error: "A credencial 'SALVY_API_KEY' não está configurada nos Secrets do Supabase." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      )
+    }
 
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/admin-alert' \
-    --header 'apiKey: sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH' \
-    --data '{"name":"Functions"}'
+    // 4. Integração HTTP com a API de Mensagens da Salvy
+    // Nota: A URL final e os campos do body devem refletir a rota de envio de SMS/WhatsApp da doc oficial da Salvy.
+    console.log(`Disparando alerta do tipo [${alertType}] para o número: ${targetPhone}`)
+    
+    const salvyResponse = await fetch("https://api.salvy.com.br/v1/messages", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${salvyApiKey}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        to: targetPhone,
+        text: message
+      })
+    })
 
-*/
+    // Coleta a resposta da Salvy para debug interno
+    const responseData = await salvyResponse.json().catch(() => ({}));
+
+    if (!salvyResponse.ok) {
+      console.error("Erro retornado pela API da Salvy:", responseData)
+      throw new Error(`Salvy API respondeu com erro: ${salvyResponse.statusText}`)
+    }
+
+    // 5. Resposta de sucesso da Edge Function
+    return new Response(
+      JSON.stringify({ success: true, message: "Alerta enviado com sucesso!", target: alertType }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+
+  } catch (error) {
+    console.error("Erro crítico na execução da admin-alert:", error.message)
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    )
+  }
+})

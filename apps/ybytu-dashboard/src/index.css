@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root { 
+  --brand: #F55F16; 
+  --brand-hover: #FF7A3D; 
+  --brand-soft: rgba(245,95,22,.10);
+  --bg: #F8F9FA; 
+  --surface: #FFFFFF; 
+  --surface-2: #F1F5F9; 
+  --border: #E2E8F0; 
+  --text: #1A202C; 
+  --muted: #718096; 
+  --field: #F8F9FA;
+  --success: #16a34a; 
+  --info: #3b82f6; 
+  --warning: #d97706; 
+  --danger: #ef4444; 
+  --purple: #a855f7; 
+}
+
+:root[data-theme="dark"] { 
+  --bg: #121212; 
+  --surface: #1E1E1E; 
+  --surface-2: #2A2A2A; 
+  --border: #333333; 
+  --text: #DBD9D8; 
+  --muted: #9C9C9C; 
+  --field: #161616; 
+  --brand-soft: rgba(245,95,22,.14); 
+}
+
+* { 
+  box-sizing: border-box; 
+}
+
+html, body { 
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif; 
+  background: var(--bg); 
+  color: var(--text); 
+  -webkit-font-smoothing: antialiased; 
+  transition: background .3s, color .3s;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+}
+
+a { 
+  color: inherit; 
+}
+
+/* ---- Responsive Shell Rules ---- */
+.yb-mnav { display: none !important; }
+
+@media(max-width: 860px) {
+  .yb-side { display: none !important; }
+  .yb-mnav { display: flex !important; }
+  .yb-main-content { padding-bottom: 92px !important; }
+}
+
+@keyframes ybFade {
+  from { opacity: 0; transform: translateY(8px) }
+  to { opacity: 1; transform: none }
+}
+@keyframes ybFloat {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-14px) }
+}
+@media (min-width: 820px) { 
+  .yb-brandpanel { display: flex !important; } 
+}
+
+/* ---- Hover Effects para Exercicios ---- */
+.yb-hover-row { transition: background 0.2s; cursor: pointer; }
+.yb-hover-row:hover { background: var(--surface-2) !important; }
+
+.yb-hover-card { transition: border-color 0.2s, transform 0.15s; cursor: pointer; }
+.yb-hover-card:hover { border-color: rgba(245,95,22,.5) !important; transform: translateY(-3px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important; }
+
+@keyframes ybToastIn {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
