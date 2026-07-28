@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { authService } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const { user } = useAuth();
+
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
@@ -18,39 +21,38 @@ export default function Login() {
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const togglePw = () => setShowPw(!showPw);
 
-const handleLogin = async (e) => {
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { user: loggedInUser } = await authService.login(email, password);
 
-    if (authError) {
+      const userRole = loggedInUser?.user_metadata?.role;
+
+      if (userRole !== 'admin' && userRole !== 'invited_user') {
+        await authService.logout();
+        setError('Acesso negado. Esta área é restrita para administradores.');
+        setLoading(false);
+        return;
+      }
+
+      navigate('/dashboard');
+    } catch (authError) {
+      console.error(authError);
       if (authError.message === 'Invalid login credentials') {
         setError('E-mail ou senha incorretos.');
       } else {
         setError(authError.message);
       }
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // TRAVA DE SEGURANÇA: Verifica se é admin ou convidado do painel
-    const userRole = data.user?.user_metadata?.role;
-    
-    if (userRole !== 'admin' && userRole !== 'invited_user') {
-      // Se for um usuário comum do App, desloga ele imediatamente e mostra erro
-      await supabase.auth.signOut();
-      setError('Acesso negado. Esta área é restrita para administradores.');
-      setLoading(false);
-      return;
-    }
-
-    // Sucesso absoluto! Direciona o administrador para o painel de gestão
-    navigate('/dashboard');
   };
 
   return (

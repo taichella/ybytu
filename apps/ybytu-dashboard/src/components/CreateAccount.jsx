@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
+import { authService } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
 export default function CreateAccount() {
@@ -21,9 +23,15 @@ export default function CreateAccount() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const { user } = useAuth();
+
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
@@ -38,26 +46,27 @@ export default function CreateAccount() {
       return;
     }
 
-    // Registro no Supabase passando dados adicionais
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          role: flow === 'pro' ? 'admin' : 'invited_user',
-          company_or_code: companyOrCode
+    try {
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: flow === 'pro' ? 'admin' : 'invited_user',
+            company_or_code: companyOrCode
+          }
         }
-      }
-    });
+      });
 
-    if (signUpError) {
-      setError(signUpError.message);
-      setLoading(false);
-    } else {
-      // Por padrão, o Supabase envia um email de confirmação.
-      // Você pode desativar isso no painel (Authentication > Providers > Email).
+      if (signUpError) throw signUpError;
+
       navigate('/login');
+    } catch (signUpError) {
+      console.error(signUpError);
+      setError(signUpError.message);
+    } finally {
+      setLoading(false);
     }
   };
 

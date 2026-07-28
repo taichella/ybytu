@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { userService } from '../services/userService';
 
 export default function Users() {
   const [theme, setTheme] = useState('dark');
+  const [usersData, setUsersData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [totalUsers, setTotalUsers] = useState(0);
 
   // Sincroniza o tema
   useEffect(() => {
@@ -11,7 +16,6 @@ export default function Users() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
-  // Dados mocados extraídos do seu protótipo original
   const SUB = {
     free: { sub: 'Free', subBg: 'var(--surface-2)', subColor: 'var(--muted)' },
     start: { sub: 'Start', subBg: 'rgba(59,130,246,.12)', subColor: '#3b82f6' },
@@ -21,21 +25,48 @@ export default function Users() {
   const getAdColor = (v) => v >= 80 ? '#16a34a' : (v >= 40 ? '#d97706' : '#ef4444');
   const avatars = ['#ec4899','#3b82f6','#16a34a','#a855f7','#f59e0b','#06b6d4','#ef4444','#8b5cf6'];
   
-  const usersData = [
-    { initials: 'MS', name: 'Mariana Silva', meta: '32 anos · F · São Paulo', subKey: 'pro', goal: 'Hipertrofia', level: 'Intermediário', trainPlan: 'Hipertrofia 12 Sem', mealPlan: 'Cutting 1.800 kcal', adherence: 88, onbDone: true },
-    { initials: 'CE', name: 'Carlos Eduardo', meta: '41 anos · M · Rio de Janeiro', subKey: 'start', goal: 'Emagrecimento', level: 'Iniciante', trainPlan: 'Full Body em Casa', mealPlan: 'Low Carb 1.600', adherence: 64, onbDone: true },
-    { initials: 'AC', name: 'Amanda Costa', meta: '27 anos · F · Belo Horizonte', subKey: 'pro', goal: 'Condicionamento', level: 'Avançado', trainPlan: 'Corrida & Mobilidade', mealPlan: 'Manutenção 2.400', adherence: 92, onbDone: true },
-    { initials: 'RN', name: 'Rafael Nunes', meta: '35 anos · M · Curitiba', subKey: 'free', goal: 'Hipertrofia', level: 'Intermediário', trainPlan: '—', mealPlan: '—', adherence: 22, onbDone: false },
-    { initials: 'JL', name: 'Juliana Lima', meta: '29 anos · F · Porto Alegre', subKey: 'start', goal: 'Emagrecimento', level: 'Iniciante', trainPlan: 'Cutting Definição', mealPlan: 'Vegano 2.000', adherence: 57, onbDone: true },
-    { initials: 'PH', name: 'Pedro Henrique', meta: '38 anos · M · Salvador', subKey: 'pro', goal: 'Força', level: 'Avançado', trainPlan: 'Força Powerbuilding', mealPlan: 'Bulking 3.200', adherence: 79, onbDone: true },
-    { initials: 'BF', name: 'Beatriz Ferraz', meta: '24 anos · F · Recife', subKey: 'free', goal: 'Condicionamento', level: 'Iniciante', trainPlan: '—', mealPlan: '—', adherence: 12, onbDone: false },
-    { initials: 'LG', name: 'Lucas Gomes', meta: '46 anos · M · Fortaleza', subKey: 'start', goal: 'Emagrecimento', level: 'Intermediário', trainPlan: 'Full Body em Casa', mealPlan: 'Manutenção 2.400', adherence: 71, onbDone: true },
-  ].map((u, i) => ({
-    ...u,
-    ...SUB[u.subKey],
-    adColor: getAdColor(u.adherence),
-    avatarBg: avatars[i % avatars.length]
-  }));
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const { data, count } = await userService.getProfiles(10, 0);
+
+        const formattedData = (data || []).map((u, i) => {
+          // Fallbacks for missing data
+          const name = u.full_name || 'Usuário Anônimo';
+          const initials = name.substring(0, 2).toUpperCase();
+
+          // Em um app real, meta, goal, level, etc viriam de u
+          return {
+            id: u.id,
+            initials,
+            name,
+            meta: `${u.age || '?'} anos · ${u.gender || '?'} · ${u.city || '?'}`,
+            subKey: u.subscription_tier || 'free',
+            goal: u.goal || '—',
+            level: u.level || '—',
+            trainPlan: u.current_training_plan || '—',
+            mealPlan: u.current_meal_plan || '—',
+            adherence: u.adherence_score || 0,
+            onbDone: u.onboarding_completed || false,
+
+            ...SUB[u.subscription_tier || 'free'],
+            adColor: getAdColor(u.adherence_score || 0),
+            avatarBg: avatars[i % avatars.length]
+          };
+        });
+
+        setUsersData(formattedData);
+        setTotalUsers(count || 0);
+      } catch (err) {
+        console.error('Error fetching users:', err);
+        setError('Erro ao carregar usuários.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
@@ -101,11 +132,15 @@ export default function Users() {
                   </tr>
                 </thead>
                 <tbody>
-                  {usersData.map((u, index) => (
-                    <tr key={index} style={{ borderTop: '1px solid var(--border)' }}>
+                  {loading ? (
+                    <tr><td colSpan="8" style={{ textAlign: 'center', padding: '20px' }}>Carregando usuários...</td></tr>
+                  ) : error ? (
+                    <tr><td colSpan="8" style={{ textAlign: 'center', padding: '20px', color: 'var(--danger)' }}>{error}</td></tr>
+                  ) : usersData.map((u, index) => (
+                    <tr key={u.id || index} style={{ borderTop: '1px solid var(--border)' }}>
                       <td style={{ textAlign: 'center', padding: '12px 16px' }}><input type="checkbox" style={{ width: '15px', height: '15px', accentColor: 'var(--brand)' }} /></td>
                       <td style={{ padding: '12px 16px' }}>
-                        <Link to={`/users/${index}`} style={{ display: 'flex', alignItems: 'center', gap: '13px', textDecoration: 'none', color: 'inherit' }}>
+                        <Link to={`/users/${u.id}`} style={{ display: 'flex', alignItems: 'center', gap: '13px', textDecoration: 'none', color: 'inherit' }}>
                           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: u.avatarBg, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px', flexShrink: 0 }}>{u.initials}</div>
                           <div><p style={{ margin: 0, fontWeight: 700, fontSize: '14px' }}>{u.name}</p><p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>{u.meta}</p></div>
                         </Link>
@@ -134,7 +169,7 @@ export default function Users() {
                         )}
                       </td>
                       <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                        <Link to={`/users/${index}`} style={{ display: 'inline-flex', color: 'var(--muted)', padding: '6px', borderRadius: '8px', textDecoration: 'none' }}>
+                        <Link to={`/users/${u.id}`} style={{ display: 'inline-flex', color: 'var(--muted)', padding: '6px', borderRadius: '8px', textDecoration: 'none' }}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         </Link>
                       </td>
@@ -146,7 +181,7 @@ export default function Users() {
 
             {/* Pagination[cite: 8] */}
             <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', color: 'var(--muted)', background: 'var(--bg)', flexWrap: 'wrap', gap: '10px' }}>
-              <span>Mostrando <strong style={{ color: 'var(--text)' }}>1–8</strong> de 12.450 usuários</span>
+              <span>Mostrando <strong style={{ color: 'var(--text)' }}>1–{usersData.length}</strong> de {totalUsers} usuários</span>
               <div style={{ display: 'flex', gap: '6px' }}>
                 <button style={{ padding: '6px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--surface)', color: 'var(--muted)', fontWeight: 700, fontSize: '13px', cursor: 'not-allowed', opacity: .5, fontFamily: 'inherit' }}>Anterior</button>
                 <button style={{ padding: '6px 12px', border: 'none', borderRadius: '8px', background: 'var(--brand)', color: '#fff', fontWeight: 800, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>1</button>
