@@ -39,57 +39,85 @@ const HOME_EQUIPMENT_WHITELIST = [
 // qual dia, quantos slots) é agnóstica de equipamento — só o exercício que
 // preenche cada slot muda pelo pool seguro (casa vs. academia).
 
-function nearestMoldeDays(days: number): number {
-  const options = [3, 4, 5]
-  return options.reduce((best, opt) => (Math.abs(opt - days) < Math.abs(best - days) ? opt : best))
+// ─── REGRA 0 (reformulada 2026-07-27): papéis de slot × objetivo ─────────────
+// Mineração de 179 linhas dos 7 moldes ativos (tr_201-207) mostrou que
+// sets/rest não são "por molde inteiro", são POR PAPEL do slot dentro do dia —
+// e só os papéis compostos (o "peso" real do treino) escalam rest com o
+// objetivo. Isolamento/core/cardio são FIXOS pro objetivo: confirmado que
+// finisher (rosca/tríceps/panturrilha), core (abdominal) e cardio (esteira)
+// têm o MESMO rest em tr_204 (weight_loss) e tr_205 (hypertrophy) — só os
+// slots de 3/2 séries no topo do dia (supino/remada/leg press/agachamento)
+// mudam de 60s pra 120s. Isso substitui a dicotomia antiga "molde dedicado
+// (weight_loss/hypertrophy, sets intocados) vs matriz genérica achatada
+// (conditioning/health_routine, 3x12@50s pra TUDO, ignorando o papel do
+// slot)" — agora TODO objetivo passa pela MESMA matriz de papéis.
+type SlotRole =
+  | 'composto_principal'
+  | 'composto_secundario'
+  | 'isolamento'
+  | 'core'
+  | 'cardio'
+  | 'leve_mobilidade' // papel NOVO — ver comentário mais abaixo, sem dado observado
+
+const SETS_BY_ROLE: Record<SlotRole, number> = {
+  composto_principal: 3,
+  composto_secundario: 2,
+  isolamento: 1,
+  core: 3,
+  cardio: 3,
+  leve_mobilidade: 2,
 }
 
-// ─── REGRA 0: seleção do molde por (objetivo × dias) ──────────────────────────
-// Confirmado por query real do banco (goals_ids): weight_loss e hypertrophy têm
-// moldes próprios de academia por dias (3/4/5). conditioning e health_routine
-// NÃO têm molde próprio — usam a MESMA estrutura do molde weight_loss (decisão
-// da Taina: ritmo moderado/sustentável pra saúde geral, não emagrecimento
-// intenso — só a matriz de séries muda, não o esqueleto de dias, ver abaixo).
-// tr_201 (o único Original "home", health_routine) fica FORA da REGRA 0:
-// day_number nulo, gaps, exercício repetido 3x — pendente de revisão
-// profissional, nunca é selecionado aqui.
-const MOLDE_BY_GOAL_AND_DAYS: Record<string, Record<number, string>> = {
-  weight_loss:    { 3: 'tr_202', 4: 'tr_204', 5: 'tr_206' },
-  hypertrophy:    { 3: 'tr_203', 4: 'tr_205', 5: 'tr_207' },
-  conditioning:   { 3: 'tr_202', 4: 'tr_204', 5: 'tr_206' }, // empresta estrutura do weight_loss
-  health_routine: { 3: 'tr_202', 4: 'tr_204', 5: 'tr_206' }, // empresta estrutura do weight_loss
+// Só os dois papéis compostos escalam rest com o objetivo (60s ritmo
+// sustentável / 120s hipertrofia). isolamento e cardio ficam fixos em 60s;
+// core fixo em 45s (normaliza a variação 30s/60s que existia entre os moldes
+// de 3 dias — nos moldes de 4/5 dias o core já era 45s fixo nos dois
+// objetivos, então 45s é o padrão real, não um número inventado).
+function restSecondsForRole(role: SlotRole, goal: string): number {
+  if (role === 'composto_principal' || role === 'composto_secundario') {
+    return goal === 'hypertrophy' ? 120 : 60
+  }
+  if (role === 'core') return 45
+  // leve_mobilidade: PENDENTE de validação do personal trainer — não existe
+  // nenhuma linha desse papel em nenhum molde real hoje (é o dia leve do
+  // split de 7 dias, split novo). 40s é uma proposta razoável (descanso curto,
+  // é recuperação ativa/mobilidade, não força bruta), não uma curadoria.
+  if (role === 'leve_mobilidade') return 40
+  return 60 // isolamento, cardio
 }
 
-function moldeForGoal(goal: string, requestedDays: number): { moldeDays: number; moldeTrainingPlanId: string } {
-  const moldeDays = nearestMoldeDays(requestedDays)
-  const byGoal = MOLDE_BY_GOAL_AND_DAYS[goal] ?? MOLDE_BY_GOAL_AND_DAYS.health_routine
-  return { moldeDays, moldeTrainingPlanId: byGoal[moldeDays] }
+// Reps-default SÓ pra slots que nunca existiram em nenhum molde real (splits
+// desenhados do zero: 2/6/7 dias). Pra 3/4/5 dias, reps SEMPRE vem da linha
+// real do molde (fetchMoldeSlotsWithMuscles abaixo) — nunca é reinventado.
+const DEFAULT_REPS_BY_ROLE: Record<SlotRole, number> = {
+  composto_principal: 12,
+  composto_secundario: 12,
+  isolamento: 15,
+  core: 15,
+  cardio: 12,
+  leve_mobilidade: 12, // PENDENTE validação do personal trainer
 }
 
-// ─── REGRA 0: matriz de séries/reps/descanso — SÓ para objetivos sem molde
-// dedicado ──────────────────────────────────────────────────────────────────
-// weight_loss (tr_202/204/206) e hypertrophy (tr_203/205/207) JÁ têm
-// sets/reps/rest_seconds curados por exercício no banco (confirmado: ex_031 é
-// rest 60s em tr_202 vs 120s em tr_203 pro MESMO exercício; ex_098 é 1x25 em
-// ambos — um finisher deliberado, não um "3 séries" genérico). Sobrescrever
-// isso com uma matriz genérica seria regressão, não melhoria — por isso essa
-// matriz NUNCA se aplica a esses dois objetivos, e o ajuste de nível (abaixo)
-// também não mexe neles: a única molde por (objetivo × dias) já serve todo
-// nível — a personalização por nível acontece na SELEÇÃO do exercício (pool
-// filtrado por exercise_level_id), não nas séries. Rebaixar ex_098 de 1→2
-// séries pra um beginner, por exemplo, destruiria o finisher curado.
-//
-// conditioning/health_routine tomam emprestada a ESTRUTURA do molde
-// weight_loss, mas os números emprestados são a curadoria do weight_loss —
-// não fariam o objetivo pesar de verdade. Aqui sim a matriz sobrescreve, com
-// ajuste de séries por nível: beginner -1 (mín. 2), intermediate = base,
-// advanced +1. Reps e descanso são fixos por objetivo, não variam por nível.
-const SETS_REPS_REST_BY_GOAL: Record<string, { sets: number; reps: number; rest_seconds: number }> = {
-  conditioning:   { sets: 3, reps: 12, rest_seconds: 50 },
-  health_routine: { sets: 3, reps: 12, rest_seconds: 50 }, // mesma matriz do conditioning (decisão da Taina)
-}
+// Nome do exercício vence a contagem de séries do molde pra decidir o papel:
+// núcleo (abdominal) e cardio (esteira) são gravados com série alta (3, igual
+// composto principal) mas NÃO escalam rest com o objetivo — por isso a
+// classificação por nome roda ANTES do fallback por nº de séries.
+const CORE_EXERCISE_NAMES = new Set(['Abdominal tradicional'])
+const CARDIO_EXERCISE_NAMES = new Set(['Corrida em inclinação (esteira inclinada)'])
 
-const GOALS_WITH_DEDICATED_MOLDE = new Set(['weight_loss', 'hypertrophy'])
+// Panturrilha entra aqui como isolamento de verdade (decisão desta sessão):
+// os moldes de 4/5 dias guardavam ela com 2 séries e rest escalando com o
+// objetivo (tratada como "quase-composto"), enquanto os moldes de 3 dias já
+// guardavam ela como 1 série @60s fixo — as duas versões foram normalizadas
+// pra isolamento (a classificação por nº de séries abaixo já resolve isso
+// sozinha, sem precisar de um caso especial por nome).
+function roleForMoldeSlot(exerciseNamePtbr: string, moldeSets: number): SlotRole {
+  if (CORE_EXERCISE_NAMES.has(exerciseNamePtbr)) return 'core'
+  if (CARDIO_EXERCISE_NAMES.has(exerciseNamePtbr)) return 'cardio'
+  if (moldeSets === 1) return 'isolamento'
+  if (moldeSets === 2) return 'composto_secundario'
+  return 'composto_principal'
+}
 
 // ─── Nome amigável — rótulo curto em PT-BR pro usuário, nunca o slug em inglês ─
 const GOAL_LABEL_PTBR: Record<string, string> = {
@@ -102,16 +130,247 @@ function goalLabelPtbr(goal: string): string {
   return GOAL_LABEL_PTBR[goal] ?? goal
 }
 
-function setsRepsRestForSlot(
-  goal: string,
-  level: string,
-  moldeSlot: { sets: number; reps: number; rest_seconds: number },
-): { sets: number; reps: number; rest_seconds: number } {
-  if (GOALS_WITH_DEDICATED_MOLDE.has(goal)) return moldeSlot // preserva curadoria real do banco
+// ─── SPLITS: 2 a 7 dias ────────────────────────────────────────────────────
+// dias 3/4 vêm direto dos moldes reais (tr_202/204 pra weight_loss/
+// conditioning/health_routine — mesmo empréstimo de estrutura de sempre —,
+// tr_203/205 pra hypertrophy). dia 5 é uma REFORMULAÇÃO: upper/lower
+// U-L-U-L-U repetindo os dias 1(U)/2(L) do molde de 4 dias — o antigo dia 3
+// de tr_206/tr_207 (híbrido condicionamento/core) foi identificado como
+// acidental, não desenho intencional, e descartado (ver memória
+// split-patterns-pending-validation). dias 2/6/7 são desenho NOVO, sem
+// exercício-fonte real — action item explícito da Taina: nenhum dos 4 splits
+// novos (2/5/6/7) vai pro onboarding do piloto sem validação de um personal
+// trainer, mesmo gate que a base de exercícios já tem.
+const REAL_MOLDE_DAYS = new Set([3, 4, 5])
 
-  const base = SETS_REPS_REST_BY_GOAL[goal] ?? SETS_REPS_REST_BY_GOAL.health_routine
-  const levelDelta = level === 'beginner' ? -1 : level === 'advanced' ? 1 : 0
-  return { sets: Math.max(2, base.sets + levelDelta), reps: base.reps, rest_seconds: base.rest_seconds }
+const MOLDE_TRAINING_PLAN_BY_GOAL_AND_DAYS: Record<string, Record<3 | 4, string>> = {
+  weight_loss:    { 3: 'tr_202', 4: 'tr_204' },
+  hypertrophy:    { 3: 'tr_203', 4: 'tr_205' },
+  conditioning:   { 3: 'tr_202', 4: 'tr_204' }, // empresta estrutura do weight_loss
+  health_routine: { 3: 'tr_202', 4: 'tr_204' }, // empresta estrutura do weight_loss
+}
+
+const SUPPORTED_DAYS = [2, 3, 4, 5, 6, 7] as const
+function nearestSupportedDays(days: number): number {
+  return SUPPORTED_DAYS.reduce((best, opt) => (Math.abs(opt - days) < Math.abs(best - days) ? opt : best))
+}
+
+type SplitSlotDraft = {
+  day_number: number
+  order_within_day: number
+  role: SlotRole
+  reps: number
+  target_muscle_groups: string[]
+  cadence_eccentric: number
+  cadence_isometric_bottom: number
+  cadence_concentric: number
+  cadence_isometric_top: number
+}
+
+// Cadência default (2-0-2-0) — mesmo valor fixo já usado em toda a base
+// (confirmado: 100% dos slots de tr_202/204 têm essa cadência). Splits
+// desenhados (2/6/7 dias) não têm linha de molde pra herdar cadência, então
+// usam esse mesmo default, não um valor novo.
+const DEFAULT_CADENCE = {
+  cadence_eccentric: 2,
+  cadence_isometric_bottom: 0,
+  cadence_concentric: 2,
+  cadence_isometric_top: 0,
+}
+
+type DesignedSlotSpec = { day_number: number; order_within_day: number; role: SlotRole; target_muscle_groups: string[] }
+
+// ─── Split de 2 dias — full body A/B (DESENHO NOVO, pendente de validação) ──
+// Cobertura por padrão de movimento (agachar/dobrar quadril/empurrar/puxar),
+// não por músculo isolado — é o que um full body de 2x/semana precisa cobrir.
+const SPLIT_2_DAYS: DesignedSlotSpec[] = [
+  // Dia A — agachar + empurrar horizontal + puxar horizontal + core
+  { day_number: 1, order_within_day: 1, role: 'composto_principal', target_muscle_groups: ['quadriceps', 'glutes', 'hamstrings'] },
+  { day_number: 1, order_within_day: 2, role: 'composto_principal', target_muscle_groups: ['pectoralis_major', 'triceps_brachii', 'deltoids'] },
+  { day_number: 1, order_within_day: 3, role: 'composto_secundario', target_muscle_groups: ['back', 'biceps_brachii'] },
+  { day_number: 1, order_within_day: 4, role: 'composto_secundario', target_muscle_groups: ['glutes', 'hamstrings'] },
+  { day_number: 1, order_within_day: 5, role: 'isolamento', target_muscle_groups: ['calves'] },
+  { day_number: 1, order_within_day: 6, role: 'core', target_muscle_groups: ['rectus_abdominis', 'core'] },
+  // Dia B — dobrar quadril + puxar vertical + empurrar vertical + avanço
+  { day_number: 2, order_within_day: 1, role: 'composto_principal', target_muscle_groups: ['hamstrings', 'glutes', 'back'] },
+  { day_number: 2, order_within_day: 2, role: 'composto_principal', target_muscle_groups: ['back', 'latissimus_dorsi', 'biceps_brachii'] },
+  { day_number: 2, order_within_day: 3, role: 'composto_secundario', target_muscle_groups: ['deltoids', 'triceps_brachii'] },
+  { day_number: 2, order_within_day: 4, role: 'composto_secundario', target_muscle_groups: ['quadriceps', 'glutes'] },
+  { day_number: 2, order_within_day: 5, role: 'isolamento', target_muscle_groups: ['biceps_brachii'] },
+  { day_number: 2, order_within_day: 6, role: 'core', target_muscle_groups: ['rectus_abdominis', 'core'] },
+]
+
+// Bloco push/pull/legs — usado 2x no split de 6 dias (dias 1-3 e 4-6), mesma
+// convenção do split de 4 dias (upper/lower A-B-A-B repetido).
+function pushPullLegsBlock(startDay: number): DesignedSlotSpec[] {
+  const push: DesignedSlotSpec[] = [
+    { day_number: startDay, order_within_day: 1, role: 'composto_principal', target_muscle_groups: ['pectoralis_major', 'triceps_brachii', 'deltoids'] },
+    { day_number: startDay, order_within_day: 2, role: 'composto_principal', target_muscle_groups: ['deltoids', 'triceps_brachii'] },
+    { day_number: startDay, order_within_day: 3, role: 'composto_secundario', target_muscle_groups: ['pectoralis_major', 'deltoids'] },
+    { day_number: startDay, order_within_day: 4, role: 'isolamento', target_muscle_groups: ['triceps_brachii'] },
+    { day_number: startDay, order_within_day: 5, role: 'isolamento', target_muscle_groups: ['deltoids'] },
+  ]
+  const pull: DesignedSlotSpec[] = [
+    { day_number: startDay + 1, order_within_day: 1, role: 'composto_principal', target_muscle_groups: ['back', 'biceps_brachii', 'rhomboids'] },
+    { day_number: startDay + 1, order_within_day: 2, role: 'composto_principal', target_muscle_groups: ['back', 'latissimus_dorsi', 'biceps_brachii'] },
+    { day_number: startDay + 1, order_within_day: 3, role: 'composto_secundario', target_muscle_groups: ['back', 'trapezius'] },
+    { day_number: startDay + 1, order_within_day: 4, role: 'isolamento', target_muscle_groups: ['biceps_brachii'] },
+  ]
+  const legs: DesignedSlotSpec[] = [
+    { day_number: startDay + 2, order_within_day: 1, role: 'composto_principal', target_muscle_groups: ['quadriceps', 'glutes', 'hamstrings'] },
+    { day_number: startDay + 2, order_within_day: 2, role: 'composto_principal', target_muscle_groups: ['quadriceps', 'glutes', 'hamstrings'] },
+    { day_number: startDay + 2, order_within_day: 3, role: 'isolamento', target_muscle_groups: ['quadriceps'] },
+    { day_number: startDay + 2, order_within_day: 4, role: 'isolamento', target_muscle_groups: ['hamstrings'] },
+    { day_number: startDay + 2, order_within_day: 5, role: 'isolamento', target_muscle_groups: ['calves'] },
+    { day_number: startDay + 2, order_within_day: 6, role: 'core', target_muscle_groups: ['rectus_abdominis', 'core'] },
+  ]
+  return [...push, ...pull, ...legs]
+}
+
+// ─── Split de 6 dias — push/pull/legs ×2 (DESENHO NOVO, pendente de validação) ─
+const SPLIT_6_DAYS: DesignedSlotSpec[] = [...pushPullLegsBlock(1), ...pushPullLegsBlock(4)]
+
+// ─── Dia 7 — leve/mobilidade OBRIGATÓRIO (DESENHO NOVO, sem dado observado) ──
+// Decisão explícita da Taina: "7 dias" no onboarding NUNCA significa 7 dias de
+// treino pesado sem descanso — o 7º dia é sempre mobilidade/recuperação
+// ativa, full body, baixa intensidade. Papel leve_mobilidade não existe em
+// nenhum molde real hoje — reps/rest daqui (DEFAULT_REPS_BY_ROLE,
+// restSecondsForRole) são proposta, não curadoria, pendente de validação do
+// personal trainer antes de qualquer split de 7 dias ir pro piloto.
+const LIGHT_MOBILITY_DAY: DesignedSlotSpec[] = [
+  { day_number: 7, order_within_day: 1, role: 'leve_mobilidade', target_muscle_groups: ['back', 'flexibility_mobility'] },
+  { day_number: 7, order_within_day: 2, role: 'leve_mobilidade', target_muscle_groups: ['hip_flexors', 'glutes', 'flexibility_mobility'] },
+  { day_number: 7, order_within_day: 3, role: 'leve_mobilidade', target_muscle_groups: ['hamstrings', 'calves', 'flexibility_mobility'] },
+  { day_number: 7, order_within_day: 4, role: 'leve_mobilidade', target_muscle_groups: ['shoulders', 'flexibility_mobility'] },
+  { day_number: 7, order_within_day: 5, role: 'leve_mobilidade', target_muscle_groups: ['core', 'flexibility_mobility'] },
+]
+
+// ─── Split de 7 dias — push/pull/legs ×2 (6 dias reais) + 1 dia leve ────────
+const SPLIT_7_DAYS: DesignedSlotSpec[] = [...SPLIT_6_DAYS, ...LIGHT_MOBILITY_DAY]
+
+// Busca as linhas reais de um molde (training_plan_exercises) já com nome do
+// exercício (pra classificar o papel) e muscle_groups_ids (pro slot ter
+// target_muscle_groups, igual antes) — separado do handler principal porque
+// dia 5 precisa chamar isso e reaproveitar só os dias 1/2 (ver buildSplitSlots).
+async function fetchMoldeSlotsWithMuscles(supabase: any, trainingPlanId: string): Promise<Array<{
+  day_number: number
+  order_within_day: number
+  exercise_name_ptbr: string
+  sets: number
+  reps: number
+  cadence_eccentric: number
+  cadence_isometric_bottom: number
+  cadence_concentric: number
+  cadence_isometric_top: number
+  target_muscle_groups: string[]
+}>> {
+  const { data: rows, error } = await supabase
+    .from('training_plan_exercises')
+    .select('day_number, order_within_day, sets, reps, exercise_id, cadence_eccentric, cadence_isometric_bottom, cadence_concentric, cadence_isometric_top')
+    .eq('training_plan_id', trainingPlanId)
+    .order('day_number', { ascending: true })
+    .order('order_within_day', { ascending: true })
+  if (error || !rows || rows.length === 0) throw new Error('Molde not found: ' + trainingPlanId)
+
+  const exerciseIds = [...new Set(rows.map((r: any) => r.exercise_id))]
+  const { data: exercisesData, error: exError } = await supabase
+    .from('exercises')
+    .select('exercise_id, name_ptbr, muscle_groups_ids')
+    .in('exercise_id', exerciseIds)
+  if (exError) throw new Error('Molde exercises lookup failed: ' + exError.message)
+
+  const byId = new Map<string, { name_ptbr: string; muscle_groups_ids: string[] }>(
+    (exercisesData ?? []).map((e: any) => [e.exercise_id, { name_ptbr: e.name_ptbr, muscle_groups_ids: e.muscle_groups_ids ?? [] }])
+  )
+
+  return rows.map((r: any) => {
+    const ex = byId.get(r.exercise_id)
+    return {
+      day_number: r.day_number,
+      order_within_day: r.order_within_day,
+      exercise_name_ptbr: ex?.name_ptbr ?? '',
+      sets: r.sets,
+      reps: r.reps,
+      cadence_eccentric: r.cadence_eccentric,
+      cadence_isometric_bottom: r.cadence_isometric_bottom,
+      cadence_concentric: r.cadence_concentric,
+      cadence_isometric_top: r.cadence_isometric_top,
+      target_muscle_groups: ex?.muscle_groups_ids ?? [],
+    }
+  })
+}
+
+// ─── Monta o esqueleto de slots pro (objetivo × dias) ───────────────────────
+// Reps SEMPRE preservado por-goal do molde de origem quando existe (dias
+// 3/4/5) — ex: hypertrophy 3 dias usa a reps curada de tr_203 pro mesmo slot,
+// não a de tr_202, mesmo os dois compartilhando o mesmo esqueleto de
+// dia/ordem/papel. Só sets e rest vêm da matriz de papéis, uniforme pros 4
+// objetivos.
+async function buildSplitSlots(
+  supabase: any,
+  goal: string,
+  requestedDays: number,
+): Promise<{ moldeDaysCount: number; slots: SplitSlotDraft[] }> {
+  const days = nearestSupportedDays(requestedDays)
+  const byGoal = MOLDE_TRAINING_PLAN_BY_GOAL_AND_DAYS[goal] ?? MOLDE_TRAINING_PLAN_BY_GOAL_AND_DAYS.health_routine
+
+  if (days === 3 || days === 4) {
+    const raw = await fetchMoldeSlotsWithMuscles(supabase, byGoal[days as 3 | 4])
+    const slots: SplitSlotDraft[] = raw.map(r => ({
+      day_number: r.day_number,
+      order_within_day: r.order_within_day,
+      role: roleForMoldeSlot(r.exercise_name_ptbr, r.sets),
+      reps: r.reps,
+      target_muscle_groups: r.target_muscle_groups,
+      cadence_eccentric: r.cadence_eccentric,
+      cadence_isometric_bottom: r.cadence_isometric_bottom,
+      cadence_concentric: r.cadence_concentric,
+      cadence_isometric_top: r.cadence_isometric_top,
+    }))
+    return { moldeDaysCount: days, slots }
+  }
+
+  if (days === 5) {
+    // REFORMULAÇÃO: U-L-U-L-U repetindo os dias 1(U)/2(L) do molde de 4 dias
+    // — ver comentário do bloco SPLITS acima pro porquê do dia 3 antigo
+    // (tr_206/tr_207) ter sido descartado.
+    const raw = await fetchMoldeSlotsWithMuscles(supabase, byGoal[4])
+    const upperDay = raw.filter(r => r.day_number === 1)
+    const lowerDay = raw.filter(r => r.day_number === 2)
+    const sourceForDay = [upperDay, lowerDay, upperDay, lowerDay, upperDay]
+    const slots: SplitSlotDraft[] = []
+    sourceForDay.forEach((daySource, idx) => {
+      const dayNumber = idx + 1
+      for (const r of daySource) {
+        slots.push({
+          day_number: dayNumber,
+          order_within_day: r.order_within_day,
+          role: roleForMoldeSlot(r.exercise_name_ptbr, r.sets),
+          reps: r.reps,
+          target_muscle_groups: r.target_muscle_groups,
+          cadence_eccentric: r.cadence_eccentric,
+          cadence_isometric_bottom: r.cadence_isometric_bottom,
+          cadence_concentric: r.cadence_concentric,
+          cadence_isometric_top: r.cadence_isometric_top,
+        })
+      }
+    })
+    return { moldeDaysCount: 5, slots }
+  }
+
+  // 2, 6, 7 dias — desenho novo, sem exercício-fonte real (ver SPLIT_2_DAYS /
+  // SPLIT_6_DAYS / SPLIT_7_DAYS). Reps vem do default por papel; cadência usa
+  // o default fixo — não há linha de molde pra herdar nenhum dos dois.
+  const designed = days === 2 ? SPLIT_2_DAYS : days === 6 ? SPLIT_6_DAYS : SPLIT_7_DAYS
+  const slots: SplitSlotDraft[] = designed.map(spec => ({
+    day_number: spec.day_number,
+    order_within_day: spec.order_within_day,
+    role: spec.role,
+    reps: DEFAULT_REPS_BY_ROLE[spec.role],
+    target_muscle_groups: spec.target_muscle_groups,
+    ...DEFAULT_CADENCE,
+  }))
+  return { moldeDaysCount: days, slots }
 }
 
 // ─── REGRA 1: duração → nº de slots por dia ────────────────────────────────────
@@ -180,18 +439,23 @@ function cutSlotsForDuration<
   return { survivors, anyDayTrimmed }
 }
 
-// ─── REGRA 2 (parte 2 — reforço): +1 set nos slots focados sobreviventes. Só
-// entra pra conditioning/health_routine (matriz genérica) — pra
-// weight_loss/hypertrophy (molde curado), foco já atuou como proteção no corte
-// acima e NÃO soma set: mesma razão do ex_098 na REGRA 0 (nível também não
-// mexe no molde curado). Sets curados não levam patches acumuláveis de nível
-// nem de foco — só a proteção contra corte conta como reforço nesses casos.
+// ─── REGRA 2 (parte 2 — reforço): +1 set nos slots focados sobreviventes.
+// DECISÃO desta reformulação (não coberta explicitamente por nenhuma
+// instrução da Taina — sinalizar se for indesejado): agora que a matriz de
+// papéis é a curadoria ÚNICA de sets pra TODOS os objetivos (não só
+// weight_loss/hypertrophy como antes), a proteção contra patch se estende
+// pros splits com fonte real de molde (3/4/5 dias) igual pra qualquer
+// objetivo — foco já atuou como proteção no corte acima (REGRA 2 parte 1) e
+// não soma set em cima disso. Isso MUDA o comportamento antigo de
+// conditioning/health_routine nos dias 3/4/5 (eles tinham bônus antes, pela
+// matriz genérica achatada). Splits desenhados do zero (2/6/7 dias) não têm
+// essa curadoria pra proteger, então o reforço continua valendo neles.
 function applyFocusBonus<T extends { sets: number; target_muscle_groups: string[] }>(
   slots: T[],
-  goal: string,
+  moldeDaysCount: number,
   focusMuscleGroups: string[],
 ): T[] {
-  if (GOALS_WITH_DEDICATED_MOLDE.has(goal) || focusMuscleGroups.length === 0) return slots
+  if (REAL_MOLDE_DAYS.has(moldeDaysCount) || focusMuscleGroups.length === 0) return slots
   return slots.map(slot =>
     slot.target_muscle_groups.some(m => focusMuscleGroups.includes(m)) ? { ...slot, sets: slot.sets + 1 } : slot,
   )
@@ -502,55 +766,30 @@ serve(async (req) => {
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // ── MOLDE: esqueleto de dias vindo de um Original de academia (REGRA 0) ──
-    const { moldeDays: moldeDaysCount, moldeTrainingPlanId } = moldeForGoal(primaryGoal, requestedDays)
+    // ── SPLIT: esqueleto de dias × papéis de slot (REGRA 0) ──────────────────
+    const { moldeDaysCount, slots: splitSlotsDraft } = await buildSplitSlots(supabase, primaryGoal, requestedDays)
 
-    const { data: moldeSlotsRaw, error: moldeError } = await supabase
-      .from('training_plan_exercises')
-      .select('day_number, order_within_day, sets, reps, rest_seconds, exercise_id, cadence_eccentric, cadence_isometric_bottom, cadence_concentric, cadence_isometric_top')
-      .eq('training_plan_id', moldeTrainingPlanId)
-      .order('day_number', { ascending: true })
-      .order('order_within_day', { ascending: true })
-    if (moldeError || !moldeSlotsRaw || moldeSlotsRaw.length === 0) throw new Error('Molde not found: ' + moldeTrainingPlanId)
-
-    const moldeExerciseIds = [...new Set(moldeSlotsRaw.map((s: any) => s.exercise_id))]
-    const { data: moldeExercises, error: moldeExError } = await supabase
-      .from('exercises')
-      .select('exercise_id, muscle_groups_ids')
-      .in('exercise_id', moldeExerciseIds)
-    if (moldeExError) throw new Error('Molde exercises lookup failed: ' + moldeExError.message)
-
-    const moldeMuscleGroupsById = new Map<string, string[]>(
-      (moldeExercises ?? []).map((e: any) => [e.exercise_id, e.muscle_groups_ids ?? []])
-    )
-
-    const slots = moldeSlotsRaw.map((s: any) => {
-      const { sets, reps, rest_seconds } = setsRepsRestForSlot(primaryGoal, levelSlug, {
-        sets: s.sets,
-        reps: s.reps,
-        rest_seconds: s.rest_seconds,
-      })
-      return {
-        day_number: s.day_number,
-        order_within_day: s.order_within_day,
-        sets,
-        reps,
-        rest_seconds,
-        cadence_eccentric: s.cadence_eccentric,
-        cadence_isometric_bottom: s.cadence_isometric_bottom,
-        cadence_concentric: s.cadence_concentric,
-        cadence_isometric_top: s.cadence_isometric_top,
-        target_muscle_groups: moldeMuscleGroupsById.get(s.exercise_id) ?? [],
-      }
-    })
+    const slots = splitSlotsDraft.map(s => ({
+      day_number: s.day_number,
+      order_within_day: s.order_within_day,
+      sets: SETS_BY_ROLE[s.role],
+      reps: s.reps,
+      rest_seconds: restSecondsForRole(s.role, primaryGoal),
+      cadence_eccentric: s.cadence_eccentric,
+      cadence_isometric_bottom: s.cadence_isometric_bottom,
+      cadence_concentric: s.cadence_concentric,
+      cadence_isometric_top: s.cadence_isometric_top,
+      target_muscle_groups: s.target_muscle_groups,
+    }))
 
     // ── REGRA 1: corta slots por duração ANTES de escolher exercício — não faz
     // sentido montar candidatos pra um slot que vai ser cortado. REGRA 2 entra
     // aqui como proteção (imunidade relativa no corte) e depois como reforço
-    // (+1 set nos focados sobreviventes, só onde a matriz genérica rege).
+    // (+1 set nos focados sobreviventes, só nos splits sem curadoria real —
+    // ver comentário de applyFocusBonus).
     const targetSlots = targetSlotsPerDay(trainingDuration)
     const { survivors: slotsAfterDurationCut, anyDayTrimmed } = cutSlotsForDuration(slots, targetSlots, focusMuscleGroupSlugs)
-    const focusedSlots = applyFocusBonus(slotsAfterDurationCut, primaryGoal, focusMuscleGroupSlugs)
+    const focusedSlots = applyFocusBonus(slotsAfterDurationCut, moldeDaysCount, focusMuscleGroupSlugs)
 
     // ── CANDIDATOS POR SLOT (base do determinístico E do que a IA vê) ────────
     // Cada slot ganha sua lista de candidatos já ranqueada e cortada — a mesma
