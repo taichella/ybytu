@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { Link, Navigate } from 'react-router-dom';
+import { authService } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ForgotPassword() {
   const [theme, setTheme] = useState('dark');
@@ -9,9 +10,15 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const { user } = useAuth();
+
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
@@ -20,16 +27,13 @@ export default function ForgotPassword() {
     setLoading(true);
     setError(null);
 
-    // O redirectTo aponta para o link onde o usuário definirá a nova senha
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-
-    if (resetError) {
-      setError(resetError.message);
-      setLoading(false);
-    } else {
+    try {
+      await authService.resetPassword(email);
       setSent(true);
+    } catch (resetError) {
+      console.error(resetError);
+      setError(resetError.message);
+    } finally {
       setLoading(false);
     }
   };
