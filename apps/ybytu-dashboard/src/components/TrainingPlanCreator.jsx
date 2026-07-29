@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { generateTrainingPlan } from '../services/aiService';
 
 export default function TrainingPlanCreator() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function TrainingPlanCreator() {
   const [mode, setMode] = useState('card');
   const [day, setDay] = useState(0);
   const [settings, setSettings] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // ESTADO DOS EXERCÍCIOS DA FICHA
   const [blocks, setBlocks] = useState([
@@ -22,6 +24,29 @@ export default function TrainingPlanCreator() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const toggleSettings = () => setSettings(prev => !prev);
+
+  const handleGenerateAI = async () => {
+    setIsGenerating(true);
+    try {
+      const payload = {
+        goal: 'Hipertrofia',
+        level: 'Intermediário',
+        daysPerWeek: 4,
+        duration: '12 Semanas'
+      };
+
+      const response = await generateTrainingPlan(payload);
+
+      if (response && response.blocks) {
+        setBlocks(response.blocks);
+      }
+    } catch (error) {
+      console.error('Erro ao gerar plano:', error);
+      alert('Houve um erro ao gerar o plano com IA.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const segStyle = (isActive) => ({
     border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: 800, padding: '7px 16px', borderRadius: '7px', whiteSpace: 'nowrap',
@@ -99,6 +124,9 @@ export default function TrainingPlanCreator() {
           </button>
           <button onClick={toggleSettings} style={{ display: 'flex', alignItems: 'center', gap: '7px', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', background: settings ? 'var(--brand-soft)' : 'var(--surface)', color: settings ? 'var(--brand)' : 'var(--text)', border: `1px solid ${settings ? 'rgba(245,95,22,.4)' : 'var(--border)'}` }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Configurações
+          </button>
+          <button disabled={isGenerating} onClick={handleGenerateAI} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'rgba(124,58,237,.1)', color: '#7c3aed', border: '1px solid rgba(124,58,237,.25)', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: isGenerating ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v2M5.6 5.6l1.4 1.4M3 12h2M5.6 18.4l1.4-1.4M12 19v2M17 12h2M18.4 5.6 17 7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path></svg> {isGenerating ? 'Gerando...' : 'Gerar com IA'}
           </button>
           <button onClick={() => navigate('/trainings')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg> Publicar
