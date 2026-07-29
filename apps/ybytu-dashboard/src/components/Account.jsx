@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function Account() {
   const [theme, setTheme] = useState('dark');
-  const [tab, setTab] = useState('perfil'); // 'perfil', 'seguranca', 'pref', 'equipe'
+  const [tab, setTab] = useState('perfil'); // 'perfil', 'assinatura', 'equipe'
   const [toast, setToast] = useState(false);
   const [prefs, setPrefs] = useState([true, true, false, true]);
   
@@ -26,45 +26,27 @@ export default function Account() {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => setToast(false), 3200);
   };
-
   const hideToast = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
     setToast(false);
+    if (timerRef.current) clearTimeout(timerRef.current);
   };
 
-  const togglePref = (index) => {
-    const newPrefs = [...prefs];
-    newPrefs[index] = !newPrefs[index];
-    setPrefs(newPrefs);
-  };
-
-  const tabStyle = (isActive) => ({
-    border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px', fontWeight: 700, padding: '11px 16px', whiteSpace: 'nowrap',
-    borderBottom: `2px solid ${isActive ? 'var(--brand)' : 'transparent'}`,
-    color: isActive ? 'var(--brand)' : 'var(--muted)'
-  });
-
-  const trackStyle = (isOn) => ({
-    flexShrink: 0, width: '42px', height: '24px', borderRadius: '999px', position: 'relative', transition: 'background .2s',
-    background: isOn ? 'var(--brand)' : 'var(--surface-2)',
-    border: `1px solid ${isOn ? 'var(--brand)' : 'var(--border)'}`
-  });
-
-  const thumbStyle = (isOn) => ({
-    position: 'absolute', top: '2px', left: '2px', width: '18px', height: '18px', borderRadius: '50%', background: '#fff', transition: 'transform .2s',
-    transform: `translateX(${isOn ? '18px' : '0'})`, boxShadow: '0 1px 3px rgba(0,0,0,.25)'
-  });
-
-  // Dados Mocados[cite: 17]
-  const sessions = [
-    { id: 1, icon: '💻', device: 'MacBook Pro · Chrome', where: 'São Paulo, BR · 192.168.0.1', current: true, canRevoke: false },
-    { id: 2, icon: '📱', device: 'iPhone 15 · App', where: 'São Paulo, BR · há 3 horas', current: false, canRevoke: true },
+  const tabs = [
+    { id: 'perfil', label: 'Meu Perfil' },
+    { id: 'assinatura', label: 'Assinatura & Faturamento' },
+    { id: 'equipe', label: 'Equipe' }
   ];
 
-  const prefDefs = [
-    { title: 'Novos usuários', desc: 'Receba um e-mail quando um novo usuário se cadastrar.' },
-    { title: 'Falhas de pagamento', desc: 'Avisos sobre cobranças recusadas ou estornos.' },
-    { title: 'Resumo semanal', desc: 'Relatório consolidado de métricas toda segunda.' },
+  const togglePref = (i) => setPrefs(prev => {
+    const next = [...prev];
+    next[i] = !next[i];
+    return next;
+  });
+
+  const prefsList = [
+    { title: 'Novas inscrições', desc: 'Notifique-me quando um novo aluno entrar.' },
+    { title: 'Planos vencendo', desc: 'Alertas de alunos que precisam renovar.' },
+    { title: 'Feedback de treino', desc: 'Quando o aluno completar um treino e avaliar.' },
     { title: 'Atualizações do produto', desc: 'Novidades e mudanças na plataforma Ybytu.' },
   ];
 
@@ -76,7 +58,7 @@ export default function Account() {
   ];
 
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
       <header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}><span>Configurações</span><span>/</span><span style={{ color: 'var(--text)' }}>Minha conta</span></div>
@@ -86,124 +68,117 @@ export default function Account() {
           <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          <button onClick={handleSave} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8M7 3v5h8"></path></svg> Salvar alterações
-          </button>
         </div>
       </header>
 
-      <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
-        <div style={{ maxWidth: '980px', margin: '0 auto' }}>
+      {/* TABS HEADER */}
+      <div style={{ flexShrink: 0, borderBottom: '1px solid var(--border)', padding: '0 28px', display: 'flex', gap: '20px' }}>
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            style={{
+              background: 'none', border: 'none', padding: '16px 0',
+              fontSize: '13px', fontWeight: 800, fontFamily: 'inherit',
+              color: tab === t.id ? 'var(--brand)' : 'var(--muted)',
+              borderBottom: tab === t.id ? '3px solid var(--brand)' : '3px solid transparent',
+              cursor: 'pointer'
+            }}>
+            {t.label}
+          </button>
+        ))}
+      </div>
 
-          {/* Profile Hero[cite: 17] */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px', marginBottom: '22px' }}>
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <div style={{ width: '76px', height: '76px', borderRadius: '20px', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '28px', color: '#fff' }}>A</div>
-              <button title="Trocar foto" style={{ position: 'absolute', bottom: '-4px', right: '-4px', width: '28px', height: '28px', borderRadius: '50%', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"></path><circle cx="12" cy="13" r="3"></circle></svg>
-              </button>
-            </div>
-            <div style={{ flex: 1, minWidth: '200px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 900 }}>Admin Principal</h1>
-                <span style={{ display: 'inline-flex', padding: '3px 10px', borderRadius: '7px', fontSize: '11px', fontWeight: 800, background: 'rgba(245,95,22,.14)', color: '#F55F16', textTransform: 'uppercase' }}>Super Admin</span>
-              </div>
-              <p style={{ margin: '5px 0 0', fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>admin Ybytu · Acesso total · Membro desde jan 2025</p>
-            </div>
-          </div>
-
-          {/* TABS[cite: 17] */}
-          <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--border)', marginBottom: '22px', overflowX: 'auto' }}>
-            <button onClick={() => setTab('perfil')} style={tabStyle(tab === 'perfil')}>Perfil</button>
-            <button onClick={() => setTab('seguranca')} style={tabStyle(tab === 'seguranca')}>Segurança</button>
-            <button onClick={() => setTab('pref')} style={tabStyle(tab === 'pref')}>Preferências</button>
-            <button onClick={() => setTab('equipe')} style={tabStyle(tab === 'equipe')}>Equipe & permissões</button>
-          </div>
+      <main style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
+        <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
 
           {/* PERFIL */}
           {tab === 'perfil' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            <>
+              {/* Card Dados Pessoais */}
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px' }}>
-                <h3 style={{ margin: '0 0 18px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Informações Pessoais</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Nome</label><input type="text" defaultValue="Admin" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} /></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Sobrenome</label><input type="text" defaultValue="Principal" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} /></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>E-mail</label><input type="text" defaultValue="admin@ybytu.com" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} /></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Telefone</label><input type="text" defaultValue="+55 11 91234-5678" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} /></div>
-                  <div style={{ gridColumn: '1 / -1' }}><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Cargo / Função</label><input type="text" defaultValue="Administrador da plataforma" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} /></div>
-                </div>
-              </section>
+                <h3 style={{ margin: '0 0 20px', fontSize: '15px', fontWeight: 900 }}>Dados Pessoais</h3>
 
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px' }}>
-                <h3 style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Idioma & Região</h3>
-                <p style={{ margin: '0 0 18px', fontSize: '13px', color: 'var(--muted)' }}>Afeta apenas o painel administrativo.</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Idioma do painel</label><select style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>🇧🇷 Português (Brasil)</option><option>🇬🇧 English</option><option>🇫🇷 Français</option></select></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Fuso horário</label><select style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>(GMT-3) São Paulo</option><option>(GMT-5) Nova York</option><option>(GMT+1) Paris</option></select></div>
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* SEGURANÇA */}
-          {tab === 'seguranca' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px' }}>
-                <h3 style={{ margin: '0 0 18px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Alterar Senha</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '440px' }}>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Senha atual</label><input type="password" defaultValue="********" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} /></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Nova senha</label><input type="password" placeholder="Mínimo 8 caracteres" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} /></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Confirmar nova senha</label><input type="password" placeholder="Repita a nova senha" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} /></div>
-                  <button onClick={handleSave} style={{ alignSelf: 'flex-start', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '11px 20px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Atualizar senha</button>
-                </div>
-              </section>
-
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-                  <div style={{ flex: 1, minWidth: '240px' }}>
-                    <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Autenticação em 2 fatores</h3>
-                    <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--muted)', lineHeight: 1.5 }}>Adicione uma camada extra de segurança exigindo um código além da senha.</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px' }}>
+                  <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', fontWeight: 900 }}>
+                    A
                   </div>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 800, background: 'rgba(22,163,74,.12)', color: '#16a34a' }}>
-                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }}></span> Ativo
-                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <button style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text)', padding: '8px 14px', borderRadius: '9px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Trocar foto</button>
+                      <button style={{ background: 'none', border: '1px solid transparent', color: '#ef4444', padding: '8px 14px', borderRadius: '9px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Remover</button>
+                    </div>
+                    <p style={{ margin: '8px 0 0', fontSize: '11px', color: 'var(--muted)' }}>Formatos suportados: JPG, PNG ou GIF (máx. 2MB)</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>Nome Completo</label>
+                    <input type="text" defaultValue="Admin Principal" style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>E-mail</label>
+                    <input type="text" defaultValue="admin@ybytu.app" style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />
+                  </div>
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>Bio Curta</label>
+                    <textarea defaultValue="Treinador especialista em hipertrofia e performance. Criador da metodologia Ybytu." rows="3" style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 500, outline: 'none', resize: 'vertical' }}></textarea>
+                  </div>
+                </div>
+                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+                  <button onClick={handleSave} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 20px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>Salvar Alterações</button>
                 </div>
               </section>
 
+              {/* Card Notificações */}
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
-                <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}><h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Sessões Ativas</h3></div>
-                <div>
-                  {sessions.map(s => (
-                    <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '15px 24px', borderBottom: '1px solid var(--border)' }}>
-                      <span style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'var(--surface-2)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{s.icon}</span>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ margin: 0, fontSize: '14px', fontWeight: 700 }}>{s.device} {s.current && <span style={{ fontSize: '11px', fontWeight: 800, color: '#16a34a', marginLeft: '6px' }}>· esta sessão</span>}</p>
-                        <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>{s.where}</p>
+                <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+                  <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Preferências de Notificação</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Escolha o que você quer receber no seu e-mail.</p>
+                </div>
+                <div style={{ padding: '8px 24px' }}>
+                  {prefsList.map((p, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0', borderBottom: i < prefsList.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                      <div>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: 700 }}>{p.title}</p>
+                        <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>{p.desc}</p>
                       </div>
-                      {s.canRevoke && (
-                        <button style={{ fontSize: '12px', fontWeight: 700, color: '#ef4444', background: 'none', border: '1px solid var(--border)', borderRadius: '8px', padding: '7px 12px', cursor: 'pointer', fontFamily: 'inherit' }}>Encerrar</button>
-                      )}
+                      <button onClick={() => togglePref(i)} style={{ width: '44px', height: '24px', borderRadius: '12px', background: prefs[i] ? 'var(--brand)' : 'var(--surface-2)', border: 'none', position: 'relative', cursor: 'pointer', transition: 'all .2s' }}>
+                        <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#fff', position: 'absolute', top: '3px', left: prefs[i] ? '23px' : '3px', transition: 'all .2s', boxShadow: '0 2px 5px rgba(0,0,0,.2)' }}></div>
+                      </button>
                     </div>
                   ))}
                 </div>
               </section>
-            </div>
+            </>
           )}
 
-          {/* PREFERÊNCIAS */}
-          {tab === 'pref' && (
-            <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
-              <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}><h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Notificações por E-mail</h3></div>
-              <div>
-                {prefDefs.map((p, i) => (
-                  <div key={i} className="yb-hover-row" onClick={() => togglePref(i)} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '16px 24px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ margin: 0, fontSize: '14px', fontWeight: 700 }}>{p.title}</p>
-                      <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>{p.desc}</p>
-                    </div>
-                    <span style={trackStyle(prefs[i])}><span style={thumbStyle(prefs[i])}></span></span>
+          {/* ASSINATURA */}
+          {tab === 'assinatura' && (
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '6px', background: 'rgba(245,95,22,.1)', color: 'var(--brand)', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', marginBottom: '8px' }}>Plano Ativo</span>
+                  <h3 style={{ margin: 0, fontSize: '22px', fontWeight: 900 }}>Ybytu Pro</h3>
+                  <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--muted)' }}>Até 100 alunos · Relatórios Avançados · IA Ilimitada</p>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ margin: 0, fontSize: '24px', fontWeight: 900 }}>R$ 149<span style={{ fontSize: '14px', color: 'var(--muted)' }}>/mês</span></p>
+                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Próxima cobrança em 15/09/2025</p>
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '24px' }}>
+                <h3 style={{ margin: '0 0 20px', fontSize: '15px', fontWeight: 900 }}>Método de Pagamento</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', border: '1px solid var(--border)', borderRadius: '12px', background: 'var(--field)' }}>
+                  <div style={{ width: '48px', height: '32px', borderRadius: '6px', background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '12px', color: '#3b82f6' }}>VISA</div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: 0, fontSize: '14px', fontWeight: 700 }}>Visa terminando em 4242</p>
+                    <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Expira em 12/28</p>
                   </div>
-                ))}
+                  <button style={{ background: 'var(--surface-2)', border: 'none', padding: '8px 14px', borderRadius: '9px', fontSize: '12px', fontWeight: 700, color: 'var(--text)', cursor: 'pointer', fontFamily: 'inherit' }}>Atualizar</button>
+                </div>
               </div>
             </section>
           )}
@@ -237,21 +212,19 @@ export default function Account() {
 
         </div>
       </main>
+
+      {/* SNACKBAR (TOAST) */}
+      {toast && (
+        <div style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', zIndex: 80, display: 'flex', alignItems: 'center', gap: '11px', background: 'var(--text)', color: 'var(--bg)', padding: '13px 18px', borderRadius: '13px', boxShadow: '0 12px 40px rgba(0,0,0,.28)', animation: 'ybToastIn .25s ease-out both' }}>
+          <span style={{ display: 'inline-flex', width: '24px', height: '24px', borderRadius: '50%', background: '#16a34a', color: '#fff', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+          </span>
+          <span style={{ fontSize: '14px', fontWeight: 700 }}>Alterações salvas com sucesso</span>
+          <button onClick={hideToast} style={{ background: 'none', border: 'none', color: 'var(--bg)', opacity: .6, cursor: 'pointer', display: 'flex', padding: '2px', marginLeft: '6px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+      )}
     </div>
-
-    {/* SNACKBAR (TOAST)[cite: 17] */}
-    {toast && (
-      <div style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', zIndex: 80, display: 'flex', alignItems: 'center', gap: '11px', background: 'var(--text)', color: 'var(--bg)', padding: '13px 18px', borderRadius: '13px', boxShadow: '0 12px 40px rgba(0,0,0,.28)', animation: 'ybToastIn .25s ease-out both' }}>
-        <span style={{ display: 'inline-flex', width: '24px', height: '24px', borderRadius: '50%', background: '#16a34a', color: '#fff', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
-        </span>
-        <span style={{ fontSize: '14px', fontWeight: 700 }}>Alterações salvas com sucesso</span>
-        <button onClick={hideToast} style={{ background: 'none', border: 'none', color: 'var(--bg)', opacity: .6, cursor: 'pointer', display: 'flex', padding: '2px', marginLeft: '6px' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
-        </button>
-      </div>
-    )}
-
-  </>
   );
 }

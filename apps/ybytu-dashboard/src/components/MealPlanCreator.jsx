@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { generateMealPlan } from '../services/aiService';
 
 export default function MealPlanCreator() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export default function MealPlanCreator() {
   const [theme, setTheme] = useState('dark');
   const [day, setDay] = useState(0);
   const [settings, setSettings] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Lógica de Abas de Dia
   const dayLabels = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
@@ -48,6 +50,30 @@ export default function MealPlanCreator() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const toggleSettings = () => setSettings(prev => !prev);
+
+  const handleGenerateAI = async () => {
+    setIsGenerating(true);
+    try {
+      const payload = {
+        goal: 'Emagrecimento',
+        dailyCalories: 2000,
+        mealsPerDay: 5,
+        preference: 'Onívoro',
+        restrictions: ['Sem lactose']
+      };
+
+      const response = await generateMealPlan(payload);
+
+      if (response && response.slots) {
+        setSlots(response.slots);
+      }
+    } catch (error) {
+      console.error('Erro ao gerar plano:', error);
+      alert('Houve um erro ao gerar o plano com IA.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   // Manipulação de Refeições nos Slots
   const assignMealToEmptySlot = (meal) => {
@@ -301,8 +327,8 @@ export default function MealPlanCreator() {
           <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', width: '100%', padding: '11px', borderRadius: '11px', background: 'var(--surface-2)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', marginBottom: '10px' }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Duplicar para outro dia
           </button>
-          <button style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', width: '100%', padding: '11px', borderRadius: '11px', background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', color: '#7c3aed', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v2M5.6 5.6l1.4 1.4M3 12h2M5.6 18.4l1.4-1.4M12 19v2M17 12h2M18.4 5.6 17 7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path></svg> Preencher dia com IA
+          <button disabled={isGenerating} onClick={handleGenerateAI} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', width: '100%', padding: '11px', borderRadius: '11px', background: 'rgba(124,58,237,.1)', border: '1px solid rgba(124,58,237,.25)', color: '#7c3aed', fontSize: '13px', fontWeight: 800, cursor: isGenerating ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v2M5.6 5.6l1.4 1.4M3 12h2M5.6 18.4l1.4-1.4M12 19v2M17 12h2M18.4 5.6 17 7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path></svg> {isGenerating ? 'Gerando...' : 'Preencher dia com IA'}
           </button>
         </aside>
 
