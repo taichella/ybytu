@@ -24,6 +24,7 @@ import MealPlans from './components/MealPlans';
 import MealPlanCreator from './components/MealPlanCreator';
 import Account from './components/Account';
 import Tags from './components/Tags';
+import SharedPlan from './components/SharedPlan';
 
 function App() {
   return (
@@ -33,7 +34,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        
+        {/* Rota pública — link compartilhável do plano, fora do login */}
+        <Route path="/plano/:token" element={<SharedPlan />} />
+
         {/* Rotas protegidas pelo Layout */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
