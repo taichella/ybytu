@@ -107,9 +107,11 @@ export default function UserPlan({ payload }) {
           font-size: 14px;
           line-height: 1.62;
           padding: 20px 0;
+          width: 100%;
+          min-width: 0;
         }
         .doc { box-sizing:border-box; max-width:8.5in; margin:0 auto; background:var(--bg); padding:0 0 60px; box-shadow:0 18px 60px rgba(16,24,40,.16); }
-        .doc-frame { width:100%; border-collapse:collapse; }
+        .doc-frame { width:100%; border-collapse:collapse; table-layout:fixed; }
         .doc-frame td { padding:0; }
         .hdr-space, .ftr-space { display:none; }
 
@@ -146,7 +148,7 @@ export default function UserPlan({ payload }) {
         .pill.ok::before { content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
 
         /* ---------- program summary band ---------- */
-        .summary { margin:26px 52px 0; background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:8px 8px; display:grid; grid-template-columns:repeat(5,1fr); }
+        .summary { margin:26px 52px 0; background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:8px 8px; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); }
         .summary .cell { padding:14px 16px; position:relative; }
         .summary .cell + .cell::before { content:""; position:absolute; left:0; top:14px; bottom:14px; width:1px; background:var(--line); }
         .summary .ic { width:30px; height:30px; border-radius:9px; background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
@@ -161,9 +163,9 @@ export default function UserPlan({ payload }) {
         .sec-head .d { font-size:13px; color:var(--muted); font-weight:500; margin-top:3px; }
 
         .grid { display:grid; gap:14px; }
-        .g2 { grid-template-columns:1fr 1fr; }
-        .g3 { grid-template-columns:1fr 1fr 1fr; }
-        .g4 { grid-template-columns:repeat(4,1fr); }
+        .g2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        .g3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+        .g4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
 
         .card { background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:var(--shadow); }
         .card.tint { background:var(--panel); box-shadow:none; }
@@ -180,13 +182,13 @@ export default function UserPlan({ payload }) {
         .kv .v { font-weight:700; text-align:right; }
 
         /* preference card layout */
-        .pref-facts { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid var(--line-2); }
+        .pref-facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid var(--line-2); }
         .pref-facts .f .l2 { font-size:10px; font-weight:800; letter-spacing:.05em; color:var(--muted); text-transform:uppercase; }
         .pref-facts .f .v2 { font-size:15px; font-weight:800; margin-top:5px; letter-spacing:-.01em; }
         .pref-group + .pref-group { margin-top:16px; }
         .pref-group .lab { font-size:10.5px; font-weight:800; letter-spacing:.05em; color:var(--muted); text-transform:uppercase; margin-bottom:9px; }
 
-        .statline { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+        .statline { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
         .stat { background:var(--bg); border:1px solid var(--line); border-radius:15px; padding:16px; box-shadow:var(--shadow); }
         .stat .lab { font-size:10px; font-weight:800; letter-spacing:.05em; color:var(--muted); text-transform:uppercase; }
         .stat .num { font-size:26px; font-weight:900; margin-top:6px; line-height:1; letter-spacing:-.02em; }
@@ -277,6 +279,62 @@ export default function UserPlan({ payload }) {
         .toolbar { position:fixed; top:18px; right:18px; display:flex; gap:9px; z-index:50; }
         .toolbar button { font-family:inherit; font-size:13px; font-weight:800; border:none; border-radius:11px; padding:11px 17px; cursor:pointer; box-shadow:0 6px 18px rgba(245,95,22,.35); background:var(--brand); color:#fff; display:flex; align-items:center; gap:7px; }
 
+        /* ---------- mobile (screen only — não toca em @media print) ---------- */
+        @media (max-width: 680px) {
+          .user-plan-wrapper { padding: 0; }
+          .doc { box-shadow: none; }
+          .doc .body { padding: 0 16px; }
+
+          .toolbar { top: 10px; right: 10px; }
+          .toolbar button { padding: 9px 13px; font-size: 12px; }
+
+          .cover { padding: 24px 18px 60px; }
+          .cover .peak { width: 190px; }
+          .brandrow { flex-wrap: wrap; row-gap: 8px; }
+          .brandrow .tag { margin-left: 0; font-size: 9px; white-space: normal; max-width: 100%; letter-spacing: .04em; line-height: 1.4; }
+          .cover .eyebrow { margin-top: 28px; }
+          .cover h1 { font-size: 27px; }
+          .cover .sub { font-size: 14px; }
+
+          .float { margin: -40px 16px 0; flex-direction: column; }
+          .pcard, .card, .day-head, .meal-head, .diag, .chips { min-width: 0; }
+          .pcard .nm, .pcard > div { min-width: 0; }
+          .pcard .rw { min-width: 0; }
+          .pill { white-space: normal; max-width: 100%; }
+          .chip { max-width: 100%; white-space: normal; overflow-wrap: break-word; }
+          .mini { min-width: 0; flex-direction: row; justify-content: space-between; align-items: center; padding: 12px 16px; }
+
+          .summary { margin: 16px 16px 0; grid-template-columns: repeat(2, minmax(0,1fr)); }
+          .summary .cell::before { display: none !important; }
+          .summary .cell { padding: 12px; min-width: 0; }
+
+          .section { margin-top: 28px; }
+          .sec-head h2 { font-size: 18px; }
+
+          .statline,
+          .pref-facts,
+          .grid.g3,
+          .grid.g4 { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+          .grid.g2 { grid-template-columns: minmax(0,1fr) !important; }
+
+          .cal15 .cd { width: calc(33.333% - 5px); }
+
+          .macros { flex-direction: column; align-items: flex-start; gap: 14px; }
+
+          .day-head { flex-wrap: wrap; row-gap: 8px; padding: 13px 14px; }
+          .day-head .time { margin-left: 0; }
+
+          .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -1px; }
+          table.ex { min-width: 560px; }
+
+          .meal-head { flex-wrap: wrap; row-gap: 6px; }
+          .meal-head .kcal { margin-left: auto; }
+          .mleg { flex-wrap: wrap; row-gap: 6px; gap: 10px; }
+          .ing { flex-wrap: wrap; row-gap: 2px; }
+
+          .footer { flex-direction: column; align-items: flex-start; gap: 6px; padding: 16px 16px 0; }
+        }
+
         @page { size:letter; margin:0; }
         @media print {
           html, body { margin:0; padding:0; background:#fff !important; }
@@ -358,7 +416,7 @@ export default function UserPlan({ payload }) {
 
                   <div className="card">
                     <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Características Físicas</h3>
-                    <div className="pref-facts" style={{ gridTemplateColumns: 'repeat(2,1fr)' }}>
+                    <div className="pref-facts" style={{ gridTemplateColumns: 'repeat(2,minmax(0,1fr))' }}>
                       <div className="f"><p className="l2">Nome completo</p><p className="v2">{profile.name || '—'}</p></div>
                       <div className="f"><p className="l2">Gênero</p><p className="v2">{profile.gender_ptbr || '—'}</p></div>
                       <div className="f"><p className="l2">Nível de atividade</p><p className="v2">{profile.activity_level_ptbr || '—'}</p></div>
@@ -446,7 +504,7 @@ export default function UserPlan({ payload }) {
                     {cycleGoals.length > 0 && (
                       <div className="card tint" style={{ marginTop: '14px' }}>
                         <h3>Metas do Ciclo</h3>
-                        <div className="grid" style={{ gridTemplateColumns: `repeat(${Math.min(cycleGoals.length, 4)},1fr)` }}>
+                        <div className="grid" style={{ gridTemplateColumns: `repeat(${Math.min(cycleGoals.length, 4)},minmax(0,1fr))` }}>
                           {cycleGoals.map((g, i) => (
                             <div key={i}>
                               <p style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-.01em' }}>{g.expectation_ptbr}</p>
@@ -478,7 +536,7 @@ export default function UserPlan({ payload }) {
 
                       <div className="card" style={{ marginBottom: '16px' }}>
                         <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Preferências de Treino</h3>
-                        <div className="pref-facts" style={{ gridTemplateColumns: 'repeat(4,1fr)' }}>
+                        <div className="pref-facts" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))' }}>
                           <div className="f"><p className="l2">Ambiente</p><p className="v2">{training.environment_ptbr || '—'}</p></div>
                           <div className="f"><p className="l2">Dias/semana</p><p className="v2">{training.days_per_week} dias</p></div>
                           <div className="f"><p className="l2">Duração</p><p className="v2">{training.session_duration_min ? `${training.session_duration_min} min` : '—'}</p></div>
@@ -513,29 +571,31 @@ export default function UserPlan({ payload }) {
                             </div>
                             <span className="time"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> ~{day.estimated_minutes} min</span>
                           </div>
-                          <table className="ex">
-                            <thead><tr><th>Exercício</th><th className="c">Séries</th><th className="c">Reps</th><th className="c">Cadência*</th><th className="c">Descanso</th></tr></thead>
-                            <tbody>
-                              {day.exercises.map((ex) => (
-                                <tr key={ex.order}>
-                                  <td>
-                                    <div className="exname">
-                                      <span className="ltr">{ex.order}</span>
-                                      <div className="exbody">
-                                        <div>{ex.name_ptbr || '—'}</div>
-                                        {ex.instruction_ptbr && <div className="instr">{ex.instruction_ptbr}</div>}
-                                        {ex.video_url && <a className="vid" href={ex.video_url} target="_blank" rel="noreferrer">▶ Ver vídeo</a>}
+                          <div className="table-scroll">
+                            <table className="ex">
+                              <thead><tr><th>Exercício</th><th className="c">Séries</th><th className="c">Reps</th><th className="c">Cadência*</th><th className="c">Descanso</th></tr></thead>
+                              <tbody>
+                                {day.exercises.map((ex) => (
+                                  <tr key={ex.order}>
+                                    <td>
+                                      <div className="exname">
+                                        <span className="ltr">{ex.order}</span>
+                                        <div className="exbody">
+                                          <div>{ex.name_ptbr || '—'}</div>
+                                          {ex.instruction_ptbr && <div className="instr">{ex.instruction_ptbr}</div>}
+                                          {ex.video_url && <a className="vid" href={ex.video_url} target="_blank" rel="noreferrer">▶ Ver vídeo</a>}
+                                        </div>
                                       </div>
-                                    </div>
-                                  </td>
-                                  <td className="c mono">{ex.sets}</td>
-                                  <td className="c mono">{ex.reps_ptbr}</td>
-                                  <td className="c mono">{ex.cadence_ptbr}</td>
-                                  <td className="c mono">{ex.rest_seconds}s</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                                    </td>
+                                    <td className="c mono">{ex.sets}</td>
+                                    <td className="c mono">{ex.reps_ptbr}</td>
+                                    <td className="c mono">{ex.cadence_ptbr}</td>
+                                    <td className="c mono">{ex.rest_seconds}s</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       ))}
                     </>
