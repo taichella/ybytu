@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { mealPlanService } from '../services/mealPlanService';
+
 
 export default function MealPlanCreator() {
   const navigate = useNavigate();
@@ -24,19 +26,13 @@ export default function MealPlanCreator() {
     { id: 7, emoji: '🥤', name: 'Shake Proteico', kcal: 220, type: 'Lanche', prot: 25, carb: 18, fat: 4 },
   ];
 
-  // Estado Inicial dos "Slots" do dia. Se for edição, carregamos alguns dados[cite: 16]
-  const initialSlots = isNew ? [
+  // Estado Inicial dos "Slots" do dia vazios.
+  const initialSlots = [
     { id: 's1', icon: '☀️', slot: 'Café da manhã', time: '07:00', meal: null },
     { id: 's2', icon: '🍎', slot: 'Lanche da manhã', time: '10:00', meal: null },
     { id: 's3', icon: '🍽️', slot: 'Almoço', time: '13:00', meal: null },
     { id: 's4', icon: '🥛', slot: 'Lanche da tarde', time: '16:00', meal: null },
     { id: 's5', icon: '🌙', slot: 'Jantar', time: '20:00', meal: null }
-  ] : [
-    { id: 's1', icon: '☀️', slot: 'Café da manhã', time: '07:00', meal: library[0] },
-    { id: 's2', icon: '🍎', slot: 'Lanche da manhã', time: '10:00', meal: library[6] },
-    { id: 's3', icon: '🍽️', slot: 'Almoço', time: '13:00', meal: library[2] },
-    { id: 's4', icon: '🥛', slot: 'Lanche da tarde', time: '16:00', meal: null },
-    { id: 's5', icon: '🌙', slot: 'Jantar', time: '20:00', meal: library[3] }
   ];
 
   // (Nota: Em produção terias um array de slots POR DIA. Aqui estamos a usar apenas um para exemplificar o editor)
@@ -48,6 +44,22 @@ export default function MealPlanCreator() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const toggleSettings = () => setSettings(prev => !prev);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const planData = { name_ptbr: 'Novo Plano', user_id: 'dummy-id' };
+      await mealPlanService.create(planData);
+      navigate('/meal-plans');
+    } catch (err) {
+      alert('Erro: ' + err.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+
 
   // Manipulação de Refeições nos Slots
   const assignMealToEmptySlot = (meal) => {
@@ -133,8 +145,8 @@ export default function MealPlanCreator() {
           <button onClick={toggleSettings} style={{ display: 'flex', alignItems: 'center', gap: '7px', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', background: settings ? 'var(--brand-soft)' : 'var(--surface)', color: settings ? 'var(--brand)' : 'var(--text)', border: `1px solid ${settings ? 'rgba(245,95,22,.4)' : 'var(--border)'}` }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Configurações
           </button>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg> {isNew ? 'Criar plano' : 'Publicar'}
+          <button onClick={handleSave} disabled={isSaving} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg> {isSaving ? 'Salvando...' : (isNew ? 'Criar plano' : 'Publicar')}
           </button>
         </div>
       </header>

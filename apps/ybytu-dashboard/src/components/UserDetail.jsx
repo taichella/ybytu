@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserDetail() {
   const navigate = useNavigate();
-  const { id } = useParams();
+
   
   const [theme, setTheme] = useState('dark');
   const [tab, setTab] = useState('overview');
@@ -52,12 +52,13 @@ export default function UserDetail() {
       let col = [];
       for (let d = 0; d < days; d++){
         const seed = (w*7 + d) * 2654435761 % 100;
-        let lvl = 0;
-        if (d === 6 || d === 0) lvl = seed % 4 < 2 ? 0 : 1; 
-        else lvl = [0,1,2,3,2,3,1,3,2,3][seed % 10];
-        if (w < 2) lvl = Math.max(0, lvl - 1); 
+
+        let activityLevel;
+        if (d === 6 || d === 0) activityLevel = seed % 4 < 2 ? 0 : 1;
+        else activityLevel = [0,1,2,3,2,3,1,3,2,3][seed % 10];
+        if (w < 2) activityLevel = Math.max(0, activityLevel - 1);
         col.push(
-          <div key={`c${w}-${d}`} title={`Semana ${w+1}, dia ${d+1}`} style={{ width: 15, height: 15, borderRadius: 3, background: colors[lvl] }}></div>
+          <div key={`c${w}-${d}`} title={`Semana ${w+1}, dia ${d+1}`} style={{ width: 15, height: 15, borderRadius: 3, background: colors[activityLevel] }}></div>
         );
       }
       cells.push(<div key={`w${w}`} style={{ display:'flex', flexDirection:'column', gap:4 }}>{col}</div>);

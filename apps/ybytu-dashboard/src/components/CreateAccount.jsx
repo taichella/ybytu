@@ -39,7 +39,7 @@ export default function CreateAccount() {
     }
 
     // Registro no Supabase passando dados adicionais
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
