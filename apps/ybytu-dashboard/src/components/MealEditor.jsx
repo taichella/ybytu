@@ -1,3 +1,4 @@
+let globalCounter = 0;
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -45,7 +46,7 @@ export default function MealEditor() {
 
   // Funções de manipulação do construtor[cite: 14]
   const addFood = (food) => {
-    setItems([...items, { ...food, uniqueId: `it${Date.now()}`, qty: 100 }]);
+    setItems([...items, { ...food, uniqueId: `it${(++globalCounter)}`, qty: 100 }]);
   };
 
   const removeFood = (uniqueId) => {

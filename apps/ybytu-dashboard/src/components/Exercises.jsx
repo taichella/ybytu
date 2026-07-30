@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function Exercises() {
   const [theme, setTheme] = useState('dark');
   const [view, setView] = useState('table'); // 'table' ou 'grid'
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
