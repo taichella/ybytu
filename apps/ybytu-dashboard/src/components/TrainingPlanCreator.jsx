@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { whatsappService } from '../services/whatsappService';
 
 export default function TrainingPlanCreator() {
   const navigate = useNavigate();
   const { id } = useParams();
   
   const [theme, setTheme] = useState('dark');
+  const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false);
   const [mode, setMode] = useState('card');
   const [day, setDay] = useState(0);
   const [settings, setSettings] = useState(true);
@@ -99,6 +101,29 @@ export default function TrainingPlanCreator() {
           </button>
           <button onClick={toggleSettings} style={{ display: 'flex', alignItems: 'center', gap: '7px', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', background: settings ? 'var(--brand-soft)' : 'var(--surface)', color: settings ? 'var(--brand)' : 'var(--text)', border: `1px solid ${settings ? 'rgba(245,95,22,.4)' : 'var(--border)'}` }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Configurações
+          </button>
+          <button
+            onClick={async () => {
+              const phone = window.prompt('Digite o número do WhatsApp com DDD (ex: 11999999999):');
+              if (!phone) return;
+              setIsSendingWhatsApp(true);
+              try {
+                await whatsappService.sendPlanToWhatsApp(phone, { blocks, day });
+                alert('Plano enviado por WhatsApp com sucesso!');
+              } catch (err) {
+                console.error(err);
+                alert('Erro ao enviar plano por WhatsApp.');
+              } finally {
+                setIsSendingWhatsApp(false);
+              }
+            }}
+            disabled={isSendingWhatsApp}
+            style={{ display: 'flex', alignItems: 'center', gap: '7px', background: '#25D366', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: isSendingWhatsApp ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: isSendingWhatsApp ? 0.7 : 1 }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            {isSendingWhatsApp ? 'Enviando...' : 'Enviar por WhatsApp'}
           </button>
           <button onClick={() => navigate('/trainings')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg> Publicar
