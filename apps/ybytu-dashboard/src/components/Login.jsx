@@ -38,11 +38,23 @@ const handleLogin = async (e) => {
       return;
     }
 
-    // TRAVA DE SEGURANÇA: Verifica se é admin ou convidado do painel
-    const userRole = data.user?.user_metadata?.role;
-    
-    if (userRole !== 'admin' && userRole !== 'invited_user') {
-      // Se for um usuário comum do App, desloga ele imediatamente e mostra erro
+    // TRAVA DE SEGURANÇA: papel resolvido no servidor (nunca em user_metadata,
+    // que o próprio usuário controla). ybytu-whoami consulta staff/staff_roles
+    // via service_role.
+    const accessToken = data.session?.access_token;
+    let isStaff = false;
+    try {
+      const { data: whoami, error: whoamiError } = await supabase.functions.invoke('ybytu-whoami', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      isStaff = !whoamiError && whoami?.isStaff === true;
+    } catch {
+      isStaff = false;
+    }
+
+    if (!isStaff) {
+      // Se for um usuário comum do App (ou a checagem falhou), desloga
+      // imediatamente e mostra erro
       await supabase.auth.signOut();
       setError('Acesso negado. Esta área é restrita para administradores.');
       setLoading(false);
