@@ -15,8 +15,7 @@ serve(async (req) => {
     const token = url.searchParams.get("hub.verify_token")
     const challenge = url.searchParams.get("hub.challenge")
 
-    // Esse é o token de segurança que você vai inventar
-    const MY_VERIFY_TOKEN = "ybytu_whatsapp_token_2026" 
+    const MY_VERIFY_TOKEN = Deno.env.get('WHATSAPP_VERIFY_TOKEN')
 
     if (mode === "subscribe" && token === MY_VERIFY_TOKEN) {
       console.log("Webhook validado pela Meta com sucesso!")
