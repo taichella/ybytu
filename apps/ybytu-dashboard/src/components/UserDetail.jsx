@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import UserPlan from './UserPlan';
+import { useStaff } from '../lib/StaffContext';
 
 export default function UserDetail() {
   const navigate = useNavigate();
@@ -8,10 +10,59 @@ export default function UserDetail() {
   const [theme, setTheme] = useState('dark');
   const [tab, setTab] = useState('overview');
   const [isBlocked, setIsBlocked] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [planPayload, setPlanPayload] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    async function fetchUserDetail() {
+      try {
+        const { supabase } = await import('../lib/supabase.js');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        // Fetch user profile basic data from the new staff edge function
+        const { data: usersData, error: usersError } = await supabase.functions.invoke('ybytu-get-users-for-staff', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+
+        if (!usersError && usersData) {
+          const profile = usersData.find(u => u.id === id);
+          if (profile) setUserProfile(profile);
+        }
+
+        // Fetch plan payload via ybytu-get-plan-for-staff
+        const { data: planData, error: planError } = await supabase.functions.invoke('ybytu-get-plan-for-staff', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          body: { userId: id }
+        });
+
+        if (!planError && planData && !planData.error) {
+          setPlanPayload(planData);
+        }
+
+      } catch (err) {
+        console.error('Failed to load user details', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) {
+      fetchUserDetail();
+    }
+  }, [id]);
+
+  const staff = useStaff();
+  const isPersonal = staff?.roles?.includes('personal');
+  const isNutricionista = staff?.roles?.includes('nutricionista');
+
+  const [reviewNote, setReviewNote] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const toggleBlock = () => setIsBlocked(!isBlocked);
@@ -21,6 +72,43 @@ export default function UserDetail() {
     borderBottom: `2px solid ${isActive ? 'var(--brand)' : 'transparent'}`,
     color: isActive ? 'var(--brand)' : 'var(--muted)'
   });
+
+  const submitReview = async (role) => {
+    if (!reviewNote.trim()) return;
+    setSubmittingReview(true);
+    try {
+      const { supabase } = await import('../lib/supabase.js');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const payload = {
+        userId: id,
+        role: role,
+        reviewer_credential: 'CRN/CREF', // mockup, in reality would come from user's staff profile
+        note_ptbr: reviewNote,
+        training_plan_id: userProfile?.current_training_plan_id,
+        meal_plan_id: userProfile?.current_meal_plan_id
+      };
+
+      const { error } = await supabase.functions.invoke('ybytu-submit-plan-review', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: payload
+      });
+
+      if (!error) {
+        alert('Parecer adicionado com sucesso!');
+        setReviewNote('');
+        // We could refresh planPayload here to show the review immediately
+      } else {
+        alert('Erro ao salvar parecer.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar parecer.');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   // Dados mockados originais do protótipo[cite: 9]
   const history = [
@@ -137,12 +225,12 @@ export default function UserDetail() {
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Dados Pessoais</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Nome completo</span><span style={{ fontWeight: 700 }}>Mariana Silva</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Gênero</span><span style={{ fontWeight: 700 }}>Feminino</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Idade</span><span style={{ fontWeight: 700 }}>32 anos</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Peso</span><span style={{ fontWeight: 700 }}>64 kg</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Altura</span><span style={{ fontWeight: 700 }}>168 cm</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', borderTop: '1px solid var(--border)', paddingTop: '12px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>IMC</span><span style={{ fontWeight: 800, color: '#16a34a' }}>22.7 · Saudável</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Nome completo</span><span style={{ fontWeight: 700 }}>{userProfile?.full_name || [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') || 'Mariana Silva'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Gênero</span><span style={{ fontWeight: 700 }}>{userProfile?.gender_id === 'female' ? 'Feminino' : userProfile?.gender_id === 'male' ? 'Masculino' : '?'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Idade</span><span style={{ fontWeight: 700 }}>{userProfile?.age ? `${userProfile.age} anos` : '?'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Peso</span><span style={{ fontWeight: 700 }}>{userProfile?.weight_kg ? `${userProfile.weight_kg} kg` : '?'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Altura</span><span style={{ fontWeight: 700 }}>{userProfile?.height_cm ? `${userProfile.height_cm} cm` : '?'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', borderTop: '1px solid var(--border)', paddingTop: '12px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>IMC</span><span style={{ fontWeight: 800, color: '#16a34a' }}>{userProfile?.weight_kg && userProfile?.height_cm ? (userProfile.weight_kg / Math.pow(userProfile.height_cm / 100, 2)).toFixed(1) : '?'}</span></div>
                 </div>
               </section>
 
@@ -227,48 +315,48 @@ export default function UserDetail() {
           {/* ===== TAB: PLANOS ATRIBUÍDOS (Completa)[cite: 9] ===== */}
           {tab === 'plans' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano de Treino Atual</h3>
-                  <a href="#" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>Ver plano</a>
+              {planPayload ? (
+                <UserPlan payload={planPayload} />
+              ) : (
+                <div style={{ padding: '40px', textAlign: 'center', color: 'var(--muted)' }}>
+                  Nenhum plano encontrado ou erro ao carregar.
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                  <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                  </div>
-                  <div style={{ flex: 1, minWidth: '180px' }}>
-                    <p style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>Hipertrofia 12 Semanas</p>
-                    <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--muted)' }}>Iniciado há 6 semanas · 5 dias/sem · Semana 6 de 12</p>
-                  </div>
-                  <div style={{ minWidth: '140px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}><span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)' }}>Progresso</span><span style={{ fontSize: '12px', fontWeight: 800 }}>50%</span></div>
-                    <div style={{ height: '8px', borderRadius: '4px', background: 'var(--surface-2)', overflow: 'hidden' }}><div style={{ height: '100%', width: '50%', background: 'var(--brand)', borderRadius: '4px' }}></div></div>
-                  </div>
-                </div>
-              </section>
+              )}
 
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano Alimentar Atual</h3>
-                  <a href="#" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>Ver plano</a>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                  <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: 'linear-gradient(135deg,#16a34a,#4ade80)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>
+              {(isPersonal || isNutricionista) && (
+                <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                  <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Adicionar Parecer</h3>
+                  <textarea
+                    value={reviewNote}
+                    onChange={(e) => setReviewNote(e.target.value)}
+                    placeholder="Escreva seu parecer profissional sobre este plano..."
+                    style={{ width: '100%', minHeight: '80px', padding: '12px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'inherit', fontSize: '14px', marginBottom: '12px', outline: 'none', resize: 'vertical' }}
+                  />
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {isPersonal && (
+                      <button
+                        onClick={() => submitReview('personal')}
+                        disabled={submittingReview}
+                        style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: submittingReview ? 'not-allowed' : 'pointer', opacity: submittingReview ? 0.7 : 1 }}
+                      >
+                        Enviar Parecer (Treino)
+                      </button>
+                    )}
+                    {isNutricionista && (
+                      <button
+                        onClick={() => submitReview('nutricionista')}
+                        disabled={submittingReview}
+                        style={{ background: '#16a34a', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: submittingReview ? 'not-allowed' : 'pointer', opacity: submittingReview ? 0.7 : 1 }}
+                      >
+                        Enviar Parecer (Nutrição)
+                      </button>
+                    )}
                   </div>
-                  <div style={{ flex: 1, minWidth: '180px' }}>
-                    <p style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>Cutting 1.800 kcal</p>
-                    <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--muted)' }}>5 refeições/dia · meta 1.800 kcal · 40P / 35C / 25G</p>
-                  </div>
-                  <div style={{ minWidth: '140px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}><span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--muted)' }}>Aderência</span><span style={{ fontSize: '12px', fontWeight: 800 }}>74%</span></div>
-                    <div style={{ height: '8px', borderRadius: '4px', background: 'var(--surface-2)', overflow: 'hidden' }}><div style={{ height: '100%', width: '74%', background: '#16a34a', borderRadius: '4px' }}></div></div>
-                  </div>
-                </div>
-              </section>
+                </section>
+              )}
 
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
-                <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)' }}><h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Histórico de Atribuições</h3></div>
+                <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)' }}><h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Histórico de Atribuições</h3></div>
                 <div>
                   {history.map((h, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '13px', padding: '14px 22px', borderBottom: '1px solid var(--border)' }}>

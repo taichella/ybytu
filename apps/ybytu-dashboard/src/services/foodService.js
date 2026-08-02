@@ -4,12 +4,14 @@ export const foodService = {
   // Utility function to remove fields not present in the database schema
   _sanitizeData(data) {
     const sanitized = { ...data };
-    const validFields = ['id', 'emoji', 'name', 'sub', 'group', 'portion', 'kcal', 'prot', 'carbs', 'fat', 'tags'];
+    const validFields = [
+      'food_id',
+      'name_ptbr',
+      'calories'
+    ];
 
-    // Removing mock data specific fields or incorrect field names (like carb instead of carbs)
     Object.keys(sanitized).forEach(key => {
       if (!validFields.includes(key)) {
-        if (key === 'carb') sanitized['carbs'] = sanitized[key]; // Just in case it was renamed
         delete sanitized[key];
       }
     });

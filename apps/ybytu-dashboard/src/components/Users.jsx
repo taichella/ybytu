@@ -3,15 +3,39 @@ import { Link } from 'react-router-dom';
 
 export default function Users() {
   const [theme, setTheme] = useState('dark');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Sincroniza o tema
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
+  useEffect(() => {
+    async function loadUsers() {
+      try {
+        const { supabase } = await import('../lib/supabase.js');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const { data, error } = await supabase.functions.invoke('ybytu-get-users-for-staff', {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+
+        if (!error && data) {
+          setUsers(data);
+        }
+      } catch (err) {
+        console.error('Failed to load users', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadUsers();
+  }, []);
+
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
-  // Dados mocados extraídos do seu protótipo original
   const SUB = {
     free: { sub: 'Free', subBg: 'var(--surface-2)', subColor: 'var(--muted)' },
     start: { sub: 'Start', subBg: 'rgba(59,130,246,.12)', subColor: '#3b82f6' },
@@ -21,21 +45,36 @@ export default function Users() {
   const getAdColor = (v) => v >= 80 ? '#16a34a' : (v >= 40 ? '#d97706' : '#ef4444');
   const avatars = ['#ec4899','#3b82f6','#16a34a','#a855f7','#f59e0b','#06b6d4','#ef4444','#8b5cf6'];
   
-  const usersData = [
-    { initials: 'MS', name: 'Mariana Silva', meta: '32 anos · F · São Paulo', subKey: 'pro', goal: 'Hipertrofia', level: 'Intermediário', trainPlan: 'Hipertrofia 12 Sem', mealPlan: 'Cutting 1.800 kcal', adherence: 88, onbDone: true },
-    { initials: 'CE', name: 'Carlos Eduardo', meta: '41 anos · M · Rio de Janeiro', subKey: 'start', goal: 'Emagrecimento', level: 'Iniciante', trainPlan: 'Full Body em Casa', mealPlan: 'Low Carb 1.600', adherence: 64, onbDone: true },
-    { initials: 'AC', name: 'Amanda Costa', meta: '27 anos · F · Belo Horizonte', subKey: 'pro', goal: 'Condicionamento', level: 'Avançado', trainPlan: 'Corrida & Mobilidade', mealPlan: 'Manutenção 2.400', adherence: 92, onbDone: true },
-    { initials: 'RN', name: 'Rafael Nunes', meta: '35 anos · M · Curitiba', subKey: 'free', goal: 'Hipertrofia', level: 'Intermediário', trainPlan: '—', mealPlan: '—', adherence: 22, onbDone: false },
-    { initials: 'JL', name: 'Juliana Lima', meta: '29 anos · F · Porto Alegre', subKey: 'start', goal: 'Emagrecimento', level: 'Iniciante', trainPlan: 'Cutting Definição', mealPlan: 'Vegano 2.000', adherence: 57, onbDone: true },
-    { initials: 'PH', name: 'Pedro Henrique', meta: '38 anos · M · Salvador', subKey: 'pro', goal: 'Força', level: 'Avançado', trainPlan: 'Força Powerbuilding', mealPlan: 'Bulking 3.200', adherence: 79, onbDone: true },
-    { initials: 'BF', name: 'Beatriz Ferraz', meta: '24 anos · F · Recife', subKey: 'free', goal: 'Condicionamento', level: 'Iniciante', trainPlan: '—', mealPlan: '—', adherence: 12, onbDone: false },
-    { initials: 'LG', name: 'Lucas Gomes', meta: '46 anos · M · Fortaleza', subKey: 'start', goal: 'Emagrecimento', level: 'Intermediário', trainPlan: 'Full Body em Casa', mealPlan: 'Manutenção 2.400', adherence: 71, onbDone: true },
-  ].map((u, i) => ({
-    ...u,
-    ...SUB[u.subKey],
-    adColor: getAdColor(u.adherence),
-    avatarBg: avatars[i % avatars.length]
-  }));
+  function initials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    return ((parts[0]?.[0] || '') + (parts[1]?.[0] || parts[0]?.[1] || '')).toUpperCase();
+  }
+
+  const usersData = users.map((u, i) => {
+    const fullName = u.full_name || [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Usuário Sem Nome';
+    const gender = u.gender_id === 'female' ? 'F' : (u.gender_id === 'male' ? 'M' : '?');
+
+    // Simplification for prototype mapping
+    const subKey = 'free'; // default to free if we don't have accurate mapping here
+
+    return {
+      id: u.id,
+      initials: initials(fullName),
+      name: fullName,
+      meta: `${u.age || '?'} anos · ${gender} · Brasil`,
+      subKey,
+      goal: u.goals_ids?.length ? u.goals_ids[0].split('_')[0] : 'Indefinido',
+      level: u.exercise_level_id || 'Iniciante',
+      trainPlan: u.current_training_plan_id ? 'Plano Atribuído' : '—',
+      mealPlan: u.current_meal_plan_id ? 'Plano Atribuído' : '—',
+      adherence: Math.floor(Math.random() * 100), // mock adherence since it's not stored yet
+      onbDone: u.plan_generation_status !== 'pending',
+      ...SUB[subKey],
+      adColor: getAdColor(Math.floor(Math.random() * 100)),
+      avatarBg: avatars[i % avatars.length]
+    }
+  });
 
   return (
     <>
@@ -101,11 +140,25 @@ export default function Users() {
                   </tr>
                 </thead>
                 <tbody>
-                  {usersData.map((u, index) => (
+                  {loading && (
+                    <tr>
+                      <td colSpan="8" style={{ textAlign: 'center', padding: '24px', color: 'var(--muted)' }}>
+                        Carregando usuários...
+                      </td>
+                    </tr>
+                  )}
+                  {!loading && usersData.length === 0 && (
+                    <tr>
+                      <td colSpan="8" style={{ textAlign: 'center', padding: '24px', color: 'var(--muted)' }}>
+                        Nenhum usuário encontrado.
+                      </td>
+                    </tr>
+                  )}
+                  {!loading && usersData.map((u, index) => (
                     <tr key={index} style={{ borderTop: '1px solid var(--border)' }}>
                       <td style={{ textAlign: 'center', padding: '12px 16px' }}><input type="checkbox" style={{ width: '15px', height: '15px', accentColor: 'var(--brand)' }} /></td>
                       <td style={{ padding: '12px 16px' }}>
-                        <Link to={`/users/${index}`} style={{ display: 'flex', alignItems: 'center', gap: '13px', textDecoration: 'none', color: 'inherit' }}>
+                        <Link to={`/users/${u.id}`} style={{ display: 'flex', alignItems: 'center', gap: '13px', textDecoration: 'none', color: 'inherit' }}>
                           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: u.avatarBg, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px', flexShrink: 0 }}>{u.initials}</div>
                           <div><p style={{ margin: 0, fontWeight: 700, fontSize: '14px' }}>{u.name}</p><p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>{u.meta}</p></div>
                         </Link>
@@ -134,7 +187,7 @@ export default function Users() {
                         )}
                       </td>
                       <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                        <Link to={`/users/${index}`} style={{ display: 'inline-flex', color: 'var(--muted)', padding: '6px', borderRadius: '8px', textDecoration: 'none' }}>
+                        <Link to={`/users/${u.id}`} style={{ display: 'inline-flex', color: 'var(--muted)', padding: '6px', borderRadius: '8px', textDecoration: 'none' }}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         </Link>
                       </td>

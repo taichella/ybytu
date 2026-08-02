@@ -4,7 +4,16 @@ export const exerciseService = {
   // Utility function to remove fields not present in the database schema
   _sanitizeData(data) {
     const sanitized = { ...data };
-    const validFields = ['id', 'name', 'ref', 'groups', 'level', 'kcal', 'langs'];
+    const validFields = [
+      'exercise_id',
+      'name_ptbr',
+      'name_en',
+      'name_fr',
+      'muscle_groups_ids',
+      'exercise_level_id',
+      'exercise_equipments_ids',
+      'calories'
+    ];
 
     Object.keys(sanitized).forEach(key => {
       if (!validFields.includes(key)) {
