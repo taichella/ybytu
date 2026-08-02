@@ -3,6 +3,7 @@ import './index.css';
 
 import Login from './components/Login';
 import CreateAccount from './components/CreateAccount';
+import AcceptInvite from './components/AcceptInvite';
 import ForgotPassword from './components/ForgotPassword';
 import DashboardLayout from './components/DashboardLayout';
 import Dashboard from './components/Dashboard';
@@ -33,6 +34,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
+        <Route path="/aceitar-convite/:token" element={<AcceptInvite />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         {/* Rota pública — link compartilhável do plano, fora do login */}
         <Route path="/plano/:token" element={<SharedPlan />} />
