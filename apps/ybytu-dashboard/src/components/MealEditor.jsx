@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function MealEditor() {
@@ -30,6 +30,7 @@ export default function MealEditor() {
   ];
 
   const [items, setItems] = useState(initialItems);
+  const nextItemId = useRef(initialItems.length + 1);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -45,7 +46,7 @@ export default function MealEditor() {
 
   // Funções de manipulação do construtor[cite: 14]
   const addFood = (food) => {
-    setItems([...items, { ...food, uniqueId: `it${Date.now()}`, qty: 100 }]);
+    setItems([...items, { ...food, uniqueId: `it${nextItemId.current++}`, qty: 100 }]);
   };
 
   const removeFood = (uniqueId) => {
