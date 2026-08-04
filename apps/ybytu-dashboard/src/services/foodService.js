@@ -4,12 +4,14 @@ export const foodService = {
   // Utility function to remove fields not present in the database schema
   _sanitizeData(data) {
     const sanitized = { ...data };
-    const validFields = ['id', 'emoji', 'name', 'sub', 'group', 'portion', 'kcal', 'prot', 'carbs', 'fat', 'tags'];
+    const validFields = [
+      'food_id',
+      'name_ptbr',
+      'calories_per_unit'
+    ];
 
-    // Removing mock data specific fields or incorrect field names (like carb instead of carbs)
     Object.keys(sanitized).forEach(key => {
       if (!validFields.includes(key)) {
-        if (key === 'carb') sanitized['carbs'] = sanitized[key]; // Just in case it was renamed
         delete sanitized[key];
       }
     });
@@ -24,7 +26,7 @@ export const foodService = {
         // Map back carbs to carb for frontend if needed, though frontend expects carb
         return {
            ...item,
-           carb: item.carbs || 0 // Assuming 'carbs' is the real column name. We map it back to what frontend expects.
+           carb: item.carbs_g || 0
         };
     });
   },
@@ -32,7 +34,7 @@ export const foodService = {
   async getById(id) {
     const { data, error } = await supabase.from('foods').select('*').eq('id', id).single();
     if (error) throw error;
-    return { ...data, carb: data.carbs || 0 };
+    return { ...data, carb: data.carbs_g || 0 };
   },
 
   async create(foodData) {

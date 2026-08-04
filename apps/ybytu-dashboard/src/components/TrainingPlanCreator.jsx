@@ -1,12 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function TrainingPlanCreator() {
   const navigate = useNavigate();
-  const { id } = useParams();
-  
+
   const [theme, setTheme] = useState('dark');
-  const [mode, setMode] = useState('card');
   const [day, setDay] = useState(0);
   const [settings, setSettings] = useState(true);
 
@@ -15,6 +13,8 @@ export default function TrainingPlanCreator() {
     { id: 'b1', letter: 'A', name: 'Supino Reto', group: 'Peitoral', sets: [ { id: 's1', n: 1, reps: '12', load: '50 kg', rest: '90s' } ] },
     { id: 'b2', letter: 'B', name: 'Tríceps Pulley', group: 'Tríceps', sets: [ { id: 's2', n: 1, reps: '15', load: '30 kg', rest: '45s' } ] }
   ]);
+  const nextBlockId = useRef(3);
+  const nextSetId = useRef(3);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -22,13 +22,6 @@ export default function TrainingPlanCreator() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const toggleSettings = () => setSettings(prev => !prev);
-
-  const segStyle = (isActive) => ({
-    border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: 800, padding: '7px 16px', borderRadius: '7px', whiteSpace: 'nowrap',
-    background: isActive ? 'var(--field)' : 'transparent',
-    color: isActive ? 'var(--text)' : 'var(--muted)',
-    boxShadow: isActive ? '0 1px 2px rgba(0,0,0,.12)' : 'none'
-  });
 
   const dayStyle = (isActive) => ({
     border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px', fontWeight: 700, padding: '18px 14px', whiteSpace: 'nowrap',
@@ -47,11 +40,11 @@ export default function TrainingPlanCreator() {
   const addExercise = (libItem) => {
     const newLetter = String.fromCharCode(65 + blocks.length);
     const newBlock = {
-      id: `b${Date.now()}`,
+      id: `b${nextBlockId.current++}`,
       letter: newLetter,
       name: libItem.name,
       group: libItem.group,
-      sets: [ { id: `s${Date.now()}`, n: 1, reps: '10', load: '-', rest: '60s' } ]
+      sets: [ { id: `s${nextSetId.current++}`, n: 1, reps: '10', load: '-', rest: '60s' } ]
     };
     setBlocks([...blocks, newBlock]);
   };
@@ -63,7 +56,7 @@ export default function TrainingPlanCreator() {
   const addSet = (blockId) => {
     setBlocks(blocks.map(b => {
       if (b.id === blockId) {
-        return { ...b, sets: [...b.sets, { id: `s${Date.now()}`, n: b.sets.length + 1, reps: '10', load: '-', rest: '60s' }] };
+        return { ...b, sets: [...b.sets, { id: `s${nextSetId.current++}`, n: b.sets.length + 1, reps: '10', load: '-', rest: '60s' }] };
       }
       return b;
     }));
