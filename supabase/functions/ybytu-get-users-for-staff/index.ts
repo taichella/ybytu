@@ -56,12 +56,12 @@ serve(async (req) => {
     // tem acesso a elas (RLS deny-all), então resolvemos os rótulos aqui
     // com o service_role antes de devolver pro frontend.
     const [gendersRes, levelsRes, goalsRes] = await Promise.all([
-      supabase.from('genders').select('id, name_ptbr'),
+      supabase.from('genders').select('id, label_ptbr'),
       supabase.from('exercise_levels').select('id, name_ptbr'),
       supabase.from('goals').select('id, name_ptbr'),
     ])
 
-    const genderLabels = new Map((gendersRes.data ?? []).map((g) => [g.id, g.name_ptbr]))
+    const genderLabels = new Map((gendersRes.data ?? []).map((g) => [g.id, g.label_ptbr]))
     const levelLabels = new Map((levelsRes.data ?? []).map((l) => [l.id, l.name_ptbr]))
     const goalLabels = new Map((goalsRes.data ?? []).map((g) => [g.id, g.name_ptbr]))
 

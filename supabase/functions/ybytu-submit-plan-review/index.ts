@@ -47,6 +47,39 @@ serve(async (req) => {
       )
     }
 
+    // plan_reviews.training_plan_id/meal_plan_id referenciam os SLUGs
+    // (training_plans.training_plan_id / meal_plans.meal_plan_id, ambos
+    // text), não os uuids que profiles.current_training_plan_id /
+    // current_meal_plan_id guardam — nunca confiamos no que o client manda
+    // aqui, resolvemos a partir do profile atual via service_role.
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('current_training_plan_id, current_meal_plan_id')
+      .eq('id', body.userId)
+      .maybeSingle()
+
+    if (profileError) throw new Error(`Lookup de profile falhou: ${profileError.message}`)
+
+    let trainingPlanSlug: string | null = null
+    if (profile?.current_training_plan_id) {
+      const { data: trainingPlan } = await supabase
+        .from('training_plans')
+        .select('training_plan_id')
+        .eq('id', profile.current_training_plan_id)
+        .maybeSingle()
+      trainingPlanSlug = trainingPlan?.training_plan_id ?? null
+    }
+
+    let mealPlanSlug: string | null = null
+    if (profile?.current_meal_plan_id) {
+      const { data: mealPlan } = await supabase
+        .from('meal_plans')
+        .select('meal_plan_id')
+        .eq('id', profile.current_meal_plan_id)
+        .maybeSingle()
+      mealPlanSlug = mealPlan?.meal_plan_id ?? null
+    }
+
     const { error: upsertError } = await supabase
       .from('plan_reviews')
       .upsert(
@@ -56,8 +89,8 @@ serve(async (req) => {
           reviewer_name: auth.staff.fullName,
           reviewer_credential: body.reviewer_credential || null,
           note_ptbr: body.note_ptbr || null,
-          training_plan_id: body.training_plan_id || null,
-          meal_plan_id: body.meal_plan_id || null,
+          training_plan_id: trainingPlanSlug,
+          meal_plan_id: mealPlanSlug,
           updated_at: new Date().toISOString()
         },
         { onConflict: 'user_id, role' }

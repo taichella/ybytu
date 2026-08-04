@@ -86,8 +86,9 @@ export default function UserDetail() {
         role: role,
         reviewer_credential: 'CRN/CREF', // mockup, in reality would come from user's staff profile
         note_ptbr: reviewNote,
-        training_plan_id: userProfile?.current_training_plan_id,
-        meal_plan_id: userProfile?.current_meal_plan_id
+        // ybytu-submit-plan-review resolve os slugs de plano atuais do
+        // profile no servidor — não manda os uuids de current_training_plan_id/
+        // current_meal_plan_id, que não batem com o tipo esperado (text) da FK.
       };
 
       const { error } = await supabase.functions.invoke('ybytu-submit-plan-review', {
