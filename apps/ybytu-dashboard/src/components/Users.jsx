@@ -51,12 +51,23 @@ export default function Users() {
     return ((parts[0]?.[0] || '') + (parts[1]?.[0] || parts[0]?.[1] || '')).toUpperCase();
   }
 
+  // Aderência ainda não é persistida — deriva um valor mock estável a
+  // partir do id do usuário, pra não recalcular aleatório a cada render.
+  function mockAdherence(id) {
+    let hash = 0;
+    for (let i = 0; i < (id || '').length; i++) {
+      hash = (hash * 31 + id.charCodeAt(i)) % 100;
+    }
+    return Math.abs(hash);
+  }
+
   const usersData = users.map((u, i) => {
     const fullName = u.full_name || [u.first_name, u.last_name].filter(Boolean).join(' ') || 'Usuário Sem Nome';
-    const gender = u.gender_id === 'female' ? 'F' : (u.gender_id === 'male' ? 'M' : '?');
+    const gender = u.gender_label === 'Feminino' ? 'F' : (u.gender_label === 'Masculino' ? 'M' : '?');
 
     // Simplification for prototype mapping
     const subKey = 'free'; // default to free if we don't have accurate mapping here
+    const adherence = mockAdherence(u.id);
 
     return {
       id: u.id,
@@ -64,14 +75,14 @@ export default function Users() {
       name: fullName,
       meta: `${u.age || '?'} anos · ${gender} · Brasil`,
       subKey,
-      goal: u.goals_ids?.length ? u.goals_ids[0].split('_')[0] : 'Indefinido',
-      level: u.exercise_level_id || 'Iniciante',
+      goal: u.goals_labels?.length ? u.goals_labels[0] : 'Indefinido',
+      level: u.exercise_level_label || 'Iniciante',
       trainPlan: u.current_training_plan_id ? 'Plano Atribuído' : '—',
       mealPlan: u.current_meal_plan_id ? 'Plano Atribuído' : '—',
-      adherence: Math.floor(Math.random() * 100), // mock adherence since it's not stored yet
+      adherence, // mock — aderência ainda não é persistida
       onbDone: u.plan_generation_status !== 'pending',
       ...SUB[subKey],
-      adColor: getAdColor(Math.floor(Math.random() * 100)),
+      adColor: getAdColor(adherence),
       avatarBg: avatars[i % avatars.length]
     }
   });

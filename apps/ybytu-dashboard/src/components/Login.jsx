@@ -42,7 +42,7 @@ const handleLogin = async (e) => {
     // que o próprio usuário controla). ybytu-whoami consulta staff/staff_roles
     // via service_role.
     const accessToken = data.session?.access_token;
-    let isStaff = false;
+    let isStaff;
     try {
       const { data: whoami, error: whoamiError } = await supabase.functions.invoke('ybytu-whoami', {
         headers: { Authorization: `Bearer ${accessToken}` },

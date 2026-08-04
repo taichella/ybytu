@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function MealPlans() {
-  const navigate = useNavigate();
   const [theme, setTheme] = useState('dark');
   const [tab, setTab] = useState('all');
   const [aiFilter, setAiFilter] = useState(false);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import UserPlan from './UserPlan';
-import { useStaff } from '../lib/StaffContext';
+import { useStaff } from '../lib/staffContextCore';
 
 export default function UserDetail() {
   const navigate = useNavigate();
@@ -140,8 +140,8 @@ export default function UserDetail() {
       let col = [];
       for (let d = 0; d < days; d++){
         const seed = (w*7 + d) * 2654435761 % 100;
-        let lvl = 0;
-        if (d === 6 || d === 0) lvl = seed % 4 < 2 ? 0 : 1; 
+        let lvl;
+        if (d === 6 || d === 0) lvl = seed % 4 < 2 ? 0 : 1;
         else lvl = [0,1,2,3,2,3,1,3,2,3][seed % 10];
         if (w < 2) lvl = Math.max(0, lvl - 1); 
         col.push(
@@ -165,7 +165,9 @@ export default function UserDetail() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>
               <span style={{ cursor: 'pointer' }} onClick={() => navigate('/users')}>Usuários</span><span>/</span><span style={{ color: 'var(--text)' }}>Perfil</span>
             </div>
-            <h2 style={{ margin: '2px 0 0', fontSize: '18px', fontWeight: 900, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Mariana Silva</h2>
+            <h2 style={{ margin: '2px 0 0', fontSize: '18px', fontWeight: 900, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {loading ? 'Carregando...' : (userProfile?.full_name || [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') || '?')}
+            </h2>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
@@ -225,8 +227,8 @@ export default function UserDetail() {
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Dados Pessoais</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Nome completo</span><span style={{ fontWeight: 700 }}>{userProfile?.full_name || [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') || 'Mariana Silva'}</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Gênero</span><span style={{ fontWeight: 700 }}>{userProfile?.gender_id === 'female' ? 'Feminino' : userProfile?.gender_id === 'male' ? 'Masculino' : '?'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Nome completo</span><span style={{ fontWeight: 700 }}>{userProfile?.full_name || [userProfile?.first_name, userProfile?.last_name].filter(Boolean).join(' ') || '?'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Gênero</span><span style={{ fontWeight: 700 }}>{userProfile?.gender_label || '?'}</span></div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Idade</span><span style={{ fontWeight: 700 }}>{userProfile?.age ? `${userProfile.age} anos` : '?'}</span></div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Peso</span><span style={{ fontWeight: 700 }}>{userProfile?.weight_kg ? `${userProfile.weight_kg} kg` : '?'}</span></div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Altura</span><span style={{ fontWeight: 700 }}>{userProfile?.height_cm ? `${userProfile.height_cm} cm` : '?'}</span></div>

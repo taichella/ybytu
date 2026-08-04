@@ -51,15 +51,28 @@ serve(async (req) => {
 
     if (error) throw new Error(`Lookup de profiles falhou: ${error.message}`)
 
-    // Optional: resolve references using helper tables to enrich user data
-    // For example, resolving goals names or exercise levels could be done here,
-    // but doing it on the client side or returning IDs to be mapped by the client is simpler if we just want basic data.
-    // Let's resolve some basic ones to match the requested output.
+    // gender_id, exercise_level_id e goals_ids são UUIDs que referenciam
+    // tabelas de lookup (genders/exercise_levels/goals) — o dashboard não
+    // tem acesso a elas (RLS deny-all), então resolvemos os rótulos aqui
+    // com o service_role antes de devolver pro frontend.
+    const [gendersRes, levelsRes, goalsRes] = await Promise.all([
+      supabase.from('genders').select('id, name_ptbr'),
+      supabase.from('exercise_levels').select('id, name_ptbr'),
+      supabase.from('goals').select('id, name_ptbr'),
+    ])
 
-    // As an optimization, we return the raw profiles. The frontend mapping logic
-    // will format it into what Users.jsx expects.
+    const genderLabels = new Map((gendersRes.data ?? []).map((g) => [g.id, g.name_ptbr]))
+    const levelLabels = new Map((levelsRes.data ?? []).map((l) => [l.id, l.name_ptbr]))
+    const goalLabels = new Map((goalsRes.data ?? []).map((g) => [g.id, g.name_ptbr]))
 
-    return new Response(JSON.stringify(profiles), {
+    const enrichedProfiles = (profiles ?? []).map((p) => ({
+      ...p,
+      gender_label: genderLabels.get(p.gender_id) ?? null,
+      exercise_level_label: levelLabels.get(p.exercise_level_id) ?? null,
+      goals_labels: (p.goals_ids ?? []).map((id: string) => goalLabels.get(id)).filter(Boolean),
+    }))
+
+    return new Response(JSON.stringify(enrichedProfiles), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
