@@ -1,14 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { foodService } from '../services/foodService.js';
+
 export default function Foods() {
   const navigate = useNavigate();
   const [theme, setTheme] = useState('dark');
   const [view, setView] = useState('table');
+  const [foodsData, setFoodsData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    foodService.getAll().then(data => {
+      setFoodsData(data);
+      setIsLoading(false);
+    }).catch(err => {
+      setErrorMsg(err.message);
+      setIsLoading(false);
+    });
+  }, []);
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
@@ -47,23 +62,7 @@ export default function Foods() {
     );
   };
 
-  const createFood = (id, emoji, name, sub, grp, portion, kcal, prot, carb, fat, tags) => ({
-    id, emoji, name, sub, ...GROUPS[grp], portion, kcal, prot, carb, fat,
-    tagsShown: tags.slice(0, 1),
-    hasMoreTags: tags.length > 1,
-    moreTags: `+${tags.length - 1}`,
-    tagsAll: tags
-  });
 
-  const foods = [
-    createFood(1, '🍗', 'Peito de Frango Grelhado', 'TACO · grelhado', 'prot', '100 g', 165, 31, 0, 3.6, ['Low carb', 'Sem glúten']),
-    createFood(2, '🍚', 'Arroz Branco Cozido', 'TACO · cozido', 'carb', '100 g', 128, 2.5, 28, 0.2, ['Vegano', 'Sem lactose']),
-    createFood(3, '🥚', 'Ovo de Galinha', 'TACO · cozido', 'prot', '1 un (50 g)', 78, 6.3, 0.6, 5.3, ['Vegetariano', 'Keto']),
-    createFood(4, '🥦', 'Brócolis', 'TACO · cozido', 'veg', '100 g', 35, 2.4, 7, 0.4, ['Vegano', 'Sem glúten']),
-    createFood(5, '🍌', 'Banana Prata', 'TACO · in natura', 'fruit', '1 un (100 g)', 98, 1.3, 26, 0.1, ['Vegano']),
-    createFood(6, '🥑', 'Abacate', 'TACO · in natura', 'fat', '100 g', 96, 1.2, 6, 8.4, ['Keto', 'Vegano']),
-    createFood(7, '🧀', 'Queijo Minas Frescal', 'Rótulo · Tirolez', 'dairy', '30 g', 73, 5.4, 0.9, 5.5, ['Vegetariano']),
-  ];
 
   return (
     <>
@@ -117,7 +116,7 @@ export default function Foods() {
           </div>
 
           {/* TABLE VIEW */}
-          {view === 'table' && (
+          {isLoading ? <div style={{padding: "20px"}}>Carregando...</div> : errorMsg ? <div style={{padding: "20px", color: "red"}}>{errorMsg}</div> : view === 'table' && (
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
@@ -134,7 +133,7 @@ export default function Foods() {
                     </tr>
                   </thead>
                   <tbody>
-                    {foods.map((f, idx) => (
+                    {foodsData?.map((f, idx) => (
                       <tr key={idx} className="yb-hover-row" style={{ borderTop: '1px solid var(--border)' }}>
                         <td style={{ textAlign: 'center', padding: '12px 16px' }}><input type="checkbox" style={{ width: '15px', height: '15px', accentColor: 'var(--brand)' }} /></td>
                         <td style={{ padding: '12px 16px' }}>
@@ -181,9 +180,9 @@ export default function Foods() {
           )}
 
           {/* GRID VIEW */}
-          {view === 'grid' && (
+          {!isLoading && !errorMsg && view === 'grid' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '18px' }}>
-              {foods.map((f, idx) => (
+              {foodsData?.map((f, idx) => (
                 <div key={idx} className="yb-hover-card" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px' }}>
                   <div style={{ display: 'flex', gap: '14px', alignItems: 'center', marginBottom: '14px' }}>
                     <div style={{ width: '54px', height: '54px', borderRadius: '13px', background: 'var(--surface-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', flexShrink: 0 }}>{f.emoji}</div>

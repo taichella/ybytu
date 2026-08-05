@@ -1,18 +1,18 @@
 import { supabase } from '../lib/supabase.js';
 
 export const foodService = {
-  // Utility function to remove fields not present in the database schema
   _sanitizeData(data) {
     const sanitized = { ...data };
-    const validFields = ['id', 'emoji', 'name', 'sub', 'group', 'portion', 'kcal', 'prot', 'carbs', 'fat', 'tags'];
 
-    // Removing mock data specific fields or incorrect field names (like carb instead of carbs)
-    Object.keys(sanitized).forEach(key => {
-      if (!validFields.includes(key)) {
-        if (key === 'carb') sanitized['carbs'] = sanitized[key]; // Just in case it was renamed
-        delete sanitized[key];
-      }
-    });
+    if (sanitized.carb !== undefined) {
+        sanitized.carbs_g = sanitized.carb;
+        delete sanitized.carb;
+    }
+
+    if (sanitized.kcal !== undefined) {
+        sanitized.calories_per_unit = sanitized.kcal;
+        delete sanitized.kcal;
+    }
 
     return sanitized;
   },
@@ -21,10 +21,10 @@ export const foodService = {
     const { data, error } = await supabase.from('foods').select('*');
     if (error) throw error;
     return data.map(item => {
-        // Map back carbs to carb for frontend if needed, though frontend expects carb
         return {
            ...item,
-           carb: item.carbs || 0 // Assuming 'carbs' is the real column name. We map it back to what frontend expects.
+           carb: item.carbs_g || 0,
+           kcal: item.calories_per_unit || 0
         };
     });
   },
@@ -32,26 +32,34 @@ export const foodService = {
   async getById(id) {
     const { data, error } = await supabase.from('foods').select('*').eq('id', id).single();
     if (error) throw error;
-    return { ...data, carb: data.carbs || 0 };
+    return {
+        ...data,
+        carb: data.carbs_g || 0,
+        kcal: data.calories_per_unit || 0
+    };
   },
 
   async create(foodData) {
     const payload = this._sanitizeData(foodData);
-    const { data, error } = await supabase.from('foods').insert([payload]).select();
+    const { data, error } = await supabase.functions.invoke('admin-catalog-foods', {
+        method: 'POST',
+        body: payload
+    });
     if (error) throw error;
     return data;
   },
 
   async update(id, foodData) {
     const payload = this._sanitizeData(foodData);
-    const { data, error } = await supabase.from('foods').update(payload).eq('id', id).select();
+    const { data, error } = await supabase.functions.invoke(`admin-catalog-foods?id=${id}`, {
+        method: 'PUT',
+        body: payload
+    });
     if (error) throw error;
     return data;
   },
 
   async delete(id) {
-    const { data, error } = await supabase.from('foods').delete().eq('id', id).select();
-    if (error) throw error;
-    return data;
+    throw new Error('Deletes destrutivos não são permitidos no projeto.');
   }
 };

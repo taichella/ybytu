@@ -1,14 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { exerciseService } from '../services/exerciseService.js';
+
 export default function Exercises() {
   const [theme, setTheme] = useState('dark');
-  const [view, setView] = useState('table'); // 'table' ou 'grid'
+  const [view, setView] = useState('table');
   const navigate = useNavigate();
+  const [exercisesData, setExercisesData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    exerciseService.getAll().then(data => {
+      setExercisesData(data);
+      setIsLoading(false);
+    }).catch(err => {
+      setErrorMsg(err.message);
+      setIsLoading(false);
+    });
+  }, []);
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
@@ -35,37 +50,7 @@ export default function Exercises() {
     av: { level: 'Avançado', levelBg: 'rgba(245,95,22,.14)', levelColor: '#F55F16' },
   };
 
-  const createEx = (name, ref, groups, equips, lv, kcal, avoid, caution, langs) => {
-    const total = avoid + caution;
-    const health = avoid > 0
-      ? { healthBg: 'rgba(239,68,68,.12)', healthColor: '#ef4444' }
-      : { healthBg: 'rgba(217,119,6,.14)', healthColor: '#d97706' };
-    const eqMore = equips.length > 1 ? ` +${equips.length - 1}` : '';
     
-    return {
-      name, ref, kcal,
-      groupsShown: groups.slice(0, 2),
-      hasMoreGroups: groups.length > 2, 
-      moreGroups: '+' + (groups.length - 2),
-      equipLabel: equips[0] + eqMore,
-      ...LV[lv],
-      healthNone: total === 0, healthWarn: total > 0, healthCount: total, ...health,
-      langPills: [ 
-        { code: 'PT', style: langPill(langs.includes('pt')) }, 
-        { code: 'EN', style: langPill(langs.includes('en')) }, 
-        { code: 'FR', style: langPill(langs.includes('fr')) } 
-      ],
-    };
-  };
-
-  const exercises = [
-    createEx('Agachamento Livre', 'EX-0142', ['Quadríceps', 'Glúteos', 'Core'], ['Barra', 'Anilha'], 'av', 8, 1, 1, ['pt', 'en', 'fr']),
-    createEx('Leg Press 45º', 'EX-0088', ['Quadríceps', 'Glúteos'], ['Máquina'], 'ini', 6, 0, 1, ['pt', 'en']),
-    createEx('Supino Reto', 'EX-0031', ['Peitoral', 'Tríceps'], ['Barra', 'Banco'], 'inter', 7, 0, 1, ['pt', 'en', 'fr']),
-    createEx('Puxada Frontal', 'EX-0205', ['Costas', 'Bíceps'], ['Cabo/Polia'], 'inter', 5, 0, 0, ['pt', 'en']),
-    createEx('Flexão de Braço', 'EX-0009', ['Peitoral', 'Tríceps', 'Core'], ['Peso corporal'], 'ini', 5, 0, 0, ['pt', 'en', 'fr']),
-    createEx('Levantamento Terra', 'EX-0177', ['Posteriores', 'Glúteos', 'Lombar'], ['Barra', 'Anilha'], 'av', 9, 2, 1, ['pt', 'en', 'fr']),
-  ];
 
   return (
     <>
@@ -123,7 +108,7 @@ export default function Exercises() {
           </div>
 
           {/* VIEW: TABLE */}
-          {view === 'table' && (
+          {isLoading ? <div style={{padding: "20px"}}>Carregando...</div> : errorMsg ? <div style={{padding: "20px", color: "red"}}>{errorMsg}</div> : view === 'table' && (
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
@@ -141,7 +126,7 @@ export default function Exercises() {
                     </tr>
                   </thead>
                   <tbody>
-                    {exercises.map((ex, idx) => (
+                    {exercisesData?.map((ex, idx) => (
                       <tr key={idx} style={{ borderTop: '1px solid var(--border)' }}>
                         <td style={{ textAlign: 'center', padding: '12px 16px' }}><input type="checkbox" style={{ width: '15px', height: '15px', accentColor: 'var(--brand)' }} /></td>
                         <td style={{ padding: '12px 16px' }}>
@@ -197,9 +182,9 @@ export default function Exercises() {
           )}
 
           {/* VIEW: GRID */}
-          {view === 'grid' && (
+          {!isLoading && !errorMsg && view === 'grid' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '18px' }}>
-              {exercises.map((ex, idx) => (
+              {exercisesData?.map((ex, idx) => (
                 <div key={idx} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
                   <div style={{ position: 'relative', width: '100%', height: '150px', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
                     {/* Placeholder para imagem/vídeo */}

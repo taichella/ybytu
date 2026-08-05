@@ -1,24 +1,14 @@
 import { supabase } from '../lib/supabase.js';
 
 export const exerciseService = {
-  // Utility function to remove fields not present in the database schema
   _sanitizeData(data) {
     const sanitized = { ...data };
-    const validFields = ['id', 'name', 'ref', 'groups', 'level', 'kcal', 'langs'];
-
-    Object.keys(sanitized).forEach(key => {
-      if (!validFields.includes(key)) {
-        delete sanitized[key];
-      }
-    });
-
     return sanitized;
   },
 
   async getAll() {
     const { data, error } = await supabase.from('exercises').select('*');
     if (error) throw error;
-    // adding default mock fields expected by the UI that don't exist in DB schema
     return data.map(item => ({
        ...item,
        equips: item.equips || ['Nenhum'],
@@ -40,21 +30,25 @@ export const exerciseService = {
 
   async create(exerciseData) {
     const payload = this._sanitizeData(exerciseData);
-    const { data, error } = await supabase.from('exercises').insert([payload]).select();
+    const { data, error } = await supabase.functions.invoke('admin-catalog-exercises', {
+        method: 'POST',
+        body: payload
+    });
     if (error) throw error;
     return data;
   },
 
   async update(id, exerciseData) {
     const payload = this._sanitizeData(exerciseData);
-    const { data, error } = await supabase.from('exercises').update(payload).eq('id', id).select();
+    const { data, error } = await supabase.functions.invoke(`admin-catalog-exercises?id=${id}`, {
+        method: 'PUT',
+        body: payload
+    });
     if (error) throw error;
     return data;
   },
 
   async delete(id) {
-    const { data, error } = await supabase.from('exercises').delete().eq('id', id).select();
-    if (error) throw error;
-    return data;
+    throw new Error('Deletes destrutivos não são permitidos no projeto.');
   }
 };
