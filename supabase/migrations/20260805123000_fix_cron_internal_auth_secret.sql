@@ -5,6 +5,19 @@
 -- manualmente e receber 403). Troca por um segredo dedicado
 -- (INTERNAL_FUNCTION_SECRET / vault "ybytu_internal_function_secret"),
 -- mais estavel e com blast radius menor que o service_role key.
+
+-- Falha alto em vez de agendar o cron mandando 'Bearer ' vazio pra sempre --
+-- sem isso, um 403 silencioso toda hora só seria notado quando um
+-- profissional reclamasse que nao recebeu lembrete.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM vault.secrets WHERE name = 'ybytu_internal_function_secret'
+  ) THEN
+    RAISE EXCEPTION 'vault secret "ybytu_internal_function_secret" nao existe -- crie com select vault.create_secret(...) antes de aplicar esta migration';
+  END IF;
+END $$;
+
 SELECT cron.schedule(
   'ybytu-plan-review-reminder-hourly',
   '0 * * * *',
