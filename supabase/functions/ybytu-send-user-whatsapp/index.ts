@@ -90,7 +90,7 @@ serve(async (req) => {
       if (insertError) throw new Error(`Criação de plan_share_token falhou: ${insertError.message}`)
     }
 
-    const planLink = `https://ybytu.app/plano/${planToken}`
+    const planLink = `https://dashboard.ybytu.app/plano/${planToken}`
     const templateId = Deno.env.get('SALVY_TEMPLATE_USER_PLAN_READY') ?? ''
 
     const result = await sendWhatsAppTemplate(profile.whatsapp_phone, templateId, [
