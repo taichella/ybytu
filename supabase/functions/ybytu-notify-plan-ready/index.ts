@@ -97,7 +97,7 @@ serve(async (req) => {
     }
 
     const templateId = Deno.env.get('SALVY_TEMPLATE_STAFF_PLAN_READY') ?? ''
-    const dashboardLink = `https://dashboard.ybytu.app/users/${userId}`
+    const dashboardLink = `https://pro.ybytu.app/users/${userId}`
     const notifiedRoles: string[] = []
 
     for (const role of missingRoles) {
