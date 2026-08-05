@@ -1,10 +1,13 @@
-// Chamada interna function->function (ou cron->function): autentica pelo
-// SERVICE_ROLE_KEY no header Authorization, nunca por telefone/user_id livre
-// no body. Mesmo nível de confiança que qualquer outro uso de service_role
-// nestas functions -- o segredo nunca sai do backend (client não tem acesso
-// a ele; a página de onboarding usa a sessão do próprio usuário, não isto).
+// Chamada interna function->function (ou cron->function): autentica por um
+// segredo PRÓPRIO (INTERNAL_FUNCTION_SECRET), não pelo SUPABASE_SERVICE_ROLE_KEY.
+// Motivo: o service_role key muda de formato conforme a Supabase migra o
+// esquema de API keys do projeto (aconteceu em 2026-08-05, quebrou a
+// comparação direta -- Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') no runtime
+// da function não bateu mais com o valor obtido via `projects api-keys`).
+// Um segredo dedicado também tem blast radius menor: se vazar, só dispara
+// estas duas notificações internas, não dá acesso total ao banco.
 export function isInternalServiceCall(req: Request): boolean {
   const token = req.headers.get('Authorization')?.replace('Bearer ', '')
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  return !!token && !!serviceKey && token === serviceKey
+  const internalSecret = Deno.env.get('INTERNAL_FUNCTION_SECRET')
+  return !!token && !!internalSecret && token === internalSecret
 }

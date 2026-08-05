@@ -86,7 +86,7 @@ serve(async (req) => {
       const notifyResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/ybytu-send-user-whatsapp`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          'Authorization': `Bearer ${Deno.env.get('INTERNAL_FUNCTION_SECRET')}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ user_id: userId }),
