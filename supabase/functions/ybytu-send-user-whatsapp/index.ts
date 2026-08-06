@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
 import { resolveStaffFromRequest } from '../_shared/staffAuth.ts'
-import { sendWhatsAppTemplate } from '../_shared/salvy.ts'
+import { sendWhatsAppTemplate } from '../_shared/whatsapp.ts'
 import { getOrCreatePlanShareToken } from '../_shared/planShareToken.ts'
 
 // Manda WhatsApp pro USUÁRIO final. Só aceita user_id -- nunca telefone cru
@@ -66,7 +66,7 @@ serve(async (req) => {
 
     const planToken = await getOrCreatePlanShareToken(supabase, userId)
     const planLink = `https://pro.ybytu.app/plano/${planToken}`
-    const templateId = Deno.env.get('SALVY_TEMPLATE_USER_PLAN_READY') ?? ''
+    const templateId = Deno.env.get('WHATSAPP_TEMPLATE_USER_PLAN_READY') ?? ''
 
     const result = await sendWhatsAppTemplate(profile.whatsapp_phone, templateId, [
       profile.full_name ?? '',

@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
-import { sendWhatsAppTemplate } from '../_shared/salvy.ts'
+import { sendWhatsAppTemplate } from '../_shared/whatsapp.ts'
 
 // Avisa os profissionais (personal/nutricionista) que ainda faltam dar
 // parecer num plano recém-gerado. Duas formas de chamar:
@@ -96,7 +96,7 @@ serve(async (req) => {
       })
     }
 
-    const templateId = Deno.env.get('SALVY_TEMPLATE_STAFF_PLAN_READY') ?? ''
+    const templateId = Deno.env.get('WHATSAPP_TEMPLATE_STAFF_PLAN_READY') ?? ''
     const dashboardLink = `https://pro.ybytu.app/users/${userId}`
     const notifiedRoles: string[] = []
 
