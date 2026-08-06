@@ -4,19 +4,13 @@ import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
 import { resolveStaffFromRequest } from '../_shared/staffAuth.ts'
 import { sendWhatsAppTemplate } from '../_shared/salvy.ts'
+import { getOrCreatePlanShareToken } from '../_shared/planShareToken.ts'
 
 // Manda WhatsApp pro USUÁRIO final. Só aceita user_id -- nunca telefone cru
 // no body (o número mora em profiles.whatsapp_phone, resolvido aqui dentro).
 // Caller autorizado: chamada interna (service_role -- ex: ybytu-submit-
 // plan-review avisando que o plano ficou pronto) OU staff autenticado
 // (qualquer papel ativo, ex: reenvio manual futuro pelo dashboard).
-function generateToken(): string {
-  const bytes = new Uint8Array(32)
-  crypto.getRandomValues(bytes)
-  let binary = ''
-  for (const b of bytes) binary += String.fromCharCode(b)
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-}
 
 serve(async (req) => {
   const corsHeaders = corsHeadersFor(req)
@@ -70,26 +64,7 @@ serve(async (req) => {
       })
     }
 
-    // Reaproveita token válido existente em vez de gerar um novo a cada envio.
-    const { data: existingToken } = await supabase
-      .from('plan_share_tokens')
-      .select('token')
-      .eq('user_id', userId)
-      .is('revoked_at', null)
-      .gt('expires_at', new Date().toISOString())
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-
-    let planToken = existingToken?.token ?? null
-    if (!planToken) {
-      planToken = generateToken()
-      const { error: insertError } = await supabase
-        .from('plan_share_tokens')
-        .insert({ user_id: userId, token: planToken })
-      if (insertError) throw new Error(`Criação de plan_share_token falhou: ${insertError.message}`)
-    }
-
+    const planToken = await getOrCreatePlanShareToken(supabase, userId)
     const planLink = `https://pro.ybytu.app/plano/${planToken}`
     const templateId = Deno.env.get('SALVY_TEMPLATE_USER_PLAN_READY') ?? ''
 

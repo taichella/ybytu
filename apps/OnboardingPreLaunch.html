@@ -482,8 +482,12 @@
           // 4b. Avisa personal/nutri que tem plano novo pra validar —
           // fail-soft igual ao resto: se falhar, o cron de lembrete (12h)
           // cobre o caso mesmo assim, não trava o redirect do usuário.
+          // 4c. Gera o link compartilhável (/plano/<token>) na hora, em vez
+          // de alguém ter que criar a linha em plan_share_tokens na mão pra
+          // conseguir revisar/testar o plano depois — mesmo fail-soft.
           if (!generationFailed) {
             supabase.functions.invoke('ybytu-notify-plan-ready').catch((e) => console.error(e));
+            supabase.functions.invoke('ybytu-create-plan-share-token').catch((e) => console.error(e));
           }
 
           // 5. WhatsApp sempre — mesmo se o gerador falhou (fail-soft).
