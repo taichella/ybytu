@@ -1,5 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
+const GROUPS = {
+  prot: { label: 'Proteínas', bg: 'rgba(59,130,246,.12)', color: '#3b82f6' },
+  carb: { label: 'Carboidratos', bg: 'rgba(245,158,11,.12)', color: '#f59e0b' },
+  veg: { label: 'Vegetais', bg: 'rgba(22,163,74,.12)', color: '#16a34a' },
+  fruit: { label: 'Frutas', bg: 'rgba(236,72,153,.12)', color: '#ec4899' },
+  dairy: { label: 'Laticínios', bg: 'rgba(6,182,212,.12)', color: '#06b6d4' },
+  fat: { label: 'Gorduras', bg: 'rgba(168,85,247,.12)', color: '#a855f7' }
+};
 
 export default function Foods() {
   const navigate = useNavigate();
@@ -18,15 +27,6 @@ export default function Foods() {
     color: isActive ? 'var(--text)' : 'var(--muted)',
     boxShadow: isActive ? '0 1px 2px rgba(0,0,0,.12)' : 'none'
   });
-
-  const GROUPS = {
-    prot: { label: 'Proteínas', bg: 'rgba(59,130,246,.12)', color: '#3b82f6' },
-    carb: { label: 'Carboidratos', bg: 'rgba(245,158,11,.12)', color: '#f59e0b' },
-    veg: { label: 'Vegetais', bg: 'rgba(22,163,74,.12)', color: '#16a34a' },
-    fruit: { label: 'Frutas', bg: 'rgba(236,72,153,.12)', color: '#ec4899' },
-    dairy: { label: 'Laticínios', bg: 'rgba(6,182,212,.12)', color: '#06b6d4' },
-    fat: { label: 'Gorduras', bg: 'rgba(168,85,247,.12)', color: '#a855f7' }
-  };
 
   // LÓGICA CORRIGIDA: Cores hexadecimais aplicadas diretamente no conic-gradient
   const getDonut = (prot, carb, fat, kcal, size = 64) => {
@@ -47,23 +47,51 @@ export default function Foods() {
     );
   };
 
-  const createFood = (id, emoji, name, sub, grp, portion, kcal, prot, carb, fat, tags) => ({
-    id, emoji, name, sub, ...GROUPS[grp], portion, kcal, prot, carb, fat,
-    tagsShown: tags.slice(0, 1),
-    hasMoreTags: tags.length > 1,
-    moreTags: `+${tags.length - 1}`,
-    tagsAll: tags
-  });
+  const formatFood = useCallback((f) => {
+    // Map backend schema to frontend expectation
+    // Many fields might be missing or under different names. Be defensive.
+    const rawTags = f.tags_ids || '';
+    const tags = rawTags ? rawTags.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-  const foods = [
-    createFood(1, '🍗', 'Peito de Frango Grelhado', 'TACO · grelhado', 'prot', '100 g', 165, 31, 0, 3.6, ['Low carb', 'Sem glúten']),
-    createFood(2, '🍚', 'Arroz Branco Cozido', 'TACO · cozido', 'carb', '100 g', 128, 2.5, 28, 0.2, ['Vegano', 'Sem lactose']),
-    createFood(3, '🥚', 'Ovo de Galinha', 'TACO · cozido', 'prot', '1 un (50 g)', 78, 6.3, 0.6, 5.3, ['Vegetariano', 'Keto']),
-    createFood(4, '🥦', 'Brócolis', 'TACO · cozido', 'veg', '100 g', 35, 2.4, 7, 0.4, ['Vegano', 'Sem glúten']),
-    createFood(5, '🍌', 'Banana Prata', 'TACO · in natura', 'fruit', '1 un (100 g)', 98, 1.3, 26, 0.1, ['Vegano']),
-    createFood(6, '🥑', 'Abacate', 'TACO · in natura', 'fat', '100 g', 96, 1.2, 6, 8.4, ['Keto', 'Vegano']),
-    createFood(7, '🧀', 'Queijo Minas Frescal', 'Rótulo · Tirolez', 'dairy', '30 g', 73, 5.4, 0.9, 5.5, ['Vegetariano']),
-  ];
+    const grpInfo = GROUPS[f.food_group_id] || { label: f.food_group_id || 'Outros', bg: 'var(--surface-2)', color: 'var(--text)' };
+
+    return {
+      id: f.id,
+      emoji: f.url_image || '🍽️',
+      name: f.name_ptbr || 'Alimento Desconhecido',
+      sub: f.brand || f.food_source_id || '-',
+      ...grpInfo,
+      portion: f.quantity ? `${f.quantity} ${f.food_measurement_unit_id || ''}`.trim() : '-',
+      kcal: f.calories_per_unit || 0,
+      prot: f.protein_g || 0,
+      carb: f.carbs_g || 0,
+      fat: f.fat_g || 0,
+      tagsShown: tags.slice(0, 1),
+      hasMoreTags: tags.length > 1,
+      moreTags: `+${tags.length - 1}`,
+      tagsAll: tags,
+      originalData: f // Keep original data around if needed for edits
+    };
+  }, []);
+
+  const [foods, setFoods] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    import('../services/foodService.js').then(({ foodService }) => {
+      foodService.getAll()
+        .then(data => {
+          setFoods(data.map(formatFood));
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Error fetching foods:", err);
+          setError(err.message || 'Falha ao carregar alimentos');
+          setLoading(false);
+        });
+    });
+  }, [formatFood]);
 
   return (
     <>
@@ -116,8 +144,13 @@ export default function Foods() {
             <select style={{ padding: '9px 14px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: '13px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>Tags</option><option>Rico em proteína</option><option>Magro</option></select>
           </div>
 
+          {/* FEEDBACK STATES */}
+          {loading && <div data-testid="loading-state" style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)', fontWeight: 800 }}>Carregando...</div>}
+          {error && <div data-testid="error-state" style={{ padding: '20px', textAlign: 'center', color: '#ef4444', fontWeight: 800, background: 'rgba(239,68,68,.1)', borderRadius: '12px' }}>{error}</div>}
+          {!loading && !error && foods.length === 0 && <div data-testid="empty-state" style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)', fontWeight: 800 }}>Lista vazia</div>}
+
           {/* TABLE VIEW */}
-          {view === 'table' && (
+          {!loading && !error && foods.length > 0 && view === 'table' && (
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
@@ -181,7 +214,7 @@ export default function Foods() {
           )}
 
           {/* GRID VIEW */}
-          {view === 'grid' && (
+          {!loading && !error && foods.length > 0 && view === 'grid' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '18px' }}>
               {foods.map((f, idx) => (
                 <div key={idx} className="yb-hover-card" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px' }}>

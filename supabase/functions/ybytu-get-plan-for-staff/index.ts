@@ -2,13 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { buildPlanPayload } from '../_shared/buildPlanPayload.ts'
 import { resolveStaffFromRequest } from '../_shared/staffAuth.ts'
-
-const corsHeaders = {
-  // DÉBITO pré-lançamento: restringir à(s) origem(ns) do frontend antes do
-  // go-live — mesmo débito já registrado em ybytu-generate-training-plan.
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeadersFor } from '../_shared/cors.ts'
 
 // PORTA DE STAFF — recebe { userId } (não token), autoriza pela sessão do
 // caller (precisa ser staff ativo, qualquer papel — a leitura do plano não
@@ -17,6 +11,7 @@ const corsHeaders = {
 // (porta pública por token) — ver comentário lá pro motivo de serem
 // functions separadas em vez de uma só com dois modos.
 serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {

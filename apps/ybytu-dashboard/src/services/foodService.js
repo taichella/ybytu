@@ -1,56 +1,75 @@
 import { supabase } from '../lib/supabase.js';
 
 export const foodService = {
-  // Utility function to remove fields not present in the database schema
+  // Utility function to rename fields to match the database schema
   _sanitizeData(data) {
-    const sanitized = { ...data };
-    const validFields = ['id', 'emoji', 'name', 'sub', 'group', 'portion', 'kcal', 'prot', 'carbs', 'fat', 'tags'];
+    const validFields = [
+      'food_id', 'name_ptbr', 'name_en', 'name_fr', 'food_group_id', 'food_source_id',
+      'food_type_id', 'brand', 'food_preparation_method_id', 'quantity', 'food_measurement_unit_id',
+      'correction_factor', 'cooking_factor', 'calories_per_unit', 'protein_g', 'carbs_g', 'fat_g',
+      'fiber_g', 'sugar_g', 'fat_sat_g', 'fat_trans_g', 'cholesterol_mg', 'sodium_mg', 'calcium_mg',
+      'iron_mg', 'potassium_mg', 'magnesium_mg', 'vitamins_ids', 'minerals_ids', 'dietary_restrictions_ids',
+      'diet_tags_ids', 'functional_tags_ids', 'tags_ids', 'food_facts_source_id', 'url_image', 'dietary_preference'
+    ];
 
-    // Removing mock data specific fields or incorrect field names (like carb instead of carbs)
-    Object.keys(sanitized).forEach(key => {
-      if (!validFields.includes(key)) {
-        if (key === 'carb') sanitized['carbs'] = sanitized[key]; // Just in case it was renamed
-        delete sanitized[key];
-      }
+    const sanitized = {};
+
+    // Attempting sensible default mappings where possible from previous model
+    // E.g. 'name' -> 'name_ptbr'
+    if (data.name) sanitized.name_ptbr = data.name;
+    if (data.kcal) sanitized.calories_per_unit = data.kcal;
+    if (data.prot) sanitized.protein_g = data.prot;
+    if (data.carb) sanitized.carbs_g = data.carb;
+    if (data.fat) sanitized.fat_g = data.fat;
+
+    Object.keys(data).forEach(key => {
+        if (validFields.includes(key)) {
+            sanitized[key] = data[key];
+        }
     });
 
     return sanitized;
   },
 
   async getAll() {
-    const { data, error } = await supabase.from('foods').select('*');
+    const { data, error } = await supabase.functions.invoke('admin-catalog-foods', { method: 'GET' });
     if (error) throw error;
-    return data.map(item => {
-        // Map back carbs to carb for frontend if needed, though frontend expects carb
-        return {
-           ...item,
-           carb: item.carbs || 0 // Assuming 'carbs' is the real column name. We map it back to what frontend expects.
-        };
-    });
+    return data;
   },
 
   async getById(id) {
-    const { data, error } = await supabase.from('foods').select('*').eq('id', id).single();
+    // Currently edge function does not support by ID GET, will return all and filter
+    const { data, error } = await supabase.functions.invoke('admin-catalog-foods', { method: 'GET' });
     if (error) throw error;
-    return { ...data, carb: data.carbs || 0 };
+    return data.find(item => item.id === id);
   },
 
   async create(foodData) {
     const payload = this._sanitizeData(foodData);
-    const { data, error } = await supabase.from('foods').insert([payload]).select();
+    const { data, error } = await supabase.functions.invoke('admin-catalog-foods', {
+        method: 'POST',
+        body: payload
+    });
     if (error) throw error;
     return data;
   },
 
   async update(id, foodData) {
     const payload = this._sanitizeData(foodData);
-    const { data, error } = await supabase.from('foods').update(payload).eq('id', id).select();
+    payload.id = id;
+    const { data, error } = await supabase.functions.invoke('admin-catalog-foods', {
+        method: 'PUT',
+        body: payload
+    });
     if (error) throw error;
     return data;
   },
 
   async delete(id) {
-    const { data, error } = await supabase.from('foods').delete().eq('id', id).select();
+    const { data, error } = await supabase.functions.invoke('admin-catalog-foods', {
+        method: 'DELETE',
+        body: { id }
+    });
     if (error) throw error;
     return data;
   }

@@ -459,3 +459,39 @@ entrypoint = "./functions/whatsapp-webhook/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/whatsapp-webhook/*.html" ]
+
+# As 3 abaixo recebem chamada interna (cron ou function->function) com um
+# segredo próprio no Authorization, não um JWT -- o gateway rejeitaria com
+# 401 antes de chegar no código se verify_jwt ficasse true (default). A
+# autenticação real é feita dentro da function (isInternalServiceCall /
+# resolveStaffFromRequest), igual ao padrão já usado em admin-alert acima.
+[functions.ybytu-notify-plan-ready]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-notify-plan-ready/index.ts"
+
+[functions.ybytu-send-user-whatsapp]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-send-user-whatsapp/index.ts"
+
+[functions.ybytu-plan-review-reminder-cron]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-plan-review-reminder-cron/index.ts"
+
+[functions.admin-catalog-foods]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/admin-catalog-foods/index.ts"
+
+
+[functions.admin-catalog-equipment]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/admin-catalog-equipment/index.ts"
+
+[functions.admin-catalog-tags]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/admin-catalog-tags/index.ts"

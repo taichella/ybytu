@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 
 export default function Tags() {
   const [theme, setTheme] = useState('dark');
@@ -19,13 +18,6 @@ export default function Tags() {
   });
 
   // Mock Data[cite: 16]
-  const gerais = [
-    { id: 'fitness', pt: 'Fitness', en: 'Fitness', fr: 'Fitness', icon: '🏷️', count: 182 },
-    { id: 'saudavel', pt: 'Saudável', en: 'Healthy', fr: 'Sain', icon: '🏷️', count: 421 },
-    { id: 'rapido', pt: 'Rápido', en: 'Quick', fr: 'Rapide', icon: '🏷️', count: 96 },
-    { id: 'economico', pt: 'Econômico', en: 'Budget', fr: 'Économique', icon: '🏷️', count: 73 },
-  ];
-
   const funcionais = [
     { id: 'rico-proteina', pt: 'Rico em proteína', en: 'High protein', fr: 'Riche en protéines', icon: '⚡', count: 214 },
     { id: 'baixo-indice', pt: 'Baixo índice glicêmico', en: 'Low glycemic', fr: 'Faible index glyc.', icon: '⚡', count: 77 },
@@ -50,7 +42,40 @@ export default function Tags() {
     return { ...dietCat[key], count: items.length, items };
   });
 
-  const curSimple = tab === 'gerais' ? gerais : funcionais;
+  const [error, setError] = useState(null);
+  const [tags, setTags] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    if (tab === 'gerais') {
+      import('../services/tagsService.js').then(({ tagsService }) => {
+        tagsService.getAll()
+          .then(data => {
+            if (!active) return;
+            const formatted = data.map(tag => ({
+               id: tag.tag_id || tag.id,
+               pt: tag.name_ptbr || '',
+               en: tag.name_en || '',
+               fr: tag.name_fr || '',
+               icon: '🏷️',
+               count: 0,
+               originalData: tag
+            }));
+            setTags(formatted);
+            setError(null);
+          })
+          .catch(err => {
+            if (!active) return;
+            console.error("Error fetching tags:", err);
+            setError(err.message || 'Falha ao carregar tags');
+          });
+      });
+    }
+    return () => { active = false; };
+  }, [tab]);
+
+
+  const curSimple = tab === 'gerais' ? tags : funcionais;
   
   const hints = {
     gerais: 'Tags livres e descritivas (ex: "rápido", "caseiro"). Aparecem em alimentos, refeições e planos para busca e organização.',
@@ -124,8 +149,12 @@ export default function Tags() {
             </div>
           )}
 
+          {/* FEEDBACK STATES */}
+          {tab === 'gerais' && error && <div data-testid="error-state" style={{ padding: '20px', textAlign: 'center', color: '#ef4444', fontWeight: 800, background: 'rgba(239,68,68,.1)', borderRadius: '12px' }}>{error}</div>}
+          {tab === 'gerais' && !error && curSimple.length === 0 && <div data-testid="empty-state" style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)', fontWeight: 800 }}>Lista vazia</div>}
+
           {/* SIMPLES (Gerais e Funcionais)[cite: 16] */}
-          {(tab === 'gerais' || tab === 'funcionais') && (
+          {((tab === 'gerais' && !error && curSimple.length > 0) || tab === 'funcionais') && (
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>

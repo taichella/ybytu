@@ -1,18 +1,38 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-
-// Configuração de Headers para permitir chamadas externas (CORS) caso necessário
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
+import { corsHeadersFor } from '../_shared/cors.ts'
 
 serve(async (req) => {
+  const corsHeaders = corsHeadersFor(req)
   // Trata requisições de preflight do CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    // 0. Estava completamente aberto (sem CORS restrito nem auth) -- qualquer
+    // um na internet podia disparar mensagem pros telefones dos profissionais
+    // usando nosso SALVY_API_KEY. Fechado pro mesmo padrão de staff das
+    // outras functions: só admin dispara alerta.
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    )
+    const auth = await resolveStaffFromRequest(req, supabase)
+    if (!auth.ok) {
+      return new Response(
+        JSON.stringify({ error: auth.reason }),
+        { status: auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      )
+    }
+    if (!requireRole(auth.staff, 'admin')) {
+      return new Response(
+        JSON.stringify({ error: 'admin_only' }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      )
+    }
+
     // 1. Lendo os dados enviados na requisição
     const { type, message } = await req.json()
 

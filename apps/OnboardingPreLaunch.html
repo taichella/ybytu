@@ -479,6 +479,13 @@
             .update({ plan_generation_status: generationFailed ? 'failed' : 'ok' })
             .eq('id', userId);
 
+          // 4b. Avisa personal/nutri que tem plano novo pra validar —
+          // fail-soft igual ao resto: se falhar, o cron de lembrete (12h)
+          // cobre o caso mesmo assim, não trava o redirect do usuário.
+          if (!generationFailed) {
+            supabase.functions.invoke('ybytu-notify-plan-ready').catch((e) => console.error(e));
+          }
+
           // 5. WhatsApp sempre — mesmo se o gerador falhou (fail-soft).
           redirectToWhatsApp();
         } catch (e) {

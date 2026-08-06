@@ -4,14 +4,76 @@ import { useNavigate, useParams } from 'react-router-dom';
 export default function FoodEditor() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const isNew = !id; // Se não houver ID na URL, estamos a criar um Novo Alimento
+  const isNew = !id;
   
   const [theme, setTheme] = useState('dark');
   const [lang, setLang] = useState('pt');
 
+  const [formData, setFormData] = useState({
+      name_ptbr: '',
+      name_en: '',
+      name_fr: '',
+      food_id: '',
+      brand: '',
+      quantity: 100,
+      calories_per_unit: 0,
+      protein_g: 0,
+      carbs_g: 0,
+      fat_g: 0,
+      originalData: null
+  });
+
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    let active = true;
+    if (!isNew) {
+      import('../services/foodService.js').then(({ foodService }) => {
+        foodService.getById(id)
+          .then(data => {
+            if (!active) return;
+            if (data) {
+                setFormData({
+                    name_ptbr: data.name_ptbr || '',
+                    name_en: data.name_en || '',
+                    name_fr: data.name_fr || '',
+                    food_id: data.food_id || data.id,
+                    brand: data.brand || '',
+                    quantity: data.quantity || 100,
+                    calories_per_unit: data.calories_per_unit || 0,
+                    protein_g: data.protein_g || 0,
+                    carbs_g: data.carbs_g || 0,
+                    fat_g: data.fat_g || 0,
+                    originalData: data
+                });
+            } else {
+                console.error('Alimento não encontrado.');
+            }
+          })
+          .catch(err => {
+            if (!active) return;
+            console.error(err.message);
+          });
+      });
+    }
+    return () => { active = false; };
+  }, [id, isNew]);
+
+  const handleSave = async () => {
+    try {
+        const { foodService } = await import('../services/foodService.js');
+        if (isNew) {
+            await foodService.create(formData);
+        } else {
+            await foodService.update(formData.originalData.id, formData);
+        }
+        navigate('/foods');
+    } catch (err) {
+        alert("Erro ao salvar: " + err.message);
+    }
+  };
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
@@ -76,7 +138,7 @@ export default function FoodEditor() {
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
           <button onClick={() => navigate('/foods')} style={{ background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
+          <button onClick={handleSave} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8M7 3v5h8"></path></svg> {isNew ? 'Criar' : 'Salvar'}
           </button>
         </div>
