@@ -67,14 +67,16 @@ export default function TrainingPlanCreator() {
   }, [id, isNew]);
 
   useEffect(() => {
+    let cancelled = false;
     clearTimeout(searchDebounce.current);
     if (exSearch.trim().length < 2) { setExResults([]); return; }
     searchDebounce.current = setTimeout(async () => {
       try {
-        setExResults(await trainingService.searchExercises(exSearch.trim()) ?? []);
+        const results = await trainingService.searchExercises(exSearch.trim());
+        if (!cancelled) setExResults(results ?? []);
       } catch { /* autocomplete, falha silenciosa */ }
     }, 300);
-    return () => clearTimeout(searchDebounce.current);
+    return () => { cancelled = true; clearTimeout(searchDebounce.current); };
   }, [exSearch]);
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');

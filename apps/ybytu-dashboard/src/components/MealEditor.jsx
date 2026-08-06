@@ -59,15 +59,16 @@ export default function MealEditor() {
   }, [id, isNew]);
 
   useEffect(() => {
+    let cancelled = false;
     clearTimeout(searchDebounce.current);
     if (foodSearch.trim().length < 2) { setFoodResults([]); return; }
     searchDebounce.current = setTimeout(async () => {
       try {
         const results = await mealService.searchFoods(foodSearch.trim());
-        setFoodResults(results ?? []);
+        if (!cancelled) setFoodResults(results ?? []);
       } catch { /* silencioso, é só autocomplete */ }
     }, 300);
-    return () => clearTimeout(searchDebounce.current);
+    return () => { cancelled = true; clearTimeout(searchDebounce.current); };
   }, [foodSearch]);
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
