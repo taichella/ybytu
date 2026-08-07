@@ -479,19 +479,3 @@ entrypoint = "./functions/ybytu-send-user-whatsapp/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/ybytu-plan-review-reminder-cron/index.ts"
-
-[functions.admin-catalog-foods]
-enabled = true
-verify_jwt = false
-entrypoint = "./functions/admin-catalog-foods/index.ts"
-
-
-[functions.admin-catalog-equipment]
-enabled = true
-verify_jwt = false
-entrypoint = "./functions/admin-catalog-equipment/index.ts"
-
-[functions.admin-catalog-tags]
-enabled = true
-verify_jwt = false
-entrypoint = "./functions/admin-catalog-tags/index.ts"

@@ -9,66 +9,18 @@ export default function Equipment() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ id: '', pt: '', en: '', fr: '', count: 0 });
 
-  const [equipments, setEquipments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const initialEquipments = [
+    { id: 'bodyweight', pt: 'Peso corporal', en: 'Bodyweight', fr: 'Poids du corps', count: 128 },
+    { id: 'dumbbell', pt: 'Halteres', en: 'Dumbbells', fr: 'Haltères', count: 96 },
+    { id: 'barbell', pt: 'Barra', en: 'Barbell', fr: 'Barre', count: 74 },
+    { id: 'machine', pt: 'Máquina', en: 'Machine', fr: 'Machine', count: 88 }
+  ];
+
+  const [equipments, setEquipments] = useState(initialEquipments);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
-
-  useEffect(() => {
-    let active = true;
-    import('../services/equipmentService.js').then(({ equipmentService }) => {
-      equipmentService.getAll()
-        .then(data => {
-          if (!active) return;
-          const formatted = data.map(eq => ({
-             id: eq.exercise_equipment_id || eq.id, // Fallback to id if needed
-             pt: eq.name_ptbr || '',
-             en: eq.name_en || '',
-             fr: eq.name_fr || '',
-             count: eq.count || 0,
-             originalData: eq
-          }));
-          setEquipments(formatted);
-          setError(null);
-        })
-        .catch(err => {
-          if (!active) return;
-          console.error("Error fetching equipments:", err);
-          setError(err.message || 'Falha ao carregar equipamentos');
-        })
-        .finally(() => {
-          if (active) setLoading(false);
-        });
-    });
-    return () => { active = false; };
-  }, []);
-
-  const reloadData = () => {
-    setLoading(true);
-    import('../services/equipmentService.js').then(({ equipmentService }) => {
-      equipmentService.getAll()
-        .then(data => {
-          const formatted = data.map(eq => ({
-             id: eq.exercise_equipment_id || eq.id,
-             pt: eq.name_ptbr || '',
-             en: eq.name_en || '',
-             fr: eq.name_fr || '',
-             count: eq.count || 0,
-             originalData: eq
-          }));
-          setEquipments(formatted);
-          setError(null);
-        })
-        .catch(err => {
-          console.error("Error reloading equipments:", err);
-          setError(err.message || 'Falha ao carregar equipamentos');
-        })
-        .finally(() => setLoading(false));
-    });
-  };
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
@@ -86,44 +38,18 @@ export default function Equipment() {
   };
 
   const handleDelete = (id) => {
-    if (!window.confirm('Deseja realmente excluir este item? Essa ação não pode ser desfeita.')) return;
-    const target = equipments.find(e => e.id === id);
-    if (!target || !target.originalData) return;
-
-    import('../services/equipmentService.js').then(({ equipmentService }) => {
-      equipmentService.delete(target.originalData.id)
-        .then(() => reloadData())
-        .catch(err => alert("Erro ao excluir: " + err.message));
-    });
+    setEquipments(equipments.filter(e => e.id !== id));
   };
 
   const handleSave = () => {
     if (!formData.id || !formData.pt) return; // Validação simples
     
-    const payload = {
-        exercise_equipment_id: formData.id,
-        name_ptbr: formData.pt,
-        name_en: formData.en,
-        name_fr: formData.fr
-    };
-
-    import('../services/equipmentService.js').then(({ equipmentService }) => {
-      if (isEditing) {
-        equipmentService.update(formData.originalData.id, payload)
-          .then(() => {
-            setShowForm(false);
-            reloadData();
-          })
-          .catch(err => alert("Erro ao salvar: " + err.message));
-      } else {
-        equipmentService.create(payload)
-          .then(() => {
-            setShowForm(false);
-            reloadData();
-          })
-          .catch(err => alert("Erro ao criar: " + err.message));
-      }
-    });
+    if (isEditing) {
+      setEquipments(equipments.map(e => e.id === formData.id ? formData : e));
+    } else {
+      setEquipments([formData, ...equipments]);
+    }
+    setShowForm(false);
   };
 
   return (
@@ -152,11 +78,6 @@ export default function Equipment() {
             <h1 style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-.02em', margin: 0, textTransform: 'uppercase' }}>Equipamentos</h1>
             <p style={{ color: 'var(--muted)', fontSize: '14px', margin: '5px 0 0' }}>Catálogo multilíngue usado para classificar exercícios. <strong style={{ color: 'var(--text)' }}>{equipments.length}</strong> equipamentos.</p>
           </div>
-
-          {/* FEEDBACK STATES */}
-          {loading && <div data-testid="loading-state" style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)', fontWeight: 800 }}>Carregando...</div>}
-          {error && <div data-testid="error-state" style={{ padding: '20px', textAlign: 'center', color: '#ef4444', fontWeight: 800, background: 'rgba(239,68,68,.1)', borderRadius: '12px' }}>{error}</div>}
-          {!loading && !error && equipments.length === 0 && <div data-testid="empty-state" style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)', fontWeight: 800 }}>Lista vazia</div>}
 
           {/* Formulário Inline */}
           {showForm && (
@@ -193,7 +114,6 @@ export default function Equipment() {
             </div>
           )}
 
-          {!loading && !error && equipments.length > 0 && (
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
@@ -232,7 +152,6 @@ export default function Equipment() {
               </table>
             </div>
           </div>
-          )}
 
         </div>
       </main>
