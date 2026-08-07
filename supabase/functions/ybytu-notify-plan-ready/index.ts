@@ -97,7 +97,6 @@ serve(async (req) => {
     }
 
     const templateId = Deno.env.get('WHATSAPP_TEMPLATE_STAFF_PLAN_READY') ?? ''
-    const dashboardLink = `https://pro.ybytu.app/users/${userId}`
     const notifiedRoles: string[] = []
 
     for (const role of missingRoles) {
@@ -106,7 +105,9 @@ serve(async (req) => {
         console.error(`Telefone não configurado pro papel ${role} (${ROLE_PHONE_ENV[role]})`)
         continue
       }
-      const result = await sendWhatsAppTemplate(phone, templateId, [profile.full_name ?? 'aluno(a)', dashboardLink])
+      // Botão "Visit website" do template: base fixa https://pro.ybytu.app/users/
+      // cadastrada na Meta + sufixo dinâmico = userId.
+      const result = await sendWhatsAppTemplate(phone, templateId, [profile.full_name ?? 'aluno(a)'], userId)
       if (result.ok) notifiedRoles.push(role)
       else console.error(`Falha ao notificar ${role}:`, result.error)
     }

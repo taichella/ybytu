@@ -65,13 +65,16 @@ serve(async (req) => {
     }
 
     const planToken = await getOrCreatePlanShareToken(supabase, userId)
-    const planLink = `https://pro.ybytu.app/plano/${planToken}`
     const templateId = Deno.env.get('WHATSAPP_TEMPLATE_USER_PLAN_READY') ?? ''
 
-    const result = await sendWhatsAppTemplate(profile.whatsapp_phone, templateId, [
-      profile.full_name ?? '',
-      planLink,
-    ])
+    // Botão "Visit website" do template: base fixa https://pro.ybytu.app/plano/
+    // cadastrada na Meta + sufixo dinâmico = planToken.
+    const result = await sendWhatsAppTemplate(
+      profile.whatsapp_phone,
+      templateId,
+      [profile.full_name ?? ''],
+      planToken,
+    )
 
     if (!result.ok) {
       return new Response(JSON.stringify({ error: result.error ?? 'send_failed' }), {

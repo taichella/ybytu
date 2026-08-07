@@ -7,6 +7,12 @@ export async function sendWhatsAppTemplate(
   phone: string,
   templateName: string,
   bodyParams: string[],
+  // Sufixo dinâmico do botão "Visit website" do template (sub_type: url) --
+  // NÃO é a URL inteira, é só o pedaço que a Meta concatena depois da base
+  // fixa cadastrada no template (ex: base "https://pro.ybytu.app/users/" +
+  // buttonUrlParam "abc123" = URL final). Omitir quando o template não tem
+  // botão de URL dinâmica.
+  buttonUrlParam?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const accessToken = Deno.env.get('WHATSAPP_ACCESS_TOKEN')
   const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID')
@@ -14,6 +20,21 @@ export async function sendWhatsAppTemplate(
   if (!phoneNumberId) return { ok: false, error: 'missing_whatsapp_phone_number_id' }
   if (!templateName) return { ok: false, error: 'missing_template_name' }
   if (!phone) return { ok: false, error: 'missing_phone' }
+
+  const components: Record<string, unknown>[] = [
+    {
+      type: 'body',
+      parameters: bodyParams.map((text) => ({ type: 'text', text })),
+    },
+  ]
+  if (buttonUrlParam !== undefined) {
+    components.push({
+      type: 'button',
+      sub_type: 'url',
+      index: '0',
+      parameters: [{ type: 'text', text: buttonUrlParam }],
+    })
+  }
 
   try {
     const response = await fetch(`https://graph.facebook.com/v20.0/${phoneNumberId}/messages`, {
@@ -29,12 +50,7 @@ export async function sendWhatsAppTemplate(
         template: {
           name: templateName,
           language: { code: 'pt_BR' },
-          components: [
-            {
-              type: 'body',
-              parameters: bodyParams.map((text) => ({ type: 'text', text })),
-            },
-          ],
+          components,
         },
       }),
     })
