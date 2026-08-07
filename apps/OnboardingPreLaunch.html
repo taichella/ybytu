@@ -74,6 +74,23 @@
 
   const WHATSAPP_NUMBER = '5511955026812';
 
+  // Restrições que ficam redundantes/implícitas dado o dietary_preference_id
+  // (slug da tabela dietary_preferences) escolhido -- evita marcar "Sem Carne
+  // Vermelha" sendo vegetariano, por ex. Chave = slug; valores = name_ptbr
+  // (lowercase) das opções de dietary_restrictions a bloquear. Não existe
+  // opção "Sem Frango" no catálogo hoje, então pescetariano não bloqueia nada
+  // relacionado a frango -- se essa opção for criada, só adicionar aqui.
+  const DIETARY_RESTRICTION_BLOCKS_BY_PREFERENCE = {
+    vegan: ['sem carne suína', 'sem carne vermelha', 'sem frutos do mar', 'sem peixe', 'sem ovos', 'sem laticínios'],
+    vegetarian: ['sem carne suína', 'sem carne vermelha', 'sem frutos do mar', 'sem peixe'],
+    pescetarian: ['sem carne suína', 'sem carne vermelha'],
+    no_seafood: ['sem frutos do mar'],
+    no_red_meat: ['sem carne vermelha'],
+    no_pork: ['sem carne suína'],
+    omnivore: [],
+    flexitarian: [],
+  };
+
   function OnboardingApp() {
     const [currentStep, setCurrentStep] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -277,10 +294,10 @@
         type: 'single', 
         dbField: 'meals_per_day', 
         options: [
-          {id: 3, name_ptbr: '3 refeições (Ex: Pequeno-almoço, Almoço, Jantar)'}, 
-          {id: 4, name_ptbr: '4 refeições (+ 1 Lanche)'}, 
-          {id: 5, name_ptbr: '5 refeições (+ 2 Lanches)'}, 
-          {id: 6, name_ptbr: '6 refeições (Comer de 3 em 3 horas)'}
+          {id: 3, name_ptbr: '3 refeições por dia'},
+          {id: 4, name_ptbr: '4 refeições por dia'},
+          {id: 5, name_ptbr: '5 refeições por dia'},
+          {id: 6, name_ptbr: '6 refeições por dia'}
         ],
         condition: (ans) => true
       },
@@ -318,7 +335,7 @@
         try {
           const updatedSteps = await Promise.all(steps.map(async (step) => {
             if (step.table) {
-              const { data, error } = await supabase.from(step.table).select('*');
+              const { data, error } = await supabase.from(step.table).select('*').order('sort_order');
               if (error || !data) return step;
               return {
                 ...step,
@@ -344,11 +361,57 @@
 
     const visibleSteps = useMemo(() => steps.filter(step => step.condition ? step.condition(answers, steps) : true), [answers, steps]);
 
+    // "Nenhuma"/"Nenhum" é detectado pelo nome vindo do banco, não por uma
+    // lista fixa de tabelas -- assim a exclusão mútua vale pra qualquer
+    // pergunta múltipla que tenha essa opção, inclusive se o catálogo mudar.
+    const findNoneOption = (options) => (options || []).find(o => {
+      const label = String(o.name_ptbr || o.name || '').trim().toLowerCase();
+      return label === 'nenhuma' || label === 'nenhum';
+    });
+
+    // IDs de dietary_restrictions que ficam bloqueados dada a preferência
+    // alimentar escolhida (answers.dietary_preference_id guarda o uuid da
+    // opção, não o slug -- o slug mora em opt.dietary_preference_id,
+    // preservado pelo spread do fetchAllOptions).
+    const getBlockedRestrictionIds = (preferenceOptionId) => {
+      if (!preferenceOptionId) return [];
+      const prefOptions = steps.find(s => s.dbField === 'dietary_preference_id')?.options || [];
+      const chosenPref = prefOptions.find(o => o.id === preferenceOptionId);
+      const blockedLabels = DIETARY_RESTRICTION_BLOCKS_BY_PREFERENCE[chosenPref?.dietary_preference_id] || [];
+      const restrictionOptions = steps.find(s => s.dbField === 'dietary_restrictions_ids')?.options || [];
+      return restrictionOptions
+        .filter(o => blockedLabels.includes(String(o.name_ptbr || o.name || '').trim().toLowerCase()))
+        .map(o => o.id);
+    };
+
     const handleSelect = (optionId) => {
-      const field = visibleSteps[currentStep].dbField;
-      if (visibleSteps[currentStep].type === 'multiple') {
+      const stepData = visibleSteps[currentStep];
+      const field = stepData.dbField;
+      if (stepData.type === 'multiple') {
+        const noneOption = findNoneOption(stepData.options);
         const selections = answers[field] || [];
-        setAnswers({ ...answers, [field]: selections.includes(optionId) ? selections.filter(i => i !== optionId) : [...selections, optionId] });
+
+        let newSelections;
+        if (noneOption && optionId === noneOption.id) {
+          // Selecionar "Nenhuma" desmarca e desabilita as outras.
+          newSelections = selections.includes(optionId) ? [] : [optionId];
+        } else {
+          // Selecionar qualquer outra desmarca "Nenhuma".
+          const withoutNone = noneOption ? selections.filter(i => i !== noneOption.id) : selections;
+          newSelections = withoutNone.includes(optionId) ? withoutNone.filter(i => i !== optionId) : [...withoutNone, optionId];
+        }
+        setAnswers({ ...answers, [field]: newSelections });
+      } else if (field === 'dietary_preference_id') {
+        // Trocar a preferência limpa restrições que já ficaram implícitas/
+        // redundantes -- senão fica um estado inválido salvo (ex: vegano com
+        // "Sem Ovos" marcado à parte).
+        const blockedIds = getBlockedRestrictionIds(optionId);
+        const currentRestrictions = answers.dietary_restrictions_ids || [];
+        setAnswers({
+          ...answers,
+          [field]: optionId,
+          dietary_restrictions_ids: currentRestrictions.filter(id => !blockedIds.includes(id)),
+        });
       } else {
         setAnswers({ ...answers, [field]: optionId });
       }
@@ -466,6 +529,10 @@
           // o gap humano de validação do plano (horas) já dá de qualquer jeito.
           supabase.functions.invoke('ybytu-notify-onboarding-received').catch((e) => console.error(e));
 
+          // 3c. Email de confirmação + recapitulativo (Resend) — mesmo
+          // fire-and-forget, mesmo motivo.
+          supabase.functions.invoke('ybytu-send-onboarding-email').catch((e) => console.error(e));
+
           // 4. Dispara os geradores novos — fail-soft: erro não trava o
           // redirect (não perde o lead), só marca a flag pra suporte ver depois.
           const isTraining = [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
@@ -578,15 +645,24 @@
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                {currentData.options?.map((opt, i) => {
-                  const isSelected = currentData.type === 'multiple' 
-                    ? (answers[currentData.dbField] || []).includes(opt.id) 
+                {(() => {
+                  const noneOption = currentData.type === 'multiple' ? findNoneOption(currentData.options) : null;
+                  const noneSelected = noneOption && (answers[currentData.dbField] || []).includes(noneOption.id);
+                  const blockedByPreferenceIds = currentData.dbField === 'dietary_restrictions_ids'
+                    ? getBlockedRestrictionIds(answers.dietary_preference_id)
+                    : [];
+                  return currentData.options?.map((opt, i) => {
+                  const isSelected = currentData.type === 'multiple'
+                    ? (answers[currentData.dbField] || []).includes(opt.id)
                     : answers[currentData.dbField] === opt.id;
+                  const isDisabled = (noneSelected && opt.id !== noneOption.id) || blockedByPreferenceIds.includes(opt.id);
                   return (
-                    <button 
-                      key={i} 
-                      onClick={() => handleSelect(opt.id)} 
-                      className={`p-5 rounded-2xl flex justify-between items-center border transition-all duration-300 cursor-pointer w-full text-left
+                    <button
+                      key={i}
+                      onClick={() => !isDisabled && handleSelect(opt.id)}
+                      disabled={isDisabled}
+                      className={`p-5 rounded-2xl flex justify-between items-center border transition-all duration-300 w-full text-left
+                        ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}
                         ${isSelected ? 'border-brand bg-brand/10 shadow-sm' : 'border-borderColor bg-surface hover:bg-gray-50'}`}
                     >
                       <span className={`text-lg font-medium transition-colors ${isSelected ? 'text-brand' : 'text-textMain'}`}>
@@ -610,7 +686,8 @@
                       </div>
                     </button>
                   );
-                })}
+                  });
+                })()}
               </div>
             )}
           </div>
