@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Sidebar from './Sidebar.jsx';
-import MobileNav from './MobileNav.jsx';
 import { equipmentService } from '../services/equipmentService.js';
 
 export default function Equipment() {
@@ -70,10 +68,7 @@ export default function Equipment() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
-      <Sidebar />
-      <MobileNav />
-
+    <>
       <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
         <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
 
@@ -180,6 +175,6 @@ export default function Equipment() {
           )}
         </div>
       </main>
-    </div>
+    </>
   );
 }

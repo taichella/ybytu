@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Sidebar from './Sidebar.jsx';
-import MobileNav from './MobileNav.jsx';
 import { foodService } from '../services/foodService.js';
 
 export default function Foods() {
@@ -64,10 +62,7 @@ export default function Foods() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
-      <Sidebar />
-      <MobileNav />
-
+    <>
       <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
         <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
           
@@ -240,6 +235,6 @@ export default function Foods() {
 
         </div>
       </main>
-    </div>
+    </>
   );
 }

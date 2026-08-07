@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from './Sidebar.jsx';
-import MobileNav from './MobileNav.jsx';
 import { tagService } from '../services/tagService.js';
 
 export default function Tags() {
@@ -104,10 +102,7 @@ export default function Tags() {
   const dietGroupsMap = groupDietTags(tags);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
-      <Sidebar />
-      <MobileNav />
-
+    <>
       <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
         <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
 
@@ -246,6 +241,6 @@ export default function Tags() {
 
         </div>
       </main>
-    </div>
+    </>
   );
 }

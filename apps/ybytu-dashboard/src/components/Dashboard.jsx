@@ -1,8 +1,23 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { pendingReviewsService } from '../services/pendingReviewsService.js';
 
 export default function Dashboard() {
   const [theme, setTheme] = useState('dark');
   const [period, setPeriod] = useState('hoje');
+
+  const [pending, setPending] = useState([]);
+  const [pendingLoading, setPendingLoading] = useState(true);
+  const [pendingError, setPendingError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    pendingReviewsService.getAll()
+      .then((data) => { if (!cancelled) setPending(data.pending ?? []); })
+      .catch((e) => { if (!cancelled) setPendingError(e.message); })
+      .finally(() => { if (!cancelled) setPendingLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -67,6 +82,33 @@ export default function Dashboard() {
               <button onClick={() => setPeriod('mes')} style={btnStyle(period === 'mes')}>Mês</button>
             </div>
           </div>
+
+          {/* Planos aguardando validação -- real, não mock */}
+          {!pendingLoading && !pendingError && pending.length > 0 && (
+            <div style={{ background: 'rgba(245,95,22,.08)', border: '1px solid var(--brand)', borderRadius: '18px', padding: '20px 22px', marginBottom: '18px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <span style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                  </span>
+                  <div>
+                    <p style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>{pending.length} plano{pending.length > 1 ? 's' : ''} aguardando validação</p>
+                    <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Alunos com plano gerado esperando parecer profissional</p>
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {pending.map((p) => (
+                  <Link key={p.id} to={`/users/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+                    <span style={{ fontWeight: 700, fontSize: '14px' }}>{p.full_name || 'Aluno(a)'}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--brand)', fontWeight: 800 }}>
+                      falta: {p.missing_roles.map((r) => r === 'personal' ? 'personal' : 'nutricionista').join(', ')}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Stat cards row 1 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '18px', marginBottom: '18px' }}>
