@@ -458,6 +458,14 @@
 
           if (profileError) throw new Error('Erro ao salvar perfil: ' + profileError.message);
 
+          // 3b. Avisa usuário ("recebemos seu perfil, estamos montando") e
+          // sales ("novo aluno completou onboarding") — fire-and-forget,
+          // ANTES dos geradores pra não deixar o usuário no vácuo enquanto a
+          // IA roda. Sem await de propósito: os geradores (com IA) já são
+          // lentos, não vale atrasar o loading por uma garantia de ordem que
+          // o gap humano de validação do plano (horas) já dá de qualquer jeito.
+          supabase.functions.invoke('ybytu-notify-onboarding-received').catch((e) => console.error(e));
+
           // 4. Dispara os geradores novos — fail-soft: erro não trava o
           // redirect (não perde o lead), só marca a flag pra suporte ver depois.
           const isTraining = [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
