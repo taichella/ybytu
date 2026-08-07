@@ -62,9 +62,11 @@ serve(async (req) => {
           }
       }
 
+      // exercises.exercise_equipments_ids guarda o slug (exercise_equipment_id,
+      // ex: 'dumbbells'), não o uuid -- contar por eq.id sempre dava 0.
       const result = equipments.map(eq => ({
           ...eq,
-          count: counts[eq.id] || 0
+          count: counts[eq.exercise_equipment_id] || 0
       }))
 
       return json({ equipments: result }, 200, corsHeaders)
