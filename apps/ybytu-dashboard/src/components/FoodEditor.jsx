@@ -1,202 +1,134 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import Sidebar from './Sidebar.jsx';
+import MobileNav from './MobileNav.jsx';
+import { foodService } from '../services/foodService.js';
 
 export default function FoodEditor() {
-  const navigate = useNavigate();
   const { id } = useParams();
-  const isNew = !id; // Se não houver ID na URL, estamos a criar um Novo Alimento
-  
-  const [theme, setTheme] = useState('dark');
+  const navigate = useNavigate();
+  const isNew = id === 'new';
+
   const [lang, setLang] = useState('pt');
+  const [tab, setTab] = useState('macros'); // macros | micros
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+  const [lookups, setLookups] = useState(null);
 
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-
-  const langBtnStyle = (isActive) => ({
-    border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: 800, padding: '8px 14px', borderRadius: '7px', whiteSpace: 'nowrap',
-    background: isActive ? 'var(--brand)' : 'transparent',
-    color: isActive ? '#fff' : 'var(--muted)'
+  const [formData, setFormData] = useState({
+    food_id: '', name_ptbr: '', name_en: '', name_fr: '',
+    brand: '', food_group_id: '', food_source_id: '', food_type_id: '', food_preparation_method_id: '', dietary_preference: '',
+    quantity: '100', food_measurement_unit_id: '', correction_factor: '1.00', cooking_factor: '1.00',
+    calories_per_unit: '0', protein_g: '0', carbs_g: '0', fat_g: '0', fiber_g: '0', sugar_g: '0', fat_sat_g: '0', fat_trans_g: '0', cholesterol_mg: '0', sodium_mg: '0', calcium_mg: '0', iron_mg: '0', potassium_mg: '0', magnesium_mg: '0',
+    diet_tags_ids: [], functional_tags_ids: []
   });
 
-  // Lógica do Gráfico Donut. Se for novo alimento, começa a zero.
-  const pc = isNew ? 0 : 31 * 4;
-  const cc = isNew ? 0 : 0;
-  const fc = isNew ? 0 : 3.6 * 9;
-  const tot = pc + cc + fc || 1;
-  const dProt = +(pc / tot * 100).toFixed(1);
-  const dCarb = +(cc / tot * 100).toFixed(1);
-  
-  // Se for novo alimento, exibe cinza neutro
-  const bgDonut = isNew 
-    ? `var(--surface-2)` 
-    : `conic-gradient(var(--prot) 0 ${dProt}%, var(--carb) ${dProt}% ${dProt + dCarb}%, var(--fat) ${dProt + dCarb}% 100%)`;
+  useEffect(() => {
+    fetchData();
+  }, [id]);
 
-  const macros = [
-    { label: 'Proteínas', value: isNew ? '' : '31', unit: 'g' }, { label: 'Carboidratos', value: isNew ? '' : '0', unit: 'g' },
-    { label: 'Gorduras totais', value: isNew ? '' : '3.6', unit: 'g' }, { label: 'Gord. saturadas', value: isNew ? '' : '1.0', unit: 'g' },
-    { label: 'Gord. trans', value: isNew ? '' : '0', unit: 'g' }, { label: 'Fibras', value: isNew ? '' : '0', unit: 'g' },
-    { label: 'Açúcares', value: isNew ? '' : '0', unit: 'g' }, { label: 'Colesterol', value: isNew ? '' : '85', unit: 'mg' }
-  ];
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const lookupsData = await foodService.getLookups();
+      setLookups(lookupsData);
 
-  const micros = [
-    { label: 'Sódio', value: isNew ? '' : '74', unit: 'mg' }, { label: 'Cálcio', value: isNew ? '' : '15', unit: 'mg' },
-    { label: 'Ferro', value: isNew ? '' : '1.0', unit: 'mg' }, { label: 'Potássio', value: isNew ? '' : '256', unit: 'mg' },
-    { label: 'Magnésio', value: isNew ? '' : '29', unit: 'mg' }, { label: 'Energia', value: isNew ? '' : '165', unit: 'kcal' }
-  ];
+      if (!isNew) {
+        const foodData = await foodService.getById(id);
+        setFormData({
+            ...foodData,
+            diet_tags_ids: foodData.diet_tags_ids ? (typeof foodData.diet_tags_ids === 'string' ? foodData.diet_tags_ids.split(',') : foodData.diet_tags_ids) : [],
+            functional_tags_ids: foodData.functional_tags_ids ? (typeof foodData.functional_tags_ids === 'string' ? foodData.functional_tags_ids.split(',') : foodData.functional_tags_ids) : []
+        });
+      }
+    } catch (err) {
+      setError(err.message || 'Falha ao carregar dados.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const vitamins = isNew ? [] : ['Vitamina B6', 'Niacina (B3)', 'Fósforo', 'Selênio'];
-  const dietTags = isNew ? [] : ['Low carb', 'Sem glúten', 'Sem lactose', 'Keto'];
-  const functionalTags = isNew ? [] : ['Rico em proteína', 'Magro'];
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+
+      const payload = {
+          ...formData,
+          diet_tags_ids: Array.isArray(formData.diet_tags_ids) ? formData.diet_tags_ids.join(',') : formData.diet_tags_ids,
+          functional_tags_ids: Array.isArray(formData.functional_tags_ids) ? formData.functional_tags_ids.join(',') : formData.functional_tags_ids
+      };
+
+      if (isNew) {
+        await foodService.create(payload);
+      } else {
+        await foodService.update(id, payload);
+      }
+      navigate('/foods');
+    } catch (err) {
+      setError(err.message || 'Falha ao salvar alimento.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChange = (e) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  if (loading) return <div style={{ display: 'flex', height: '100vh', background: 'var(--bg)', alignItems: 'center', justifyContent: 'center' }}>Carregando...</div>;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
-      
-      {/* ===================== HEADER ===================== */}
-      <header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
-          <button onClick={() => navigate('/foods')} style={{ display: 'inline-flex', width: '38px', height: '38px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
-          </button>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>
-              <span style={{ cursor: 'pointer' }} onClick={() => navigate('/foods')}>Alimentos</span><span>/</span>
-              <span style={{ color: 'var(--text)' }}>{isNew ? 'Criar' : 'Editar'}</span>
-              {!isNew && <span style={{ fontFamily: 'monospace', background: 'var(--surface-2)', padding: '2px 7px', borderRadius: '6px', fontSize: '11px' }}>FOOD-0142</span>}
-            </div>
-            <h2 style={{ margin: '2px 0 0', fontSize: '18px', fontWeight: 900, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {isNew ? 'Novo Alimento' : 'Peito de Frango Grelhado'}
-            </h2>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
-          <button onClick={() => navigate('/foods')} style={{ background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8M7 3v5h8"></path></svg> {isNew ? 'Criar' : 'Salvar'}
-          </button>
-        </div>
-      </header>
+    <div style={{ display: 'flex', height: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
+      <Sidebar />
+      <MobileNav />
 
-      {/* ===================== MAIN CONTENT ===================== */}
       <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
-        <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
 
-          {/* Selector de Idioma */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 16px', marginBottom: '22px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"></path></svg>
-              <span style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>Nome exibido ao usuário por idioma.</span>
+          <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--muted)', fontWeight: 600, marginBottom: '4px' }}>
+                <Link to="/foods" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Alimentos</Link><span>/</span><span style={{ color: 'var(--text)' }}>{isNew ? 'Novo Alimento' : formData.name_ptbr}</span>
+              </div>
+              <h1 style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-.02em', margin: 0, textTransform: 'uppercase' }}>
+                {isNew ? 'Criar Alimento' : 'Editar Alimento'}
+              </h1>
             </div>
-            <div style={{ display: 'flex', background: 'var(--field)', border: '1px solid var(--border)', borderRadius: '10px', padding: '4px' }}>
-              <button onClick={() => setLang('pt')} style={langBtnStyle(lang === 'pt')}>🇧🇷 PT</button>
-              <button onClick={() => setLang('en')} style={langBtnStyle(lang === 'en')}>🇬🇧 EN</button>
-              <button onClick={() => setLang('fr')} style={langBtnStyle(lang === 'fr')}>🇫🇷 FR</button>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '4px' }}>
+                <button onClick={() => setLang('pt')} style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: lang === 'pt' ? 'var(--field)' : 'transparent', color: lang === 'pt' ? 'var(--text)' : 'var(--muted)', fontSize: '12px', fontWeight: 800, cursor: 'pointer', transition: 'all .2s' }}>🇧🇷 PT</button>
+                <button onClick={() => setLang('en')} style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: lang === 'en' ? 'var(--field)' : 'transparent', color: lang === 'en' ? 'var(--text)' : 'var(--muted)', fontSize: '12px', fontWeight: 800, cursor: 'pointer', transition: 'all .2s' }}>🇬🇧 EN</button>
+                <button onClick={() => setLang('fr')} style={{ padding: '6px 12px', borderRadius: '8px', border: 'none', background: lang === 'fr' ? 'var(--field)' : 'transparent', color: lang === 'fr' ? 'var(--text)' : 'var(--muted)', fontSize: '12px', fontWeight: 800, cursor: 'pointer', transition: 'all .2s' }}>🇫🇷 FR</button>
+              </div>
+              <button onClick={() => navigate('/foods')} style={{ background: 'none', color: 'var(--muted)', border: '1px solid var(--border)', borderRadius: '12px', padding: '11px 20px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
+              <button onClick={handleSave} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '12px', padding: '11px 20px', fontSize: '14px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '.02em', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>{saving ? 'Guardando...' : 'Guardar'}</button>
             </div>
-          </div>
+          </header>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)', gap: '22px', alignItems: 'start' }}>
+          {error && <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '12px', marginBottom: '22px' }}>{error}</div>}
 
-            {/* COLUNA ESQUERDA */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '22px', alignItems: 'start' }}>
+
+            {/* LEFT COLUMN: Basics & Composition */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
               
-              {/* Resumo Nutricional */}
+              {/* Identity */}
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 18px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Resumo Nutricional <span style={{ color: 'var(--muted)', fontWeight: 600, textTransform: 'none', fontSize: '13px' }}>· por porção (100 g)</span></h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-                  <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: bgDonut, flexShrink: 0, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: '74px', height: '74px', borderRadius: '50%', background: 'var(--surface)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text)', lineHeight: 1 }}>{isNew ? '0' : '165'}</span>
-                      <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)' }}>kcal</span>
-                    </div>
-                  </div>
-                  <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Energia</span>
-                      <span style={{ fontSize: '22px', fontWeight: 900 }}>{isNew ? '0' : '165'} <span style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 700 }}>kcal</span></span>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '11px', height: '11px', borderRadius: '3px', background: 'var(--prot)' }}></span><span style={{ flex: 1, fontSize: '14px', fontWeight: 700 }}>Proteínas</span><span style={{ fontSize: '15px', fontWeight: 800 }}>{isNew ? '0' : '31'} g</span><span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '42px', textAlign: 'right' }}>{isNew ? '0%' : '75%'}</span></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '11px', height: '11px', borderRadius: '3px', background: 'var(--carb)' }}></span><span style={{ flex: 1, fontSize: '14px', fontWeight: 700 }}>Carboidratos</span><span style={{ fontSize: '15px', fontWeight: 800 }}>{isNew ? '0' : '0'} g</span><span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '42px', textAlign: 'right' }}>0%</span></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '11px', height: '11px', borderRadius: '3px', background: 'var(--fat)' }}></span><span style={{ flex: 1, fontSize: '14px', fontWeight: 700 }}>Gorduras</span><span style={{ fontSize: '15px', fontWeight: 800 }}>{isNew ? '0' : '3.6'} g</span><span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '42px', textAlign: 'right' }}>{isNew ? '0%' : '20%'}</span></div>
-                  </div>
-                </div>
-              </section>
-
-              {/* Tabela Completa */}
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Tabela Nutricional Completa</h3>
-                
-                <p style={{ margin: '0 0 10px', fontSize: '11px', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Macronutrientes</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '20px' }}>
-                  {macros.map((n, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: 'var(--field)', borderRadius: '11px', border: '1px solid var(--border)' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--muted)' }}>{n.label}</span>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                        <input type="text" defaultValue={n.value} style={{ width: '56px', padding: '6px 8px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 800, outline: 'none', textAlign: 'right' }} />
-                        <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '28px' }}>{n.unit}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <p style={{ margin: '0 0 10px', fontSize: '11px', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Minerais & Outros</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-                  {micros.map((n, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: 'var(--field)', borderRadius: '11px', border: '1px solid var(--border)' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--muted)' }}>{n.label}</span>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                        <input type="text" defaultValue={n.value} style={{ width: '56px', padding: '6px 8px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 800, outline: 'none', textAlign: 'right' }} />
-                        <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '28px' }}>{n.unit}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Vit/Min */}
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Vitaminas & Minerais (fonte)</h3>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {vitamins.map((v, i) => (
-                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '6px 12px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'rgba(22,163,74,.10)', color: '#16a34a', border: '1px solid rgba(22,163,74,.22)' }}>
-                      {v} <button style={{ background: 'none', border: 'none', color: '#16a34a', cursor: 'pointer', display: 'flex', padding: 0 }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
-                    </span>
-                  ))}
-                  <button style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'none', border: '1px dashed var(--border)', color: 'var(--muted)', cursor: 'pointer', fontFamily: 'inherit' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Adicionar
-                  </button>
-                </div>
-              </section>
-            </div>
-
-            {/* COLUNA DIREITA */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
-              
-              {/* Image */}
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Imagem</h3>
-                <div style={{ width: '100%', height: '180px', borderRadius: '14px', background: 'var(--surface-2)', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '13px', fontWeight: 600 }}>
-                  Arraste a foto do alimento
-                </div>
-              </section>
-
-              {/* Identification */}
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Identificação</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Identidade ({lang.toUpperCase()})</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Nome <span style={{ fontSize: '11px', fontWeight: 800, padding: '2px 7px', borderRadius: '5px', background: 'var(--brand-soft)', color: 'var(--brand)' }}>{lang === 'pt' ? 'PT-BR' : (lang === 'en' ? 'EN' : 'FR')}</span></label>
-                    {lang === 'pt' && <input type="text" defaultValue={isNew ? '' : "Peito de Frango Grelhado"} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />}
-                    {lang === 'en' && <input type="text" defaultValue={isNew ? '' : "Grilled Chicken Breast"} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />}
-                    {lang === 'fr' && <input type="text" defaultValue={isNew ? '' : "Blanc de poulet grillé"} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />}
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Nome do Alimento</label>
+                    {lang === 'pt' && <input type="text" name="name_ptbr" value={formData.name_ptbr} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />}
+                    {lang === 'en' && <input type="text" name="name_en" value={formData.name_en || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />}
+                    {lang === 'fr' && <input type="text" name="name_fr" value={formData.name_fr || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />}
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                    <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Código (food_id)</label><input type="text" defaultValue={isNew ? '' : "FOOD-0142"} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '13px', fontFamily: 'monospace', outline: 'none' }} /></div>
-                    <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Marca</label><input type="text" placeholder="—" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} /></div>
+                    <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Código (food_id)</label><input type="text" name="food_id" value={formData.food_id} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '13px', fontFamily: 'monospace', outline: 'none' }} /></div>
+                    <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Marca</label><input type="text" name="brand" value={formData.brand || ''} onChange={handleChange} placeholder="—" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} /></div>
                   </div>
                 </div>
               </section>
@@ -205,10 +137,28 @@ export default function FoodEditor() {
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Classificação</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Grupo</label><select style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>Proteínas</option><option>Carboidratos</option><option>Vegetais</option><option>Gorduras</option></select></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Fonte</label><select style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>TACO</option><option>USDA</option><option>IBGE</option><option>Rótulo</option></select></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Preparo</label><select style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>Grelhado</option><option>Cozido</option><option>Cru</option><option>Assado</option></select></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Preferência</label><select style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>Onívoro</option><option>Vegetariano</option><option>Vegano</option></select></div>
+                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Grupo</label>
+                  <select name="food_group_id" value={formData.food_group_id || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}>
+                    <option value="">Selecione...</option>
+                    {lookups?.food_groups?.map(g => <option key={g.id} value={g.id}>{g.name_ptbr}</option>)}
+                  </select></div>
+                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Fonte</label>
+                  <select name="food_source_id" value={formData.food_source_id || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}>
+                    <option value="">Selecione...</option>
+                    {lookups?.food_sources?.map(g => <option key={g.id} value={g.id}>{g.name_ptbr}</option>)}
+                  </select></div>
+                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Preparo</label>
+                  <select name="food_preparation_method_id" value={formData.food_preparation_method_id || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}>
+                    <option value="">Selecione...</option>
+                    {lookups?.food_preparation_methods?.map(g => <option key={g.id} value={g.id}>{g.name_ptbr}</option>)}
+                  </select></div>
+                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Preferência</label>
+                  <select name="dietary_preference" value={formData.dietary_preference || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}>
+                    <option value="">Selecione...</option>
+                    <option value="omnivore">Onívoro</option>
+                    <option value="vegetarian">Vegetariano</option>
+                    <option value="vegan">Vegano</option>
+                  </select></div>
                 </div>
               </section>
 
@@ -216,29 +166,92 @@ export default function FoodEditor() {
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Porção & Fatores</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Quantidade</label><input type="text" defaultValue="100" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Unidade</label><select style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>g</option><option>ml</option><option>un</option></select></div>
-                  <div><label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Fator correção <span style={{ color: 'var(--brand)', cursor: 'help' }}>ⓘ</span></label><input type="text" defaultValue="1.00" style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                  <div><label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Fator cocção <span style={{ color: 'var(--brand)', cursor: 'help' }}>ⓘ</span></label><input type="text" defaultValue={isNew ? '1.00' : '0.90'} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Quantidade</label><input type="text" name="quantity" value={formData.quantity || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                  <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Unidade</label>
+                  <select name="food_measurement_unit_id" value={formData.food_measurement_unit_id || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}>
+                    <option value="">Selecione...</option>
+                    {lookups?.food_measurement_units?.map(g => <option key={g.id} value={g.id}>{g.name_ptbr}</option>)}
+                  </select></div>
+                  <div><label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Fator correção <span style={{ color: 'var(--brand)', cursor: 'help' }}>ⓘ</span></label><input type="text" name="correction_factor" value={formData.correction_factor || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                  <div><label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Fator cocção <span style={{ color: 'var(--brand)', cursor: 'help' }}>ⓘ</span></label><input type="text" name="cooking_factor" value={formData.cooking_factor || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
                 </div>
               </section>
 
-              {/* Restrictions & diet tags */}
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Restrições & Tags de Dieta</h3>
-                <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Adequado para</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px', marginBottom: '16px' }}>
-                  {dietTags.map((t, i) => (
-                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 11px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'rgba(22,163,74,.10)', color: '#16a34a' }}>{t}</span>
-                  ))}
-                  <button style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 11px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'none', border: '1px dashed var(--border)', color: 'var(--muted)', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Add</button>
+              {/* Composition Tabs */}
+              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
+                  <button onClick={() => setTab('macros')} style={{ flex: 1, padding: '16px', background: tab === 'macros' ? 'transparent' : 'var(--bg)', border: 'none', borderBottom: tab === 'macros' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'macros' ? 'var(--text)' : 'var(--muted)', fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', cursor: 'pointer' }}>Macronutrientes</button>
+                  <button onClick={() => setTab('micros')} style={{ flex: 1, padding: '16px', background: tab === 'micros' ? 'transparent' : 'var(--bg)', border: 'none', borderBottom: tab === 'micros' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'micros' ? 'var(--text)' : 'var(--muted)', fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', cursor: 'pointer' }}>Micronutrientes</button>
                 </div>
-                <p style={{ margin: '0 0 8px', fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Tags funcionais</p>
+
+                <div style={{ padding: '22px' }}>
+                  {tab === 'macros' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                      <div style={{ gridColumn: '1 / -1', background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Calorias (Kcal)</label>
+                        <input type="text" name="calories_per_unit" value={formData.calories_per_unit || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '16px', fontFamily: 'inherit', fontWeight: 900, outline: 'none' }} />
+                      </div>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '.04em' }}>Proteínas (g)</label><input type="text" name="protein_g" value={formData.protein_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '.04em' }}>Carboidratos (g)</label><input type="text" name="carbs_g" value={formData.carbs_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: '#a855f7', textTransform: 'uppercase', letterSpacing: '.04em' }}>Gorduras Tot. (g)</label><input type="text" name="fat_g" value={formData.fat_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Gord. Sat. (g)</label><input type="text" name="fat_sat_g" value={formData.fat_sat_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Fibra Alimentar (g)</label><input type="text" name="fiber_g" value={formData.fiber_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Açúcares (g)</label><input type="text" name="sugar_g" value={formData.sugar_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                    </div>
+                  )}
+                  {tab === 'micros' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Sódio (mg)</label><input type="text" name="sodium_mg" value={formData.sodium_mg || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Cálcio (mg)</label><input type="text" name="calcium_mg" value={formData.calcium_mg || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Ferro (mg)</label><input type="text" name="iron_mg" value={formData.iron_mg || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Potássio (mg)</label><input type="text" name="potassium_mg" value={formData.potassium_mg || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            {/* RIGHT COLUMN: Tags & Meta */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Tags de Dieta</h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px', marginBottom: '16px' }}>
+                  {formData.diet_tags_ids.map((id, i) => {
+                      const tg = lookups?.diet_tags?.find(t => t.id === id);
+                      return <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 11px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'rgba(22,163,74,.10)', color: '#16a34a' }}>{tg ? tg.name_ptbr : id}</span>
+                  })}
+                  <select onChange={(e) => {
+                      if(e.target.value && !formData.diet_tags_ids.includes(e.target.value)) {
+                          setFormData(prev => ({ ...prev, diet_tags_ids: [...prev.diet_tags_ids, e.target.value] }))
+                      }
+                      e.target.value = "";
+                  }} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 11px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'none', border: '1px dashed var(--border)', color: 'var(--muted)', cursor: 'pointer', fontFamily: 'inherit' }}>
+                      <option value="">+ Add Tag</option>
+                      {lookups?.diet_tags?.filter(t => !formData.diet_tags_ids.includes(t.id)).map(t => (
+                          <option key={t.id} value={t.id}>{t.name_ptbr}</option>
+                      ))}
+                  </select>
+                </div>
+              </section>
+
+              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Tags Funcionais</h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
-                  {functionalTags.map((t, i) => (
-                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 11px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'var(--brand-soft)', color: 'var(--brand)' }}>{t}</span>
-                  ))}
-                  <button style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 11px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'none', border: '1px dashed var(--border)', color: 'var(--muted)', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Add</button>
+                  {formData.functional_tags_ids.map((id, i) => {
+                      const tg = lookups?.functional_tags?.find(t => t.id === id);
+                      return <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 11px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'var(--brand-soft)', color: 'var(--brand)' }}>{tg ? tg.name_ptbr : id}</span>
+                  })}
+                  <select onChange={(e) => {
+                      if(e.target.value && !formData.functional_tags_ids.includes(e.target.value)) {
+                          setFormData(prev => ({ ...prev, functional_tags_ids: [...prev.functional_tags_ids, e.target.value] }))
+                      }
+                      e.target.value = "";
+                  }} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 11px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, background: 'none', border: '1px dashed var(--border)', color: 'var(--muted)', cursor: 'pointer', fontFamily: 'inherit' }}>
+                      <option value="">+ Add Funcional</option>
+                      {lookups?.functional_tags?.filter(t => !formData.functional_tags_ids.includes(t.id)).map(t => (
+                          <option key={t.id} value={t.id}>{t.name_ptbr}</option>
+                      ))}
+                  </select>
                 </div>
               </section>
             </div>

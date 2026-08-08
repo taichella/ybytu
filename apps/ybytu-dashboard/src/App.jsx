@@ -7,6 +7,7 @@ import AcceptInvite from './components/AcceptInvite';
 import ForgotPassword from './components/ForgotPassword';
 import DashboardLayout from './components/DashboardLayout';
 import Dashboard from './components/Dashboard';
+import Campaign from './components/Campaign';
 import Users from './components/Users';
 import UserDetail from './components/UserDetail';
 import Subscriptions from './components/Subscriptions';
@@ -41,6 +42,7 @@ function App() {
 
         {/* Rotas protegidas pelo Layout */}
         <Route element={<DashboardLayout />}>
+          <Route path="/campanha" element={<Campaign />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
           <Route path="/users/:id" element={<UserDetail />} />

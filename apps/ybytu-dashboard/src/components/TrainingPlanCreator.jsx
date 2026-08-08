@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { trainingService } from '../services/trainingService.js';
+import ChipMultiSelect from './ChipMultiSelect.jsx';
 
 const EMPTY_PLAN = {
   training_plan_id: '', name_ptbr: '', name_en: '', name_fr: '',
@@ -102,7 +103,7 @@ export default function TrainingPlanCreator() {
     setSlotsByDay((prev) => ({ ...prev, [day]: (prev[day] ?? []).map((s) => s.uniqueId === uniqueId ? { ...s, [field]: value } : s) }));
   };
 
-  async function handleSave() {
+  async function handleSave(publish) {
     if (isMolde) {
       const ok = window.confirm('Este treino é um dos moldes ativos (fonte do gerador). Editar afeta todo plano novo gerado a partir de agora para os objetivos que usam este molde. Continuar?');
       if (!ok) return;
@@ -110,7 +111,8 @@ export default function TrainingPlanCreator() {
     setSaving(true);
     setError(null);
     try {
-      const payload = { ...plan, days_per_week: Number(plan.days_per_week) || null, duration_minutes: plan.duration_minutes === '' ? null : Number(plan.duration_minutes) };
+      const isActive = isMolde ? true : (publish ?? plan.is_active);
+      const payload = { ...plan, is_active: isActive, days_per_week: Number(plan.days_per_week) || null, duration_minutes: plan.duration_minutes === '' ? null : Number(plan.duration_minutes) };
       const allSlots = Object.entries(slotsByDay).flatMap(([dayNumber, slots]) =>
         slots.map((s, i) => ({
           exercise_id: s.exercise_id, exercise_order: i + 1, sets: Number(s.sets) || 0, reps: Number(s.reps) || 0,
@@ -149,13 +151,29 @@ export default function TrainingPlanCreator() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: 1 }}>
           <button onClick={() => navigate('/trainings')} style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>←</button>
           <input type="text" value={plan.name_ptbr} onChange={(e) => setPlanField('name_ptbr', e.target.value)} placeholder="Nome do plano de treino…" style={{ fontSize: '18px', fontWeight: 900, background: 'none', border: 'none', color: 'var(--text)', fontFamily: 'inherit', outline: 'none', width: '100%' }} />
+          {!isNew && !isMolde && (
+            <span style={{ flexShrink: 0, fontSize: '11px', fontWeight: 800, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap', background: plan.is_active ? 'rgba(22,163,74,.1)' : 'var(--surface-2)', color: plan.is_active ? '#16a34a' : 'var(--muted)' }}>
+              {plan.is_active ? 'Publicado' : 'Rascunho'}
+            </span>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           <button onClick={toggleTheme} style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
           <button onClick={() => setSettings((s) => !s)} style={{ borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', background: settings ? 'var(--brand-soft)' : 'var(--surface)', color: settings ? 'var(--brand)' : 'var(--text)', border: `1px solid ${settings ? 'rgba(245,95,22,.4)' : 'var(--border)'}` }}>Configurações</button>
-          <button onClick={handleSave} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
-            {saving ? 'Salvando…' : (isNew ? 'Criar plano' : 'Salvar')}
-          </button>
+          {isMolde ? (
+            <button onClick={() => handleSave(true)} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
+              {saving ? 'Salvando…' : 'Salvar'}
+            </button>
+          ) : (
+            <>
+              <button onClick={() => handleSave(false)} disabled={saving} style={{ background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
+                {saving ? 'Salvando…' : 'Salvar rascunho'}
+              </button>
+              <button onClick={() => handleSave(true)} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
+                {saving ? 'Salvando…' : (isNew ? 'Criar e publicar' : 'Publicar')}
+              </button>
+            </>
+          )}
         </div>
       </header>
 
@@ -171,21 +189,15 @@ export default function TrainingPlanCreator() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '16px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>Objetivos</label>
-              <select multiple value={plan.goals_ids} onChange={(e) => setPlanField('goals_ids', Array.from(e.target.selectedOptions, (o) => o.value))} style={{ ...inputStyle, height: '76px' }}>
-                {(lookups?.goals ?? []).map((g) => <option key={g.id} value={g.goal_id}>{g.name_ptbr}</option>)}
-              </select>
+              <ChipMultiSelect options={lookups?.goals ?? []} value={plan.goals_ids} onChange={(v) => setPlanField('goals_ids', v)} getValue={(g) => g.goal_id} getLabel={(g) => g.name_ptbr} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>Ambiente</label>
-              <select multiple value={plan.exercise_environments_ids} onChange={(e) => setPlanField('exercise_environments_ids', Array.from(e.target.selectedOptions, (o) => o.value))} style={{ ...inputStyle, height: '76px' }}>
-                {(lookups?.exercise_environments ?? []).map((e) => <option key={e.id} value={e.exercise_environment_id}>{e.name_ptbr}</option>)}
-              </select>
+              <ChipMultiSelect options={lookups?.exercise_environments ?? []} value={plan.exercise_environments_ids} onChange={(v) => setPlanField('exercise_environments_ids', v)} getValue={(e) => e.exercise_environment_id} getLabel={(e) => e.name_ptbr} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>Equipamentos</label>
-              <select multiple value={plan.exercise_equipment_ids} onChange={(e) => setPlanField('exercise_equipment_ids', Array.from(e.target.selectedOptions, (o) => o.value))} style={{ ...inputStyle, height: '76px' }}>
-                {(lookups?.exercise_equipments ?? []).map((eq) => <option key={eq.id} value={eq.exercise_equipment_id}>{eq.name_ptbr}</option>)}
-              </select>
+              <ChipMultiSelect options={lookups?.exercise_equipments ?? []} value={plan.exercise_equipment_ids} onChange={(v) => setPlanField('exercise_equipment_ids', v)} getValue={(eq) => eq.exercise_equipment_id} getLabel={(eq) => eq.name_ptbr} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>Nível</label>

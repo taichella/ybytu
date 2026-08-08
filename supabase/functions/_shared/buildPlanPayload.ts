@@ -237,7 +237,7 @@ async function buildTrainingSection(
   // guarda o uuid — por isso o lookup em 2 passos acima.
   const { data: tpeRows, error: tpeErr } = await supabase
     .from('training_plan_exercises')
-    .select('exercise_id, day_number, order_within_day, sets, reps, rest_seconds, cadence_eccentric, cadence_isometric_bottom, cadence_concentric, cadence_isometric_top')
+    .select('exercise_id, day_number, order_within_day, sets, reps, rest_seconds, cadence_eccentric, cadence_isometric_bottom, cadence_concentric, cadence_isometric_top, sets_detail, method_id, superset_group')
     .eq('training_plan_id', planRow.training_plan_id)
     .order('day_number', { ascending: true })
     .order('order_within_day', { ascending: true })
@@ -332,6 +332,15 @@ async function buildTrainingSection(
         cadence_ptbr: cadencePtbr(slot),
         rest_seconds: slot.rest_seconds,
         role, // exposto pro front, não estava no shape original mas é útil pra badge/agrupamento
+        // ADITIVO (2026-08-08) — sets/reps_ptbr/cadence_ptbr/rest_seconds acima
+        // continuam sendo o resumo (1ª série), intocados, pra nenhum consumidor
+        // atual (UserPlan.jsx) mudar de renderização. sets_detail é null pra
+        // qualquer plano ainda não migrado — só planos com o campo populado
+        // (moldes tr_201-207 após o backfill) trazem o array; front ainda não
+        // lê isso, é preparação pro passo 5.
+        sets_detail: (slot as any).sets_detail ?? null,
+        method_id: (slot as any).method_id ?? null,
+        superset_group: (slot as any).superset_group ?? null,
       }
     })
 

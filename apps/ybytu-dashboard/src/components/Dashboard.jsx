@@ -27,7 +27,7 @@ export default function Dashboard() {
           </span>
           <input type="text" placeholder="Buscar usuários, alimentos, treinos…" style={{ width: '100%', padding: '10px 16px 10px 42px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
         </div>
-        
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             {theme === 'dark' ? (
@@ -36,12 +36,12 @@ export default function Dashboard() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
             )}
           </button>
-          
+
           <button title="Notificações" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
             <span style={{ position: 'absolute', top: '9px', right: '9px', width: '8px', height: '8px', background: 'var(--brand)', border: '2px solid var(--surface)', borderRadius: '50%' }}></span>
           </button>
-          
+
           <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Novo
           </button>
@@ -56,7 +56,7 @@ export default function Dashboard() {
         <div style={{ position: 'relative', maxWidth: '1240px', margin: '0 auto' }}>
 
           {/* Title row */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '14px', marginBottom: '26px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '14px', marginBottom: '18px' }}>
             <div>
               <h1 style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-.02em', margin: 0 }}>Visão Geral</h1>
               <p style={{ color: 'var(--muted)', fontSize: '14px', margin: '5px 0 0' }}>Bem-vindo de volta, Admin. Aqui está o resumo de hoje.</p>
@@ -68,9 +68,15 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* Aviso: dados de exemplo, ainda não ligados a fonte real */}
+          <div style={{ background: 'rgba(234,179,8,.08)', border: '1px solid #eab308', borderRadius: '12px', padding: '12px 18px', marginBottom: '18px', fontSize: '13px', color: '#a16207', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+            <span><strong>Dados de exemplo.</strong> Os números abaixo ainda não estão ligados a uma fonte real — não usar para decisão operacional. Números reais da campanha ficam em <strong>Campanha</strong>, no menu.</span>
+          </div>
+
           {/* Stat cards row 1 */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '18px', marginBottom: '18px' }}>
-            
+
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
                 <span style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--brand-soft)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -80,7 +86,7 @@ export default function Dashboard() {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m23 6-9.5 9.5-5-5L1 18"></path><path d="M17 6h6v6"></path></svg>12%
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Total de Usuários</p>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Total de Usuários <em style={{ opacity: .7 }}>(exemplo)</em></p>
               <p style={{ margin: '5px 0 0', fontSize: '28px', fontWeight: 900 }}>12.450</p>
             </div>
 
@@ -93,7 +99,7 @@ export default function Dashboard() {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m23 6-9.5 9.5-5-5L1 18"></path><path d="M17 6h6v6"></path></svg>8,5%
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Assinaturas Ativas</p>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Assinaturas Ativas <em style={{ opacity: .7 }}>(exemplo)</em></p>
               <p style={{ margin: '5px 0 0', fontSize: '28px', fontWeight: 900 }}>8.230</p>
             </div>
 
@@ -104,7 +110,7 @@ export default function Dashboard() {
                 </span>
                 <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--muted)', background: 'var(--field)', border: '1px solid var(--border)', padding: '3px 8px', borderRadius: '999px' }}>Hoje</span>
               </div>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Treinos Realizados</p>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Treinos Realizados <em style={{ opacity: .7 }}>(exemplo)</em></p>
               <p style={{ margin: '5px 0 0', fontSize: '28px', fontWeight: 900 }}>4.192</p>
             </div>
 
@@ -117,7 +123,7 @@ export default function Dashboard() {
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m23 6-9.5 9.5-5-5L1 18"></path><path d="M17 6h6v6"></path></svg>3,1%
                 </span>
               </div>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Base de Alimentos</p>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Base de Alimentos <em style={{ opacity: .7 }}>(exemplo)</em></p>
               <p style={{ margin: '5px 0 0', fontSize: '28px', fontWeight: 900 }}>1.405</p>
             </div>
 
@@ -127,17 +133,17 @@ export default function Dashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '18px', marginBottom: '18px' }}>
             <div style={{ background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', borderRadius: '18px', padding: '22px', color: '#fff', position: 'relative', overflow: 'hidden' }}>
               <svg viewBox="119 94 275 323" style={{ position: 'absolute', right: '-30px', bottom: '-30px', width: '150px', opacity: '.15' }} fill="#fff"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', opacity: .9, textTransform: 'uppercase' }}>Receita Recorrente (MRR)</p>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', opacity: .9, textTransform: 'uppercase' }}>Receita Recorrente (MRR) <em style={{ opacity: .8 }}>(exemplo)</em></p>
               <p style={{ margin: '8px 0 0', fontSize: '30px', fontWeight: 900 }}>R$ 142.500</p>
               <p style={{ margin: '6px 0 0', fontSize: '13px', fontWeight: 700, opacity: .95 }}>▲ 15,3% vs. mês anterior</p>
             </div>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Ticket Médio</p>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Ticket Médio <em style={{ opacity: .7 }}>(exemplo)</em></p>
               <p style={{ margin: '8px 0 0', fontSize: '30px', fontWeight: 900 }}>R$ 29,40</p>
               <p style={{ margin: '6px 0 0', fontSize: '13px', fontWeight: 700, color: '#16a34a' }}>▲ 2,1% no período</p>
             </div>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Taxa de Churn</p>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Taxa de Churn <em style={{ opacity: .7 }}>(exemplo)</em></p>
               <p style={{ margin: '8px 0 0', fontSize: '30px', fontWeight: 900 }}>2,4%</p>
               <p style={{ margin: '6px 0 0', fontSize: '13px', fontWeight: 700, color: '#16a34a' }}>▼ 0,5% no período</p>
             </div>
@@ -145,12 +151,12 @@ export default function Dashboard() {
 
           {/* Chart + Donut row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.7fr) minmax(0, 1fr)', gap: '18px', marginBottom: '18px' }}>
-            
+
             {/* Growth chart SVG */}
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Crescimento de Usuários</h3>
+                  <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Crescimento de Usuários <em style={{ opacity: .6, fontWeight: 600, fontSize: '12px' }}>(exemplo)</em></h3>
                   <p style={{ margin: '3px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Novos cadastros nos últimos 6 meses</p>
                 </div>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 800, color: '#16a34a' }}>
@@ -179,7 +185,7 @@ export default function Dashboard() {
 
             {/* Plan distribution donut SVG */}
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-              <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900 }}>Distribuição de Planos</h3>
+              <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900 }}>Distribuição de Planos <em style={{ opacity: .6, fontWeight: 600, fontSize: '12px' }}>(exemplo)</em></h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
                 <svg viewBox="0 0 42 42" style={{ width: '128px', height: '128px', flexShrink: 0, transform: 'rotate(-90deg)' }}>
                   <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--border)" strokeWidth="6"/>
@@ -203,11 +209,11 @@ export default function Dashboard() {
 
           {/* Recent signups + activity */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '18px' }}>
-            
+
             {/* Novos Usuários */}
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
               <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Novos Usuários</h3>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Novos Usuários <em style={{ opacity: .6, fontWeight: 600, fontSize: '12px' }}>(exemplo)</em></h3>
                 <a href="#" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>Ver todos</a>
               </div>
               <div>
@@ -232,7 +238,7 @@ export default function Dashboard() {
             {/* Atividade Recente */}
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
               <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
-                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Atividade Recente</h3>
+                <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Atividade Recente <em style={{ opacity: .6, fontWeight: 600, fontSize: '12px' }}>(exemplo)</em></h3>
               </div>
               <div style={{ padding: '6px 22px' }}>
                 <div style={{ display: 'flex', gap: '13px', padding: '13px 0', borderBottom: '1px solid var(--border)' }}>

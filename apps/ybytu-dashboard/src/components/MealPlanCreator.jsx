@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { mealPlanService } from '../services/mealPlanService.js';
+import ChipMultiSelect from './ChipMultiSelect.jsx';
 
 const EMPTY_PLAN = {
   meal_plan_id: '', name_ptbr: '', name_en: '', name_fr: '',
@@ -78,6 +79,8 @@ export default function MealPlanCreator() {
   const setPlanField = (field, value) => setPlan((p) => ({ ...p, [field]: value }));
 
   const currentSlots = slotsByDay[day] ?? [];
+
+  const mealTypeName = (code) => (lookups?.meal_types ?? []).find((mt) => mt.meal_type_id === code)?.name_ptbr ?? code;
 
   const addMealToDay = (meal) => {
     setSlotsByDay((prev) => {
@@ -168,9 +171,7 @@ export default function MealPlanCreator() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '16px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>Objetivos</label>
-              <select multiple value={plan.goals_ids} onChange={(e) => setPlanField('goals_ids', Array.from(e.target.selectedOptions, (o) => o.value))} style={{ ...inputStyle, height: '76px' }}>
-                {(lookups?.goals ?? []).map((g) => <option key={g.id} value={g.goal_id}>{g.name_ptbr}</option>)}
-              </select>
+              <ChipMultiSelect options={lookups?.goals ?? []} value={plan.goals_ids} onChange={(v) => setPlanField('goals_ids', v)} getValue={(g) => g.goal_id} getLabel={(g) => g.name_ptbr} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>Meta calórica (kcal/dia)</label>
@@ -193,9 +194,7 @@ export default function MealPlanCreator() {
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '7px', color: 'var(--muted)', textTransform: 'uppercase' }}>Restrições</label>
-              <select multiple value={plan.restriction_tags} onChange={(e) => setPlanField('restriction_tags', Array.from(e.target.selectedOptions, (o) => o.value))} style={{ ...inputStyle, height: '76px' }}>
-                {(lookups?.dietary_restrictions ?? []).map((r) => <option key={r.id} value={r.dietary_restriction_id}>{r.name_ptbr}</option>)}
-              </select>
+              <ChipMultiSelect options={lookups?.dietary_restrictions ?? []} value={plan.restriction_tags} onChange={(v) => setPlanField('restriction_tags', v)} getValue={(r) => r.dietary_restriction_id} getLabel={(r) => r.name_ptbr} />
             </div>
           </div>
         </div>
@@ -221,7 +220,7 @@ export default function MealPlanCreator() {
               <div key={m.id} onClick={() => addMealToDay(m)} style={{ display: 'flex', alignItems: 'center', gap: '11px', padding: '10px', border: '1px solid var(--border)', borderRadius: '11px', background: 'var(--field)', cursor: 'pointer' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name_ptbr}</p>
-                  <p style={{ margin: '1px 0 0', fontSize: '11px', color: 'var(--muted)' }}>{m.calories} kcal · {m.meal_type}</p>
+                  <p style={{ margin: '1px 0 0', fontSize: '11px', color: 'var(--muted)' }}>{m.calories} kcal · {mealTypeName(m.meal_type)}</p>
                 </div>
                 <span style={{ color: 'var(--brand)' }}>+</span>
               </div>
@@ -247,7 +246,7 @@ export default function MealPlanCreator() {
                 <div key={s.uniqueId} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '13px' }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ margin: 0, fontWeight: 700, fontSize: '14px' }}>{s.meal?.name_ptbr}</p>
-                    <p style={{ margin: '1px 0 0', fontSize: '11px', color: 'var(--muted)' }}>{s.meal_type_id} · {s.meal?.calories ?? 0} kcal</p>
+                    <p style={{ margin: '1px 0 0', fontSize: '11px', color: 'var(--muted)' }}>{mealTypeName(s.meal_type_id)} · {s.meal?.calories ?? 0} kcal</p>
                   </div>
                   <button onClick={() => removeSlot(s.uniqueId)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
                 </div>
