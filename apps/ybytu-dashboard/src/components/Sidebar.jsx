@@ -19,6 +19,9 @@ export default function Sidebar() {
 
       <nav style={{ flex: 1, overflowY: 'auto', padding: '18px 0' }}>
         <p style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: 'var(--muted)', textTransform: 'uppercase', padding: '0 22px', margin: '8px 0 8px' }}>Visão Geral</p>
+        <Link to="/campanha" style={navClass('/campanha')}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M2 12h20"></path><circle cx="12" cy="12" r="9"></circle></svg> Campanha
+        </Link>
         <Link to="/dashboard" style={navClass('/dashboard')}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg> Dashboard
         </Link>
