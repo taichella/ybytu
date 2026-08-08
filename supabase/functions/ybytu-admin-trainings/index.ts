@@ -73,43 +73,66 @@ function sanitizePlan(data: Record<string, unknown>) {
 async function replaceSlots(supabase: any, planBusinessId: string, slots: unknown, changedBy: string) {
   if (!Array.isArray(slots)) return
 
-  if (MOLDE_IDS.has(planBusinessId)) {
-    const { data: existingRows, error: existingErr } = await supabase
-      .from('training_plan_exercises')
-      .select('*')
-      .eq('training_plan_id', planBusinessId)
-    if (existingErr) throw new Error(`Falha ao ler slots atuais do molde pra snapshot: ${existingErr.message}`)
-    if (existingRows && existingRows.length > 0) {
-      const historyRows = existingRows.map((row: any) => ({
-        training_plan_id: planBusinessId,
-        exercise_row_id: row.id,
-        snapshot: row,
-        changed_by: changedBy,
-      }))
-      const { error: histErr } = await supabase.from('training_plan_exercises_history').insert(historyRows)
-      if (histErr) throw new Error(`Falha ao gravar snapshot de auditoria do molde: ${histErr.message}`)
-    }
+  // Le as linhas atuais SEMPRE (nao so pra molde) -- servem tanto pro
+  // snapshot de auditoria (so molde) quanto pra preservar sets_detail/
+  // method_id/superset_group de clientes que ainda nao mandam esses campos
+  // (ver bloco de preservacao abaixo).
+  const { data: existingRows, error: existingErr } = await supabase
+    .from('training_plan_exercises')
+    .select('*')
+    .eq('training_plan_id', planBusinessId)
+  if (existingErr) throw new Error(`Falha ao ler slots atuais: ${existingErr.message}`)
+
+  if (MOLDE_IDS.has(planBusinessId) && existingRows && existingRows.length > 0) {
+    const historyRows = existingRows.map((row: any) => ({
+      training_plan_id: planBusinessId,
+      exercise_row_id: row.id,
+      snapshot: row,
+      changed_by: changedBy,
+    }))
+    const { error: histErr } = await supabase.from('training_plan_exercises_history').insert(historyRows)
+    if (histErr) throw new Error(`Falha ao gravar snapshot de auditoria do molde: ${histErr.message}`)
   }
+
+  // replaceSlots apaga TODAS as linhas do plano e reinsere o que o cliente
+  // mandou -- qualquer save (mesmo de um campo nao relacionado) reescreve
+  // 100% dos slots. Clientes que ainda nao sabem de sets_detail/method_id/
+  // superset_group (TrainingPlanCreator antes do editor de serie multipla)
+  // simplesmente nao mandam esses campos -- sem essa preservacao, um save
+  // desses apagaria a serie detalhada de TODOS os slots do plano, nao so do
+  // que foi editado. Casa pelo par (day_number, order_within_day,
+  // exercise_id) -- identidade natural de um slot pra quem edita. Edicao
+  // estrutural naquele slot especifico (troca de exercicio/reordenacao)
+  // perde o detalhe -- aceitavel; o que nao pode acontecer e' perda em massa.
+  const existingByKey = new Map(
+    (existingRows ?? []).map((row: any) => [`${row.day_number}_${row.order_within_day}_${row.exercise_id}`, row])
+  )
 
   const { error: delErr } = await supabase.from('training_plan_exercises').delete().eq('training_plan_id', planBusinessId)
   if (delErr) throw new Error(`Falha ao limpar training_plan_exercises: ${delErr.message}`)
   if (slots.length === 0) return
 
-  const rows = slots.map((s: any) => ({
-    training_plan_id: planBusinessId,
-    exercise_id: s.exercise_id,
-    exercise_order: s.exercise_order,
-    sets: s.sets,
-    reps: s.reps,
-    rep_type_id: s.rep_type_id ?? null,
-    rest_seconds: s.rest_seconds ?? null,
-    cadence_eccentric: s.cadence_eccentric ?? null,
-    cadence_isometric_bottom: s.cadence_isometric_bottom ?? null,
-    cadence_concentric: s.cadence_concentric ?? null,
-    cadence_isometric_top: s.cadence_isometric_top ?? null,
-    day_number: s.day_number ?? null,
-    order_within_day: s.order_within_day ?? null,
-  }))
+  const rows = slots.map((s: any) => {
+    const prior = existingByKey.get(`${s.day_number}_${s.order_within_day}_${s.exercise_id}`)
+    return {
+      training_plan_id: planBusinessId,
+      exercise_id: s.exercise_id,
+      exercise_order: s.exercise_order,
+      sets: s.sets,
+      reps: s.reps,
+      rep_type_id: s.rep_type_id ?? null,
+      rest_seconds: s.rest_seconds ?? null,
+      cadence_eccentric: s.cadence_eccentric ?? null,
+      cadence_isometric_bottom: s.cadence_isometric_bottom ?? null,
+      cadence_concentric: s.cadence_concentric ?? null,
+      cadence_isometric_top: s.cadence_isometric_top ?? null,
+      day_number: s.day_number ?? null,
+      order_within_day: s.order_within_day ?? null,
+      sets_detail: s.sets_detail !== undefined ? s.sets_detail : (prior?.sets_detail ?? null),
+      method_id: s.method_id !== undefined ? s.method_id : (prior?.method_id ?? null),
+      superset_group: s.superset_group !== undefined ? s.superset_group : (prior?.superset_group ?? null),
+    }
+  })
   const { error: insErr } = await supabase.from('training_plan_exercises').insert(rows)
   if (insErr) throw new Error(`Falha ao gravar training_plan_exercises: ${insErr.message}`)
 }
