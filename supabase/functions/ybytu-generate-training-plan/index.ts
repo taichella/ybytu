@@ -489,6 +489,21 @@ function pgArrayLiteral(values: string[]): string {
   return `{${values.join(',')}}`
 }
 
+// ─── sets_detail (2026-08-08) — expande o resumo (sets/reps/rest_seconds) em
+// N séries individuais, todas com o mesmo reps/rest — a matriz de papéis não
+// tem curadoria de progressão por série (tipo pirâmide) hoje, então isso é
+// fiel ao que a matriz já decide, só materializado. load_kg fica null: o
+// gerador não prescreve carga (decisão registrada — ver memória do projeto).
+function buildSetsDetail(sets: number, reps: number, restSeconds: number) {
+  return Array.from({ length: sets }, (_, i) => ({
+    set_number: i + 1,
+    reps,
+    load_kg: null,
+    rest_seconds: restSeconds,
+    set_type: 'normal' as const,
+  }))
+}
+
 // ─── Etapa 2: IA compõe (Gemini flash, mesma função/retry da nutrição) ───────
 // Camada opcional — qualquer falha aqui é absorvida pela re-validação por slot
 // mais abaixo, que cai no determinístico da Etapa 1. Nunca é dependência dura.
@@ -961,6 +976,7 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
       cadence_isometric_bottom: s.cadence_isometric_bottom,
       cadence_concentric: s.cadence_concentric,
       cadence_isometric_top: s.cadence_isometric_top,
+      sets_detail: buildSetsDetail(s.sets, s.reps, s.rest_seconds),
     }))
 
     const { error: tpeErr } = await supabase.from('training_plan_exercises').insert(tpeRows)
