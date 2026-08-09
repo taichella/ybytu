@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const MEAL_ICONS = {
   'Café da manhã': '🥞',
@@ -61,7 +61,14 @@ function findMenuCalendarInfo(calendar, menuDay) {
   return calendar.find((d) => d.type === 'treino' && d.meal_day_ref === menuDay) || null;
 }
 
-export default function UserPlan({ payload }) {
+// Passo 5 -- edição de carga do plano do aluno. `editable` liga a UI de
+// carga (inputs por série + botão "Salvar cargas"); `onSaveLoads` é chamado
+// com { training_plan_id, load_updates } e deve bater em
+// ybytu-submit-plan-review. UserPlan não decide onde/como aparece na tela
+// (isso é do construtor que a hospeda) -- só fica pronto pra receber as
+// duas props. Sem editable, comportamento idêntico ao de antes (somente
+// leitura / impressão).
+export default function UserPlan({ payload, editable = false, onSaveLoads }) {
 
   useEffect(() => {
     // Altera a cor de fundo do body especificamente para esta página
@@ -70,6 +77,49 @@ export default function UserPlan({ payload }) {
       document.body.style.background = ''; // Limpa ao sair
     };
   }, []);
+
+  // { [training_plan_exercise_id]: { [set_number]: number|null } } -- só as
+  // séries que o personal de fato tocou nesta sessão de edição.
+  const [loadEdits, setLoadEdits] = useState({});
+  const [saveState, setSaveState] = useState('idle'); // idle | saving | success | error
+
+  useEffect(() => {
+    setLoadEdits({});
+    setSaveState('idle');
+  }, [payload]);
+
+  const hasLoadEdits = useMemo(
+    () => Object.values(loadEdits).some((sets) => Object.keys(sets).length > 0),
+    [loadEdits],
+  );
+
+  function handleLoadChange(exerciseId, setNumber, rawValue) {
+    const value = rawValue === '' ? null : Number(rawValue);
+    setLoadEdits((prev) => ({
+      ...prev,
+      [exerciseId]: { ...(prev[exerciseId] || {}), [setNumber]: Number.isNaN(value) ? null : value },
+    }));
+    setSaveState('idle');
+  }
+
+  async function handleSaveLoads(trainingPlanId) {
+    if (!onSaveLoads || !trainingPlanId) return;
+    const load_updates = Object.entries(loadEdits)
+      .filter(([, sets]) => Object.keys(sets).length > 0)
+      .map(([training_plan_exercise_id, sets]) => ({
+        training_plan_exercise_id,
+        loads: Object.entries(sets).map(([set_number, load_kg]) => ({ set_number: Number(set_number), load_kg })),
+      }));
+    if (load_updates.length === 0) return;
+    setSaveState('saving');
+    try {
+      await onSaveLoads({ training_plan_id: trainingPlanId, load_updates });
+      setSaveState('success');
+      setLoadEdits({});
+    } catch {
+      setSaveState('error');
+    }
+  }
 
   if (!payload) return null;
 
@@ -278,6 +328,13 @@ export default function UserPlan({ payload }) {
 
         .toolbar { position:fixed; top:18px; right:18px; display:flex; gap:9px; z-index:50; }
         .toolbar button { font-family:inherit; font-size:13px; font-weight:800; border:none; border-radius:11px; padding:11px 17px; cursor:pointer; box-shadow:0 6px 18px rgba(245,95,22,.35); background:var(--brand); color:#fff; display:flex; align-items:center; gap:7px; }
+        .toolbar button:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
+        .toolbar button.ghost { background:var(--bg); color:var(--ink); border:1px solid var(--line); box-shadow:var(--shadow); }
+
+        /* editable load inputs (passo 5) */
+        .load-inputs { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; }
+        .load-input { width:52px; font-family:inherit; font-size:12px; font-weight:700; text-align:center; border:1px solid var(--line); border-radius:8px; padding:5px 4px; color:var(--ink); background:var(--bg); }
+        .load-input:focus { outline:2px solid var(--brand); outline-offset:1px; border-color:var(--brand); }
 
         /* ---------- mobile (screen only — não toca em @media print) ---------- */
         @media (max-width: 680px) {
@@ -352,6 +409,15 @@ export default function UserPlan({ payload }) {
 
       <div className="user-plan-wrapper">
         <div className="toolbar screen-only">
+          {editable && onSaveLoads && training?.training_plan_id && (
+            <button
+              className="ghost"
+              onClick={() => handleSaveLoads(training.training_plan_id)}
+              disabled={!hasLoadEdits || saveState === 'saving'}
+            >
+              {saveState === 'saving' ? 'Salvando…' : saveState === 'success' ? 'Cargas salvas ✓' : 'Salvar cargas'}
+            </button>
+          )}
           <button onClick={() => window.print()}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg> Salvar PDF
           </button>
@@ -573,7 +639,7 @@ export default function UserPlan({ payload }) {
                           </div>
                           <div className="table-scroll">
                             <table className="ex">
-                              <thead><tr><th>Exercício</th><th className="c">Séries</th><th className="c">Reps</th><th className="c">Cadência*</th><th className="c">Descanso</th></tr></thead>
+                              <thead><tr><th>Exercício</th><th className="c">Séries</th>{editable && <th className="c screen-only">Carga (kg)</th>}<th className="c">Reps</th><th className="c">Cadência*</th><th className="c">Descanso</th></tr></thead>
                               <tbody>
                                 {day.exercises.map((ex) => (
                                   <tr key={ex.order}>
@@ -588,6 +654,31 @@ export default function UserPlan({ payload }) {
                                       </div>
                                     </td>
                                     <td className="c mono">{ex.sets}</td>
+                                    {editable && (
+                                      <td className="c screen-only">
+                                        {Array.isArray(ex.sets_detail) && ex.id ? (
+                                          <div className="load-inputs">
+                                            {ex.sets_detail.map((s) => {
+                                              const override = loadEdits[ex.id]?.[s.set_number];
+                                              const value = override !== undefined ? override : s.load_kg;
+                                              return (
+                                                <input
+                                                  key={s.set_number}
+                                                  type="number"
+                                                  inputMode="decimal"
+                                                  step="0.5"
+                                                  min="0"
+                                                  title={`Série ${s.set_number}`}
+                                                  className="load-input"
+                                                  value={value ?? ''}
+                                                  onChange={(e) => handleLoadChange(ex.id, s.set_number, e.target.value)}
+                                                />
+                                              );
+                                            })}
+                                          </div>
+                                        ) : <span className="dash">—</span>}
+                                      </td>
+                                    )}
                                     <td className="c mono">{ex.reps_ptbr}</td>
                                     <td className="c mono">{ex.cadence_ptbr}</td>
                                     <td className="c mono">{ex.rest_seconds}s</td>

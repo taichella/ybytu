@@ -237,7 +237,7 @@ async function buildTrainingSection(
   // guarda o uuid — por isso o lookup em 2 passos acima.
   const { data: tpeRows, error: tpeErr } = await supabase
     .from('training_plan_exercises')
-    .select('exercise_id, day_number, order_within_day, sets, reps, rest_seconds, cadence_eccentric, cadence_isometric_bottom, cadence_concentric, cadence_isometric_top, sets_detail, method_id, superset_group')
+    .select('id, exercise_id, day_number, order_within_day, sets, reps, rest_seconds, cadence_eccentric, cadence_isometric_bottom, cadence_concentric, cadence_isometric_top, sets_detail, method_id, superset_group')
     .eq('training_plan_id', planRow.training_plan_id)
     .order('day_number', { ascending: true })
     .order('order_within_day', { ascending: true })
@@ -323,6 +323,11 @@ async function buildTrainingSection(
       for (const msg of cautionByExerciseId.get(slot.exercise_id) ?? []) dayCautionMessages.add(msg)
 
       return {
+        // id = training_plan_exercises.id (uuid) DESTE slot no plano do
+        // ALUNO (não do molde) — passo 5: é o que o front manda de volta em
+        // load_updates[].training_plan_exercise_id pra editar carga. Ver
+        // [[project_plan_creators_schema_debt]].
+        id: (slot as any).id ?? null,
         order: String.fromCharCode(65 + idx), // A, B, C...
         name_ptbr: ex?.name_ptbr ?? null,
         instruction_ptbr: ex?.instruction_ptbr ?? null,
@@ -333,11 +338,10 @@ async function buildTrainingSection(
         rest_seconds: slot.rest_seconds,
         role, // exposto pro front, não estava no shape original mas é útil pra badge/agrupamento
         // ADITIVO (2026-08-08) — sets/reps_ptbr/cadence_ptbr/rest_seconds acima
-        // continuam sendo o resumo (1ª série), intocados, pra nenhum consumidor
-        // atual (UserPlan.jsx) mudar de renderização. sets_detail é null pra
-        // qualquer plano ainda não migrado — só planos com o campo populado
-        // (moldes tr_201-207 após o backfill) trazem o array; front ainda não
-        // lê isso, é preparação pro passo 5.
+        // continuam sendo o resumo (1ª série), intocados. sets_detail é null
+        // pra qualquer plano ainda não migrado — só planos com o campo
+        // populado trazem o array. Passo 5: UserPlan.jsx lê load_kg daqui
+        // quando editable=true.
         sets_detail: (slot as any).sets_detail ?? null,
         method_id: (slot as any).method_id ?? null,
         superset_group: (slot as any).superset_group ?? null,
@@ -405,6 +409,10 @@ async function buildTrainingSection(
     dayCount: days.length,
     issuedAt: planRow.created_at ? new Date(planRow.created_at) : null,
     section: {
+      // slug (tr_ai_xxx) do plano ATIVO deste aluno — passo 5: o front manda
+      // de volta como training_plan_id em load_updates pra checagem de
+      // posse no servidor (ver ybytu-submit-plan-review).
+      training_plan_id: planRow.training_plan_id,
       environment_ptbr: environmentPtbr,
       days_per_week: profile.training_days_per_week ?? days.length,
       session_duration_min: profile.training_duration_minutes ?? null,
