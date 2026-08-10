@@ -15,7 +15,6 @@ import More from './components/More';
 import Exercises from './components/Exercises';
 import ExerciseEditor from './components/ExerciseEditor';
 import Trainings from './components/Trainings';
-import TrainingPlan from './components/TrainingPlan';
 import TrainingPlanCreator from './components/TrainingPlanCreator';
 import Equipment from './components/Equipment';
 import Foods from './components/Foods';
@@ -51,7 +50,6 @@ function App() {
           <Route path="/exercises" element={<Exercises />} />
           <Route path="/exercise-editor/:id?" element={<ExerciseEditor />} />
           <Route path="/trainings" element={<Trainings />} />
-          <Route path="/trainings/:id" element={<TrainingPlan />} />
           <Route path="/training-creator/:id?" element={<TrainingPlanCreator />} />
           <Route path="/equipment" element={<Equipment />} />
           <Route path="/foods" element={<Foods />} />
