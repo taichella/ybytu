@@ -11,7 +11,6 @@ import Campaign from './components/Campaign';
 import Users from './components/Users';
 import UserDetail from './components/UserDetail';
 import Subscriptions from './components/Subscriptions';
-import More from './components/More';
 import Exercises from './components/Exercises';
 import ExerciseEditor from './components/ExerciseEditor';
 import Trainings from './components/Trainings';
@@ -47,7 +46,6 @@ function App() {
           <Route path="/users" element={<Users />} />
           <Route path="/users/:id" element={<UserDetail />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
-          <Route path="/more" element={<More />} />
           <Route path="/exercises" element={<Exercises />} />
           <Route path="/exercise-editor/:id?" element={<ExerciseEditor />} />
           <Route path="/trainings" element={<Trainings />} />
