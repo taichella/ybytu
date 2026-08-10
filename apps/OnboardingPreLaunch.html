@@ -204,29 +204,29 @@
       // ==========================================================
       // ETAPAS UNIFICADAS & TREINO
       // ==========================================================
-      { 
-        id: 'dedicated_days_per_week', 
-        title: "Quantos dias por semana pretende se dedicar ao plano?", 
-        subtitle: "Isso definirá a frequência dos seus treinos e da dieta", 
-        type: 'single', 
-        dbField: 'dedicated_days_per_week', 
-        options: [
-          {id: 2, name_ptbr: '2 dias'}, 
-          {id: 3, name_ptbr: '3 dias'}, 
-          {id: 4, name_ptbr: '4 dias'}, 
-          {id: 5, name_ptbr: '5 dias'}, 
-          {id: 6, name_ptbr: '6 dias'}, 
-          {id: 7, name_ptbr: '7 dias (Todos os dias)'}
-        ],
+      {
+        id: 'physical_conditions',
+        title: "Possui alguma dor ou limitação física?",
+        subtitle: "Múltipla escolha",
+        type: 'multiple',
+        dbField: 'physical_conditions_ids',
+        table: 'onboarding_physical_conditions',
         condition: (ans) => true
       },
-      { 
-        id: 'physical_conditions', 
-        title: "Possui alguma dor ou limitação física?", 
-        subtitle: "Múltipla escolha", 
-        type: 'multiple', 
-        dbField: 'physical_conditions_ids', 
-        table: 'onboarding_physical_conditions', 
+      {
+        id: 'dedicated_days_per_week',
+        title: "Quantos dias por semana pretende se dedicar ao plano?",
+        subtitle: "Isso definirá a frequência dos seus treinos e da dieta",
+        type: 'single',
+        dbField: 'dedicated_days_per_week',
+        options: [
+          {id: 2, name_ptbr: '2 dias'},
+          {id: 3, name_ptbr: '3 dias'},
+          {id: 4, name_ptbr: '4 dias'},
+          {id: 5, name_ptbr: '5 dias'},
+          {id: 6, name_ptbr: '6 dias'},
+          {id: 7, name_ptbr: '7 dias (Todos os dias)'}
+        ],
         condition: (ans) => true
       },
       { 
@@ -287,17 +287,21 @@
       // ==========================================================
       // ETAPAS DE NUTRIÇÃO
       // ==========================================================
-      { 
-        id: 'meals_per_day', 
-        title: "Quantas refeições prefere fazer por dia?", 
-        subtitle: "Escolha única", 
-        type: 'single', 
-        dbField: 'meals_per_day', 
+      {
+        id: 'meals_per_day',
+        title: "Como é sua rotina alimentar?",
+        subtitle: "É só pra entender seus hábitos — o nutricionista vai indicar o ideal para você",
+        type: 'single',
+        dbField: 'meals_per_day',
+        // Refeição principal e lanche são categorias diferentes na
+        // nutrição: as 3 principais (café/almoço/jantar) são a base fixa,
+        // o que varia é o nº de lanches. Bate com o que o gerador já faz
+        // (3=sem lanche, 4=1 lanche, 5=2, 6=3). Correção 3 (2026-08-10).
         options: [
-          {id: 3, name_ptbr: '3 refeições por dia'},
-          {id: 4, name_ptbr: '4 refeições por dia'},
-          {id: 5, name_ptbr: '5 refeições por dia'},
-          {id: 6, name_ptbr: '6 refeições por dia'}
+          {id: 3, name_ptbr: '3 refeições principais — café da manhã, almoço e jantar'},
+          {id: 4, name_ptbr: '3 refeições + 1 lanche'},
+          {id: 5, name_ptbr: '3 refeições + 2 lanches'},
+          {id: 6, name_ptbr: '3 refeições + 3 lanches — comendo a cada 3 horas'}
         ],
         condition: (ans) => true
       },
