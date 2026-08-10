@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
 
 export default function Users() {
   const [theme, setTheme] = useState('dark');
@@ -12,6 +11,7 @@ export default function Users() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
+  // Dados mocados extraídos do seu protótipo original
   const SUB = {
     free: { sub: 'Free', subBg: 'var(--surface-2)', subColor: 'var(--muted)' },
     start: { sub: 'Start', subBg: 'rgba(59,130,246,.12)', subColor: '#3b82f6' },
@@ -21,71 +21,29 @@ export default function Users() {
   const getAdColor = (v) => v >= 80 ? '#16a34a' : (v >= 40 ? '#d97706' : '#ef4444');
   const avatars = ['#ec4899','#3b82f6','#16a34a','#a855f7','#f59e0b','#06b6d4','#ef4444','#8b5cf6'];
   
-  const [usersData, setUsersData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    const fetchUsers = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const { data, error: funcError } = await supabase.functions.invoke('ybytu-admin-users');
-        if (funcError) throw funcError;
-
-        if (isMounted && data) {
-          const mapped = data.map((u, i) => {
-            const subName = u.resolvedSub || 'Free';
-            let subKey = 'free';
-            if (subName.toLowerCase().includes('start')) subKey = 'start';
-            else if (subName.toLowerCase().includes('pro')) subKey = 'pro';
-
-            const initialsStr = (u.full_name || 'U').split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
-
-            // adherance is not available, mock it or leave as N/A (for now, default to N/A or empty if not provided)
-            const adherence = Math.floor(Math.random() * 60) + 40; // mock random adherence for demo as requested by user originally or leave mock
-
-            return {
-              id: u.id,
-              initials: initialsStr,
-              name: u.full_name || 'Usuário',
-              meta: `ID: ${u.id.substring(0, 8)}`,
-              subKey,
-              ...SUB[subKey],
-              goal: u.resolvedGoals?.[0] || '—',
-              level: u.resolvedLevel || '—',
-              trainPlan: u.current_training_plan_id ? 'Sim' : '—',
-              mealPlan: u.current_meal_plan_id ? 'Sim' : '—',
-              adherence: adherence,
-              adColor: getAdColor(adherence),
-              onbDone: u.onboarding_completed,
-              avatarBg: avatars[i % avatars.length],
-              needsReview: u.needsReview
-            };
-          });
-          setUsersData(mapped);
-        }
-      } catch (err) {
-        if (isMounted) setError(err.message);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-    fetchUsers();
-    return () => { isMounted = false; };
-  }, []);
-
+  const usersData = [
+    { initials: 'MS', name: 'Mariana Silva', meta: '32 anos · F · São Paulo', subKey: 'pro', goal: 'Hipertrofia', level: 'Intermediário', trainPlan: 'Hipertrofia 12 Sem', mealPlan: 'Cutting 1.800 kcal', adherence: 88, onbDone: true },
+    { initials: 'CE', name: 'Carlos Eduardo', meta: '41 anos · M · Rio de Janeiro', subKey: 'start', goal: 'Emagrecimento', level: 'Iniciante', trainPlan: 'Full Body em Casa', mealPlan: 'Low Carb 1.600', adherence: 64, onbDone: true },
+    { initials: 'AC', name: 'Amanda Costa', meta: '27 anos · F · Belo Horizonte', subKey: 'pro', goal: 'Condicionamento', level: 'Avançado', trainPlan: 'Corrida & Mobilidade', mealPlan: 'Manutenção 2.400', adherence: 92, onbDone: true },
+    { initials: 'RN', name: 'Rafael Nunes', meta: '35 anos · M · Curitiba', subKey: 'free', goal: 'Hipertrofia', level: 'Intermediário', trainPlan: '—', mealPlan: '—', adherence: 22, onbDone: false },
+    { initials: 'JL', name: 'Juliana Lima', meta: '29 anos · F · Porto Alegre', subKey: 'start', goal: 'Emagrecimento', level: 'Iniciante', trainPlan: 'Cutting Definição', mealPlan: 'Vegano 2.000', adherence: 57, onbDone: true },
+    { initials: 'PH', name: 'Pedro Henrique', meta: '38 anos · M · Salvador', subKey: 'pro', goal: 'Força', level: 'Avançado', trainPlan: 'Força Powerbuilding', mealPlan: 'Bulking 3.200', adherence: 79, onbDone: true },
+    { initials: 'BF', name: 'Beatriz Ferraz', meta: '24 anos · F · Recife', subKey: 'free', goal: 'Condicionamento', level: 'Iniciante', trainPlan: '—', mealPlan: '—', adherence: 12, onbDone: false },
+    { initials: 'LG', name: 'Lucas Gomes', meta: '46 anos · M · Fortaleza', subKey: 'start', goal: 'Emagrecimento', level: 'Intermediário', trainPlan: 'Full Body em Casa', mealPlan: 'Manutenção 2.400', adherence: 71, onbDone: true },
+  ].map((u, i) => ({
+    ...u,
+    ...SUB[u.subKey],
+    adColor: getAdColor(u.adherence),
+    avatarBg: avatars[i % avatars.length]
+  }));
 
   return (
     <>
       {/* ===================== HEADER ===================== */}
-      <style dangerouslySetInnerHTML={{ __html: `@keyframes spin { 100% { transform: rotate(360deg); } }` }}></style>
-<header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
+      <header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '420px' }}>
           <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', display: 'flex' }}><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
-          <input type="text" placeholder="Buscar por nome, ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: '100%', padding: '10px 16px 10px 42px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
+          <input type="text" placeholder="Buscar por nome, e-mail…" style={{ width: '100%', padding: '10px 16px 10px 42px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
@@ -143,40 +101,12 @@ export default function Users() {
                   </tr>
                 </thead>
                 <tbody>
-
-                  {isLoading && (
-                    <tr>
-                      <td colSpan="8" style={{ textAlign: 'center', padding: '32px', color: 'var(--muted)' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>
-                        <p style={{ margin: '8px 0 0', fontSize: '13px', fontWeight: 600 }}>Carregando usuários...</p>
-                      </td>
-                    </tr>
-                  )}
-                  {error && (
-                    <tr>
-                      <td colSpan="8" style={{ textAlign: 'center', padding: '32px', color: 'var(--red)' }}>
-                        <p style={{ margin: 0, fontSize: '13px', fontWeight: 600 }}>Erro ao carregar usuários: {error}</p>
-                      </td>
-                    </tr>
-                  )}
-                  {!isLoading && !error && usersData.length === 0 && (
-                    <tr>
-                      <td colSpan="8" style={{ textAlign: 'center', padding: '32px', color: 'var(--muted)' }}>
-                        <p style={{ margin: 0, fontSize: '13px', fontWeight: 600 }}>Nenhum usuário encontrado.</p>
-                      </td>
-                    </tr>
-                  )}
-                  {!isLoading && !error && usersData.filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.id.toLowerCase().includes(searchTerm.toLowerCase())).map((u, index) => (
-                    <tr key={u.id} style={{ borderTop: '1px solid var(--border)' }}>
+                  {usersData.map((u, index) => (
+                    <tr key={index} style={{ borderTop: '1px solid var(--border)' }}>
                       <td style={{ textAlign: 'center', padding: '12px 16px' }}><input type="checkbox" style={{ width: '15px', height: '15px', accentColor: 'var(--brand)' }} /></td>
                       <td style={{ padding: '12px 16px' }}>
-                        <Link to={`/users/${u.id}`} style={{ display: 'flex', alignItems: 'center', gap: '13px', textDecoration: 'none', color: 'inherit' }}>
-                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: u.avatarBg, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px', flexShrink: 0, position: 'relative' }}>
-                             {u.initials}
-                             {u.needsReview && (
-                                <span style={{ position: 'absolute', top: -2, right: -2, width: 10, height: 10, background: 'var(--red)', borderRadius: '50%', border: '2px solid var(--surface)' }} title="Parecer pendente"></span>
-                             )}
-                          </div>
+                        <Link to={`/users/${index}`} style={{ display: 'flex', alignItems: 'center', gap: '13px', textDecoration: 'none', color: 'inherit' }}>
+                          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: u.avatarBg, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px', flexShrink: 0 }}>{u.initials}</div>
                           <div><p style={{ margin: 0, fontWeight: 700, fontSize: '14px' }}>{u.name}</p><p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>{u.meta}</p></div>
                         </Link>
                       </td>
@@ -204,7 +134,7 @@ export default function Users() {
                         )}
                       </td>
                       <td style={{ padding: '12px 16px', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                        <Link to={`/users/${u.id}`} style={{ display: 'inline-flex', color: 'var(--muted)', padding: '6px', borderRadius: '8px', textDecoration: 'none' }}>
+                        <Link to={`/users/${index}`} style={{ display: 'inline-flex', color: 'var(--muted)', padding: '6px', borderRadius: '8px', textDecoration: 'none' }}>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         </Link>
                       </td>

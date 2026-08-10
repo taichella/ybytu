@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { mealService } from '../services/mealService.js';
+import ChipMultiSelect from './ChipMultiSelect';
 
 const MEAL_TYPE_ICON = {
   breakfast: '🥞', lunch: '🥗', dinner: '🍽️', snack: '🥛',

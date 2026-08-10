@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { mealPlanService } from '../services/mealPlanService.js';
+import ChipMultiSelect from './ChipMultiSelect';
 
 const COVER_GRADIENTS = [
   'linear-gradient(135deg,#16a34a,#4ade80)',

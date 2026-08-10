@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { trainingService } from '../services/trainingService.js';
+import ChipMultiSelect from './ChipMultiSelect';
 
 const COVER_GRADIENTS = [
   'linear-gradient(135deg,#F55F16,#FF7A3D)',
