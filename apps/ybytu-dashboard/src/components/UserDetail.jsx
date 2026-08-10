@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { StaffContext } from '../lib/staffContextCore';
 import UserPlan from './UserPlan';
@@ -8,13 +8,18 @@ const VALID_TABS = new Set(['overview', 'health', 'plans', 'activity']);
 
 export default function UserDetail() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
 
   const [theme, setTheme] = useState('dark');
-  // Botão do WhatsApp (template ybytu_staff_plan_ready) manda ?tab=plans pra
-  // levar o profissional direto pro plano + formulário de parecer, sem
-  // precisar navegar manualmente a partir da Visão geral.
+  // Botão "Visit website" de template do WhatsApp na Meta só aceita um
+  // sufixo dinâmico simples (sem query string -- risco de rejeição no
+  // cadastro do template, confirmado 2026-08-10). Por isso a rota
+  // /validar/:id (base separada, cadastrada na Meta) força a aba de plano
+  // direto, em vez de mandar ?tab=plans na URL. ?tab= continua funcionando
+  // pra quem navegar manualmente/via outros links internos.
   const [tab, setTab] = useState(() => {
+    if (location.pathname.startsWith('/validar/')) return 'plans';
     const requested = searchParams.get('tab');
     return VALID_TABS.has(requested) ? requested : 'overview';
   });

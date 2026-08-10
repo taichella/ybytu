@@ -105,12 +105,13 @@ serve(async (req) => {
         console.error(`Telefone não configurado pro papel ${role} (${ROLE_PHONE_ENV[role]})`)
         continue
       }
-      // Botão "Visit website" do template: base fixa https://pro.ybytu.app/users/
-      // cadastrada na Meta + sufixo dinâmico = userId + "?tab=plans" pra abrir
-      // direto no plano gerado (com formulário de parecer + edição de carga),
-      // não na Visão geral do perfil. Base do template não muda -- só o valor
-      // do parâmetro dinâmico, então não precisa reaprovar nada na Meta.
-      const result = await sendWhatsAppTemplate(phone, templateId, [profile.full_name ?? 'aluno(a)'], `${userId}?tab=plans`)
+      // Botão "Visit website" do template: base fixa https://pro.ybytu.app/validar/
+      // cadastrada na Meta + sufixo dinâmico = só o userId (sem query string --
+      // dynamic URL button da Meta valida a URL no cadastro do template e
+      // parâmetro com "?"/"=" corre risco de rejeição, ver [[project_whatsapp_button_url_no_query_string]]).
+      // A rota /validar/:id já abre direto no plano gerado (com formulário de
+      // parecer + edição de carga) -- ver App.jsx/UserDetail.jsx.
+      const result = await sendWhatsAppTemplate(phone, templateId, [profile.full_name ?? 'aluno(a)'], userId)
       if (result.ok) notifiedRoles.push(role)
       else console.error(`Falha ao notificar ${role}:`, result.error)
     }

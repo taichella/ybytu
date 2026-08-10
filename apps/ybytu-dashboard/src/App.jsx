@@ -45,6 +45,12 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
           <Route path="/users/:id" element={<UserDetail />} />
+          {/* Base separada pro botão do WhatsApp (template ybytu_staff_plan_ready)
+              cadastrada na Meta -- mesma tela do UserDetail, mas abre direto na
+              aba de plano+parecer (ver location.pathname em UserDetail.jsx).
+              Existe pra evitar sufixo dinâmico com query string no botão, que
+              corre risco de rejeição no cadastro do template. */}
+          <Route path="/validar/:id" element={<UserDetail />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
           <Route path="/more" element={<More />} />
           <Route path="/exercises" element={<Exercises />} />
