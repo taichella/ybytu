@@ -40,8 +40,12 @@ export default function UserDetail() {
 
 
   const { id } = useParams();
-  const staffContext = useContext(StaffContext);
-  const staff = staffContext?.staff;
+  // StaffContext.Provider carrega { fullName, roles } diretamente (ver
+  // staffContextCore.js) -- não um objeto encapado num .staff. Era lido
+  // como useContext(StaffContext)?.staff aqui, que é sempre undefined,
+  // quebrando silenciosamente o seletor de papel do parecer e (agora) o
+  // editable de carga -- achado na varredura de qualidade de 2026-08-10.
+  const staff = useContext(StaffContext);
 
   const [userData, setUserData] = useState(null);
   const [resolvedLabels, setResolvedLabels] = useState({});

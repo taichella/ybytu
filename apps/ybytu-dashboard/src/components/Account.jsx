@@ -17,8 +17,9 @@ function initials(name) {
 export default function Account() {
   const [theme, setTheme] = useState('dark');
   const [email, setEmail] = useState(null);
-  const staffContext = useContext(StaffContext);
-  const staff = staffContext?.staff;
+  // StaffContext.Provider carrega { fullName, roles } diretamente, sem
+  // encapar num .staff -- ver comentário em UserDetail.jsx.
+  const staff = useContext(StaffContext);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;

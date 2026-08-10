@@ -65,8 +65,8 @@ const CYCLE_EXPECTATIONS_BY_GOAL: Record<string, Array<{ expectation_ptbr: strin
 }
 
 // ─── Helpers de lookup (tabelas de tradução id→label) ──────────────────────────
-// A maioria das lookup tables usa name_ptbr, exceto genders/activity_levels que
-// usam label_ptbr — por isso o nome da coluna de label é parametrizado.
+// A maioria das lookup tables usa name_ptbr, exceto activity_levels que usa
+// label_ptbr — por isso o nome da coluna de label é parametrizado.
 async function labelMapByUuid(
   supabase: SupabaseClient,
   table: string,
@@ -604,7 +604,7 @@ export async function buildPlanPayload(
     nutritionResult,
     review,
   ] = await Promise.all([
-    singleLabelByUuid(supabase, 'genders', profile.gender_id, 'label_ptbr'),
+    singleLabelByUuid(supabase, 'genders', profile.gender_id, 'name_ptbr'),
     singleLabelByUuid(supabase, 'activity_levels', profile.activity_level_id, 'label_ptbr'),
     singleLabelByUuid(supabase, 'exercise_levels', profile.exercise_level_id, 'name_ptbr'),
     // goals precisa do goal_id (slug) além do label, pra bater com
