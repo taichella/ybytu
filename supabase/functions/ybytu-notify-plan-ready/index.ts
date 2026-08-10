@@ -106,8 +106,11 @@ serve(async (req) => {
         continue
       }
       // Botão "Visit website" do template: base fixa https://pro.ybytu.app/users/
-      // cadastrada na Meta + sufixo dinâmico = userId.
-      const result = await sendWhatsAppTemplate(phone, templateId, [profile.full_name ?? 'aluno(a)'], userId)
+      // cadastrada na Meta + sufixo dinâmico = userId + "?tab=plans" pra abrir
+      // direto no plano gerado (com formulário de parecer + edição de carga),
+      // não na Visão geral do perfil. Base do template não muda -- só o valor
+      // do parâmetro dinâmico, então não precisa reaprovar nada na Meta.
+      const result = await sendWhatsAppTemplate(phone, templateId, [profile.full_name ?? 'aluno(a)'], `${userId}?tab=plans`)
       if (result.ok) notifiedRoles.push(role)
       else console.error(`Falha ao notificar ${role}:`, result.error)
     }

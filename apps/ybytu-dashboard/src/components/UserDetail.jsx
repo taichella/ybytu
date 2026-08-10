@@ -1,14 +1,23 @@
 import { useState, useEffect, useContext } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { StaffContext } from '../lib/staffContextCore';
 import UserPlan from './UserPlan';
 
+const VALID_TABS = new Set(['overview', 'health', 'plans', 'activity']);
+
 export default function UserDetail() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [theme, setTheme] = useState('dark');
-  const [tab, setTab] = useState('overview');
+  // Botão do WhatsApp (template ybytu_staff_plan_ready) manda ?tab=plans pra
+  // levar o profissional direto pro plano + formulário de parecer, sem
+  // precisar navegar manualmente a partir da Visão geral.
+  const [tab, setTab] = useState(() => {
+    const requested = searchParams.get('tab');
+    return VALID_TABS.has(requested) ? requested : 'overview';
+  });
   const [isBlocked, setIsBlocked] = useState(false);
 
   useEffect(() => {
@@ -106,6 +115,31 @@ export default function UserDetail() {
        alert("Erro ao salvar parecer: " + err.message);
     } finally {
        setIsSubmittingReview(false);
+    }
+  };
+
+  // Passo 5 -- "Salvar cargas" é uma ação separada de "Salvar Parecer", mas
+  // ybytu-submit-plan-review faz upsert de note_ptbr/reviewer_credential
+  // junto (onConflict user_id+role). Se mandássemos só load_updates sem
+  // reenviar o parecer já salvo do personal, o upsert apagaria o texto
+  // existente. Por isso reenviamos o note_ptbr/reviewer_credential atuais
+  // (vindos do planPayload já carregado) junto do save de carga.
+  const saveLoads = async ({ training_plan_id, load_updates }) => {
+    const existingReview = planPayload?.review?.personal;
+    const res = await supabase.functions.invoke('ybytu-submit-plan-review', {
+      body: {
+        user_id: id,
+        role: 'personal',
+        note_ptbr: existingReview?.note_ptbr ?? null,
+        reviewer_credential: existingReview?.reviewer_credential ?? null,
+        training_plan_id,
+        load_updates,
+      }
+    });
+    if (res.error) throw res.error;
+    const planRes = await supabase.functions.invoke('ybytu-get-plan-for-staff', { body: { userId: id } });
+    if (planRes.data && !planRes.error) {
+      setPlanPayload(planRes.data);
     }
   };
 
@@ -259,7 +293,11 @@ export default function UserDetail() {
 
               {planPayload ? (
                   <div style={{ border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
-                      <UserPlan payload={planPayload} />
+                      <UserPlan
+                        payload={planPayload}
+                        editable={Boolean(staff?.roles?.includes('personal'))}
+                        onSaveLoads={saveLoads}
+                      />
                   </div>
               ) : (
                   <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px', textAlign: 'center' }}>
