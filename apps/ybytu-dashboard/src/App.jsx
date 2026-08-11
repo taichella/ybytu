@@ -33,14 +33,14 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create-account" element={<CreateAccount />} />
-        <Route path="/aceitar-convite/:token" element={<AcceptInvite />} />
+        <Route path="/accept-invite/:token" element={<AcceptInvite />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         {/* Rota pública — link compartilhável do plano, fora do login */}
         <Route path="/plano/:token" element={<SharedPlan />} />
 
         {/* Rotas protegidas pelo Layout */}
         <Route element={<DashboardLayout />}>
-          <Route path="/campanha" element={<Campaign />} />
+          <Route path="/campaign" element={<Campaign />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
           <Route path="/users/:id" element={<UserDetail />} />
@@ -49,7 +49,7 @@ function App() {
               aba de plano+parecer (ver location.pathname em UserDetail.jsx).
               Existe pra evitar sufixo dinâmico com query string no botão, que
               corre risco de rejeição no cadastro do template. */}
-          <Route path="/validar/:id" element={<UserDetail />} />
+          <Route path="/review/:id" element={<UserDetail />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
           <Route path="/exercises" element={<Exercises />} />
           <Route path="/exercise-editor/:id?" element={<ExerciseEditor />} />

@@ -15,11 +15,11 @@ export default function UserDetail() {
   // Botão "Visit website" de template do WhatsApp na Meta só aceita um
   // sufixo dinâmico simples (sem query string -- risco de rejeição no
   // cadastro do template, confirmado 2026-08-10). Por isso a rota
-  // /validar/:id (base separada, cadastrada na Meta) força a aba de plano
+  // /review/:id (base separada, cadastrada na Meta) força a aba de plano
   // direto, em vez de mandar ?tab=plans na URL. ?tab= continua funcionando
   // pra quem navegar manualmente/via outros links internos.
   const [tab, setTab] = useState(() => {
-    if (location.pathname.startsWith('/validar/')) return 'plans';
+    if (location.pathname.startsWith('/review/')) return 'plans';
     const requested = searchParams.get('tab');
     return VALID_TABS.has(requested) ? requested : 'overview';
   });
@@ -306,6 +306,7 @@ export default function UserDetail() {
                         payload={planPayload}
                         editable={Boolean(staff?.roles?.includes('personal'))}
                         onSaveLoads={saveLoads}
+                        embedded
                       />
                   </div>
               ) : (

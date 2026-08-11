@@ -28,6 +28,7 @@ export default function Dashboard() {
     { label: 'Planos com falha', value: stats.plans_generated_failed, color: '#dc2626', bg: 'rgba(220,38,38,.1)' },
     { label: 'Aguardando validação', value: stats.pending_validation, color: '#3b82f6', bg: 'rgba(59,130,246,.1)' },
     { label: 'Planos entregues', value: stats.plans_delivered, color: '#a855f7', bg: 'rgba(168,85,247,.1)' },
+    { label: 'Refeições realizadas', value: stats.meals_completed, color: '#0ea5e9', bg: 'rgba(14,165,233,.1)' },
   ] : [];
 
   return (

@@ -117,7 +117,7 @@ export default function Campaign() {
             </div>
             <div style={{ background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: '14px', padding: '18px', opacity: 0.7 }}>
               <p style={{ margin: 0, fontWeight: 800, fontSize: '14px' }}>Convidar profissional</p>
-              <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Só existe a tela de aceitar convite (/aceitar-convite/:token).</p>
+              <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Só existe a tela de aceitar convite (/accept-invite/:token).</p>
             </div>
           </div>
         </div>

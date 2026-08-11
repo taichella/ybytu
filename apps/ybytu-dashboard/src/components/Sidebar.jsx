@@ -35,7 +35,7 @@ export default function Sidebar() {
 
       <nav style={{ flex: 1, overflowY: 'auto', padding: '18px 0' }}>
         <p style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: 'var(--muted)', textTransform: 'uppercase', padding: '0 22px', margin: '8px 0 8px' }}>Visão Geral</p>
-        <Link to="/campanha" style={navClass('/campanha')}>
+        <Link to="/campaign" style={navClass('/campaign')}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M2 12h20"></path><circle cx="12" cy="12" r="9"></circle></svg> Campanha
         </Link>
         <Link to="/dashboard" style={navClass('/dashboard')}>

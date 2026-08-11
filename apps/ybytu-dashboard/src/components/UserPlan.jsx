@@ -68,7 +68,7 @@ function findMenuCalendarInfo(calendar, menuDay) {
 // (isso é do construtor que a hospeda) -- só fica pronto pra receber as
 // duas props. Sem editable, comportamento idêntico ao de antes (somente
 // leitura / impressão).
-export default function UserPlan({ payload, editable = false, onSaveLoads }) {
+export default function UserPlan({ payload, editable = false, onSaveLoads, embedded = false }) {
 
   useEffect(() => {
     // Altera a cor de fundo do body especificamente para esta página
@@ -327,6 +327,12 @@ export default function UserPlan({ payload, editable = false, onSaveLoads }) {
         .footer .fb svg { color:var(--brand); }
 
         .toolbar { position:fixed; top:18px; right:18px; display:flex; gap:9px; z-index:50; }
+        /* embedded (passo 2, achado na varredura de qualidade 2026-08-11):
+           quando UserPlan mora dentro de uma aba do UserDetail (não sozinho
+           como em SharedPlan), o toolbar fixed colide com o header próprio
+           da tela hospedeira. sticky prende perto do topo do card ao rolar
+           sem sair da coluna do conteúdo nem sobrepor nada de fora. */
+        .user-plan-wrapper.embedded .toolbar { position:sticky; top:12px; right:auto; justify-content:flex-end; z-index:5; }
         .toolbar button { font-family:inherit; font-size:13px; font-weight:800; border:none; border-radius:11px; padding:11px 17px; cursor:pointer; box-shadow:0 6px 18px rgba(245,95,22,.35); background:var(--brand); color:#fff; display:flex; align-items:center; gap:7px; }
         .toolbar button:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
         .toolbar button.ghost { background:var(--bg); color:var(--ink); border:1px solid var(--line); box-shadow:var(--shadow); }
@@ -407,7 +413,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads }) {
         }
       `}</style>
 
-      <div className="user-plan-wrapper">
+      <div className={`user-plan-wrapper${embedded ? ' embedded' : ''}`}>
         <div className="toolbar screen-only">
           {editable && onSaveLoads && training?.training_plan_id && (
             <button

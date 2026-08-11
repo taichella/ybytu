@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 // Antes essa tela deixava qualquer visitante se auto-atribuir role:'admin' em
 // user_metadata (client-controlável, sem checagem nenhuma no servidor) — furo
 // fechado em 2026-07-30 (ver [[project_staff_role_system_design]]). O único
-// caminho pra criar conta de staff agora é /aceitar-convite/:token (function
+// caminho pra criar conta de staff agora é /accept-invite/:token (function
 // ybytu-redeem-staff-invite), gerado por um admin já autenticado.
 export default function CreateAccount() {
   const [theme, setTheme] = useState('dark');

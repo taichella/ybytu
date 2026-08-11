@@ -27,12 +27,19 @@ serve(async (req) => {
       })
     }
 
-    const [totalRes, okRes, failedRes, deliveredRes, okProfilesRes] = await Promise.all([
+    const [totalRes, okRes, failedRes, deliveredRes, okProfilesRes, mealsCompletedRes] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan_generation_status', 'ok'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan_generation_status', 'failed'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).not('user_notified_ready_at', 'is', null),
       supabase.from('profiles').select('id').eq('plan_generation_status', 'ok'),
+      // Refeições marcadas como feitas pelo app do aluno (ProfileScreen.js já
+      // lê essa tabela pro streak do usuário). Card "Refeições Realizadas" do
+      // Dashboard -- pedido da Taina 2026-08-11 pra trocar o antigo "Base de
+      // Alimentos" (mock). Vazio agora não é bug: nada popula ainda além do
+      // próprio marcar-como-feito no app, é dado real de adesão, não de
+      // catálogo.
+      supabase.from('completed_meals').select('id', { count: 'exact', head: true }),
     ])
 
     if (totalRes.error) throw new Error(`total: ${totalRes.error.message}`)
@@ -40,6 +47,7 @@ serve(async (req) => {
     if (failedRes.error) throw new Error(`failed: ${failedRes.error.message}`)
     if (deliveredRes.error) throw new Error(`delivered: ${deliveredRes.error.message}`)
     if (okProfilesRes.error) throw new Error(`ok_profiles: ${okProfilesRes.error.message}`)
+    if (mealsCompletedRes.error) throw new Error(`meals_completed: ${mealsCompletedRes.error.message}`)
 
     const okIds = (okProfilesRes.data ?? []).map((p) => p.id)
     let pendingCount = 0
@@ -67,6 +75,7 @@ serve(async (req) => {
       plans_generated_failed: failedRes.count ?? 0,
       pending_validation: pendingCount,
       plans_delivered: deliveredRes.count ?? 0,
+      meals_completed: mealsCompletedRes.count ?? 0,
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
