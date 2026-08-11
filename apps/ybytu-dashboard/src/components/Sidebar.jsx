@@ -1,8 +1,24 @@
+import { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { StaffContext } from '../lib/staffContextCore';
+
+const ROLE_LABELS = {
+  personal: 'Personal Trainer',
+  nutricionista: 'Nutricionista',
+  admin: 'Admin',
+};
+
+function initials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] || '') + (parts[1]?.[0] || parts[0]?.[1] || '')).toUpperCase();
+}
 
 export default function Sidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+  const staff = useContext(StaffContext);
+  const roleLabel = (staff?.roles ?? []).map((r) => ROLE_LABELS[r] || r).join(' · ');
 
   const navClass = (path) => currentPath.includes(path) 
     ? { display:'flex', alignItems:'center', gap:'12px', padding:'11px 22px', fontSize:'14px', fontWeight:700, color:'var(--brand)', background:'var(--brand-soft)', borderRight:'3px solid var(--brand)', textDecoration:'none' }
@@ -62,10 +78,10 @@ export default function Sidebar() {
 
       <div style={{ padding: '14px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
         <Link to="/account" style={navClass('/account')}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: '15px', flexShrink: 0 }}>A</div>
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#fff', fontSize: '15px', flexShrink: 0 }}>{initials(staff?.fullName)}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ margin: 0, fontWeight: 700, fontSize: '13px', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Admin Principal</p>
-            <p style={{ margin: '1px 0 0', fontSize: '12px', color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Ver minha conta</p>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: '13px', color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{staff?.fullName || '—'}</p>
+            <p style={{ margin: '1px 0 0', fontSize: '12px', color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{roleLabel || 'Ver minha conta'}</p>
           </div>
         </Link>
       </div>
