@@ -242,7 +242,17 @@ serve(async (req) => {
     if (action === 'create') {
       const payload = sanitizePlan(body?.data ?? {})
       if (!payload.name_ptbr) return json({ error: 'missing_name_ptbr' }, 400, corsHeaders)
-      if (!payload.training_plan_id) return json({ error: 'missing_training_plan_id' }, 400, corsHeaders)
+      // ConstrutorPlano.dc.html (design original) nao tem campo de "codigo"
+      // pro plano -- diferente de AlimentoEditor, que tem (food_id). Bug real
+      // achado 2026-08-11: TrainingPlanCreator.jsx nunca preenchia
+      // training_plan_id, e o create() exigia o campo -- toda criacao de
+      // plano quebrava com 400 (surgia como erro generico no client). Fix
+      // certo, fiel ao design: gerar aqui, nao adicionar campo que a Taina
+      // nunca desenhou. Convencao "tr_staff_<8 hex>" -- distinto de
+      // "tr_ai_<8 hex>" (gerador automatico) e dos 7 moldes fixos tr_20N.
+      if (!payload.training_plan_id) {
+        payload.training_plan_id = `tr_staff_${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`
+      }
       // Ninguem cria um NOVO molde por aqui -- os 7 codigos sao fixos no
       // gerador. Se alguem tentar reusar um desses codigos, bloqueia.
       if (MOLDE_IDS.has(payload.training_plan_id as string)) {
