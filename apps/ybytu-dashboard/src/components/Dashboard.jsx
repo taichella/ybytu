@@ -1,5 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { campaignStatsService } from '../services/campaignStatsService.js';
+
+const DONUT_COLORS = ['#F55F16', '#3b82f6', '#a855f7', '#16a34a', '#9ca3af', '#0ea5e9'];
+
+function buildGrowthPath(series) {
+  const W = 580, H = 210, PAD_BOTTOM = 25;
+  const max = Math.max(1, ...series.map((s) => s.count));
+  const stepX = series.length > 1 ? W / (series.length - 1) : W;
+  const points = series.map((s, i) => {
+    const x = series.length > 1 ? i * stepX : 0;
+    const y = (H - PAD_BOTTOM) - (s.count / max) * (H - PAD_BOTTOM - 15);
+    return [x, y];
+  });
+  const line = points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  const area = `${line} L${points[points.length - 1][0].toFixed(1)},${H - PAD_BOTTOM} L0,${H - PAD_BOTTOM} Z`;
+  return { line, area, points };
+}
 
 export default function Dashboard() {
   const [theme, setTheme] = useState('dark');
@@ -21,6 +37,18 @@ export default function Dashboard() {
   }, []);
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+
+  const growth = useMemo(() => stats?.growth_series?.length ? buildGrowthPath(stats.growth_series) : null, [stats]);
+  const growthTotal = stats?.growth_series?.reduce((a, s) => a + s.count, 0) ?? 0;
+  const distribution = stats?.plan_distribution ?? [];
+  const distributionTotal = distribution.reduce((a, d) => a + d.count, 0);
+
+  const designCards = stats ? [
+    { label: 'Total de Usuários', value: stats.total_users, color: 'var(--brand)', bg: 'var(--brand-soft)' },
+    { label: 'Assinaturas Ativas', value: stats.active_subscriptions, color: '#3b82f6', bg: 'rgba(59,130,246,.1)' },
+    { label: 'Refeições Realizadas', value: stats.meals_completed, color: '#a855f7', bg: 'rgba(168,85,247,.1)' },
+    { label: 'Base de Alimentos', value: stats.foods_count, color: '#16a34a', bg: 'rgba(22,163,74,.1)' },
+  ] : [];
 
   const cards = stats ? [
     { label: 'Onboardings completos', value: stats.onboardings_completed, color: 'var(--brand)', bg: 'var(--brand-soft)' },
@@ -72,15 +100,16 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* Stat cards -- só números reais, vindos de ybytu-campaign-stats
-              (mesma fonte da tela Campanha). Removidos MRR/ticket médio/churn/
-              gráfico de crescimento/distribuição de planos/listas de usuários
-              e atividade recente -- eram todos dado de exemplo, sem fonte real
-              (WooCommerce/assinaturas ainda não estão no Supabase -- ver tela
-              Assinaturas). Regra da Taina: tela removida > dado falso. */}
+          {/* 4 cards do design original (Dashboard.dc.html), dado real vindo
+              de ybytu-campaign-stats (profiles/foods/completed_meals).
+              MRR/Ticket médio/Churn NÃO voltam -- sem WooCommerce/assinaturas
+              no Supabase ainda não há fonte real pra esses três (ver tela
+              Assinaturas). "Treinos Realizados" do design vira "Refeições
+              Realizadas" -- decisão já tomada pela Taina em 2026-08-11,
+              não existe tabela de treino concluído, completed_meals sim. */}
           {!error && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '18px' }}>
-              {(loading ? Array.from({ length: 5 }) : cards).map((c, i) => (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '18px', marginBottom: '18px' }}>
+              {(loading ? Array.from({ length: 4 }) : designCards).map((c, i) => (
                 <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                   {c && (
                     <span style={{ width: '44px', height: '44px', borderRadius: '12px', background: c.bg, color: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '18px', fontWeight: 900, fontSize: '18px' }}>
@@ -92,6 +121,101 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
+          )}
+
+          {/* Gráfico de crescimento + donut de distribuição -- dado real,
+              nunca ausente: se não houver cadastro/assinatura ainda, mostra
+              o card com estado vazio em vez de sumir. */}
+          {!error && !loading && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.7fr) minmax(0,1fr)', gap: '18px', marginBottom: '18px' }}>
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Crescimento de Usuários</h3>
+                    <p style={{ margin: '3px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Novos cadastros nos últimos 6 meses</p>
+                  </div>
+                </div>
+                {growthTotal === 0 ? (
+                  <div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '13px' }}>Sem dados ainda</div>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 580 210" preserveAspectRatio="none" style={{ width: '100%', height: '200px', marginTop: '8px', display: 'block' }}>
+                      <defs>
+                        <linearGradient id="ybArea" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#F55F16" stopOpacity="0.35" />
+                          <stop offset="100%" stopColor="#F55F16" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <line x1="0" y1="40" x2="580" y2="40" stroke="var(--border)" strokeWidth="1" />
+                      <line x1="0" y1="90" x2="580" y2="90" stroke="var(--border)" strokeWidth="1" />
+                      <line x1="0" y1="140" x2="580" y2="140" stroke="var(--border)" strokeWidth="1" />
+                      <path d={growth.area} fill="url(#ybArea)" />
+                      <path d={growth.line} fill="none" stroke="#F55F16" strokeWidth="3" strokeLinecap="round" />
+                      {growth.points.map(([x, y], i) => (
+                        <circle key={i} cx={x} cy={y} r="4" fill="var(--surface)" stroke="#F55F16" strokeWidth="2.5" />
+                      ))}
+                    </svg>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '11px', fontWeight: 700, color: 'var(--muted)' }}>
+                      {stats.growth_series.map((s, i) => <span key={i}>{s.label}</span>)}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900 }}>Distribuição de Planos</h3>
+                {distributionTotal === 0 ? (
+                  <div style={{ height: '128px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '13px' }}>Sem dados ainda</div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                    <svg viewBox="0 0 42 42" style={{ width: '128px', height: '128px', flexShrink: 0, transform: 'rotate(-90deg)' }}>
+                      <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--border)" strokeWidth="6" />
+                      {(() => {
+                        let offset = 0;
+                        return distribution.map((d, i) => {
+                          const pct = (d.count / distributionTotal) * 100;
+                          const el = (
+                            <circle key={i} cx="21" cy="21" r="15.915" fill="none" stroke={DONUT_COLORS[i % DONUT_COLORS.length]} strokeWidth="6" strokeDasharray={`${pct} ${100 - pct}`} strokeDashoffset={-offset} />
+                          );
+                          offset += pct;
+                          return el;
+                        });
+                      })()}
+                    </svg>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {distribution.map((d, i) => (
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                          <span style={{ width: '10px', height: '10px', borderRadius: '3px', background: DONUT_COLORS[i % DONUT_COLORS.length], flexShrink: 0 }}></span>
+                          <span style={{ fontWeight: 700 }}>{d.name}</span>
+                          <span style={{ marginLeft: 'auto', color: 'var(--muted)', fontWeight: 600 }}>{Math.round((d.count / distributionTotal) * 100)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Campanha (Desafio 15 dias) -- números operacionais do pré-lançamento,
+              já existiam e continuam reais (ybytu-campaign-stats). */}
+          {!error && (
+            <>
+              <h2 style={{ fontSize: '15px', fontWeight: 900, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '.03em', color: 'var(--muted)' }}>Campanha (Desafio 15 dias)</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '18px' }}>
+                {(loading ? Array.from({ length: 5 }) : cards).map((c, i) => (
+                  <div key={i} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                    {c && (
+                      <span style={{ width: '44px', height: '44px', borderRadius: '12px', background: c.bg, color: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '18px', fontWeight: 900, fontSize: '18px' }}>
+                        {c.value}
+                      </span>
+                    )}
+                    <p style={{ margin: c ? '18px 0 0' : 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>{c ? c.label : '—'}</p>
+                    <p style={{ margin: '5px 0 0', fontSize: '28px', fontWeight: 900 }}>{c ? c.value : '…'}</p>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </main>

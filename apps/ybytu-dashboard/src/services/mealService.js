@@ -33,6 +33,11 @@ export const mealService = {
     const { foods } = await invoke('search_foods', { search });
     return foods;
   },
+  async getFoodsByIds(ids) {
+    if (!ids || ids.length === 0) return [];
+    const { foods } = await invoke('search_foods', { ids });
+    return foods;
+  },
   async create(mealData) {
     const { meal } = await invoke('create', { data: mealData });
     return meal;

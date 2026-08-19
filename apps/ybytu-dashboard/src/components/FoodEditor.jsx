@@ -1,8 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import Sidebar from './Sidebar.jsx';
-import MobileNav from './MobileNav.jsx';
 import { foodService } from '../services/foodService.js';
+
+const MACRO_FIELDS = [
+  { name: 'calories_per_unit', label: 'Calorias', unit: 'kcal' },
+  { name: 'protein_g', label: 'Proteínas', unit: 'g' },
+  { name: 'carbs_g', label: 'Carboidratos', unit: 'g' },
+  { name: 'fat_g', label: 'Gorduras totais', unit: 'g' },
+  { name: 'fat_sat_g', label: 'Gord. saturadas', unit: 'g' },
+  { name: 'fat_trans_g', label: 'Gord. trans', unit: 'g' },
+  { name: 'fiber_g', label: 'Fibras', unit: 'g' },
+  { name: 'sugar_g', label: 'Açúcares', unit: 'g' },
+  { name: 'cholesterol_mg', label: 'Colesterol', unit: 'mg' },
+];
+
+const MICRO_FIELDS = [
+  { name: 'sodium_mg', label: 'Sódio', unit: 'mg' },
+  { name: 'calcium_mg', label: 'Cálcio', unit: 'mg' },
+  { name: 'iron_mg', label: 'Ferro', unit: 'mg' },
+  { name: 'potassium_mg', label: 'Potássio', unit: 'mg' },
+  { name: 'magnesium_mg', label: 'Magnésio', unit: 'mg' },
+];
 
 export default function FoodEditor() {
   const { id } = useParams();
@@ -10,7 +28,6 @@ export default function FoodEditor() {
   const isNew = id === 'new';
 
   const [lang, setLang] = useState('pt');
-  const [tab, setTab] = useState('macros'); // macros | micros
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -79,14 +96,26 @@ export default function FoodEditor() {
       setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  if (loading) return <div style={{ display: 'flex', height: '100vh', background: 'var(--bg)', alignItems: 'center', justifyContent: 'center' }}>Carregando...</div>;
+  const donut = useMemo(() => {
+    const prot = parseFloat(formData.protein_g) || 0;
+    const carb = parseFloat(formData.carbs_g) || 0;
+    const fat = parseFloat(formData.fat_g) || 0;
+    const pc = prot * 4, cc = carb * 4, fc = fat * 9;
+    const tot = pc + cc + fc;
+    if (!tot) return { gradient: 'conic-gradient(var(--border) 0 100%)', pProt: 0, pCarb: 0, pFat: 0 };
+    const pProt = +(pc / tot * 100).toFixed(1);
+    const pCarb = +(cc / tot * 100).toFixed(1);
+    const pFat = +(100 - pProt - pCarb).toFixed(1);
+    return {
+      gradient: `conic-gradient(#3b82f6 0 ${pProt}%, #f59e0b ${pProt}% ${pProt + pCarb}%, #a855f7 ${pProt + pCarb}% 100%)`,
+      pProt, pCarb, pFat,
+    };
+  }, [formData.protein_g, formData.carbs_g, formData.fat_g]);
+
+  if (loading) return <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', alignItems: 'center', justifyContent: 'center' }}>Carregando...</div>;
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter, sans-serif' }}>
-      <Sidebar />
-      <MobileNav />
-
-      <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+    <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
         <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
 
           <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
@@ -111,11 +140,64 @@ export default function FoodEditor() {
 
           {error && <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '12px', marginBottom: '22px' }}>{error}</div>}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '22px', alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.3fr) minmax(0, 1fr)', gap: '22px', alignItems: 'start' }}>
 
-            {/* LEFT COLUMN: Basics & Composition */}
+            {/* LEFT COLUMN: Nutrition (sempre visível) */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
-              
+
+              {/* Macro summary + donut */}
+              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                <h3 style={{ margin: '0 0 18px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Resumo Nutricional <span style={{ color: 'var(--muted)', fontWeight: 600, textTransform: 'none', fontSize: '13px' }}>· por porção ({formData.quantity || 0}{lookups?.food_measurement_units?.find(u => u.id === formData.food_measurement_unit_id)?.name_ptbr || 'g'})</span></h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+                  <div style={{ width: '120px', height: '120px', borderRadius: '50%', backgroundImage: donut.gradient, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '74px', height: '74px', borderRadius: '50%', background: 'var(--surface)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: '20px', fontWeight: 900, color: 'var(--text)', lineHeight: 1 }}>{formData.calories_per_unit || 0}</span>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--muted)' }}>kcal</span>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '11px', height: '11px', borderRadius: '3px', background: '#3b82f6' }}></span><span style={{ flex: 1, fontSize: '14px', fontWeight: 700 }}>Proteínas</span><span style={{ fontSize: '15px', fontWeight: 800 }}>{formData.protein_g || 0} g</span><span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '42px', textAlign: 'right' }}>{donut.pProt}%</span></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '11px', height: '11px', borderRadius: '3px', background: '#f59e0b' }}></span><span style={{ flex: 1, fontSize: '14px', fontWeight: 700 }}>Carboidratos</span><span style={{ fontSize: '15px', fontWeight: 800 }}>{formData.carbs_g || 0} g</span><span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '42px', textAlign: 'right' }}>{donut.pCarb}%</span></div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}><span style={{ width: '11px', height: '11px', borderRadius: '3px', background: '#a855f7' }}></span><span style={{ flex: 1, fontSize: '14px', fontWeight: 700 }}>Gorduras</span><span style={{ fontSize: '15px', fontWeight: 800 }}>{formData.fat_g || 0} g</span><span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '42px', textAlign: 'right' }}>{donut.pFat}%</span></div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Full nutrient table */}
+              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Tabela Nutricional Completa</h3>
+
+                <p style={{ margin: '0 0 10px', fontSize: '11px', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Macronutrientes</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '20px' }}>
+                  {MACRO_FIELDS.map(f => (
+                    <div key={f.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: 'var(--field)', borderRadius: '11px', border: '1px solid var(--border)' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--muted)' }}>{f.label}</span>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                        <input type="text" name={f.name} value={formData[f.name] ?? ''} onChange={handleChange} style={{ width: '64px', padding: '6px 8px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 800, outline: 'none', textAlign: 'right' }} />
+                        <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '22px' }}>{f.unit}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <p style={{ margin: '0 0 10px', fontSize: '11px', fontWeight: 800, color: 'var(--brand)', textTransform: 'uppercase', letterSpacing: '.06em' }}>Minerais & Outros</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  {MICRO_FIELDS.map(f => (
+                    <div key={f.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', background: 'var(--field)', borderRadius: '11px', border: '1px solid var(--border)' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--muted)' }}>{f.label}</span>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                        <input type="text" name={f.name} value={formData[f.name] ?? ''} onChange={handleChange} style={{ width: '64px', padding: '6px 8px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 800, outline: 'none', textAlign: 'right' }} />
+                        <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 700, width: '22px' }}>{f.unit}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            {/* RIGHT COLUMN: Identity, Classification, Portion & Tags */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+
               {/* Identity */}
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 16px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Identidade ({lang.toUpperCase()})</h3>
@@ -177,42 +259,6 @@ export default function FoodEditor() {
                 </div>
               </section>
 
-              {/* Composition Tabs */}
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
-                <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
-                  <button onClick={() => setTab('macros')} style={{ flex: 1, padding: '16px', background: tab === 'macros' ? 'transparent' : 'var(--bg)', border: 'none', borderBottom: tab === 'macros' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'macros' ? 'var(--text)' : 'var(--muted)', fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', cursor: 'pointer' }}>Macronutrientes</button>
-                  <button onClick={() => setTab('micros')} style={{ flex: 1, padding: '16px', background: tab === 'micros' ? 'transparent' : 'var(--bg)', border: 'none', borderBottom: tab === 'micros' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'micros' ? 'var(--text)' : 'var(--muted)', fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', cursor: 'pointer' }}>Micronutrientes</button>
-                </div>
-
-                <div style={{ padding: '22px' }}>
-                  {tab === 'macros' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                      <div style={{ gridColumn: '1 / -1', background: 'var(--bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)' }}>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Calorias (Kcal)</label>
-                        <input type="text" name="calories_per_unit" value={formData.calories_per_unit || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '16px', fontFamily: 'inherit', fontWeight: 900, outline: 'none' }} />
-                      </div>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '.04em' }}>Proteínas (g)</label><input type="text" name="protein_g" value={formData.protein_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '.04em' }}>Carboidratos (g)</label><input type="text" name="carbs_g" value={formData.carbs_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: '#a855f7', textTransform: 'uppercase', letterSpacing: '.04em' }}>Gorduras Tot. (g)</label><input type="text" name="fat_g" value={formData.fat_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Gord. Sat. (g)</label><input type="text" name="fat_sat_g" value={formData.fat_sat_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Fibra Alimentar (g)</label><input type="text" name="fiber_g" value={formData.fiber_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Açúcares (g)</label><input type="text" name="sugar_g" value={formData.sugar_g || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                    </div>
-                  )}
-                  {tab === 'micros' && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Sódio (mg)</label><input type="text" name="sodium_mg" value={formData.sodium_mg || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Cálcio (mg)</label><input type="text" name="calcium_mg" value={formData.calcium_mg || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Ferro (mg)</label><input type="text" name="iron_mg" value={formData.iron_mg || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                      <div><label style={{ display: 'block', fontSize: '12px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Potássio (mg)</label><input type="text" name="potassium_mg" value={formData.potassium_mg || ''} onChange={handleChange} style={{ width: '100%', padding: '12px 14px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 700, outline: 'none' }} /></div>
-                    </div>
-                  )}
-                </div>
-              </section>
-            </div>
-
-            {/* RIGHT COLUMN: Tags & Meta */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 14px', fontSize: '15px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Tags de Dieta</h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px', marginBottom: '16px' }}>
@@ -258,7 +304,6 @@ export default function FoodEditor() {
 
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   );
 }

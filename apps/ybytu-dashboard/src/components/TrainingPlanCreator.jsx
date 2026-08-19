@@ -70,13 +70,12 @@ export default function TrainingPlanCreator() {
   useEffect(() => {
     let cancelled = false;
     clearTimeout(searchDebounce.current);
-    if (exSearch.trim().length < 2) { setExResults([]); return; }
     searchDebounce.current = setTimeout(async () => {
       try {
         const results = await trainingService.searchExercises(exSearch.trim());
         if (!cancelled) setExResults(results ?? []);
       } catch { /* autocomplete, falha silenciosa */ }
-    }, 300);
+    }, exSearch.trim() ? 300 : 0);
     return () => { cancelled = true; clearTimeout(searchDebounce.current); };
   }, [exSearch]);
 

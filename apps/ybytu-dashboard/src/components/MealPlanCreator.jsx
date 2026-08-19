@@ -65,13 +65,12 @@ export default function MealPlanCreator() {
   useEffect(() => {
     let cancelled = false;
     clearTimeout(searchDebounce.current);
-    if (mealSearch.trim().length < 2) { setMealResults([]); return; }
     searchDebounce.current = setTimeout(async () => {
       try {
         const results = await mealPlanService.searchMeals(mealSearch.trim());
         if (!cancelled) setMealResults(results ?? []);
       } catch { /* autocomplete, falha silenciosa */ }
-    }, 300);
+    }, mealSearch.trim() ? 300 : 0);
     return () => { cancelled = true; clearTimeout(searchDebounce.current); };
   }, [mealSearch]);
 

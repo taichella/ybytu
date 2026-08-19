@@ -98,9 +98,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        // TODO(débito): voltar pro domínio próprio (onboarding@ybytu.app) assim que
-        // ybytu.app verificar no Resend -- por ora usando o remetente sandbox deles.
-        from: 'Ybytu <onboarding@resend.dev>',
+        from: 'Ybytu <onboarding@send.ybytu.app>',
         to: [email],
         subject: `Recebemos seu perfil, ${firstName}! 🎉`,
         html,

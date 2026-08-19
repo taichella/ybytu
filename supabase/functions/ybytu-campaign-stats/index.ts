@@ -27,7 +27,10 @@ serve(async (req) => {
       })
     }
 
-    const [totalRes, okRes, failedRes, deliveredRes, okProfilesRes, mealsCompletedRes] = await Promise.all([
+    const [
+      totalRes, okRes, failedRes, deliveredRes, okProfilesRes, mealsCompletedRes,
+      activeSubsRes, foodsRes, profilesForGrowthRes, subscriptionTypesRes, profilesForDistributionRes,
+    ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan_generation_status', 'ok'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan_generation_status', 'failed'),
@@ -40,6 +43,15 @@ serve(async (req) => {
       // próprio marcar-como-feito no app, é dado real de adesão, não de
       // catálogo.
       supabase.from('completed_meals').select('id', { count: 'exact', head: true }),
+      // Cards do design original (Dashboard.dc.html) restaurados 2026-08-16
+      // com dado real -- growth chart e donut de distribuição usam
+      // profiles.created_at / subscription_type_id, que sempre existiram e
+      // nunca precisaram de WooCommerce (só MRR/ticket/churn precisam).
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).not('subscription_type_id', 'is', null),
+      supabase.from('foods').select('food_id', { count: 'exact', head: true }),
+      supabase.from('profiles').select('created_at'),
+      supabase.from('subscription_types').select('id, name_ptbr'),
+      supabase.from('profiles').select('subscription_type_id'),
     ])
 
     if (totalRes.error) throw new Error(`total: ${totalRes.error.message}`)
@@ -48,6 +60,44 @@ serve(async (req) => {
     if (deliveredRes.error) throw new Error(`delivered: ${deliveredRes.error.message}`)
     if (okProfilesRes.error) throw new Error(`ok_profiles: ${okProfilesRes.error.message}`)
     if (mealsCompletedRes.error) throw new Error(`meals_completed: ${mealsCompletedRes.error.message}`)
+    if (activeSubsRes.error) throw new Error(`active_subs: ${activeSubsRes.error.message}`)
+    if (foodsRes.error) throw new Error(`foods: ${foodsRes.error.message}`)
+    if (profilesForGrowthRes.error) throw new Error(`growth: ${profilesForGrowthRes.error.message}`)
+    if (subscriptionTypesRes.error) throw new Error(`subscription_types: ${subscriptionTypesRes.error.message}`)
+    if (profilesForDistributionRes.error) throw new Error(`distribution: ${profilesForDistributionRes.error.message}`)
+
+    // Growth chart -- últimos 6 meses (inclusive o atual), contagem de
+    // profiles.created_at por mês.
+    const now = new Date()
+    const monthBuckets: { key: string; label: string; count: number }[] = []
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1))
+      monthBuckets.push({
+        key: `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`,
+        label: d.toLocaleDateString('pt-BR', { month: 'short', timeZone: 'UTC' }).replace('.', ''),
+        count: 0,
+      })
+    }
+    const bucketByKey = new Map(monthBuckets.map((b) => [b.key, b]))
+    for (const p of profilesForGrowthRes.data ?? []) {
+      if (!p.created_at) continue
+      const d = new Date(p.created_at)
+      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`
+      const bucket = bucketByKey.get(key)
+      if (bucket) bucket.count += 1
+    }
+
+    // Distribuição de planos -- por subscription_type_id real do profile.
+    const typeNameById = new Map((subscriptionTypesRes.data ?? []).map((t: any) => [t.id, t.name_ptbr]))
+    const distributionCounts = new Map<string, number>()
+    let noPlanCount = 0
+    for (const p of profilesForDistributionRes.data ?? []) {
+      if (!p.subscription_type_id) { noPlanCount += 1; continue }
+      const name = typeNameById.get(p.subscription_type_id) ?? 'Outro'
+      distributionCounts.set(name, (distributionCounts.get(name) ?? 0) + 1)
+    }
+    if (noPlanCount > 0) distributionCounts.set('Sem plano', noPlanCount)
+    const planDistribution = [...distributionCounts.entries()].map(([name, count]) => ({ name, count }))
 
     const okIds = (okProfilesRes.data ?? []).map((p) => p.id)
     let pendingCount = 0
@@ -76,6 +126,11 @@ serve(async (req) => {
       pending_validation: pendingCount,
       plans_delivered: deliveredRes.count ?? 0,
       meals_completed: mealsCompletedRes.count ?? 0,
+      total_users: totalRes.count ?? 0,
+      active_subscriptions: activeSubsRes.count ?? 0,
+      foods_count: foodsRes.count ?? 0,
+      growth_series: monthBuckets,
+      plan_distribution: planDistribution,
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

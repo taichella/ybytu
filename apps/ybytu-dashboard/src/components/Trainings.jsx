@@ -111,9 +111,14 @@ export default function Trainings() {
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px', flex: 1, alignContent: 'flex-start' }}>
                         {goals.map((g, i) => <span key={i} style={{ display: 'inline-flex', padding: '3px 9px', borderRadius: '7px', fontSize: '11px', fontWeight: 700, background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)' }}>{g}</span>)}
                       </div>
-                      <Link to={`/training-creator/${p.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px', borderRadius: '10px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, textDecoration: 'none', borderTop: '1px solid var(--border)', marginTop: 'auto', paddingTop: '14px' }}>
-                        Editar
-                      </Link>
+                      <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid var(--border)', marginTop: 'auto', paddingTop: '14px' }}>
+                        <Link to={`/trainings/${p.id}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px', borderRadius: '10px', background: 'var(--surface-2)', color: 'var(--text)', fontSize: '13px', fontWeight: 800, textDecoration: 'none', border: '1px solid var(--border)' }}>
+                          Ver
+                        </Link>
+                        <Link to={`/training-creator/${p.id}`} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px', borderRadius: '10px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, textDecoration: 'none' }}>
+                          Editar
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 );

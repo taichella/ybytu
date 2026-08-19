@@ -201,10 +201,24 @@ serve(async (req) => {
 
       const exerciseIds = [...new Set((slots ?? []).map((s: any) => s.exercise_id))]
       const { data: exercises, error: exErr } = exerciseIds.length
-        ? await supabase.from('exercises').select('id, exercise_id, name_ptbr').in('exercise_id', exerciseIds)
+        ? await supabase.from('exercises').select('id, exercise_id, name_ptbr, muscle_groups_ids').in('exercise_id', exerciseIds)
         : { data: [], error: null }
       if (exErr) throw exErr
-      const exerciseByCode = new Map((exercises ?? []).map((e: any) => [e.exercise_id, e]))
+
+      const { data: muscleGroups, error: mgErr } = await supabase.from('muscle_groups').select('muscle_group_id, name_ptbr')
+      if (mgErr) throw mgErr
+      const muscleGroupName = new Map((muscleGroups ?? []).map((m: any) => [m.muscle_group_id, m.name_ptbr]))
+
+      const exerciseByCode = new Map((exercises ?? []).map((e: any) => [e.exercise_id, {
+        ...e,
+        muscle_groups: (e.muscle_groups_ids ?? []).map((mid: string) => muscleGroupName.get(mid) ?? mid),
+      }]))
+
+      const { count: usersCount, error: usersErr } = await supabase
+        .from('user_training_plans')
+        .select('id', { count: 'exact', head: true })
+        .eq('training_plan_id', plan.id)
+      if (usersErr) throw usersErr
 
       return json({
         training_plan: {
@@ -214,6 +228,7 @@ serve(async (req) => {
           exercise_equipment_ids: pgArrayToList(plan.exercise_equipment_ids),
         },
         is_molde: MOLDE_IDS.has(plan.training_plan_id),
+        users_count: usersCount ?? 0,
         slots: (slots ?? []).map((s: any) => ({ ...s, exercise: exerciseByCode.get(s.exercise_id) ?? null })),
       }, 200, corsHeaders)
     }

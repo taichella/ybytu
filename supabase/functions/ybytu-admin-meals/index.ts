@@ -82,12 +82,17 @@ serve(async (req) => {
 
     if (action === 'search_foods') {
       const search = typeof body?.search === 'string' ? body.search.trim() : ''
-      if (search.length < 2) return json({ foods: [] }, 200, corsHeaders)
-      const { data, error } = await supabase
+      const ids = Array.isArray(body?.ids) ? body.ids.filter((v: unknown) => typeof v === 'string') : null
+      let query = supabase
         .from('foods')
-        .select('food_id, name_ptbr, calories_per_unit, protein_g, carbs_g, fat_g, food_measurement_unit_id')
-        .ilike('name_ptbr', `%${search}%`)
-        .limit(30)
+        .select('food_id, name_ptbr, calories_per_unit, protein_g, carbs_g, fat_g, quantity, food_measurement_unit_id')
+      if (ids && ids.length > 0) {
+        query = query.in('food_id', ids)
+      } else {
+        query = query.limit(30)
+        if (search) query = query.ilike('name_ptbr', `%${search}%`)
+      }
+      const { data, error } = await query
       if (error) throw error
       return json({ foods: data }, 200, corsHeaders)
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { foodService } from '../services/foodService.js';
 
@@ -9,6 +9,8 @@ export default function Foods() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const [lookups, setLookups] = useState(null);
+  const [search, setSearch] = useState('');
+  const [groupFilter, setGroupFilter] = useState('');
 
   useEffect(() => {
     fetchFoods();
@@ -61,6 +63,16 @@ export default function Foods() {
     return tags.filter(Boolean);
   };
 
+  const filtered = useMemo(() => foods.filter((f) => {
+    if (groupFilter && f.food_group_id !== groupFilter) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const hay = `${f.name_ptbr ?? ''} ${f.brand ?? ''} ${f.food_id ?? ''}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }), [foods, search, groupFilter]);
+
   return (
     <>
       <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
@@ -93,9 +105,9 @@ export default function Foods() {
           <div style={{ display: 'flex', gap: '12px', marginBottom: '22px', flexWrap: 'wrap' }}>
             <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
               <svg style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-              <input type="text" placeholder="Buscar por nome, marca ou ID..." style={{ width: '100%', padding: '12px 14px 12px 38px', borderRadius: '12px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />
+              <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome, marca ou ID..." style={{ width: '100%', padding: '12px 14px 12px 38px', borderRadius: '12px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none' }} />
             </div>
-            <select style={{ padding: '12px 16px', borderRadius: '12px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer', appearance: 'none' }}>
+            <select value={groupFilter} onChange={(e) => setGroupFilter(e.target.value)} style={{ padding: '12px 16px', borderRadius: '12px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer', appearance: 'none' }}>
               <option value="">Todos os Grupos</option>
               {lookups?.food_groups?.map(g => (
                 <option key={g.id} value={g.id}>{g.name_ptbr}</option>
@@ -123,7 +135,11 @@ export default function Foods() {
             </div>
           )}
 
-          {!loading && !error && foods.length > 0 && view === 'list' && (
+          {!loading && !error && foods.length > 0 && filtered.length === 0 && (
+            <p style={{ color: 'var(--muted)', textAlign: 'center', padding: '40px' }}>Nenhum alimento encontrado para esse filtro.</p>
+          )}
+
+          {!loading && !error && filtered.length > 0 && view === 'list' && (
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', whiteSpace: 'nowrap' }}>
@@ -139,7 +155,7 @@ export default function Foods() {
                     </tr>
                   </thead>
                   <tbody>
-                    {foods.map((f) => {
+                    {filtered.map((f) => {
                       const tags = getTags(f);
                       return (
                       <tr key={f.id} className="yb-hover-row" style={{ borderTop: '1px solid var(--border)' }}>
@@ -189,9 +205,9 @@ export default function Foods() {
             </div>
           )}
 
-          {!loading && !error && foods.length > 0 && view === 'grid' && (
+          {!loading && !error && filtered.length > 0 && view === 'grid' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '18px' }}>
-              {foods.map((f) => {
+              {filtered.map((f) => {
                 const tags = getTags(f);
                 return (
                 <div key={f.id} className="yb-hover-card" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '18px' }}>

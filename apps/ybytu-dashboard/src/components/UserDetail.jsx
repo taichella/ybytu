@@ -109,7 +109,12 @@ export default function UserDetail() {
             user_id: id,
             role: reviewRole,
             note_ptbr: notePtbr,
-            training_plan_id: userData?.current_training_plan_id
+            // training_plan_id aqui precisa ser o slug texto (training_plans.training_plan_id),
+            // não o uuid de profiles.current_training_plan_id -- plan_reviews.training_plan_id
+            // tem FK pra training_plans.training_plan_id (texto). Usar o uuid quebrava o upsert
+            // com violação de FK (500 silencioso pro usuário). Achado testando o fluxo ao vivo,
+            // 2026-08-16.
+            training_plan_id: planPayload?.training?.training_plan_id ?? null
           }
        });
        if (res.error) throw res.error;

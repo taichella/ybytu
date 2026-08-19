@@ -141,7 +141,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
   return (
     <>
       <style>{`
-        :root {
+        .user-plan-wrapper {
           --brand:#F55F16; --brand-2:#FF7A3D; --brand-soft:#FEF0E9; --brand-ink:#B4400A;
           --ink:#121826; --muted:#697586; --faint:#9AA4B2;
           --line:#ECEFF3; --line-2:#F4F6F9; --bg:#FFFFFF; --panel:#FAFBFD;
@@ -149,8 +149,6 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
           --green:#15A34A; --red:#EF4444; --amber:#D97706; --blue:#3B82F6; --violet:#A855F7;
           --shadow:0 1px 2px rgba(16,24,40,.04), 0 6px 18px rgba(16,24,40,.05);
           --shadow-lg:0 12px 36px rgba(16,24,40,.10);
-        }
-        .user-plan-wrapper {
           color: var(--ink);
           font-family: 'Inter', sans-serif;
           -webkit-font-smoothing: antialiased;
