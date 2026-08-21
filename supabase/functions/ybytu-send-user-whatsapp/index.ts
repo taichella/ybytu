@@ -70,6 +70,8 @@ serve(async (req) => {
     // Botão "Visit website" do template: base fixa https://pro.ybytu.app/plano/
     // cadastrada na Meta + sufixo dinâmico = planToken.
     const result = await sendWhatsAppTemplate(
+      supabase,
+      userId,
       profile.whatsapp_phone,
       templateId,
       [profile.full_name ?? ''],

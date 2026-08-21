@@ -162,6 +162,27 @@ export default function UserDetail() {
   const isActive = userData?.subscription_type_id ? true : false;
   const isBlockedMode = isBlocked;
 
+  const memberSinceLabel = userData?.created_at
+    ? new Date(userData.created_at).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+    : null;
+
+  // IMC: peso(kg) / altura(m)^2 -- classificação padrão OMS, mesmas faixas
+  // que o design mostra (ex: "22.7 · Saudável").
+  let imc = null;
+  if (userData?.weight_kg && userData?.height_cm) {
+    const heightM = userData.height_cm / 100;
+    const value = userData.weight_kg / (heightM * heightM);
+    let label = 'Abaixo do peso', color = '#3b82f6';
+    if (value >= 30) { label = 'Obesidade'; color = 'var(--danger)'; }
+    else if (value >= 25) { label = 'Sobrepeso'; color = '#d97706'; }
+    else if (value >= 18.5) { label = 'Saudável'; color = '#16a34a'; }
+    imc = { value: value.toFixed(1), label, color };
+  }
+
+  const lastSignInLabel = resolvedLabels.lastSignInAt
+    ? new Date(resolvedLabels.lastSignInAt).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+    : 'Nunca acessou';
+
   if (isLoading) {
     return <main style={{ padding: '40px', textAlign: 'center' }}><p>Carregando perfil...</p></main>;
   }
@@ -221,7 +242,9 @@ export default function UserDetail() {
                     <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: isBlocked ? 'var(--danger)' : '#16a34a' }}></span> {isBlocked ? 'Inativo' : 'Ativo'}
                   </span>
                 </div>
-                <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>ID {userData.id}</p>
+                <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>
+                  {memberSinceLabel ? `Membro desde ${memberSinceLabel} · ` : ''}ID {userData.id.slice(0, 4)}…{userData.id.slice(-4)}
+                </p>
               </div>
             </div>
           </div>
@@ -239,21 +262,25 @@ export default function UserDetail() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Dados Pessoais</h3>
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Plano</span><span style={{ display: 'inline-flex', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 800, background: 'rgba(245,95,22,.14)', color: '#F55F16' }}>{resolvedLabels.subscriptionName || 'Free'}</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Onboarding</span><span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 800, color: userData.onboarding_completed ? '#16a34a' : 'var(--muted)' }}>{userData.onboarding_completed ? <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"></path></svg> Completo</> : 'Incompleto'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Nome completo</span><span style={{ fontWeight: 700 }}>{userData.full_name}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Sexo</span><span style={{ fontWeight: 700 }}>{resolvedLabels.gender || '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Idade</span><span style={{ fontWeight: 700 }}>{userData.age ? `${userData.age} anos` : '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Peso</span><span style={{ fontWeight: 700 }}>{userData.weight_kg ? `${userData.weight_kg} kg` : '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Altura</span><span style={{ fontWeight: 700 }}>{userData.height_cm ? `${userData.height_cm} cm` : '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 600 }}>IMC</span>
+                    <span style={{ fontWeight: 800, color: imc ? imc.color : 'var(--muted)' }}>{imc ? `${imc.value} · ${imc.label}` : '—'}</span>
+                  </div>
                 </div>
               </section>
 
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Perfil Básico</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '14px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Sexo</span><span style={{ fontWeight: 700 }}>{resolvedLabels.gender || '—'}</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Idade</span><span style={{ fontWeight: 700 }}>{userData.age || '—'} anos</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Peso</span><span style={{ fontWeight: 700 }}>{userData.weight_kg || '—'} kg</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Altura</span><span style={{ fontWeight: 700 }}>{userData.height_cm || '—'} cm</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Nível</span><span style={{ fontWeight: 700 }}>{resolvedLabels.exerciseLevel || '—'}</span></div>
+                <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Conta & Assinatura</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Plano</span><span style={{ display: 'inline-flex', padding: '3px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: 800, background: 'rgba(245,95,22,.14)', color: '#F55F16' }}>{resolvedLabels.subscriptionName || 'Free'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Onboarding</span><span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontWeight: 800, color: userData.onboarding_completed ? '#16a34a' : 'var(--muted)' }}>{userData.onboarding_completed ? <><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"></path></svg> Completo</> : 'Incompleto'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Último acesso</span><span style={{ fontWeight: 700 }}>{lastSignInLabel}</span></div>
                 </div>
               </section>
             </div>
@@ -295,6 +322,33 @@ export default function UserDetail() {
                   {(resolvedLabels.dietaryRestrictions && resolvedLabels.dietaryRestrictions.length > 0) ? resolvedLabels.dietaryRestrictions.map((g, i) => (
                       <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 13px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)' }}>{g}</span>
                   )) : <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Não informado</span>}
+                </div>
+              </section>
+
+              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Preferências de Treino</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Nível</span><span style={{ fontWeight: 700 }}>{resolvedLabels.exerciseLevel || '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Ambiente</span><span style={{ fontWeight: 700 }}>{resolvedLabels.exerciseEnvironment || '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Dias/semana</span><span style={{ fontWeight: 700 }}>{userData.training_days_per_week ? `${userData.training_days_per_week} dias` : '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Duração/sessão</span><span style={{ fontWeight: 700 }}>{userData.training_duration_minutes ? `${userData.training_duration_minutes} min` : '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', fontSize: '14px' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>Equipamentos</span>
+                    <span style={{ fontWeight: 700, textAlign: 'right' }}>{(resolvedLabels.exerciseEquipments && resolvedLabels.exerciseEquipments.length > 0) ? resolvedLabels.exerciseEquipments.join(', ') : '—'}</span>
+                  </div>
+                </div>
+              </section>
+
+              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Preferências Nutricionais</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Preferência</span><span style={{ fontWeight: 700 }}>{resolvedLabels.dietaryPreference || '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Refeições/dia</span><span style={{ fontWeight: 700 }}>{userData.meals_per_day || '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Dias/semana</span><span style={{ fontWeight: 700 }}>{userData.nutrition_days_per_week ? `${userData.nutrition_days_per_week} dias` : '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', fontSize: '14px' }}>
+                    <span style={{ color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>Não gosta de</span>
+                    <span style={{ fontWeight: 700, textAlign: 'right' }}>{userData.disliked_foods || '—'}</span>
+                  </div>
                 </div>
               </section>
             </div>

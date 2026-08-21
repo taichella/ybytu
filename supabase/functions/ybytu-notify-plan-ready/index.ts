@@ -111,7 +111,7 @@ serve(async (req) => {
       // parâmetro com "?"/"=" corre risco de rejeição, ver [[project_whatsapp_button_url_no_query_string]]).
       // A rota /validar/:id já abre direto no plano gerado (com formulário de
       // parecer + edição de carga) -- ver App.jsx/UserDetail.jsx.
-      const result = await sendWhatsAppTemplate(phone, templateId, [profile.full_name ?? 'aluno(a)'], userId)
+      const result = await sendWhatsAppTemplate(supabase, userId, phone, templateId, [profile.full_name ?? 'aluno(a)'], userId)
       if (result.ok) notifiedRoles.push(role)
       else console.error(`Falha ao notificar ${role}:`, result.error)
     }

@@ -64,7 +64,7 @@ serve(async (req) => {
     const results: Record<string, unknown> = {}
 
     if (profile.whatsapp_phone) {
-      const result = await sendWhatsAppTemplate(profile.whatsapp_phone, userTemplateId, [fullName])
+      const result = await sendWhatsAppTemplate(supabase, userId, profile.whatsapp_phone, userTemplateId, [fullName])
       results.user = result.ok ? 'sent' : `failed: ${result.error}`
       if (!result.ok) console.error('Falha ao notificar usuario (onboarding_received):', result.error)
     } else {
@@ -72,7 +72,7 @@ serve(async (req) => {
     }
 
     if (salesPhone) {
-      const result = await sendWhatsAppTemplate(salesPhone, salesTemplateId, [fullName], userId)
+      const result = await sendWhatsAppTemplate(supabase, userId, salesPhone, salesTemplateId, [fullName], userId)
       results.sales = result.ok ? 'sent' : `failed: ${result.error}`
       if (!result.ok) console.error('Falha ao notificar sales (new_onboarding):', result.error)
     } else {

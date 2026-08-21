@@ -5,6 +5,7 @@ import Login from './components/Login';
 import CreateAccount from './components/CreateAccount';
 import AcceptInvite from './components/AcceptInvite';
 import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import DashboardLayout from './components/DashboardLayout';
 import Dashboard from './components/Dashboard';
 import Campaign from './components/Campaign';
@@ -36,6 +37,7 @@ function App() {
         <Route path="/create-account" element={<CreateAccount />} />
         <Route path="/accept-invite/:token" element={<AcceptInvite />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         {/* Rota pública — link compartilhável do plano, fora do login */}
         <Route path="/plano/:token" element={<SharedPlan />} />
 

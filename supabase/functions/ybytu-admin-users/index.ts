@@ -79,6 +79,13 @@ serve(async (req) => {
           if (subData) subName = subData.name_ptbr
       }
 
+      // last_sign_in_at mora em auth.users, não em profiles -- só dá pra ler
+      // via admin API (service_role). Usado no card "Conta & Assinatura" do
+      // UserDetail (dado real que a tela de design pedia e tinha como pegar).
+      let lastSignInAt = null
+      const { data: authUserData } = await supabase.auth.admin.getUserById(userId)
+      if (authUserData?.user) lastSignInAt = authUserData.user.last_sign_in_at
+
       const resolved = {
         gender,
         activityLevel,
@@ -91,7 +98,8 @@ serve(async (req) => {
         dietaryRestrictions,
         muscleGroups,
         exerciseEquipments,
-        subscriptionName: subName
+        subscriptionName: subName,
+        lastSignInAt,
       }
 
       return new Response(JSON.stringify({ profile, resolved }), {

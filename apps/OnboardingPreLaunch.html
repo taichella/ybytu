@@ -423,9 +423,27 @@
 
     const isNextDisabled = () => {
       const stepData = visibleSteps[currentStep];
+      const value = answers[stepData.dbField];
       if (stepData.type === 'form') {
         return !answers.first_name || !answers.last_name || !answers.email || !answers.whatsapp_phone;
       }
+      // 'single' e 'multiple' cobrem todas as perguntas de catálogo (gênero,
+      // condições físicas, objetivos, etc.) -- sem isso o usuário avançava
+      // sem responder e o perfil ficava com campo nulo/"incompleto" no
+      // dashboard, sem nenhum aviso. Perguntas com opção "Nenhuma" exigem
+      // escolher explicitamente "Nenhuma", não deixar em branco.
+      if (stepData.type === 'single') {
+        return value === undefined || value === null || value === '';
+      }
+      if (stepData.type === 'multiple') {
+        return !Array.isArray(value) || value.length === 0;
+      }
+      if (stepData.type === 'number') {
+        return value === undefined || value === null || value === '' || isNaN(Number(value));
+      }
+      // 'text' (disliked_foods) e 'slider' (training_duration_minutes) ficam
+      // opcionais de propósito -- texto livre tem subtítulo dizendo "deixe em
+      // branco", e o slider sempre carrega um valor default (recommended).
       return false;
     };
 
