@@ -98,11 +98,22 @@ serve(async (req) => {
 
     const templateId = Deno.env.get('WHATSAPP_TEMPLATE_STAFF_PLAN_READY') ?? ''
     const notifiedRoles: string[] = []
+    // No pilot, PHONE_ADMIN_TRAINER e PHONE_ADMIN_NUTRI são o MESMO número
+    // (a Taina cobre os dois papéis) -- sem dedupe, o profissional recebia o
+    // mesmo template 2x seguidas (uma por papel pendente), parecendo bug de
+    // envio duplicado. Achado 2026-08-22. Uma mensagem por telefone único é
+    // suficiente pra avisar "tem parecer pendente"; o papel específico é
+    // detalhado ao abrir o link /validar/:id.
+    const notifiedPhones = new Set<string>()
 
     for (const role of missingRoles) {
       const phone = Deno.env.get(ROLE_PHONE_ENV[role]) ?? ''
       if (!phone) {
         console.error(`Telefone não configurado pro papel ${role} (${ROLE_PHONE_ENV[role]})`)
+        continue
+      }
+      if (notifiedPhones.has(phone)) {
+        notifiedRoles.push(role)
         continue
       }
       // Botão "Visit website" do template: base fixa https://pro.ybytu.app/validar/
@@ -112,8 +123,10 @@ serve(async (req) => {
       // A rota /validar/:id já abre direto no plano gerado (com formulário de
       // parecer + edição de carga) -- ver App.jsx/UserDetail.jsx.
       const result = await sendWhatsAppTemplate(supabase, userId, phone, templateId, [profile.full_name ?? 'aluno(a)'], userId)
-      if (result.ok) notifiedRoles.push(role)
-      else console.error(`Falha ao notificar ${role}:`, result.error)
+      if (result.ok) {
+        notifiedRoles.push(role)
+        notifiedPhones.add(phone)
+      } else console.error(`Falha ao notificar ${role}:`, result.error)
     }
 
     const updateColumn = mode === 'initial' ? 'plan_ready_notified_at' : 'plan_review_reminder_sent_at'

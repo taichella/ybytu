@@ -33,6 +33,11 @@ export async function sendWhatsAppTemplate(
       target_phone: phone,
       status: result.ok ? 'sent' : 'failed',
       error: result.error ?? null,
+      // wamid é o que o whatsapp-webhook usa pra casar o status de entrega
+      // (sent/delivered/read/failed) que a Meta manda depois, assíncrono, com
+      // esta linha. Sem isso não tem como saber se "aceito pela Meta" virou
+      // "chegou no aparelho". Ver [[project_whatsapp_delivery_tracking]].
+      wamid: result.wamid ?? null,
     })
   } catch (logErr) {
     console.error('Falha ao gravar log em whatsapp_notifications:', logErr)
@@ -46,7 +51,7 @@ async function doSendWhatsAppTemplate(
   templateName: string,
   bodyParams: string[],
   buttonUrlParam?: string,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; wamid?: string }> {
   const accessToken = Deno.env.get('WHATSAPP_ACCESS_TOKEN')
   const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID')
   if (!accessToken) return { ok: false, error: 'missing_whatsapp_access_token' }
@@ -94,7 +99,8 @@ async function doSendWhatsAppTemplate(
       const metaErrorMessage = typeof responseData?.error?.message === 'string' ? responseData.error.message : undefined
       return { ok: false, error: metaErrorMessage ? `whatsapp_error_${response.status}: ${metaErrorMessage}` : `whatsapp_error_${response.status}` }
     }
-    return { ok: true }
+    const wamid = typeof responseData?.messages?.[0]?.id === 'string' ? responseData.messages[0].id : undefined
+    return { ok: true, wamid }
   } catch (err) {
     console.error('Falha ao chamar a Cloud API da Meta:', err)
     return { ok: false, error: 'whatsapp_request_failed' }

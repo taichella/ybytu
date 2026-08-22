@@ -60,7 +60,15 @@ serve(async (req) => {
         return (data || []).map(row => row[col])
       }
 
-      const gender = await fetchLookup('genders', profile.gender_id, 'label_ptbr')
+      // ATENÇÃO: onboarding_physical_conditions / onboarding_muscle_groups /
+      // onboarding_exercise_equipments são os catálogos CURADOS que o
+      // onboarding realmente usa (7/9/7 linhas) -- physical_conditions,
+      // muscle_groups e exercise_equipments são os catálogos grandes usados
+      // em outro lugar (16/49/72 linhas), com UUIDs DIFERENTES. Resolver
+      // contra a tabela errada sempre retorna vazio (find por id que não
+      // existe lá), mesmo com o dado salvo certinho no profile. Bug
+      // encontrado e corrigido 2026-08-22 (achado no teste E2E da Taina).
+      const gender = await fetchLookup('genders', profile.gender_id, 'name_ptbr')
       const activityLevel = await fetchLookup('activity_levels', profile.activity_level_id, 'label_ptbr')
       const dietaryPreference = await fetchLookup('dietary_preferences', profile.dietary_preference_id, 'name_ptbr')
       const exerciseLevel = await fetchLookup('exercise_levels', profile.exercise_level_id, 'name_ptbr')
@@ -68,10 +76,10 @@ serve(async (req) => {
 
       const goals = await fetchLookupMulti('goals', profile.goals_ids, 'name_ptbr')
       const healthConditions = await fetchLookupMulti('health_conditions', profile.health_conditions_ids, 'name_ptbr')
-      const physicalConditions = await fetchLookupMulti('physical_conditions', profile.physical_conditions_ids, 'name_ptbr')
+      const physicalConditions = await fetchLookupMulti('onboarding_physical_conditions', profile.physical_conditions_ids, 'name_ptbr')
       const dietaryRestrictions = await fetchLookupMulti('dietary_restrictions', profile.dietary_restrictions_ids, 'name_ptbr')
-      const muscleGroups = await fetchLookupMulti('muscle_groups', profile.muscle_groups_ids, 'name_ptbr')
-      const exerciseEquipments = await fetchLookupMulti('exercise_equipments', profile.exercise_equipments_ids, 'name_ptbr')
+      const muscleGroups = await fetchLookupMulti('onboarding_muscle_groups', profile.muscle_groups_ids, 'name_ptbr')
+      const exerciseEquipments = await fetchLookupMulti('onboarding_exercise_equipments', profile.exercise_equipments_ids, 'name_ptbr')
 
       let subName = null
       if (profile.subscription_type_id) {

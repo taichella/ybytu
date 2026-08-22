@@ -6,6 +6,17 @@ import UserPlan from './UserPlan';
 
 const VALID_TABS = new Set(['overview', 'health', 'plans', 'activity']);
 
+// Mesmas opções do passo "meals_per_day" do onboarding (OnboardingPreLaunch.html)
+// -- profiles.meals_per_day guarda só o número (3-6), o rótulo nunca foi
+// resolvido aqui, aparecia cru ("5 refeições") em vez do que a pessoa
+// escolheu. Bug encontrado 2026-08-22 (teste E2E da Taina).
+const MEALS_PER_DAY_LABELS = {
+  3: '3 refeições principais',
+  4: '3 refeições + 1 lanche',
+  5: '3 refeições + 2 lanches',
+  6: '3 refeições + 3 lanches',
+};
+
 export default function UserDetail() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -138,7 +149,7 @@ export default function UserDetail() {
   // reenviar o parecer já salvo do personal, o upsert apagaria o texto
   // existente. Por isso reenviamos o note_ptbr/reviewer_credential atuais
   // (vindos do planPayload já carregado) junto do save de carga.
-  const saveLoads = async ({ training_plan_id, load_updates }) => {
+  const saveLoads = async ({ training_plan_id, load_updates, exercise_field_updates }) => {
     const existingReview = planPayload?.review?.personal;
     const res = await supabase.functions.invoke('ybytu-submit-plan-review', {
       body: {
@@ -148,6 +159,7 @@ export default function UserDetail() {
         reviewer_credential: existingReview?.reviewer_credential ?? null,
         training_plan_id,
         load_updates,
+        exercise_field_updates,
       }
     });
     if (res.error) throw res.error;
@@ -343,7 +355,7 @@ export default function UserDetail() {
                 <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Preferências Nutricionais</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Preferência</span><span style={{ fontWeight: 700 }}>{resolvedLabels.dietaryPreference || '—'}</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Refeições/dia</span><span style={{ fontWeight: 700 }}>{userData.meals_per_day || '—'}</span></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Refeições/dia</span><span style={{ fontWeight: 700 }}>{MEALS_PER_DAY_LABELS[userData.meals_per_day] || userData.meals_per_day || '—'}</span></div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}><span style={{ color: 'var(--muted)', fontWeight: 600 }}>Dias/semana</span><span style={{ fontWeight: 700 }}>{userData.nutrition_days_per_week ? `${userData.nutrition_days_per_week} dias` : '—'}</span></div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', fontSize: '14px' }}>
                     <span style={{ color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>Não gosta de</span>
@@ -360,7 +372,49 @@ export default function UserDetail() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
               {planPayload ? (
-                  <div style={{ border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
+                <>
+                  {/* Layout de cards do mockup (UsuarioDetalhe.dc.html) -- sem barra de
+                      progresso/aderência e sem "Histórico de Atribuições": esses dados
+                      dependem de schema que ainda não existe (adesão/streak/histórico de
+                      planos), descopado de propósito -- ver [[project_userdetail_design_gaps_product_decisions]].
+                      "Ver plano" rola até o documento completo, já embutido logo abaixo. */}
+                  {planPayload.training && (
+                    <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                        <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano de Treino Atual</h3>
+                        <a href="#user-plan-document" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>Ver plano</a>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                        <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        </div>
+                        <div style={{ flex: 1, minWidth: '180px' }}>
+                          <p style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>{resolvedLabels.goals?.length ? resolvedLabels.goals.join(' + ') : 'Plano de treino'}</p>
+                          <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--muted)' }}>{planPayload.training.days_per_week} dias/sem · {planPayload.training.session_duration_min ? `${planPayload.training.session_duration_min} min/sessão` : 'duração não definida'}</p>
+                        </div>
+                      </div>
+                    </section>
+                  )}
+
+                  {planPayload.nutrition && (
+                    <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                        <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano Alimentar Atual</h3>
+                        <a href="#user-plan-document" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>Ver plano</a>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                        <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: 'linear-gradient(135deg,#16a34a,#4ade80)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>
+                        </div>
+                        <div style={{ flex: 1, minWidth: '180px' }}>
+                          <p style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>{resolvedLabels.dietaryPreference || 'Plano alimentar'}</p>
+                          <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--muted)' }}>{MEALS_PER_DAY_LABELS[userData.meals_per_day] || `${planPayload.nutrition.meals_per_day} refeições`}/dia · meta {planPayload.nutrition.daily_kcal_target} kcal</p>
+                        </div>
+                      </div>
+                    </section>
+                  )}
+
+                  <div id="user-plan-document" style={{ border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
                       <UserPlan
                         payload={planPayload}
                         editable={Boolean(staff?.roles?.includes('personal'))}
@@ -368,6 +422,7 @@ export default function UserDetail() {
                         embedded
                       />
                   </div>
+                </>
               ) : (
                   <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px', textAlign: 'center' }}>
                       <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Este usuário ainda não possui planos gerados.</p>

@@ -29,11 +29,39 @@ serve(async (req) => {
     const payload = await req.json()
     console.log("Notificação recebida da Meta:", JSON.stringify(payload))
 
-    // A lógica de atualizar o banco vai aqui assim que validarmos a conexão
+    // Callback de status (sent/delivered/read/failed) do template que a gente
+    // mandou -- é isso que dá a resposta real de "chegou no aparelho ou não",
+    // diferente do 200 OK que só confirma que a Meta ACEITOU o envio. Achado
+    // 2026-08-22: o webhook era só stub, não gravava nada. Correlaciona pelo
+    // wamid (id da mensagem) gravado em whatsapp_notifications no envio.
+    const statuses = (payload?.entry ?? [])
+      .flatMap((entry: any) => entry?.changes ?? [])
+      .flatMap((change: any) => change?.value?.statuses ?? [])
 
-    return new Response(JSON.stringify({ status: "success" }), { 
+    for (const s of statuses) {
+      const wamid = s?.id
+      const status = s?.status
+      if (!wamid || !status) continue
+
+      const errorMessage = Array.isArray(s?.errors) && s.errors.length > 0
+        ? s.errors.map((e: any) => `${e.code}: ${e.title}${e.error_data?.details ? ' -- ' + e.error_data.details : ''}`).join('; ')
+        : null
+
+      const { error } = await supabase
+        .from('whatsapp_notifications')
+        .update({
+          delivery_status: status,
+          delivery_error: errorMessage,
+          delivery_status_at: new Date().toISOString(),
+        })
+        .eq('wamid', wamid)
+
+      if (error) console.error('Falha ao gravar delivery_status:', error)
+    }
+
+    return new Response(JSON.stringify({ status: "success" }), {
       headers: { "Content-Type": "application/json" },
-      status: 200 
+      status: 200
     })
   } catch (err) {
     console.error("Erro:", err.message)

@@ -81,16 +81,20 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
   // { [training_plan_exercise_id]: { [set_number]: number|null } } -- só as
   // séries que o personal de fato tocou nesta sessão de edição.
   const [loadEdits, setLoadEdits] = useState({});
+  // { [training_plan_exercise_id]: { reps?: number, rest_seconds?: number } }
+  const [fieldEdits, setFieldEdits] = useState({});
   const [saveState, setSaveState] = useState('idle'); // idle | saving | success | error
 
   useEffect(() => {
     setLoadEdits({});
+    setFieldEdits({});
     setSaveState('idle');
   }, [payload]);
 
   const hasLoadEdits = useMemo(
-    () => Object.values(loadEdits).some((sets) => Object.keys(sets).length > 0),
-    [loadEdits],
+    () => Object.values(loadEdits).some((sets) => Object.keys(sets).length > 0)
+      || Object.values(fieldEdits).some((f) => Object.keys(f).length > 0),
+    [loadEdits, fieldEdits],
   );
 
   function handleLoadChange(exerciseId, setNumber, rawValue) {
@@ -102,6 +106,17 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
     setSaveState('idle');
   }
 
+  function handleFieldChange(exerciseId, field, rawValue) {
+    const value = rawValue === '' ? undefined : Number(rawValue);
+    setFieldEdits((prev) => {
+      const next = { ...(prev[exerciseId] || {}) };
+      if (value === undefined || Number.isNaN(value)) delete next[field];
+      else next[field] = value;
+      return { ...prev, [exerciseId]: next };
+    });
+    setSaveState('idle');
+  }
+
   async function handleSaveLoads(trainingPlanId) {
     if (!onSaveLoads || !trainingPlanId) return;
     const load_updates = Object.entries(loadEdits)
@@ -110,12 +125,16 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
         training_plan_exercise_id,
         loads: Object.entries(sets).map(([set_number, load_kg]) => ({ set_number: Number(set_number), load_kg })),
       }));
-    if (load_updates.length === 0) return;
+    const exercise_field_updates = Object.entries(fieldEdits)
+      .filter(([, f]) => Object.keys(f).length > 0)
+      .map(([training_plan_exercise_id, f]) => ({ training_plan_exercise_id, ...f }));
+    if (load_updates.length === 0 && exercise_field_updates.length === 0) return;
     setSaveState('saving');
     try {
-      await onSaveLoads({ training_plan_id: trainingPlanId, load_updates });
+      await onSaveLoads({ training_plan_id: trainingPlanId, load_updates, exercise_field_updates });
       setSaveState('success');
       setLoadEdits({});
+      setFieldEdits({});
     } catch {
       setSaveState('error');
     }
@@ -408,7 +427,9 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
           .section { break-inside:avoid-page; }
           p, li { orphans:3; widows:3; }
           .screen-only { display:none!important; }
+          .print-only { display:inline!important; }
         }
+        .print-only { display:none; }
       `}</style>
 
       <div className={`user-plan-wrapper${embedded ? ' embedded' : ''}`}>
@@ -644,6 +665,9 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                           <div className="table-scroll">
                             <table className="ex">
                               <thead><tr><th>Exercício</th><th className="c">Séries</th>{editable && <th className="c screen-only">Carga (kg)</th>}<th className="c">Reps</th><th className="c">Cadência*</th><th className="c">Descanso</th></tr></thead>
+                              {/* Reps/Descanso editáveis (Passo 5b) reaproveitam a mesma coluna --
+                                  em tela mostram input quando editable, na impressão (PDF) caem no
+                                  texto de sempre via CSS screen-only/print-only já existente no arquivo. */}
                               <tbody>
                                 {day.exercises.map((ex) => (
                                   <tr key={ex.order}>
@@ -683,9 +707,40 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                                         ) : <span className="dash">—</span>}
                                       </td>
                                     )}
-                                    <td className="c mono">{ex.reps_ptbr}</td>
+                                    <td className="c mono">
+                                      {editable && ex.id ? (
+                                        <>
+                                          <input
+                                            type="number"
+                                            inputMode="numeric"
+                                            min="1"
+                                            title="Repetições"
+                                            className="load-input screen-only"
+                                            value={fieldEdits[ex.id]?.reps ?? ex.reps ?? ''}
+                                            onChange={(e) => handleFieldChange(ex.id, 'reps', e.target.value)}
+                                          />
+                                          <span className="print-only">{ex.reps_ptbr}</span>
+                                        </>
+                                      ) : ex.reps_ptbr}
+                                    </td>
                                     <td className="c mono">{ex.cadence_ptbr}</td>
-                                    <td className="c mono">{ex.rest_seconds}s</td>
+                                    <td className="c mono">
+                                      {editable && ex.id ? (
+                                        <>
+                                          <input
+                                            type="number"
+                                            inputMode="numeric"
+                                            min="0"
+                                            step="5"
+                                            title="Descanso (segundos)"
+                                            className="load-input screen-only"
+                                            value={fieldEdits[ex.id]?.rest_seconds ?? ex.rest_seconds ?? ''}
+                                            onChange={(e) => handleFieldChange(ex.id, 'rest_seconds', e.target.value)}
+                                          />
+                                          <span className="print-only">{ex.rest_seconds}s</span>
+                                        </>
+                                      ) : `${ex.rest_seconds}s`}
+                                    </td>
                                   </tr>
                                 ))}
                               </tbody>

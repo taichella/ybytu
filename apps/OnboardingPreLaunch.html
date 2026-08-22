@@ -96,7 +96,13 @@
     const [loading, setLoading] = useState(true);
     
     const [answers, setAnswers] = useState({
-      subscription_type_id: SUBSCRIPTION_PLANS.COMPLETE
+      subscription_type_id: SUBSCRIPTION_PLANS.COMPLETE,
+      // Slider é opcional (isNextDisabled ignora), mas a tela já mostra "45 min"
+      // por default (currentData.recommended) -- sem seedar aqui, quem nunca
+      // arrasta o handle avança com answers.training_duration_minutes undefined,
+      // o update() não manda a chave, e a coluna fica no default do schema (30),
+      // divergindo do que a pessoa viu na tela. Bug real, achado 2026-08-22.
+      training_duration_minutes: 45
     });
 
     const userName = answers.first_name || 'Futuro Aluno'; 
@@ -341,15 +347,23 @@
             if (step.table) {
               const { data, error } = await supabase.from(step.table).select('*').order('sort_order');
               if (error || !data) return step;
-              return {
-                ...step,
-                options: data.map(item => ({
-                  ...item, 
-                  id: item.id || item[Object.keys(item).find(k => k.includes('id'))],
-                  name_ptbr: item.name_ptbr || item.label_ptbr || item.name || item.title,
-                  name: item.name_ptbr || item.label_ptbr || item.name || item.title
-                }))
-              };
+              let mapped = data.map(item => ({
+                ...item,
+                id: item.id || item[Object.keys(item).find(k => k.includes('id'))],
+                name_ptbr: item.name_ptbr || item.label_ptbr || item.name || item.title,
+                name: item.name_ptbr || item.label_ptbr || item.name || item.title
+              }));
+              // PASSO 17 (dietary_restrictions): carne suína/vermelha, peixe e
+              // frutos do mar já são cobertos pela pergunta de preferência
+              // alimentar (vegano/vegetariano/pescetariano etc via
+              // DIETARY_RESTRICTION_BLOCKS_BY_PREFERENCE) -- oferecer de novo
+              // aqui é redundante e confunde quem já respondeu. Removido
+              // 2026-08-22 a pedido da Taina.
+              if (step.dbField === 'dietary_restrictions_ids') {
+                const REDUNDANT_WITH_PREFERENCE = ['sem carne suína', 'sem carne vermelha', 'sem frutos do mar', 'sem peixe'];
+                mapped = mapped.filter(o => !REDUNDANT_WITH_PREFERENCE.includes(String(o.name_ptbr || '').trim().toLowerCase()));
+              }
+              return { ...step, options: mapped };
             }
             return step;
           }));
@@ -539,6 +553,7 @@
             dietary_preference_id: answers.dietary_preference_id,
             dietary_restrictions_ids: answers.dietary_restrictions_ids || [],
             disliked_foods: answers.disliked_foods,
+            onboarding_completed: true,
           }).eq('id', userId);
 
           if (profileError) throw new Error('Erro ao salvar perfil: ' + profileError.message);

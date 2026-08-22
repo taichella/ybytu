@@ -76,11 +76,19 @@ serve(async (req) => {
     }
 
     const rawLoadUpdates = Array.isArray(body?.load_updates) ? body.load_updates : null
-    if (rawLoadUpdates) {
-      // Carga é domínio de treino -- só quem tem o papel personal pode editar,
-      // independente de qual `role` este submit está assinando (ex: um
-      // nutricionista nunca deveria conseguir mandar load_updates junto do
-      // parecer dele).
+    // PASSO 5b (2026-08-22) -- reps/rest_seconds editáveis por exercício,
+    // além da carga por série que já existia. Mesmo domínio (treino), mesmo
+    // dono (personal), mesma checagem de posse -- por isso reaproveita todo
+    // o bloco de load_updates em vez de duplicar a validação de posse.
+    // Trocar o EXERCÍCIO em si (não só os números) fica pra depois -- precisa
+    // de um seletor filtrado por grupo muscular/equipamento, peça maior que
+    // não coube nesta rodada.
+    const rawFieldUpdates = Array.isArray(body?.exercise_field_updates) ? body.exercise_field_updates : null
+    if (rawLoadUpdates || rawFieldUpdates) {
+      // Carga/reps/descanso são domínio de treino -- só quem tem o papel
+      // personal pode editar, independente de qual `role` este submit está
+      // assinando (ex: um nutricionista nunca deveria conseguir mandar isso
+      // junto do parecer dele).
       if (!requireRole(auth.staff, 'personal')) {
         return new Response(JSON.stringify({ error: 'load_updates_requires_personal_role' }), {
           status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -93,7 +101,7 @@ serve(async (req) => {
       }
 
       const parsedUpdates: Array<{ tpeId: string; loads: Map<number, unknown> }> = []
-      for (const raw of rawLoadUpdates) {
+      for (const raw of rawLoadUpdates ?? []) {
         const tpeId = typeof raw?.training_plan_exercise_id === 'string' ? raw.training_plan_exercise_id : null
         const loads = Array.isArray(raw?.loads) ? raw.loads : null
         if (!tpeId || !loads) {
@@ -111,6 +119,34 @@ serve(async (req) => {
           loadsBySetNumber.set(l.set_number, l.load_kg)
         }
         parsedUpdates.push({ tpeId, loads: loadsBySetNumber })
+      }
+
+      const parsedFieldUpdates: Array<{ tpeId: string; reps?: number; rest_seconds?: number }> = []
+      for (const raw of rawFieldUpdates ?? []) {
+        const tpeId = typeof raw?.training_plan_exercise_id === 'string' ? raw.training_plan_exercise_id : null
+        if (!tpeId) {
+          return new Response(JSON.stringify({ error: 'invalid_field_update' }), {
+            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        }
+        const entry: { tpeId: string; reps?: number; rest_seconds?: number } = { tpeId }
+        if (raw?.reps !== undefined) {
+          if (typeof raw.reps !== 'number' || !Number.isFinite(raw.reps) || raw.reps <= 0) {
+            return new Response(JSON.stringify({ error: 'invalid_reps' }), {
+              status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            })
+          }
+          entry.reps = raw.reps
+        }
+        if (raw?.rest_seconds !== undefined) {
+          if (typeof raw.rest_seconds !== 'number' || !Number.isFinite(raw.rest_seconds) || raw.rest_seconds < 0) {
+            return new Response(JSON.stringify({ error: 'invalid_rest_seconds' }), {
+              status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            })
+          }
+          entry.rest_seconds = raw.rest_seconds
+        }
+        parsedFieldUpdates.push(entry)
       }
 
       // Checagem de posse: training_plan_id do body precisa ser o plano
@@ -142,7 +178,7 @@ serve(async (req) => {
         })
       }
 
-      const tpeIds = parsedUpdates.map((u) => u.tpeId)
+      const tpeIds = [...new Set([...parsedUpdates.map((u) => u.tpeId), ...parsedFieldUpdates.map((u) => u.tpeId)])]
       const { data: tpeRows, error: tpeErr } = await supabase
         .from('training_plan_exercises')
         .select('id, training_plan_id, sets_detail')
@@ -152,7 +188,7 @@ serve(async (req) => {
 
       // Todo slot referenciado precisa mesmo pertencer a ESTE training_plan_id
       // (mesma checagem de posse, agora no nível do exercício individual).
-      for (const { tpeId } of parsedUpdates) {
+      for (const tpeId of tpeIds) {
         const row = tpeById.get(tpeId)
         if (!row || row.training_plan_id !== planRow.training_plan_id) {
           return new Response(JSON.stringify({ error: 'training_plan_exercise_not_in_plan' }), {
@@ -173,6 +209,17 @@ serve(async (req) => {
             .update({ sets_detail: mergedDetail })
             .eq('id', tpeId)
           if (updateErr) throw new Error(`Update de sets_detail falhou (${tpeId}): ${updateErr.message}`)
+        }
+        for (const { tpeId, reps, rest_seconds } of parsedFieldUpdates) {
+          const fields: Record<string, number> = {}
+          if (reps !== undefined) fields.reps = reps
+          if (rest_seconds !== undefined) fields.rest_seconds = rest_seconds
+          if (Object.keys(fields).length === 0) continue
+          const { error: updateErr } = await supabase
+            .from('training_plan_exercises')
+            .update(fields)
+            .eq('id', tpeId)
+          if (updateErr) throw new Error(`Update de reps/rest_seconds falhou (${tpeId}): ${updateErr.message}`)
         }
       } catch (loadErr) {
         if (loadErr instanceof Error && loadErr.message === 'invalid_load_kg') {
