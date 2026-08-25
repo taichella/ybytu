@@ -225,7 +225,7 @@ async function buildTrainingSection(
 
   const { data: planRow, error: planErr } = await supabase
     .from('training_plans')
-    .select('training_plan_id, created_at, caution_warnings')
+    .select('training_plan_id, created_at, caution_warnings, is_active')
     .eq('id', profile.current_training_plan_id)
     .maybeSingle()
   if (planErr) throw new Error(`Lookup do training_plan falhou: ${planErr.message}`)
@@ -413,6 +413,11 @@ async function buildTrainingSection(
       // de volta como training_plan_id em load_updates pra checagem de
       // posse no servidor (ver ybytu-submit-plan-review).
       training_plan_id: planRow.training_plan_id,
+      // is_active aqui = "publicado" (rascunho vs publicado), controlado
+      // pelo admin/personal via ybytu-admin-trainings — não confundir com
+      // MOLDE_IDS (moldes tr_2xx nunca podem ser desativados, ver lá). Usado
+      // pela lista de planos do UserDetail pra computar a tag de status.
+      is_active: planRow.is_active,
       environment_ptbr: environmentPtbr,
       days_per_week: profile.training_days_per_week ?? days.length,
       session_duration_min: profile.training_duration_minutes ?? null,
@@ -446,7 +451,7 @@ async function buildNutritionSection(
 
   const { data: planRow, error: planErr } = await supabase
     .from('meal_plans')
-    .select('calories, meals_per_day, days_per_week, created_at')
+    .select('calories, meals_per_day, days_per_week, created_at, is_active')
     .eq('id', profile.current_meal_plan_id)
     .maybeSingle()
   if (planErr) throw new Error(`Lookup do meal_plan falhou: ${planErr.message}`)
@@ -547,6 +552,9 @@ async function buildNutritionSection(
     issuedAt: planRow.created_at ? new Date(planRow.created_at) : null,
     section: {
       preference_ptbr: preferencePtbr,
+      // is_active = "publicado" (rascunho vs publicado) — mesmo significado
+      // do lado treino acima, usado pra tag de status na lista de planos.
+      is_active: planRow.is_active,
       days_per_week: profile.nutrition_days_per_week ?? planRow.days_per_week,
       meals_per_day: profile.meals_per_day ?? planRow.meals_per_day,
       daily_kcal_target: planRow.calories,

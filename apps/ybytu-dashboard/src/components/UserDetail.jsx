@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { StaffContext } from '../lib/staffContextCore';
@@ -68,6 +68,13 @@ export default function UserDetail() {
   const [notePtbr, setNotePtbr] = useState('');
   const [reviewRole, setReviewRole] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  // 👁 Ver / ✏️ Editar (#2, aprovado 2026-08-24): o documento embutido
+  // (UserPlan) só fica editável quando o admin/personal clica "Editar" --
+  // por padrão abre em modo leitura, igual ao que o aluno recebe.
+  const [forceEdit, setForceEdit] = useState(false);
+  // Evita disparar window.print() de novo a cada re-render enquanto ?print=1
+  // continuar na URL -- só uma vez, assim que o payload carrega.
+  const printTriggeredRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -108,6 +115,34 @@ export default function UserDetail() {
       else if (staff.roles.includes('nutricionista')) setReviewRole('nutricionista');
     }
   }, [staff]);
+
+  // PDF (#2): ?print=1 na URL dispara window.print() automaticamente assim
+  // que o documento do plano carrega -- reusa o fluxo "Salvar PDF" que já
+  // existe dentro do UserPlan (window.print() com CSS @media print própria),
+  // só automatizado pra funcionar como um ícone de lista. O admin ainda
+  // salva o PDF manualmente no diálogo do navegador (ver aviso da Taina:
+  // isso serve pro piloto, não gera arquivo no servidor).
+  useEffect(() => {
+    if (searchParams.get('print') === '1' && planPayload && !printTriggeredRef.current) {
+      printTriggeredRef.current = true;
+      setTab('plans');
+      setTimeout(() => window.print(), 300);
+    }
+  }, [searchParams, planPayload]);
+
+  // Admin tem acesso a tudo que personal/nutricionista têm (fix #1) -- pode
+  // editar carga/reps mesmo sem o papel 'personal' explícito.
+  const canEditTraining = Boolean(staff?.roles?.includes('personal') || staff?.roles?.includes('admin'));
+
+  // Status computado (#2) -- nunca um campo novo no schema: is_active
+  // (rascunho/publicado, controlado por ybytu-admin-trainings/-meal-plans)
+  // cruzado com plan_reviews (parecer do personal pro treino, do
+  // nutricionista pra nutrição). Ver buildPlanPayload.ts pra origem de is_active.
+  function planStatus(isActive, hasReview) {
+    if (!isActive) return { label: 'Rascunho', bg: 'var(--surface-2)', color: 'var(--muted)' };
+    if (!hasReview) return { label: 'Aguardando validação', bg: 'rgba(217,119,6,.12)', color: '#d97706' };
+    return { label: 'Validado', bg: 'rgba(22,163,74,.12)', color: '#16a34a' };
+  }
 
   const submitReview = async () => {
     if (!notePtbr.trim()) return alert("Digite um parecer antes de enviar.");
@@ -228,7 +263,7 @@ export default function UserDetail() {
             {isBlocked ? 'Desbloquear Conta' : 'Bloquear Usuário'}
           </button>
           <button style={{ background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Mensagem</button>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
+          <button onClick={() => navigate('/trainings')} title="Escolher/criar outro plano de treino no catálogo" style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Reatribuir plano
           </button>
         </div>
@@ -378,11 +413,22 @@ export default function UserDetail() {
                       dependem de schema que ainda não existe (adesão/streak/histórico de
                       planos), descopado de propósito -- ver [[project_userdetail_design_gaps_product_decisions]].
                       "Ver plano" rola até o documento completo, já embutido logo abaixo. */}
-                  {planPayload.training && (
+                  {planPayload.training && (() => {
+                    const status = planStatus(planPayload.training.is_active, Boolean(planPayload.review?.personal));
+                    return (
                     <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                        <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano de Treino Atual</h3>
-                        <a href="#user-plan-document" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>Ver plano</a>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                          <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano de Treino Atual</h3>
+                          <span style={{ display: 'inline-flex', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: status.bg, color: status.color }}>{status.label}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <button title="Ver" onClick={() => { setForceEdit(false); document.getElementById('user-plan-document')?.scrollIntoView({ behavior: 'smooth' }); }} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>👁</button>
+                          {canEditTraining && (
+                            <button title="Editar" onClick={() => { setForceEdit(true); document.getElementById('user-plan-document')?.scrollIntoView({ behavior: 'smooth' }); }} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>✏️</button>
+                          )}
+                          <button title="Baixar PDF" onClick={() => window.print()} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', fontSize: '12px', fontWeight: 800 }}>PDF</button>
+                        </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                         <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
@@ -394,13 +440,22 @@ export default function UserDetail() {
                         </div>
                       </div>
                     </section>
-                  )}
+                    );
+                  })()}
 
-                  {planPayload.nutrition && (
+                  {planPayload.nutrition && (() => {
+                    const status = planStatus(planPayload.nutrition.is_active, Boolean(planPayload.review?.nutricionista));
+                    return (
                     <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-                        <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano Alimentar Atual</h3>
-                        <a href="#user-plan-document" style={{ fontSize: '13px', fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>Ver plano</a>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                          <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano Alimentar Atual</h3>
+                          <span style={{ display: 'inline-flex', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: status.bg, color: status.color }}>{status.label}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <button title="Ver" onClick={() => document.getElementById('user-plan-document')?.scrollIntoView({ behavior: 'smooth' })} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>👁</button>
+                          <button title="Baixar PDF" onClick={() => window.print()} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', fontSize: '12px', fontWeight: 800 }}>PDF</button>
+                        </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                         <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: 'linear-gradient(135deg,#16a34a,#4ade80)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
@@ -412,12 +467,13 @@ export default function UserDetail() {
                         </div>
                       </div>
                     </section>
-                  )}
+                    );
+                  })()}
 
                   <div id="user-plan-document" style={{ border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
                       <UserPlan
                         payload={planPayload}
-                        editable={Boolean(staff?.roles?.includes('personal'))}
+                        editable={canEditTraining && forceEdit}
                         onSaveLoads={saveLoads}
                         embedded
                       />

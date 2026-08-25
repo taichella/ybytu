@@ -68,8 +68,10 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
-    // Só pode assinar parecer com um papel que o próprio staff realmente tem.
-    if (!requireRole(auth.staff, role)) {
+    // Só pode assinar parecer com um papel que o próprio staff realmente tem
+    // -- admin tem acesso a tudo que personal e nutricionista têm, então
+    // pode assinar como qualquer um dos dois.
+    if (!requireRole(auth.staff, role) && !requireRole(auth.staff, 'admin')) {
       return new Response(JSON.stringify({ error: 'role_not_held_by_caller' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -86,10 +88,11 @@ serve(async (req) => {
     const rawFieldUpdates = Array.isArray(body?.exercise_field_updates) ? body.exercise_field_updates : null
     if (rawLoadUpdates || rawFieldUpdates) {
       // Carga/reps/descanso são domínio de treino -- só quem tem o papel
-      // personal pode editar, independente de qual `role` este submit está
-      // assinando (ex: um nutricionista nunca deveria conseguir mandar isso
-      // junto do parecer dele).
-      if (!requireRole(auth.staff, 'personal')) {
+      // personal (ou admin, que tem acesso a tudo que personal e
+      // nutricionista têm) pode editar, independente de qual `role` este
+      // submit está assinando (ex: um nutricionista nunca deveria conseguir
+      // mandar isso junto do parecer dele).
+      if (!requireRole(auth.staff, 'personal') && !requireRole(auth.staff, 'admin')) {
         return new Response(JSON.stringify({ error: 'load_updates_requires_personal_role' }), {
           status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
