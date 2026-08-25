@@ -87,3 +87,17 @@ a {
   from { opacity: 0; transform: translate(-50%, 12px); }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* ---- Print: nada do chrome do dashboard (sidebar/mobilenav/shell) pode ir
+   pro papel. Só o documento (UserPlan) tem conteúdo pensado pra @media
+   print -- essas regras aqui só limpam o que envolve ele. `!important`
+   necessário pra vencer os estilos inline de height/overflow do
+   DashboardLayout/UserPlanPage (autor sem !important perde pra stylesheet
+   com !important, mesmo inline). Achado 2026-08-25: nunca existiu essa
+   limpeza, por isso o PDF saía com sidebar + coluna estreita com scroll. */
+@media print {
+  .yb-side, .yb-mnav { display: none !important; }
+  .yb-shell { height: auto !important; overflow: visible !important; }
+  .yb-main-content { overflow: visible !important; height: auto !important; }
+  .yb-plan-main { overflow: visible !important; }
+}

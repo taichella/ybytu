@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { trainingService } from '../services/trainingService.js';
 import ChipMultiSelect from './ChipMultiSelect.jsx';
 
@@ -13,7 +13,15 @@ const EMPTY_PLAN = {
 export default function TrainingPlanCreator() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const isNew = !id;
+  // Vindo de "Editar treino" no documento do aluno (UserPlanPage) -- este
+  // training_plans.id É o plano ATRIBUÍDO a um aluno específico, não um
+  // molde nem um item de catálogo. Decisão 2026-08-25: sem estado de
+  // rascunho/publicado aqui, salva e já vale na hora pro aluno.
+  const forUser = searchParams.get('forUser');
+  const forUserName = searchParams.get('forUserName') || '';
+  const isStudentPlan = Boolean(forUser);
 
   const [theme, setTheme] = useState('dark');
   const [day, setDay] = useState(1);
@@ -124,7 +132,7 @@ export default function TrainingPlanCreator() {
         navigate(`/training-creator/${created.id}`);
       } else {
         await trainingService.update(id, payload, allSlots);
-        navigate('/trainings');
+        navigate(isStudentPlan ? `/users/${forUser}/plano` : '/trainings');
       }
     } catch (e) {
       setError(e.message || 'Falha ao salvar plano de treino');
@@ -148,9 +156,9 @@ export default function TrainingPlanCreator() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
       <header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: 1 }}>
-          <button onClick={() => navigate('/trainings')} style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>←</button>
+          <button onClick={() => navigate(isStudentPlan ? `/users/${forUser}/plano` : '/trainings')} style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>←</button>
           <input type="text" value={plan.name_ptbr} onChange={(e) => setPlanField('name_ptbr', e.target.value)} placeholder="Nome do plano de treino…" style={{ fontSize: '18px', fontWeight: 900, background: 'none', border: 'none', color: 'var(--text)', fontFamily: 'inherit', outline: 'none', width: '100%' }} />
-          {!isNew && !isMolde && (
+          {!isNew && !isMolde && !isStudentPlan && (
             <span style={{ flexShrink: 0, fontSize: '11px', fontWeight: 800, padding: '4px 10px', borderRadius: '999px', whiteSpace: 'nowrap', background: plan.is_active ? 'rgba(22,163,74,.1)' : 'var(--surface-2)', color: plan.is_active ? '#16a34a' : 'var(--muted)' }}>
               {plan.is_active ? 'Publicado' : 'Rascunho'}
             </span>
@@ -159,9 +167,9 @@ export default function TrainingPlanCreator() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           <button onClick={toggleTheme} style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
           <button onClick={() => setSettings((s) => !s)} style={{ borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', background: settings ? 'var(--brand-soft)' : 'var(--surface)', color: settings ? 'var(--brand)' : 'var(--text)', border: `1px solid ${settings ? 'rgba(245,95,22,.4)' : 'var(--border)'}` }}>Configurações</button>
-          {isMolde ? (
+          {isMolde || isStudentPlan ? (
             <button onClick={() => handleSave(true)} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
-              {saving ? 'Salvando…' : 'Salvar'}
+              {saving ? 'Salvando…' : 'Salvar alterações'}
             </button>
           ) : (
             <>
@@ -179,6 +187,11 @@ export default function TrainingPlanCreator() {
       {isMolde && (
         <div style={{ flexShrink: 0, background: 'rgba(245,95,22,.1)', borderBottom: '1px solid rgba(245,95,22,.3)', padding: '10px 28px', fontSize: '13px', fontWeight: 700, color: '#F55F16' }}>
           ⚠️ Este é um molde ativo ({plan.training_plan_id}) — fonte do gerador de planos. Qualquer alteração salva aqui muda o formato de todo plano novo gerado a partir de agora. Um snapshot é gravado antes de cada mudança para permitir reverter.
+        </div>
+      )}
+      {isStudentPlan && (
+        <div style={{ flexShrink: 0, background: 'rgba(59,130,246,.1)', borderBottom: '1px solid rgba(59,130,246,.3)', padding: '10px 28px', fontSize: '13px', fontWeight: 700, color: '#3b82f6' }}>
+          Editando o plano de treino de {forUserName || 'aluno'}. Alterações valem na hora — o aluno já vê refletido no documento e no PDF.
         </div>
       )}
       {error && <p style={{ color: '#ef4444', padding: '10px 28px 0' }}>{error}</p>}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { mealPlanService } from '../services/mealPlanService.js';
 import ChipMultiSelect from './ChipMultiSelect.jsx';
 
@@ -13,7 +13,13 @@ const EMPTY_PLAN = {
 export default function MealPlanCreator() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const isNew = !id;
+  // Vindo de "Editar nutrição" no documento do aluno (UserPlanPage) -- ver
+  // mesma decisão em TrainingPlanCreator.jsx (2026-08-25).
+  const forUser = searchParams.get('forUser');
+  const forUserName = searchParams.get('forUserName') || '';
+  const isStudentPlan = Boolean(forUser);
 
   const [theme, setTheme] = useState('dark');
   const [day, setDay] = useState(1);
@@ -127,7 +133,7 @@ export default function MealPlanCreator() {
         navigate(`/meal-plan-creator/${created.id}`);
       } else {
         await mealPlanService.update(id, payload, allSlots);
-        navigate('/meal-plans');
+        navigate(isStudentPlan ? `/users/${forUser}/plano` : '/meal-plans');
       }
     } catch (e) {
       setError(e.message || 'Falha ao salvar plano');
@@ -151,18 +157,23 @@ export default function MealPlanCreator() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
       <header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: 1 }}>
-          <button onClick={() => navigate('/meal-plans')} style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>←</button>
+          <button onClick={() => navigate(isStudentPlan ? `/users/${forUser}/plano` : '/meal-plans')} style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>←</button>
           <input type="text" value={plan.name_ptbr} onChange={(e) => setPlanField('name_ptbr', e.target.value)} placeholder="Nome do plano alimentar…" style={{ fontSize: '18px', fontWeight: 900, background: 'none', border: 'none', color: 'var(--text)', fontFamily: 'inherit', outline: 'none', width: '100%' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           <button onClick={toggleTheme} style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
           <button onClick={() => setSettings((s) => !s)} style={{ borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', background: settings ? 'var(--brand-soft)' : 'var(--surface)', color: settings ? 'var(--brand)' : 'var(--text)', border: `1px solid ${settings ? 'rgba(245,95,22,.4)' : 'var(--border)'}` }}>Configurações</button>
           <button onClick={handleSave} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
-            {saving ? 'Salvando…' : (isNew ? 'Criar plano' : 'Salvar')}
+            {saving ? 'Salvando…' : (isNew ? 'Criar plano' : isStudentPlan ? 'Salvar alterações' : 'Salvar')}
           </button>
         </div>
       </header>
 
+      {isStudentPlan && (
+        <div style={{ flexShrink: 0, background: 'rgba(59,130,246,.1)', borderBottom: '1px solid rgba(59,130,246,.3)', padding: '10px 28px', fontSize: '13px', fontWeight: 700, color: '#3b82f6' }}>
+          Editando o plano alimentar de {forUserName || 'aluno'}. Alterações valem na hora — o aluno já vê refletido no documento e no PDF.
+        </div>
+      )}
       {error && <p style={{ color: '#ef4444', padding: '10px 28px 0' }}>{error}</p>}
 
       {settings && (
@@ -266,9 +277,11 @@ export default function MealPlanCreator() {
             <div style={{ padding: '11px', background: 'var(--field)', borderRadius: '11px', borderLeft: '3px solid #f59e0b' }}><p style={{ margin: 0, fontSize: '11px', fontWeight: 700, color: 'var(--muted)' }}>Carboidratos</p><p style={{ margin: '2px 0 0', fontSize: '16px', fontWeight: 900 }}>{dayTotals.C.toFixed(1)} g</p></div>
             <div style={{ padding: '11px', background: 'var(--field)', borderRadius: '11px', borderLeft: '3px solid #a855f7' }}><p style={{ margin: 0, fontSize: '11px', fontWeight: 700, color: 'var(--muted)' }}>Gorduras</p><p style={{ margin: '2px 0 0', fontSize: '16px', fontWeight: 900 }}>{dayTotals.F.toFixed(1)} g</p></div>
           </div>
-          <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', fontWeight: 700, cursor: 'pointer', marginTop: '20px', paddingTop: '18px', borderTop: '1px solid var(--border)' }}>
-            Plano ativo <input type="checkbox" checked={plan.is_active} onChange={(e) => setPlanField('is_active', e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--brand)' }} />
-          </label>
+          {!isStudentPlan && (
+            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', fontWeight: 700, cursor: 'pointer', marginTop: '20px', paddingTop: '18px', borderTop: '1px solid var(--border)' }}>
+              Plano ativo <input type="checkbox" checked={plan.is_active} onChange={(e) => setPlanField('is_active', e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--brand)' }} />
+            </label>
+          )}
         </aside>
       </div>
     </div>
