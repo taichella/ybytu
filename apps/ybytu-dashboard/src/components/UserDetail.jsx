@@ -489,7 +489,12 @@ export default function UserDetail() {
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Escrever Parecer Técnico</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {staff?.roles?.includes('personal') && staff?.roles?.includes('nutricionista') && (
+                  {/* Admin tem acesso a ambos os papeis (mesma regra do backend em
+                      ybytu-submit-plan-review), mas nao tem 'personal'/'nutricionista'
+                      no staff.roles -- sem isso o seletor nunca aparecia pra admin e
+                      reviewRole ficava vazio pra sempre, travando o submit no alert
+                      "Selecione o papel do avaliador." (achado testando em prod 2026-08-25). */}
+                  {(staff?.roles?.includes('admin') || (staff?.roles?.includes('personal') && staff?.roles?.includes('nutricionista'))) && (
                      <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
                         <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}>
                            <input type="radio" name="reviewRole" value="personal" checked={reviewRole === 'personal'} onChange={() => setReviewRole('personal')} /> Personal
