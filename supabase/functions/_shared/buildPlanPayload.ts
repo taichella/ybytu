@@ -225,7 +225,7 @@ async function buildTrainingSection(
 
   const { data: planRow, error: planErr } = await supabase
     .from('training_plans')
-    .select('training_plan_id, created_at, caution_warnings, is_active')
+    .select('training_plan_id, name_ptbr, created_at, caution_warnings, is_active')
     .eq('id', profile.current_training_plan_id)
     .maybeSingle()
   if (planErr) throw new Error(`Lookup do training_plan falhou: ${planErr.message}`)
@@ -413,6 +413,10 @@ async function buildTrainingSection(
       // de volta como training_plan_id em load_updates pra checagem de
       // posse no servidor (ver ybytu-submit-plan-review).
       training_plan_id: planRow.training_plan_id,
+      // Nome real do plano (ex: "Hipertrofia 12 Semanas") -- adicionado pra
+      // subseção Planos Atribuídos (UsuarioDetalhe.dc.html), que mostra o
+      // nome do plano no card em vez de um rótulo genérico.
+      name_ptbr: planRow.name_ptbr,
       // is_active aqui = "publicado" (rascunho vs publicado), controlado
       // pelo admin/personal via ybytu-admin-trainings — não confundir com
       // MOLDE_IDS (moldes tr_2xx nunca podem ser desativados, ver lá). Usado
@@ -451,7 +455,7 @@ async function buildNutritionSection(
 
   const { data: planRow, error: planErr } = await supabase
     .from('meal_plans')
-    .select('calories, meals_per_day, days_per_week, created_at, is_active')
+    .select('name_ptbr, calories, meals_per_day, days_per_week, created_at, is_active')
     .eq('id', profile.current_meal_plan_id)
     .maybeSingle()
   if (planErr) throw new Error(`Lookup do meal_plan falhou: ${planErr.message}`)
@@ -552,6 +556,8 @@ async function buildNutritionSection(
     issuedAt: planRow.created_at ? new Date(planRow.created_at) : null,
     section: {
       preference_ptbr: preferencePtbr,
+      // Nome real do plano alimentar -- mesmo motivo do lado treino acima.
+      name_ptbr: planRow.name_ptbr,
       // is_active = "publicado" (rascunho vs publicado) — mesmo significado
       // do lado treino acima, usado pra tag de status na lista de planos.
       is_active: planRow.is_active,

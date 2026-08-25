@@ -11,6 +11,7 @@ import Dashboard from './components/Dashboard';
 import Campaign from './components/Campaign';
 import Users from './components/Users';
 import UserDetail from './components/UserDetail';
+import UserPlanPage from './components/UserPlanPage';
 import Subscriptions from './components/Subscriptions';
 import Exercises from './components/Exercises';
 import ExerciseEditor from './components/ExerciseEditor';
@@ -47,6 +48,9 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
           <Route path="/users/:id" element={<UserDetail />} />
+          {/* Documento do aluno como página própria (UsuarioDetalhe.dc.html,
+              "Ver plano" -> href separado) -- ver [[project_userdetail_design_gaps_product_decisions]]. */}
+          <Route path="/users/:id/plano" element={<UserPlanPage />} />
           {/* Base separada pro botão do WhatsApp (template ybytu_staff_plan_ready)
               cadastrada na Meta -- mesma tela do UserDetail, mas abre direto na
               aba de plano+parecer (ver location.pathname em UserDetail.jsx).

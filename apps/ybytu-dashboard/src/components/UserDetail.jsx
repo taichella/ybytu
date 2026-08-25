@@ -1,8 +1,7 @@
-import { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { StaffContext } from '../lib/staffContextCore';
-import UserPlan from './UserPlan';
 
 const VALID_TABS = new Set(['overview', 'health', 'plans', 'activity']);
 
@@ -68,13 +67,6 @@ export default function UserDetail() {
   const [notePtbr, setNotePtbr] = useState('');
   const [reviewRole, setReviewRole] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  // 👁 Ver / ✏️ Editar (#2, aprovado 2026-08-24): o documento embutido
-  // (UserPlan) só fica editável quando o admin/personal clica "Editar" --
-  // por padrão abre em modo leitura, igual ao que o aluno recebe.
-  const [forceEdit, setForceEdit] = useState(false);
-  // Evita disparar window.print() de novo a cada re-render enquanto ?print=1
-  // continuar na URL -- só uma vez, assim que o payload carrega.
-  const printTriggeredRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -115,24 +107,6 @@ export default function UserDetail() {
       else if (staff.roles.includes('nutricionista')) setReviewRole('nutricionista');
     }
   }, [staff]);
-
-  // PDF (#2): ?print=1 na URL dispara window.print() automaticamente assim
-  // que o documento do plano carrega -- reusa o fluxo "Salvar PDF" que já
-  // existe dentro do UserPlan (window.print() com CSS @media print própria),
-  // só automatizado pra funcionar como um ícone de lista. O admin ainda
-  // salva o PDF manualmente no diálogo do navegador (ver aviso da Taina:
-  // isso serve pro piloto, não gera arquivo no servidor).
-  useEffect(() => {
-    if (searchParams.get('print') === '1' && planPayload && !printTriggeredRef.current) {
-      printTriggeredRef.current = true;
-      setTab('plans');
-      setTimeout(() => window.print(), 300);
-    }
-  }, [searchParams, planPayload]);
-
-  // Admin tem acesso a tudo que personal/nutricionista têm (fix #1) -- pode
-  // editar carga/reps mesmo sem o papel 'personal' explícito.
-  const canEditTraining = Boolean(staff?.roles?.includes('personal') || staff?.roles?.includes('admin'));
 
   // Status computado (#2) -- nunca um campo novo no schema: is_active
   // (rascunho/publicado, controlado por ybytu-admin-trainings/-meal-plans)
@@ -177,33 +151,6 @@ export default function UserDetail() {
        setIsSubmittingReview(false);
     }
   };
-
-  // Passo 5 -- "Salvar cargas" é uma ação separada de "Salvar Parecer", mas
-  // ybytu-submit-plan-review faz upsert de note_ptbr/reviewer_credential
-  // junto (onConflict user_id+role). Se mandássemos só load_updates sem
-  // reenviar o parecer já salvo do personal, o upsert apagaria o texto
-  // existente. Por isso reenviamos o note_ptbr/reviewer_credential atuais
-  // (vindos do planPayload já carregado) junto do save de carga.
-  const saveLoads = async ({ training_plan_id, load_updates, exercise_field_updates }) => {
-    const existingReview = planPayload?.review?.personal;
-    const res = await supabase.functions.invoke('ybytu-submit-plan-review', {
-      body: {
-        user_id: id,
-        role: 'personal',
-        note_ptbr: existingReview?.note_ptbr ?? null,
-        reviewer_credential: existingReview?.reviewer_credential ?? null,
-        training_plan_id,
-        load_updates,
-        exercise_field_updates,
-      }
-    });
-    if (res.error) throw res.error;
-    const planRes = await supabase.functions.invoke('ybytu-get-plan-for-staff', { body: { userId: id } });
-    if (planRes.data && !planRes.error) {
-      setPlanPayload(planRes.data);
-    }
-  };
-
 
   const initialsStr = userData?.full_name ? userData.full_name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase() : 'U';
   const isActive = userData?.subscription_type_id ? true : false;
@@ -406,77 +353,120 @@ export default function UserDetail() {
           {tab === 'plans' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
+              {/* Faixa de assinatura (UsuarioDetalhe.dc.html, versão nova 2026-08-25).
+                  "Desde"/"Renovação" (billing) e a pill "Acompanhamento" do mockup NÃO
+                  entraram -- não existe data de assinatura/renovação nem flag de tier-pro
+                  em subscription_types; ver [[project_userdetail_design_gaps_product_decisions]].
+                  Flagado pra Taina antes de implementar, não inventado aqui. */}
+              <section style={{ background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', borderRadius: '18px', padding: '22px', color: '#fff', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+                  <span style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2 4 6v6c0 5 3.4 9.3 8 10 4.6-.7 8-5 8-10V6Z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                  </span>
+                  <div style={{ flex: 1, minWidth: '220px' }}>
+                    <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.08em', opacity: .9, textTransform: 'uppercase' }}>Tipo de assinatura</p>
+                    <p style={{ margin: '5px 0 0', fontSize: '22px', fontWeight: 900, letterSpacing: '-.02em' }}>{resolvedLabels.subscriptionName || 'Free'}</p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {resolvedLabels.subscriptionIncludesTraining && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: 800, padding: '6px 12px', borderRadius: '999px', background: 'rgba(255,255,255,.24)' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Treino</span>
+                    )}
+                    {resolvedLabels.subscriptionIncludesMeals && (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11.5px', fontWeight: 800, padding: '6px 12px', borderRadius: '999px', background: 'rgba(255,255,255,.24)' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20.94c1.5 0 2.75-1.06 4-2.94 1.5-2.25 2-5.5 2-7 0-2.5-1.5-4-3.5-4-1.5 0-2.5 1-3 1.5-.5-.5-1.5-1.5-3-1.5C5 7 3.5 8.5 3.5 11c0 1.5.5 4.75 2 7 1.25 1.88 2.5 2.94 4 2.94Z"></path></svg> Nutrição</span>
+                    )}
+                  </div>
+                </div>
+                {/* Profissionais = quem já assinou parecer pra este plano (dado real,
+                    plan_reviews.reviewer_name) -- só aparece o que já foi validado. */}
+                {(planPayload?.review?.personal?.reviewer_name || planPayload?.review?.nutricionista?.reviewer_name) && (
+                  <div style={{ position: 'relative', display: 'flex', gap: '26px', marginTop: '20px', paddingTop: '18px', borderTop: '1px solid rgba(255,255,255,.22)', flexWrap: 'wrap' }}>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '10.5px', fontWeight: 800, opacity: .85, textTransform: 'uppercase', letterSpacing: '.05em' }}>Profissionais</p>
+                      <p style={{ margin: '3px 0 0', fontSize: '14px', fontWeight: 800 }}>
+                        {[planPayload?.review?.personal?.reviewer_name, planPayload?.review?.nutricionista?.reviewer_name].filter(Boolean).join(' · ')}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </section>
+
               {planPayload ? (
                 <>
-                  {/* Layout de cards do mockup (UsuarioDetalhe.dc.html) -- sem barra de
-                      progresso/aderência e sem "Histórico de Atribuições": esses dados
-                      dependem de schema que ainda não existe (adesão/streak/histórico de
-                      planos), descopado de propósito -- ver [[project_userdetail_design_gaps_product_decisions]].
-                      "Ver plano" rola até o documento completo, já embutido logo abaixo. */}
-                  {planPayload.training && (() => {
-                    const status = planStatus(planPayload.training.is_active, Boolean(planPayload.review?.personal));
-                    return (
-                    <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                          <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano de Treino Atual</h3>
-                          <span style={{ display: 'inline-flex', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: status.bg, color: status.color }}>{status.label}</span>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+                    {planPayload.training && (() => {
+                      const status = planStatus(planPayload.training.is_active, Boolean(planPayload.review?.personal));
+                      return (
+                      <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
+                        <div style={{ height: '5px', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)' }}></div>
+                        <div style={{ padding: '20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' }}>
+                            <span style={{ width: '48px', height: '48px', borderRadius: '13px', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                            </span>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <p style={{ margin: 0, fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Plano de Treino</p>
+                                <span style={{ display: 'inline-flex', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', background: status.bg, color: status.color }}>{status.label}</span>
+                              </div>
+                              <p style={{ margin: '3px 0 0', fontSize: '17px', fontWeight: 900, letterSpacing: '-.01em' }}>{planPayload.training.name_ptbr || (resolvedLabels.goals?.length ? resolvedLabels.goals.join(' + ') : 'Plano de treino')}</p>
+                              <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 500 }}>{planPayload.training.days_per_week} dias/sem · {planPayload.training.session_duration_min ? `${planPayload.training.session_duration_min} min/sessão` : 'duração não definida'}</p>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => navigate(`/users/${id}/plano`)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '11px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver plano</button>
+                            <button onClick={() => navigate('/trainings')} title="Escolher outro plano de treino no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <button title="Ver" onClick={() => { setForceEdit(false); document.getElementById('user-plan-document')?.scrollIntoView({ behavior: 'smooth' }); }} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>👁</button>
-                          {canEditTraining && (
-                            <button title="Editar" onClick={() => { setForceEdit(true); document.getElementById('user-plan-document')?.scrollIntoView({ behavior: 'smooth' }); }} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>✏️</button>
-                          )}
-                          <button title="Baixar PDF" onClick={() => window.print()} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', fontSize: '12px', fontWeight: 800 }}>PDF</button>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                        <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
-                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                        </div>
-                        <div style={{ flex: 1, minWidth: '180px' }}>
-                          <p style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>{resolvedLabels.goals?.length ? resolvedLabels.goals.join(' + ') : 'Plano de treino'}</p>
-                          <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--muted)' }}>{planPayload.training.days_per_week} dias/sem · {planPayload.training.session_duration_min ? `${planPayload.training.session_duration_min} min/sessão` : 'duração não definida'}</p>
-                        </div>
-                      </div>
-                    </section>
-                    );
-                  })()}
+                      </section>
+                      );
+                    })()}
 
-                  {planPayload.nutrition && (() => {
-                    const status = planStatus(planPayload.nutrition.is_active, Boolean(planPayload.review?.nutricionista));
-                    return (
-                    <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                          <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Plano Alimentar Atual</h3>
-                          <span style={{ display: 'inline-flex', padding: '3px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', background: status.bg, color: status.color }}>{status.label}</span>
+                    {planPayload.nutrition && (() => {
+                      const status = planStatus(planPayload.nutrition.is_active, Boolean(planPayload.review?.nutricionista));
+                      return (
+                      <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
+                        <div style={{ height: '5px', background: 'linear-gradient(135deg,#16a34a,#4ade80)' }}></div>
+                        <div style={{ padding: '20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' }}>
+                            <span style={{ width: '48px', height: '48px', borderRadius: '13px', background: 'linear-gradient(135deg,#16a34a,#4ade80)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>
+                            </span>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <p style={{ margin: 0, fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Plano Alimentar</p>
+                                <span style={{ display: 'inline-flex', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', background: status.bg, color: status.color }}>{status.label}</span>
+                              </div>
+                              <p style={{ margin: '3px 0 0', fontSize: '17px', fontWeight: 900, letterSpacing: '-.01em' }}>{planPayload.nutrition.name_ptbr || resolvedLabels.dietaryPreference || 'Plano alimentar'}</p>
+                              <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 500 }}>{MEALS_PER_DAY_LABELS[userData.meals_per_day] || `${planPayload.nutrition.meals_per_day} refeições`}/dia · meta {planPayload.nutrition.daily_kcal_target} kcal</p>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => navigate(`/users/${id}/plano`)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '11px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver plano</button>
+                            <button onClick={() => navigate('/meal-plans')} title="Escolher outro plano alimentar no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <button title="Ver" onClick={() => document.getElementById('user-plan-document')?.scrollIntoView({ behavior: 'smooth' })} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer' }}>👁</button>
-                          <button title="Baixar PDF" onClick={() => window.print()} style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', fontSize: '12px', fontWeight: 800 }}>PDF</button>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                        <div style={{ width: '54px', height: '54px', borderRadius: '14px', background: 'linear-gradient(135deg,#16a34a,#4ade80)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
-                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>
-                        </div>
-                        <div style={{ flex: 1, minWidth: '180px' }}>
-                          <p style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>{resolvedLabels.dietaryPreference || 'Plano alimentar'}</p>
-                          <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--muted)' }}>{MEALS_PER_DAY_LABELS[userData.meals_per_day] || `${planPayload.nutrition.meals_per_day} refeições`}/dia · meta {planPayload.nutrition.daily_kcal_target} kcal</p>
-                        </div>
-                      </div>
-                    </section>
-                    );
-                  })()}
+                      </section>
+                      );
+                    })()}
 
-                  <div id="user-plan-document" style={{ border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
-                      <UserPlan
-                        payload={planPayload}
-                        editable={canEditTraining && forceEdit}
-                        onSaveLoads={saveLoads}
-                        embedded
-                      />
+                    {/* Card de módulo bloqueado -- só quando a assinatura EXPLICITAMENTE
+                        (=== false, não null/undefined) não inclui o módulo. Sem
+                        subscription_type_id (Free), fica sem card -- não dá pra saber se é
+                        "bloqueado" ou "ainda não atribuído". */}
+                    {resolvedLabels.subscriptionIncludesTraining === false && (
+                      <section style={{ background: 'var(--field)', border: '1px dashed var(--border)', borderRadius: '18px', padding: '22px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '10px', minHeight: '160px' }}>
+                        <span style={{ width: '46px', height: '46px', borderRadius: '13px', background: 'var(--surface-2)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+                        <p style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Módulo de Treino</p>
+                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)', lineHeight: 1.5, maxWidth: '230px' }}>Não incluído no plano atual.</p>
+                      </section>
+                    )}
+                    {resolvedLabels.subscriptionIncludesMeals === false && (
+                      <section style={{ background: 'var(--field)', border: '1px dashed var(--border)', borderRadius: '18px', padding: '22px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '10px', minHeight: '160px' }}>
+                        <span style={{ width: '46px', height: '46px', borderRadius: '13px', background: 'var(--surface-2)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+                        <p style={{ margin: 0, fontSize: '15px', fontWeight: 900 }}>Módulo de Nutrição</p>
+                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)', lineHeight: 1.5, maxWidth: '230px' }}>Não incluído no plano atual.</p>
+                      </section>
+                    )}
                   </div>
                 </>
               ) : (
@@ -485,7 +475,41 @@ export default function UserDetail() {
                   </section>
               )}
 
-              {/* Formulário de Parecer Técnico */}
+              {/* Histórico de Atribuições (UsuarioDetalhe.dc.html) -- versão mínima:
+                  user_training_plans/user_meal_plans são logs reais append-only (nome do
+                  plano + data). NÃO tem aderência/duração/status/"responsável"/PDF
+                  arquivado por linha -- nada disso existe no schema hoje, ver análise
+                  trazida antes de implementar (2026-08-25) e
+                  [[project_userdetail_design_gaps_product_decisions]]. Sem link de "ver
+                  infos" pq o payload só carrega o plano ATUAL, não versões passadas. */}
+              {resolvedLabels.planHistory?.filter(h => !h.isCurrent).length > 0 && (
+                <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
+                  <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
+                    <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Histórico de Atribuições</h3>
+                    <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>Planos atribuídos anteriormente. Aderência, duração e PDF arquivado não são rastreados hoje.</p>
+                  </div>
+                  <div>
+                    {resolvedLabels.planHistory.filter(h => !h.isCurrent).map((h, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '13px', padding: '13px 22px', borderBottom: '1px solid var(--border)' }}>
+                        <span style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'var(--surface-2)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {h.kind === 'training'
+                            ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                            : <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>}
+                        </span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ margin: 0, fontSize: '13.5px', fontWeight: 700 }}>{h.name}</p>
+                          <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>{h.kind === 'training' ? 'Plano de treino' : 'Plano alimentar'}</p>
+                        </div>
+                        <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600, flexShrink: 0 }}>{new Date(h.assignedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Formulário de Parecer Técnico -- não está no mockup novo, mas é a
+                  única forma hoje do personal/nutricionista validar um plano; mantido
+                  por decisão explícita (2026-08-25), não é regressão silenciosa. */}
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Escrever Parecer Técnico</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -516,8 +540,8 @@ export default function UserDetail() {
                 </div>
               </section>
 
-              {/* Render Existing Reviews below form if we want to show it natively instead of inside UserPlan, or just rely on UserPlan */}
-              {/* UserPlan already renders the plan_reviews internally in 'Análises & Diagnósticos' */}
+              {/* Pareceres já salvos (Análises & Diagnósticos) ficam dentro do
+                  documento -- ver "Ver plano" acima, agora em /users/:id/plano. */}
             </div>
           )}
 

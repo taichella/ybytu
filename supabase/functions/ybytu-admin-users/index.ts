@@ -82,10 +82,49 @@ serve(async (req) => {
       const exerciseEquipments = await fetchLookupMulti('onboarding_exercise_equipments', profile.exercise_equipments_ids, 'name_ptbr')
 
       let subName = null
+      let subIncludesTraining = null
+      let subIncludesMeals = null
       if (profile.subscription_type_id) {
-          const { data: subData } = await supabase.from('subscription_types').select('name_ptbr').eq('id', profile.subscription_type_id).maybeSingle()
-          if (subData) subName = subData.name_ptbr
+          const { data: subData } = await supabase.from('subscription_types').select('name_ptbr, includes_training, includes_meals').eq('id', profile.subscription_type_id).maybeSingle()
+          if (subData) {
+            subName = subData.name_ptbr
+            subIncludesTraining = subData.includes_training
+            subIncludesMeals = subData.includes_meals
+          }
       }
+
+      // Histórico de Atribuições (UsuarioDetalhe.dc.html) -- user_training_plans
+      // e user_meal_plans são logs append-only reais: toda geração de plano
+      // insere uma linha nova aqui e NUNCA sobrescreve (ver ybytu-generate-
+      // training-plan/ybytu-generate-meal-plan). Não existe aderência/duração/
+      // status/responsável por atribuição no schema -- só nome do plano e data,
+      // ver [[project_userdetail_design_gaps_product_decisions]] pro resto.
+      const [{ data: utpRows }, { data: umpRows }] = await Promise.all([
+        supabase.from('user_training_plans').select('training_plan_id, created_at').eq('user_id', userId).order('created_at', { ascending: false }),
+        supabase.from('user_meal_plans').select('meal_plan_id, created_at').eq('user_id', userId).order('created_at', { ascending: false }),
+      ])
+      const trainingPlanUuids = [...new Set((utpRows ?? []).map(r => r.training_plan_id).filter(Boolean))]
+      const mealPlanUuids = [...new Set((umpRows ?? []).map(r => r.meal_plan_id).filter(Boolean))]
+      const [{ data: tpNameRows }, { data: mpNameRows }] = await Promise.all([
+        trainingPlanUuids.length ? supabase.from('training_plans').select('id, name_ptbr').in('id', trainingPlanUuids) : Promise.resolve({ data: [] }),
+        mealPlanUuids.length ? supabase.from('meal_plans').select('id, name_ptbr').in('id', mealPlanUuids) : Promise.resolve({ data: [] }),
+      ])
+      const tpNameById = new Map((tpNameRows ?? []).map(r => [r.id, r.name_ptbr]))
+      const mpNameById = new Map((mpNameRows ?? []).map(r => [r.id, r.name_ptbr]))
+      const planHistory = [
+        ...(utpRows ?? []).map(r => ({
+          kind: 'training',
+          name: tpNameById.get(r.training_plan_id) ?? 'Plano de treino',
+          assignedAt: r.created_at,
+          isCurrent: r.training_plan_id === profile.current_training_plan_id,
+        })),
+        ...(umpRows ?? []).map(r => ({
+          kind: 'nutrition',
+          name: mpNameById.get(r.meal_plan_id) ?? 'Plano alimentar',
+          assignedAt: r.created_at,
+          isCurrent: r.meal_plan_id === profile.current_meal_plan_id,
+        })),
+      ].sort((a, b) => new Date(b.assignedAt).getTime() - new Date(a.assignedAt).getTime())
 
       // last_sign_in_at mora em auth.users, não em profiles -- só dá pra ler
       // via admin API (service_role). Usado no card "Conta & Assinatura" do
@@ -107,7 +146,10 @@ serve(async (req) => {
         muscleGroups,
         exerciseEquipments,
         subscriptionName: subName,
+        subscriptionIncludesTraining: subIncludesTraining,
+        subscriptionIncludesMeals: subIncludesMeals,
         lastSignInAt,
+        planHistory,
       }
 
       return new Response(JSON.stringify({ profile, resolved }), {
