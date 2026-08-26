@@ -140,6 +140,37 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
     }
   }
 
+  // Mesmo documento, @page ajusta ao dispositivo (2026-08-26). Letter (8.5in)
+  // encolhido pra caber numa tela de celular vira ilegível sem zoom -- então
+  // numa tela estreita a impressão usa uma página física mais parecida com o
+  // celular (o media query `@media (max-width:680px)` já existente também
+  // passa a valer, porque em mídia paginada a feature `width` resolve pra
+  // largura da @page, não do viewport -- sem duplicar layout nenhum) e
+  // `zoom` aumenta tudo proporcionalmente (texto, espaçamento) porque o
+  // resto do CSS usa px fixo, não rem -- reflui igual em qualquer largura
+  // porque table.ex já é fluida (width:100%, sem min-width em @media print).
+  function handlePrint() {
+    const isNarrow = window.innerWidth <= 680
+    let styleEl = null
+    if (isNarrow) {
+      styleEl = document.createElement('style')
+      styleEl.textContent = `
+        @media print {
+          @page { size: 4in 11in; margin: 0.25in; }
+          .doc { zoom: 1.25; }
+        }
+      `
+      document.head.appendChild(styleEl)
+    }
+    const cleanup = () => { if (styleEl) styleEl.remove() }
+    window.addEventListener('afterprint', cleanup, { once: true })
+    // Fallback -- nem todo browser dispara afterprint de forma confiável
+    // depois de um print() cancelado; garante que a próxima chamada em
+    // qualquer largura não herde um @page estreito preso no <head>.
+    setTimeout(cleanup, 5000)
+    window.print()
+  }
+
   if (!payload) return null;
 
   const meta = payload.meta || {};
@@ -417,6 +448,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
 
         @page { size:letter; margin:0; }
         @media print {
+          * { print-color-adjust:exact !important; -webkit-print-color-adjust:exact !important; }
           html, body { margin:0; padding:0; background:#fff !important; }
           .user-plan-wrapper { padding: 0; }
           .doc { max-width:none!important; margin:0!important; box-shadow:none!important; padding-bottom: 0 !important;}
@@ -428,6 +460,14 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
           p, li { orphans:3; widows:3; }
           .screen-only { display:none!important; }
           .print-only { display:inline!important; }
+          /* Impressão nunca tem scroll — a regra mobile de tela (table.ex
+             min-width:560px + .table-scroll) existe só pra permitir arrastar
+             a tabela numa tela pequena; numa página impressa isso vira
+             tabela cortada na borda. Sempre reflui pra caber na largura da
+             @page ativa, seja Letter (desktop) ou estreita (celular, ver
+             handlePrint). */
+          table.ex { min-width:0 !important; table-layout:auto !important; }
+          .table-scroll { overflow:visible !important; margin:0 !important; }
         }
         .print-only { display:none; }
       `}</style>
@@ -443,7 +483,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
               {saveState === 'saving' ? 'Salvando…' : saveState === 'success' ? 'Cargas salvas ✓' : 'Salvar cargas'}
             </button>
           )}
-          <button onClick={() => window.print()}>
+          <button onClick={handlePrint}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg> Salvar PDF
           </button>
         </div>
