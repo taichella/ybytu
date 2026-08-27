@@ -111,14 +111,14 @@ export default function Campaign() {
               <p style={{ margin: 0, fontWeight: 800, fontSize: '14px' }}>Ver planos pendentes</p>
               <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Lista de quem espera parecer, logo acima</p>
             </a>
-            <div style={{ background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: '14px', padding: '18px', opacity: 0.7 }}>
+            <Link to="/campaign/failed-plans" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '18px', textDecoration: 'none', color: 'inherit', display: 'block' }}>
               <p style={{ margin: 0, fontWeight: 800, fontSize: '14px' }}>Ver planos que falharam</p>
-              <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Ainda não existe tela/filtro pra isso — só o número acima.</p>
-            </div>
-            <div style={{ background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: '14px', padding: '18px', opacity: 0.7 }}>
+              <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Lista com o motivo real do erro e botão de tentar de novo</p>
+            </Link>
+            <Link to="/campaign/invite-staff" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '18px', textDecoration: 'none', color: 'inherit', display: 'block' }}>
               <p style={{ margin: 0, fontWeight: 800, fontSize: '14px' }}>Convidar profissional</p>
-              <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Só existe a tela de aceitar convite (/accept-invite/:token).</p>
-            </div>
+              <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Gera o link de convite (personal/nutricionista/admin)</p>
+            </Link>
           </div>
         </div>
       </main>

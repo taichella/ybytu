@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
+import { isInternalServiceCall } from '../_shared/internalAuth.ts'
 
 // ─── Gate de acesso (piloto) ──────────────────────────────────────────────────
 // DÉBITO: não existe tabela `subscriptions` nem coluna de início de trial
@@ -546,6 +547,18 @@ async function callGemini(prompt: string, apiKey: string, retries = 3): Promise<
 // lista "escondida" maior por trás). Posição 0 é sempre o pick determinístico.
 const CANDIDATE_LIMIT = 8
 
+// ─── plan_generation_status — autoritativo, escrito pelo próprio gerador no
+// fim da sua execução real (não mais inferido pelo client de ter recebido ou
+// não uma resposta antes do timeout do fetch — ver memória
+// project_plan_generation_status_false_positive). Best-effort: um erro aqui
+// nunca deve mascarar o resultado real da geração pro caller.
+async function markPlanGenerationStatus(supabase: any, userId: string, status: 'ok' | 'failed', errorMessage: string | null = null) {
+  const { error } = await supabase.from('profiles')
+    .update({ plan_generation_status: status, plan_generation_error: errorMessage })
+    .eq('id', userId)
+  if (error) console.error('[ybytu-generate-training-plan] failed to write plan_generation_status:', error)
+}
+
 function rankedCandidates(targetMuscles: string[], pool: any[]) {
   return pool
     .map((ex: any) => ({
@@ -562,26 +575,43 @@ serve(async (req) => {
   const corsHeaders = corsHeadersFor(req)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  )
+  // Fora do try: precisa estar acessível no catch pra marcar plan_generation_status
+  // mesmo quando o erro acontece depois da autenticação (ver markPlanGenerationStatus).
+  let authedUserId: string | null = null
+
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    )
+    // Auth: userId from JWT, never from body — EXCETO a chamada interna
+    // abaixo (retry disparado pelo admin via ybytu-admin-retry-plan-generation),
+    // gated pelo INTERNAL_FUNCTION_SECRET, nunca exposta ao browser do aluno.
+    // Mesmo padrão de isInternalServiceCall já usado no cron de lembrete —
+    // blast radius menor que aceitar o service_role key direto.
+    let userId: string
+    if (isInternalServiceCall(req)) {
+      const body = await req.json().catch(() => null)
+      if (typeof body?.user_id !== 'string' || !body.user_id) return new Response(
+        JSON.stringify({ success: false, error: 'Missing user_id for internal call' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+      userId = body.user_id
+    } else {
+      const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+      if (!token) return new Response(
+        JSON.stringify({ success: false, error: 'Missing authorization token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
 
-    // Auth: userId from JWT, never from body
-    const token = req.headers.get('Authorization')?.replace('Bearer ', '')
-    if (!token) return new Response(
-      JSON.stringify({ success: false, error: 'Missing authorization token' }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    if (authError || !user) return new Response(
-      JSON.stringify({ success: false, error: 'Unauthorized' }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-
-    const userId = user.id
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+      if (authError || !user) return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+      userId = user.id
+    }
+    authedUserId = userId
 
     // ── PASSO 0: ler perfil ──────────────────────────────────────────────────
     const { data: profile, error: profileError } = await supabase
@@ -601,6 +631,19 @@ serve(async (req) => {
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    // Marca 'failed' otimisticamente ANTES do trabalho pesado (pool + Gemini)
+    // começar — não depois de um erro. Achado testando ao vivo 2026-08-27:
+    // quando o runtime mata a function por limite de recursos
+    // (WORKER_RESOURCE_LIMIT, visto numa chamada real >120s no gerador de
+    // nutrição), o `catch` deste arquivo NUNCA roda — o isolate morre por
+    // fora do try/catch do JS. Sem esta marca prévia, o status ficava com o
+    // valor anterior (ex: 'ok' de um treino que tinha acabado de suceder),
+    // escondendo silenciosamente que a geração seguinte não completou. 'ok'
+    // só é escrito de novo lá embaixo, na conclusão CONFIRMADA — se a
+    // function morrer no meio, isto já fica 'failed' por padrão, que é o
+    // resultado correto.
+    await markPlanGenerationStatus(supabase, userId, 'failed', 'Geração iniciada — se este texto persistir, a function foi interrompida pelo runtime antes de concluir (timeout ou limite de recursos), não por uma exceção capturável.')
 
     // ── PASSO 0: traduzir UUIDs → slugs (1 hop) em paralelo ──────────────────
     const [levelRes, envRes, goalsRes, healthRes, activityRes] = await Promise.all([
@@ -768,6 +811,8 @@ serve(async (req) => {
     const safePool = (candidatePool ?? []).filter((e: any) => !avoidExerciseIds.has(e.exercise_id))
 
     if (safePool.length === 0) {
+      const failMessage = `no_safe_exercises: pool vazio pra level=${levelSlug} environment=${environmentSlug} condition_slugs=${userConditionSlugs.join(',') || '-'}`
+      await markPlanGenerationStatus(supabase, userId, 'failed', failMessage)
       return new Response(JSON.stringify({
         success: false,
         status: 'no_safe_exercises',
@@ -989,6 +1034,8 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
     if (insertRes.error) throw new Error('Failed to save plan link: ' + insertRes.error.message)
     if (updateRes.error) throw new Error('Failed to update profile: ' + updateRes.error.message)
 
+    await markPlanGenerationStatus(supabase, userId, 'ok')
+
     return new Response(JSON.stringify({
       success: true,
       ai_layer: !!geminiKey, // tentou IA; ver ai_filled_slots pra saber quanto dela realmente colou
@@ -1031,6 +1078,7 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
   } catch (error: any) {
+    if (authedUserId) await markPlanGenerationStatus(supabase, authedUserId, 'failed', error.message)
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

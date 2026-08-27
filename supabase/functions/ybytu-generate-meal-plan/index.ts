@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 import { corsHeadersFor } from '../_shared/cors.ts'
+import { isInternalServiceCall } from '../_shared/internalAuth.ts'
 
 // ─── Mifflin-St Jeor + safety floor ──────────────────────────────────────────
 // non_binary/not_declared → female formula (conservative)
@@ -184,31 +185,60 @@ function pickForDay(options: any[], dayIndexZeroBased: number): any {
   return options[dayIndexZeroBased % options.length]
 }
 
+// ─── plan_generation_status — autoritativo, escrito pelo próprio gerador no
+// fim da sua execução real (não mais inferido pelo client de ter recebido ou
+// não uma resposta antes do timeout do fetch — ver memória
+// project_plan_generation_status_false_positive). Best-effort: um erro aqui
+// nunca deve mascarar o resultado real da geração pro caller.
+async function markPlanGenerationStatus(supabase: any, userId: string, status: 'ok' | 'failed', errorMessage: string | null = null) {
+  const { error } = await supabase.from('profiles')
+    .update({ plan_generation_status: status, plan_generation_error: errorMessage })
+    .eq('id', userId)
+  if (error) console.error('[ybytu-generate-meal-plan] failed to write plan_generation_status:', error)
+}
+
 // ─── Main handler ─────────────────────────────────────────────────────────────
 serve(async (req) => {
   const corsHeaders = corsHeadersFor(req)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  )
+  // Fora do try: precisa estar acessível no catch pra marcar plan_generation_status
+  // mesmo quando o erro acontece depois da autenticação (ver markPlanGenerationStatus).
+  let authedUserId: string | null = null
+
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-    )
+    // Auth: userId from JWT, never from body — EXCETO a chamada interna
+    // abaixo (retry disparado pelo admin via ybytu-admin-retry-plan-generation),
+    // gated pelo INTERNAL_FUNCTION_SECRET, nunca exposta ao browser do aluno.
+    // Mesmo padrão de isInternalServiceCall já usado no cron de lembrete —
+    // blast radius menor que aceitar o service_role key direto.
+    let userId: string
+    if (isInternalServiceCall(req)) {
+      const body = await req.json().catch(() => null)
+      if (typeof body?.user_id !== 'string' || !body.user_id) return new Response(
+        JSON.stringify({ success: false, error: 'Missing user_id for internal call' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+      userId = body.user_id
+    } else {
+      const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+      if (!token) return new Response(
+        JSON.stringify({ success: false, error: 'Missing authorization token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
 
-    // Auth: userId from JWT, never from body
-    const token = req.headers.get('Authorization')?.replace('Bearer ', '')
-    if (!token) return new Response(
-      JSON.stringify({ success: false, error: 'Missing authorization token' }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-    if (authError || !user) return new Response(
-      JSON.stringify({ success: false, error: 'Unauthorized' }),
-      { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
-
-    const userId = user.id
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+      if (authError || !user) return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+      userId = user.id
+    }
+    authedUserId = userId
 
     // ── PASSO 0: ler perfil ──────────────────────────────────────────────────
     const { data: profile, error: profileError } = await supabase
@@ -225,6 +255,18 @@ serve(async (req) => {
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    // Marca 'failed' otimisticamente ANTES do trabalho pesado (RPC + Gemini)
+    // começar — não depois de um erro. Achado testando ao vivo 2026-08-27:
+    // quando o runtime mata a function por limite de recursos
+    // (WORKER_RESOURCE_LIMIT, visto numa chamada real >120s), o `catch` deste
+    // arquivo NUNCA roda — o isolate morre por fora do try/catch do JS. Sem
+    // esta marca prévia, o status ficava com o valor anterior (ex: 'ok' de um
+    // treino que tinha acabado de suceder), escondendo silenciosamente que a
+    // nutrição na verdade não completou. 'ok' só é escrito de novo lá embaixo,
+    // na conclusão CONFIRMADA — se a function morrer no meio, isto já fica
+    // 'failed' por padrão, o que é o resultado correto.
+    await markPlanGenerationStatus(supabase, userId, 'failed', 'Geração iniciada — se este texto persistir, a function foi interrompida pelo runtime antes de concluir (timeout ou limite de recursos), não por uma exceção capturável.')
 
     // ── PASSO 0: traduzir UUIDs → slugs em paralelo ──────────────────────────
     const [genderRes, activityRes, preferenceRes, restrictionsRes, goalsRes] = await Promise.all([
@@ -368,6 +410,8 @@ serve(async (req) => {
       if (plansError) throw new Error('ybytu_match_meal_plans: ' + plansError.message)
 
       if (!plans || plans.length === 0) {
+        const failMessage = `no_safe_meals: sem opção segura para ${missingTypes.join(', ')}, e nenhum plano de catálogo serviu como fallback.`
+        await markPlanGenerationStatus(supabase, userId, 'failed', failMessage)
         return new Response(JSON.stringify({
           success: false,
           status:  'no_safe_meals',
@@ -399,6 +443,8 @@ serve(async (req) => {
       ])
       if (insertRes.error) throw new Error('Failed to save plan: '    + insertRes.error.message)
       if (updateRes.error) throw new Error('Failed to update profile: ' + updateRes.error.message)
+
+      await markPlanGenerationStatus(supabase, userId, 'ok')
 
       return new Response(JSON.stringify({
         success:   true,
@@ -614,6 +660,8 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
     if (insertRes.error) throw new Error('Failed to save plan link: '  + insertRes.error.message)
     if (updateRes.error) throw new Error('Failed to update profile: '  + updateRes.error.message)
 
+    await markPlanGenerationStatus(supabase, userId, 'ok')
+
     // ── 13. Degradação graciosa, não falha: opção usada em algum dia ainda
     // era "disliked" — só acontece quando não havia opções suficientes
     // não-evitadas pra aquele tipo. Reporta 1x por (tipo, meal_id) distinto.
@@ -660,6 +708,7 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
   } catch (error: any) {
+    if (authedUserId) await markPlanGenerationStatus(supabase, authedUserId, 'failed', error.message)
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

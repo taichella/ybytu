@@ -579,6 +579,15 @@
           if (isTraining) aiCalls.push(supabase.functions.invoke('ybytu-generate-training-plan'));
           if (isMeal) aiCalls.push(supabase.functions.invoke('ybytu-generate-meal-plan'));
 
+          // plan_generation_status agora é escrito pela PRÓPRIA edge function
+          // (ybytu-generate-training-plan / ybytu-generate-meal-plan) no fim da
+          // execução real, não mais inferido daqui de o fetch ter resolvido
+          // antes de um timeout do client — Gemini pode levar 3+min e o client
+          // desistir enquanto o gerador termina certinho no servidor (ver
+          // memória project_plan_generation_status_false_positive). `results`
+          // aqui só reflete se O CLIENT recebeu erro/timeout, usado abaixo só
+          // pra decidir se dispara a notificação AGORA (o cron de lembrete
+          // cobre o caso mesmo se isto não disparar).
           let generationFailed = false;
           if (aiCalls.length > 0) {
             const results = await Promise.all(
@@ -586,10 +595,6 @@
             );
             generationFailed = results.some(r => r.error);
           }
-
-          await supabase.from('profiles')
-            .update({ plan_generation_status: generationFailed ? 'failed' : 'ok' })
-            .eq('id', userId);
 
           // 4b. Avisa personal/nutri que tem plano novo pra validar —
           // fail-soft igual ao resto: se falhar, o cron de lembrete (12h)

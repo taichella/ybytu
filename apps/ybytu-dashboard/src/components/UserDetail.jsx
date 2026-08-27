@@ -66,7 +66,18 @@ export default function UserDetail() {
 
   const [notePtbr, setNotePtbr] = useState('');
   const [reviewRole, setReviewRole] = useState('');
+  const [reviewStatus, setReviewStatus] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  // Rótulo do veredito do parecer (não confundir com planStatus, que é o
+  // ciclo de vida do PLANO — rascunho/aguardando/validado). Este é o
+  // resultado que o profissional deu: aprovado ou pediu ajuste. Pareceres
+  // antigos (antes da migration 20260827130000) têm status null — sem badge.
+  function reviewVerdict(status) {
+    if (status === 'approved') return { label: 'Aprovado', bg: 'rgba(22,163,74,.12)', color: '#16a34a' };
+    if (status === 'needs_changes') return { label: 'Ajuste solicitado', bg: 'rgba(217,119,6,.12)', color: '#d97706' };
+    return null;
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -121,6 +132,7 @@ export default function UserDetail() {
   const submitReview = async () => {
     if (!notePtbr.trim()) return alert("Digite um parecer antes de enviar.");
     if (!reviewRole) return alert("Selecione o papel do avaliador.");
+    if (!reviewStatus) return alert("Selecione o resultado: aprovado ou ajuste solicitado.");
 
     setIsSubmittingReview(true);
     try {
@@ -129,6 +141,7 @@ export default function UserDetail() {
             user_id: id,
             role: reviewRole,
             note_ptbr: notePtbr,
+            status: reviewStatus,
             // training_plan_id aqui precisa ser o slug texto (training_plans.training_plan_id),
             // não o uuid de profiles.current_training_plan_id -- plan_reviews.training_plan_id
             // tem FK pra training_plans.training_plan_id (texto). Usar o uuid quebrava o upsert
@@ -140,6 +153,7 @@ export default function UserDetail() {
        if (res.error) throw res.error;
        alert("Parecer salvo com sucesso!");
        setNotePtbr('');
+       setReviewStatus('');
        // Refresh plan payload to get the new review
        const planRes = await supabase.functions.invoke('ybytu-get-plan-for-staff', { body: { userId: id } });
        if (planRes.data && !planRes.error) {
@@ -395,6 +409,7 @@ export default function UserDetail() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
                     {planPayload.training && (() => {
                       const status = planStatus(planPayload.training.is_active, Boolean(planPayload.review?.personal));
+                      const verdict = reviewVerdict(planPayload.review?.personal?.status);
                       return (
                       <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
                         <div style={{ height: '5px', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)' }}></div>
@@ -407,6 +422,9 @@ export default function UserDetail() {
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                 <p style={{ margin: 0, fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Plano de Treino</p>
                                 <span style={{ display: 'inline-flex', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', background: status.bg, color: status.color }}>{status.label}</span>
+                                {verdict && (
+                                  <span style={{ display: 'inline-flex', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', background: verdict.bg, color: verdict.color }}>Parecer: {verdict.label}</span>
+                                )}
                               </div>
                               <p style={{ margin: '3px 0 0', fontSize: '17px', fontWeight: 900, letterSpacing: '-.01em' }}>{planPayload.training.name_ptbr || (resolvedLabels.goals?.length ? resolvedLabels.goals.join(' + ') : 'Plano de treino')}</p>
                               <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 500 }}>{planPayload.training.days_per_week} dias/sem · {planPayload.training.session_duration_min ? `${planPayload.training.session_duration_min} min/sessão` : 'duração não definida'}</p>
@@ -423,6 +441,7 @@ export default function UserDetail() {
 
                     {planPayload.nutrition && (() => {
                       const status = planStatus(planPayload.nutrition.is_active, Boolean(planPayload.review?.nutricionista));
+                      const verdict = reviewVerdict(planPayload.review?.nutricionista?.status);
                       return (
                       <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
                         <div style={{ height: '5px', background: 'linear-gradient(135deg,#16a34a,#4ade80)' }}></div>
@@ -435,6 +454,9 @@ export default function UserDetail() {
                               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                 <p style={{ margin: 0, fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Plano Alimentar</p>
                                 <span style={{ display: 'inline-flex', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', background: status.bg, color: status.color }}>{status.label}</span>
+                                {verdict && (
+                                  <span style={{ display: 'inline-flex', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', background: verdict.bg, color: verdict.color }}>Parecer: {verdict.label}</span>
+                                )}
                               </div>
                               <p style={{ margin: '3px 0 0', fontSize: '17px', fontWeight: 900, letterSpacing: '-.01em' }}>{planPayload.nutrition.name_ptbr || resolvedLabels.dietaryPreference || 'Plano alimentar'}</p>
                               <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 500 }}>{MEALS_PER_DAY_LABELS[userData.meals_per_day] || `${planPayload.nutrition.meals_per_day} refeições`}/dia · meta {planPayload.nutrition.daily_kcal_target} kcal</p>
@@ -534,6 +556,14 @@ export default function UserDetail() {
                     placeholder="Escreva seu diagnóstico e metas..."
                     style={{ width: '100%', minHeight: '100px', padding: '12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--text)', fontFamily: 'inherit', fontSize: '14px' }}
                   />
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', fontWeight: 700, color: '#16a34a' }}>
+                      <input type="radio" name="reviewStatus" value="approved" checked={reviewStatus === 'approved'} onChange={() => setReviewStatus('approved')} /> Aprovado
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', fontWeight: 700, color: '#d97706' }}>
+                      <input type="radio" name="reviewStatus" value="needs_changes" checked={reviewStatus === 'needs_changes'} onChange={() => setReviewStatus('needs_changes')} /> Precisa de ajuste
+                    </label>
+                  </div>
                   <button onClick={submitReview} disabled={isSubmittingReview} style={{ alignSelf: 'flex-start', padding: '10px 18px', borderRadius: '8px', background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 800, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
                     {isSubmittingReview ? 'Salvando...' : 'Salvar Parecer'}
                   </button>

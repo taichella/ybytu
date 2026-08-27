@@ -479,3 +479,19 @@ entrypoint = "./functions/ybytu-send-user-whatsapp/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/ybytu-plan-review-reminder-cron/index.ts"
+
+# Mesma razão das 3 acima: além do JWT normal do aluno, estas duas aceitam
+# uma chamada interna (ybytu-admin-retry-plan-generation) com
+# INTERNAL_FUNCTION_SECRET no Authorization -- não é um JWT, o gateway
+# rejeitaria com 401 antes do código rodar se verify_jwt ficasse true. A
+# checagem real do JWT do aluno continua acontecendo DENTRO do código
+# (isInternalServiceCall / auth.getUser), igual antes.
+[functions.ybytu-generate-training-plan]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-generate-training-plan/index.ts"
+
+[functions.ybytu-generate-meal-plan]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-generate-meal-plan/index.ts"

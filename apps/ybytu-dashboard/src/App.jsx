@@ -28,6 +28,8 @@ import MealPlanCreator from './components/MealPlanCreator';
 import Account from './components/Account';
 import Tags from './components/Tags';
 import SharedPlan from './components/SharedPlan';
+import FailedPlans from './components/FailedPlans';
+import InviteStaff from './components/InviteStaff';
 
 function App() {
   return (
@@ -45,6 +47,8 @@ function App() {
         {/* Rotas protegidas pelo Layout */}
         <Route element={<DashboardLayout />}>
           <Route path="/campaign" element={<Campaign />} />
+          <Route path="/campaign/failed-plans" element={<FailedPlans />} />
+          <Route path="/campaign/invite-staff" element={<InviteStaff />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/users" element={<Users />} />
           <Route path="/users/:id" element={<UserDetail />} />

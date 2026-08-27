@@ -577,13 +577,13 @@ async function buildReviewSection(
 ): Promise<Record<string, unknown>> {
   const { data, error } = await supabase
     .from('plan_reviews')
-    .select('role, reviewer_name, reviewer_credential, note_ptbr, updated_at')
+    .select('role, reviewer_name, reviewer_credential, note_ptbr, status, updated_at')
     .eq('user_id', userId)
   if (error) throw new Error(`Lookup de plan_reviews falhou: ${error.message}`)
 
   const byRole = new Map((data ?? []).map((r: any) => [r.role, r]))
   const shape = (row: any | undefined) =>
-    row ? { reviewer_name: row.reviewer_name, reviewer_credential: row.reviewer_credential, note_ptbr: row.note_ptbr, updated_at: row.updated_at } : null
+    row ? { reviewer_name: row.reviewer_name, reviewer_credential: row.reviewer_credential, note_ptbr: row.note_ptbr, status: row.status ?? null, updated_at: row.updated_at } : null
 
   return {
     personal: shape(byRole.get('personal')),

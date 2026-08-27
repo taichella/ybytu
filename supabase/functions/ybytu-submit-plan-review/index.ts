@@ -24,6 +24,7 @@ import { corsHeadersFor } from '../_shared/cors.ts'
 // Série variável (nº de sets diferente por exercício editável no plano do
 // aluno) fica pendente pra v2 -- ver [[project_plan_creators_schema_debt]].
 const VALID_ROLES = new Set(['personal', 'nutricionista'])
+const VALID_STATUSES = new Set(['approved', 'needs_changes'])
 
 function normalizeLoadKg(value: unknown): number | null {
   if (value === null) return null
@@ -57,6 +58,7 @@ serve(async (req) => {
     const notePtbr = typeof body?.note_ptbr === 'string' ? body.note_ptbr : null
     const trainingPlanId = typeof body?.training_plan_id === 'string' ? body.training_plan_id : null
     const mealPlanId = typeof body?.meal_plan_id === 'string' ? body.meal_plan_id : null
+    const reviewStatus = body?.status
 
     if (!userId) {
       return new Response(JSON.stringify({ error: 'missing_user_id' }), {
@@ -65,6 +67,15 @@ serve(async (req) => {
     }
     if (!VALID_ROLES.has(role)) {
       return new Response(JSON.stringify({ error: 'invalid_role' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    // status agora é obrigatório em todo parecer NOVO — pareceres antigos
+    // (antes da migration 20260827130000) ficam null pra sempre, não dá pra
+    // retroagir sem o profissional reabrir e decidir. Ver desenho aprovado
+    // 2026-08-27: Pendente/Enviado de graça, Aprovado/Ajuste com este campo.
+    if (!VALID_STATUSES.has(reviewStatus)) {
+      return new Response(JSON.stringify({ error: 'invalid_status' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
@@ -243,6 +254,7 @@ serve(async (req) => {
           reviewer_name: auth.staff.fullName,
           reviewer_credential: reviewerCredential,
           note_ptbr: notePtbr,
+          status: reviewStatus,
           training_plan_id: trainingPlanId,
           meal_plan_id: mealPlanId,
           updated_at: new Date().toISOString(),
@@ -254,15 +266,22 @@ serve(async (req) => {
 
     const { data: reviews, error: reviewsError } = await supabase
       .from('plan_reviews')
-      .select('role')
+      .select('role, status')
       .eq('user_id', userId)
 
     if (reviewsError) throw new Error(`Lookup de plan_reviews falhou: ${reviewsError.message}`)
 
     const reviewedRoles = new Set((reviews ?? []).map((r) => r.role as string))
     const bothReviewed = reviewedRoles.has('personal') && reviewedRoles.has('nutricionista')
+    // Só notifica o aluno quando os DOIS pareceres existem E nenhum pediu
+    // ajuste — antes desta coluna, "both_reviewed" já disparava o WhatsApp
+    // mesmo que um profissional tivesse reprovado o plano (status não
+    // existia). Pareceres antigos (status null) contam como aprovados pra
+    // não regredir o comportamento de quem já validou antes desta mudança.
+    const anyNeedsChanges = (reviews ?? []).some((r: any) => r.status === 'needs_changes')
+    const readyToNotify = bothReviewed && !anyNeedsChanges
 
-    if (bothReviewed) {
+    if (readyToNotify) {
       const notifyResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/ybytu-send-user-whatsapp`, {
         method: 'POST',
         headers: {
@@ -276,7 +295,7 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ ok: true, both_reviewed: bothReviewed }), {
+    return new Response(JSON.stringify({ ok: true, both_reviewed: bothReviewed, user_notified: readyToNotify }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
