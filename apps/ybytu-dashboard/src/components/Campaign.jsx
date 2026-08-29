@@ -99,6 +99,13 @@ export default function Campaign() {
                 <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>Planos entregues</p>
                 <p style={{ margin: '10px 0 0', fontSize: '28px', fontWeight: 900 }}>{statsLoading ? '—' : stats.plans_delivered}</p>
               </div>
+              {/* Degradação IA->determinístico (2026-08-27) -- só destaca em
+                  laranja quando > 0 (a cota estourar é o caso raro que precisa
+                  chamar atenção, não o normal). "Hoje" pra sinalizar cota diária. */}
+              <div style={{ background: stats?.fully_deterministic_plans_today > 0 ? 'rgba(217,119,6,.08)' : 'var(--surface)', border: stats?.fully_deterministic_plans_today > 0 ? '1px solid #d97706' : '1px solid var(--border)', borderRadius: '18px', padding: '22px' }} title="Planos gerados hoje onde a IA não colou em nenhum slot -- sinal de cota estourada ou provedor fora do ar">
+                <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, letterSpacing: '.05em', color: 'var(--muted)', textTransform: 'uppercase' }}>100% determinístico hoje</p>
+                <p style={{ margin: '10px 0 0', fontSize: '28px', fontWeight: 900, color: stats?.fully_deterministic_plans_today > 0 ? '#d97706' : 'var(--text)' }}>{statsLoading ? '—' : stats.fully_deterministic_plans_today}</p>
+              </div>
             </div>
           )}
 

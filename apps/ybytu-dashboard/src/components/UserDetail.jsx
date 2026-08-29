@@ -16,6 +16,99 @@ const MEALS_PER_DAY_LABELS = {
   6: '3 refeições + 3 lanches',
 };
 
+// Mesmo dicionário de UserPlan.jsx (Metas do Ciclo) -- duplicado aqui de
+// propósito (pedido da Taina 2026-08-27): a página de trabalho do
+// profissional (esta) também mostra o texto curado por objetivo, não só o
+// documento final que o aluno vê.
+const GOAL_LABELS = {
+  weight_loss: 'Emagrecer',
+  hypertrophy: 'Ganhar massa muscular',
+  conditioning: 'Melhorar o condicionamento físico',
+  health_routine: 'Criar uma rotina saudável',
+};
+
+// Parecer atrelado ao card (redesenho 2026-08-27, substitui o formulário
+// solto no fim da página) -- role já é fixo pelo card (Treino=personal,
+// Nutrição=nutricionista), sem seletor. Admin vê os 2 (canEdit=true nos
+// dois). Quem só tem UM papel só edita o card daquele papel; o outro card
+// mostra o parecer (se já existir) em modo leitura, ou "Aguardando" vazio.
+function ParecerMiniForm({ roleLabel, existingReview, canEdit, onSubmit, submitting }) {
+  const [editing, setEditing] = useState(!existingReview);
+  const [note, setNote] = useState(existingReview?.note_ptbr ?? '');
+  const [status, setStatus] = useState(existingReview?.status ?? '');
+
+  const verdict = existingReview?.status === 'approved'
+    ? { label: 'Aprovado', color: '#16a34a' }
+    : existingReview?.status === 'needs_changes'
+      ? { label: 'Precisa de ajuste', color: '#d97706' }
+      : null;
+
+  const handleSave = async () => {
+    if (!note.trim()) return alert('Digite um parecer antes de enviar.');
+    if (!status) return alert('Selecione o resultado: aprovado ou ajuste solicitado.');
+    const ok = await onSubmit(note, status);
+    if (ok) setEditing(false);
+  };
+
+  if (!canEdit) {
+    return (
+      <div style={{ borderTop: '1px solid var(--border)', paddingTop: '14px', marginTop: '16px' }}>
+        <p style={{ margin: '0 0 6px', fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Parecer do {roleLabel}</p>
+        {existingReview ? (
+          <>
+            <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 700, color: verdict?.color ?? 'var(--text)' }}>
+              {verdict?.label ?? 'Enviado'} — {existingReview.reviewer_name}
+            </p>
+            <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>{existingReview.note_ptbr}</p>
+          </>
+        ) : (
+          <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--muted)' }}>Aguardando parecer.</p>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '14px', marginTop: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+        <p style={{ margin: 0, fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Parecer do {roleLabel}</p>
+        {existingReview && !editing && (
+          <button onClick={() => setEditing(true)} style={{ fontSize: '11px', fontWeight: 700, color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Editar</button>
+        )}
+      </div>
+
+      {existingReview && !editing ? (
+        <>
+          <p style={{ margin: 0, fontSize: '12.5px', fontWeight: 700, color: verdict?.color ?? 'var(--text)' }}>
+            {verdict?.label ?? 'Enviado'} — {existingReview.reviewer_name}
+          </p>
+          <p style={{ margin: '4px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>{existingReview.note_ptbr}</p>
+        </>
+      ) : (
+        <>
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Escreva o parecer..."
+            style={{ width: '100%', minHeight: '72px', padding: '10px', borderRadius: '9px', border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--text)', fontFamily: 'inherit', fontSize: '13px', boxSizing: 'border-box' }}
+          />
+          <div style={{ display: 'flex', gap: '10px', margin: '8px 0' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700, color: '#16a34a' }}>
+              <input type="radio" name={`status-${roleLabel}`} checked={status === 'approved'} onChange={() => setStatus('approved')} /> Aprovado
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700, color: '#d97706' }}>
+              <input type="radio" name={`status-${roleLabel}`} checked={status === 'needs_changes'} onChange={() => setStatus('needs_changes')} /> Precisa de ajuste
+            </label>
+          </div>
+          <button onClick={handleSave} disabled={submitting} style={{ padding: '8px 14px', borderRadius: '8px', background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 800, fontSize: '12.5px', cursor: 'pointer', fontFamily: 'inherit' }}>
+            {submitting ? 'Salvando...' : 'Salvar parecer'}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function UserDetail() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -64,15 +157,24 @@ export default function UserDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [notePtbr, setNotePtbr] = useState('');
-  const [reviewRole, setReviewRole] = useState('');
-  const [reviewStatus, setReviewStatus] = useState('');
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  // Um "submitting" por papel -- os 2 cards podem salvar independentemente
+  // (ex: admin salvando os 2 pareceres em sequência sem travar um no outro).
+  const [submittingRole, setSubmittingRole] = useState(null); // 'personal' | 'nutricionista' | null
 
   // Rótulo do veredito do parecer (não confundir com planStatus, que é o
   // ciclo de vida do PLANO — rascunho/aguardando/validado). Este é o
   // resultado que o profissional deu: aprovado ou pediu ajuste. Pareceres
   // antigos (antes da migration 20260827130000) têm status null — sem badge.
+  // Observabilidade IA vs. determinístico (2026-08-27) -- null/undefined nos
+  // dois campos = plano de antes desta coluna existir, ou molde/catálogo
+  // (nunca passa por IA). Não mostra nada nesses casos.
+  function aiSlotsLabel(aiFilled, deterministic) {
+    if (aiFilled == null || deterministic == null) return null;
+    const total = aiFilled + deterministic;
+    if (total === 0) return null;
+    return `🤖 IA: ${aiFilled}/${total} slots`;
+  }
+
   function reviewVerdict(status) {
     if (status === 'approved') return { label: 'Aprovado', bg: 'rgba(22,163,74,.12)', color: '#16a34a' };
     if (status === 'needs_changes') return { label: 'Ajuste solicitado', bg: 'rgba(217,119,6,.12)', color: '#d97706' };
@@ -112,12 +214,9 @@ export default function UserDetail() {
     return () => { isMounted = false; };
   }, [id]);
 
-  useEffect(() => {
-    if (staff && staff.roles) {
-      if (staff.roles.includes('personal')) setReviewRole('personal');
-      else if (staff.roles.includes('nutricionista')) setReviewRole('nutricionista');
-    }
-  }, [staff]);
+  // canReview(role): mesma regra do backend (ybytu-submit-plan-review) --
+  // admin edita os 2, quem só tem UM papel só edita o card daquele papel.
+  const canReview = (role) => !!staff?.roles && (staff.roles.includes(role) || staff.roles.includes('admin'));
 
   // Status computado (#2) -- nunca um campo novo no schema: is_active
   // (rascunho/publicado, controlado por ybytu-admin-trainings/-meal-plans)
@@ -129,40 +228,38 @@ export default function UserDetail() {
     return { label: 'Validado', bg: 'rgba(22,163,74,.12)', color: '#16a34a' };
   }
 
-  const submitReview = async () => {
-    if (!notePtbr.trim()) return alert("Digite um parecer antes de enviar.");
-    if (!reviewRole) return alert("Selecione o papel do avaliador.");
-    if (!reviewStatus) return alert("Selecione o resultado: aprovado ou ajuste solicitado.");
-
-    setIsSubmittingReview(true);
+  // role já vem fixo de qual card chamou (Treino -> personal, Nutrição ->
+  // nutricionista) -- sem seletor, ver ParecerMiniForm acima. training_plan_id/
+  // meal_plan_id precisam ser o SLUG texto (training_plans.training_plan_id /
+  // meal_plans.meal_plan_id), não o uuid de profiles.current_*_plan_id --
+  // plan_reviews tem FK pro slug. Usar o uuid quebrava o upsert com violação
+  // de FK (500 silencioso pro usuário, achado 2026-08-16); meal_plan_id nunca
+  // tinha sido enviado pro lado nutrição até agora (payload não expunha o
+  // slug -- fechado junto nesta revisão, ver buildPlanPayload.ts).
+  const submitReview = async (role, notePtbr, reviewStatus) => {
+    setSubmittingRole(role);
     try {
-       const res = await supabase.functions.invoke('ybytu-submit-plan-review', {
-          body: {
-            user_id: id,
-            role: reviewRole,
-            note_ptbr: notePtbr,
-            status: reviewStatus,
-            // training_plan_id aqui precisa ser o slug texto (training_plans.training_plan_id),
-            // não o uuid de profiles.current_training_plan_id -- plan_reviews.training_plan_id
-            // tem FK pra training_plans.training_plan_id (texto). Usar o uuid quebrava o upsert
-            // com violação de FK (500 silencioso pro usuário). Achado testando o fluxo ao vivo,
-            // 2026-08-16.
-            training_plan_id: planPayload?.training?.training_plan_id ?? null
-          }
-       });
-       if (res.error) throw res.error;
-       alert("Parecer salvo com sucesso!");
-       setNotePtbr('');
-       setReviewStatus('');
-       // Refresh plan payload to get the new review
-       const planRes = await supabase.functions.invoke('ybytu-get-plan-for-staff', { body: { userId: id } });
-       if (planRes.data && !planRes.error) {
-         setPlanPayload(planRes.data);
-       }
-    } catch(err) {
-       alert("Erro ao salvar parecer: " + err.message);
+      const res = await supabase.functions.invoke('ybytu-submit-plan-review', {
+        body: {
+          user_id: id,
+          role,
+          note_ptbr: notePtbr,
+          status: reviewStatus,
+          training_plan_id: role === 'personal' ? (planPayload?.training?.training_plan_id ?? null) : null,
+          meal_plan_id: role === 'nutricionista' ? (planPayload?.nutrition?.meal_plan_id ?? null) : null,
+        }
+      });
+      if (res.error) throw res.error;
+      const planRes = await supabase.functions.invoke('ybytu-get-plan-for-staff', { body: { userId: id } });
+      if (planRes.data && !planRes.error) {
+        setPlanPayload(planRes.data);
+      }
+      return true;
+    } catch (err) {
+      alert("Erro ao salvar parecer: " + err.message);
+      return false;
     } finally {
-       setIsSubmittingReview(false);
+      setSubmittingRole(null);
     }
   };
 
@@ -428,12 +525,22 @@ export default function UserDetail() {
                               </div>
                               <p style={{ margin: '3px 0 0', fontSize: '17px', fontWeight: 900, letterSpacing: '-.01em' }}>{planPayload.training.name_ptbr || (resolvedLabels.goals?.length ? resolvedLabels.goals.join(' + ') : 'Plano de treino')}</p>
                               <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 500 }}>{planPayload.training.days_per_week} dias/sem · {planPayload.training.session_duration_min ? `${planPayload.training.session_duration_min} min/sessão` : 'duração não definida'}</p>
+                              {aiSlotsLabel(planPayload.training.ai_filled_slots, planPayload.training.deterministic_fallback_slots) && (
+                                <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--faint, var(--muted))', fontWeight: 600 }}>{aiSlotsLabel(planPayload.training.ai_filled_slots, planPayload.training.deterministic_fallback_slots)}</p>
+                              )}
                             </div>
                           </div>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button onClick={() => navigate(`/users/${id}/plano`)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '11px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver plano</button>
                             <button onClick={() => navigate('/trainings')} title="Escolher outro plano de treino no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
                           </div>
+                          <ParecerMiniForm
+                            roleLabel="Personal"
+                            existingReview={planPayload.review?.personal ?? null}
+                            canEdit={canReview('personal')}
+                            submitting={submittingRole === 'personal'}
+                            onSubmit={(note, status) => submitReview('personal', note, status)}
+                          />
                         </div>
                       </section>
                       );
@@ -460,12 +567,22 @@ export default function UserDetail() {
                               </div>
                               <p style={{ margin: '3px 0 0', fontSize: '17px', fontWeight: 900, letterSpacing: '-.01em' }}>{planPayload.nutrition.name_ptbr || resolvedLabels.dietaryPreference || 'Plano alimentar'}</p>
                               <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 500 }}>{MEALS_PER_DAY_LABELS[userData.meals_per_day] || `${planPayload.nutrition.meals_per_day} refeições`}/dia · meta {planPayload.nutrition.daily_kcal_target} kcal</p>
+                              {aiSlotsLabel(planPayload.nutrition.ai_filled_slots, planPayload.nutrition.deterministic_fallback_slots) && (
+                                <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--faint, var(--muted))', fontWeight: 600 }}>{aiSlotsLabel(planPayload.nutrition.ai_filled_slots, planPayload.nutrition.deterministic_fallback_slots)}</p>
+                              )}
                             </div>
                           </div>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button onClick={() => navigate(`/users/${id}/plano`)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '11px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver plano</button>
                             <button onClick={() => navigate('/meal-plans')} title="Escolher outro plano alimentar no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
                           </div>
+                          <ParecerMiniForm
+                            roleLabel="Nutricionista"
+                            existingReview={planPayload.review?.nutricionista ?? null}
+                            canEdit={canReview('nutricionista')}
+                            submitting={submittingRole === 'nutricionista'}
+                            onSubmit={(note, status) => submitReview('nutricionista', note, status)}
+                          />
                         </div>
                       </section>
                       );
@@ -529,49 +646,27 @@ export default function UserDetail() {
                 </section>
               )}
 
-              {/* Formulário de Parecer Técnico -- não está no mockup novo, mas é a
-                  única forma hoje do personal/nutricionista validar um plano; mantido
-                  por decisão explícita (2026-08-25), não é regressão silenciosa. */}
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Escrever Parecer Técnico</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {/* Admin tem acesso a ambos os papeis (mesma regra do backend em
-                      ybytu-submit-plan-review), mas nao tem 'personal'/'nutricionista'
-                      no staff.roles -- sem isso o seletor nunca aparecia pra admin e
-                      reviewRole ficava vazio pra sempre, travando o submit no alert
-                      "Selecione o papel do avaliador." (achado testando em prod 2026-08-25). */}
-                  {(staff?.roles?.includes('admin') || (staff?.roles?.includes('personal') && staff?.roles?.includes('nutricionista'))) && (
-                     <div style={{ display: 'flex', gap: '12px', marginBottom: '8px' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}>
-                           <input type="radio" name="reviewRole" value="personal" checked={reviewRole === 'personal'} onChange={() => setReviewRole('personal')} /> Personal
-                        </label>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', fontWeight: 600 }}>
-                           <input type="radio" name="reviewRole" value="nutricionista" checked={reviewRole === 'nutricionista'} onChange={() => setReviewRole('nutricionista')} /> Nutricionista
-                        </label>
-                     </div>
-                  )}
-                  <textarea
-                    value={notePtbr}
-                    onChange={e => setNotePtbr(e.target.value)}
-                    placeholder="Escreva seu diagnóstico e metas..."
-                    style={{ width: '100%', minHeight: '100px', padding: '12px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--field)', color: 'var(--text)', fontFamily: 'inherit', fontSize: '14px' }}
-                  />
-                  <div style={{ display: 'flex', gap: '12px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', fontWeight: 700, color: '#16a34a' }}>
-                      <input type="radio" name="reviewStatus" value="approved" checked={reviewStatus === 'approved'} onChange={() => setReviewStatus('approved')} /> Aprovado
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', fontWeight: 700, color: '#d97706' }}>
-                      <input type="radio" name="reviewStatus" value="needs_changes" checked={reviewStatus === 'needs_changes'} onChange={() => setReviewStatus('needs_changes')} /> Precisa de ajuste
-                    </label>
+              {/* Metas do Ciclo -- redesenho 2026-08-27: mesmo texto curado por
+                  objetivo que já existia em UserPlan.jsx (documento final),
+                  duplicado aqui pra o profissional ver sem precisar abrir o
+                  documento. Não é gerado por IA nem por plano -- é copy fixa
+                  por goal_id (CYCLE_EXPECTATIONS_BY_GOAL), pendente de revisão
+                  de conteúdo pelo personal/nutricionista UMA VEZ (não por
+                  aluno) -- ver pendência registrada. */}
+              {planPayload?.cycle_goals?.length > 0 && (
+                <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
+                  <h3 style={{ margin: '0 0 14px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Metas do Ciclo</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(planPayload.cycle_goals.length, 4)}, minmax(0,1fr))`, gap: '14px' }}>
+                    {planPayload.cycle_goals.map((g, i) => (
+                      <div key={i}>
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-.01em' }}>{g.expectation_ptbr}</p>
+                        <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>{GOAL_LABELS[g.goal] || g.goal}</p>
+                        {g.window_ptbr && <p style={{ margin: '2px 0 0', fontSize: '10.5px', color: 'var(--faint, var(--muted))', fontWeight: 600 }}>{g.window_ptbr}</p>}
+                      </div>
+                    ))}
                   </div>
-                  <button onClick={submitReview} disabled={isSubmittingReview} style={{ alignSelf: 'flex-start', padding: '10px 18px', borderRadius: '8px', background: 'var(--brand)', color: '#fff', border: 'none', fontWeight: 800, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                    {isSubmittingReview ? 'Salvando...' : 'Salvar Parecer'}
-                  </button>
-                </div>
-              </section>
-
-              {/* Pareceres já salvos (Análises & Diagnósticos) ficam dentro do
-                  documento -- ver "Ver plano" acima, agora em /users/:id/plano. */}
+                </section>
+              )}
             </div>
           )}
 
