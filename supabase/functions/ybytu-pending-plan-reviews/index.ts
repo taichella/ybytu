@@ -66,13 +66,21 @@ serve(async (req) => {
       reviewedByUser.get(r.user_id)!.add(r.role)
     }
 
+    // missing_roles sempre mostra o quadro COMPLETO (os 2 papéis, não só o do
+    // chamador) -- achado 2026-08-29: um personal via "falta: personal" mesmo
+    // quando a nutrição também estava pendente, porque missing_roles era
+    // filtrado por relevantRoles (só o papel do próprio chamador) ANTES de
+    // virar o rótulo exibido. relevantRoles continua controlando só QUAIS
+    // alunos entram na fila de cada profissional (a fila dele = onde falta o
+    // PRÓPRIO papel) -- o rótulo em si sempre lista tudo que falta, pra quem
+    // vê saber que o outro papel também está pendente.
     const pending = profiles
       .map((p) => {
         const reviewedRoles = reviewedByUser.get(p.id) ?? new Set<string>()
-        const missingRoles = relevantRoles.filter((r) => !reviewedRoles.has(r))
+        const missingRoles = REVIEW_ROLES.filter((r) => !reviewedRoles.has(r))
         return { ...p, missing_roles: missingRoles }
       })
-      .filter((p) => p.missing_roles.length > 0)
+      .filter((p) => relevantRoles.some((r) => p.missing_roles.includes(r)))
       .sort((a, b) => (a.full_name ?? '').localeCompare(b.full_name ?? ''))
 
     return new Response(JSON.stringify({ pending, count: pending.length }), {

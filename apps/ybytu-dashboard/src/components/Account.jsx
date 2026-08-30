@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { StaffContext } from '../lib/staffContextCore';
 
@@ -15,8 +16,10 @@ function initials(name) {
 }
 
 export default function Account() {
+  const navigate = useNavigate();
   const [theme, setTheme] = useState('dark');
   const [email, setEmail] = useState(null);
+  const [signingOut, setSigningOut] = useState(false);
   // StaffContext.Provider carrega { fullName, roles } diretamente, sem
   // encapar num .staff -- ver comentário em UserDetail.jsx.
   const staff = useContext(StaffContext);
@@ -31,6 +34,16 @@ export default function Account() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
+  // Não existia NENHUM jeito de sair da conta no app inteiro (achado
+  // 2026-08-29, testando o roteiro completo) -- Sidebar/MobileNav nunca
+  // tiveram botão de logout, só o guard de DashboardLayout chamava signOut
+  // (e só quando a sessão já tinha sido rejeitada, não por ação do staff).
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    await supabase.auth.signOut();
+    navigate('/login', { replace: true });
+  };
+
   const roleLabels = (staff?.roles ?? []).map((r) => ROLE_LABELS[r] || r);
 
   return (
@@ -43,6 +56,10 @@ export default function Account() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <button onClick={handleSignOut} disabled={signingOut} style={{ display: 'flex', alignItems: 'center', gap: '7px', height: '40px', padding: '0 16px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--danger, #ef4444)', fontSize: '13px', fontWeight: 800, cursor: signingOut ? 'default' : 'pointer', fontFamily: 'inherit', opacity: signingOut ? 0.6 : 1 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5-5-5"></path><path d="M21 12H9"></path></svg>
+            {signingOut ? 'Saindo…' : 'Sair'}
           </button>
         </div>
       </header>

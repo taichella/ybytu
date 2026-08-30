@@ -704,7 +704,13 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                           </div>
                           <div className="table-scroll">
                             <table className="ex">
-                              <thead><tr><th>Exercício</th><th className="c">Séries</th>{editable && <th className="c screen-only">Carga (kg)</th>}<th className="c">Reps</th><th className="c">Cadência*</th><th className="c">Descanso</th></tr></thead>
+                              {/* Coluna Cadência removida 2026-08-29 (decisão da Taina) -- os 179
+                                  registros dos moldes compartilham o mesmo valor 2-0-2-0 (placeholder
+                                  uniforme, nunca curado por exercício) e o construtor não preserva os
+                                  4 campos ao editar (vira "-"). Colunas continuam no banco -- nenhum
+                                  dado foi apagado, só a exibição. Pendência: cadência real por
+                                  exercício exige curadoria do personal, não implementado ainda. */}
+                              <thead><tr><th>Exercício</th><th className="c">Séries</th>{editable && <th className="c screen-only">Carga (kg)</th>}<th className="c">Reps</th><th className="c">Descanso</th></tr></thead>
                               {/* Reps/Descanso editáveis (Passo 5b) reaproveitam a mesma coluna --
                                   em tela mostram input quando editable, na impressão (PDF) caem no
                                   texto de sempre via CSS screen-only/print-only já existente no arquivo. */}
@@ -763,7 +769,6 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                                         </>
                                       ) : ex.reps_ptbr}
                                     </td>
-                                    <td className="c mono">{ex.cadence_ptbr}</td>
                                     <td className="c mono">
                                       {editable && ex.id ? (
                                         <>
