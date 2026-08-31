@@ -96,6 +96,15 @@ a {
    com !important, mesmo inline). Achado 2026-08-25: nunca existiu essa
    limpeza, por isso o PDF saía com sidebar + coluna estreita com scroll. */
 @media print {
+  @page {
+    size: auto;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   .yb-side, .yb-mnav { display: none !important; }
   .yb-shell { height: auto !important; overflow: visible !important; }
   .yb-main-content { overflow: visible !important; height: auto !important; }
