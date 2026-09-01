@@ -18,7 +18,12 @@ export default function Sidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
   const staff = useContext(StaffContext);
-  const roleLabel = (staff?.roles ?? []).map((r) => ROLE_LABELS[r] || r).join(' · ');
+  const roles = staff?.roles ?? [];
+  const isAdmin = roles.includes('admin');
+  const isPersonal = roles.includes('personal');
+  const isNutri = roles.includes('nutricionista');
+
+  const roleLabel = roles.map((r) => ROLE_LABELS[r] || r).join(' · ');
 
   const navClass = (path) => currentPath.includes(path) 
     ? { display:'flex', alignItems:'center', gap:'12px', padding:'11px 22px', fontSize:'14px', fontWeight:700, color:'var(--brand)', background:'var(--brand-soft)', borderRight:'3px solid var(--brand)', textDecoration:'none' }
@@ -46,34 +51,44 @@ export default function Sidebar() {
         <Link to="/users" style={navClass('/users')}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg> Usuários
         </Link>
-        <Link to="/subscriptions" style={navClass('/subscriptions')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg> Assinaturas
-        </Link>
+        {isAdmin && (
+          <Link to="/subscriptions" style={navClass('/subscriptions')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg> Assinaturas
+          </Link>
+        )}
 
-        <p style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: 'var(--muted)', textTransform: 'uppercase', padding: '0 22px', margin: '20px 0 8px' }}>Módulo Treino</p>
-        <Link to="/exercises" style={navClass('/exercises')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6.5 6.5 11 11M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4M3 10l7-7M14 21l7-7"></path></svg> Exercícios
-        </Link>
-        <Link to="/trainings" style={navClass('/trainings')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Treinos (Planos)
-        </Link>
-        <Link to="/equipment" style={navClass('/equipment')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="3"></circle><path d="M6.5 8a2 2 0 0 0-1.905 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.925-2.54L19.4 9.5A2 2 0 0 0 17.48 8Z"></path></svg> Equipamentos
-        </Link>
+        {(isAdmin || isPersonal) && (
+          <>
+            <p style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: 'var(--muted)', textTransform: 'uppercase', padding: '0 22px', margin: '20px 0 8px' }}>Módulo Treino</p>
+            <Link to="/exercises" style={navClass('/exercises')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6.5 6.5 11 11M21 21l-1-1M3 3l1 1M18 22l4-4M2 6l4-4M3 10l7-7M14 21l7-7"></path></svg> Exercícios
+            </Link>
+            <Link to="/trainings" style={navClass('/trainings')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Treinos (Planos)
+            </Link>
+            <Link to="/equipment" style={navClass('/equipment')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="3"></circle><path d="M6.5 8a2 2 0 0 0-1.905 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.925-2.54L19.4 9.5A2 2 0 0 0 17.48 8Z"></path></svg> Equipamentos
+            </Link>
+          </>
+        )}
 
-        <p style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: 'var(--muted)', textTransform: 'uppercase', padding: '0 22px', margin: '20px 0 8px' }}>Módulo Nutrição</p>
-        <Link to="/foods" style={navClass('/foods')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20.94c1.5 0 2.75-1.06 4-2.94 1.5-2.25 2-5.5 2-7 0-2.5-1.5-4-3.5-4-1.5 0-2.5 1-3 1.5-.5-.5-1.5-1.5-3-1.5C5 7 3.5 8.5 3.5 11c0 1.5.5 4.75 2 7 1.25 1.88 2.5 2.94 4 2.94Z"></path><path d="M10 2c1 .5 2 2 2 5"></path></svg> Alimentos
-        </Link>
-        <Link to="/meals" style={navClass('/meals')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg> Refeições
-        </Link>
-        <Link to="/meal-plans" style={navClass('/meal-plans')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11H3v10h6V11ZM21 3h-6v18h6V3ZM15 7H9v14h6V7Z"></path></svg> Planos Alimentares
-        </Link>
-        <Link to="/tags" style={navClass('/tags')}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r="1.5"></circle></svg> Tags
-        </Link>
+        {(isAdmin || isNutri) && (
+          <>
+            <p style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '.12em', color: 'var(--muted)', textTransform: 'uppercase', padding: '0 22px', margin: '20px 0 8px' }}>Módulo Nutrição</p>
+            <Link to="/foods" style={navClass('/foods')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20.94c1.5 0 2.75-1.06 4-2.94 1.5-2.25 2-5.5 2-7 0-2.5-1.5-4-3.5-4-1.5 0-2.5 1-3 1.5-.5-.5-1.5-1.5-3-1.5C5 7 3.5 8.5 3.5 11c0 1.5.5 4.75 2 7 1.25 1.88 2.5 2.94 4 2.94Z"></path><path d="M10 2c1 .5 2 2 2 5"></path></svg> Alimentos
+            </Link>
+            <Link to="/meals" style={navClass('/meals')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg> Refeições
+            </Link>
+            <Link to="/meal-plans" style={navClass('/meal-plans')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11H3v10h6V11ZM21 3h-6v18h6V3ZM15 7H9v14h6V7Z"></path></svg> Planos Alimentares
+            </Link>
+            <Link to="/tags" style={navClass('/tags')}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"></path><circle cx="7.5" cy="7.5" r="1.5"></circle></svg> Tags
+            </Link>
+          </>
+        )}
       </nav>
 
       <div style={{ padding: '14px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
