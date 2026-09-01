@@ -627,7 +627,11 @@ export default function UserDetail() {
                   <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)' }}>Planos atribuídos anteriormente. Aderência, duração e PDF arquivado não são rastreados hoje.</p>
                 </div>
                 <div>
-                  {resolvedLabels.planHistory?.filter(h => !h.isCurrent).length > 0 ? (
+                  {!resolvedLabels.planHistory ? (
+                    <div style={{ padding: '22px', textAlign: 'center', color: 'var(--muted)', fontSize: '14px' }}>
+                      Carregando...
+                    </div>
+                  ) : resolvedLabels.planHistory.filter(h => !h.isCurrent).length > 0 ? (
                     resolvedLabels.planHistory.filter(h => !h.isCurrent).map((h, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '13px', padding: '13px 22px', borderBottom: '1px solid var(--border)' }}>
                         <span style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'var(--surface-2)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -659,7 +663,11 @@ export default function UserDetail() {
                   aluno) -- ver pendência registrada. */}
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 14px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Metas do Ciclo</h3>
-                {planPayload?.cycle_goals?.length > 0 ? (
+                {!planPayload?.cycle_goals ? (
+                  <div style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '14px', padding: '10px 0' }}>
+                    Carregando...
+                  </div>
+                ) : planPayload.cycle_goals.length > 0 ? (
                   <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(planPayload.cycle_goals.length, 4)}, minmax(0,1fr))`, gap: '14px' }}>
                     {planPayload.cycle_goals.map((g, i) => (
                       <div key={i}>
