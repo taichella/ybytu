@@ -45,7 +45,8 @@ export default function Campaign() {
           </div>
 
           {/* Planos aguardando validação */}
-          {!pendingLoading && !pendingError && pending.length > 0 && (
+          {!pendingLoading && !pendingError && (
+            pending.length > 0 ? (
             <div id="pending-section" style={{ background: 'rgba(245,95,22,.08)', border: '1px solid var(--brand)', borderRadius: '18px', padding: '20px 22px', marginBottom: '18px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -69,6 +70,11 @@ export default function Campaign() {
                 ))}
               </div>
             </div>
+            ) : (
+              <div id="pending-section" style={{ background: 'rgba(245,95,22,.08)', border: '1px dashed var(--brand)', borderRadius: '18px', padding: '20px 22px', marginBottom: '18px', textAlign: 'center', color: 'var(--muted)', fontSize: '14px' }}>
+                Nenhum plano aguardando validação no momento.
+              </div>
+            )
           )}
 
           {statsError && (
