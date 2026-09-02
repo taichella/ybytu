@@ -22,6 +22,38 @@ const MET_BY_ROLE: Record<string, number> = {
   leve_mobilidade: 2.5,
 }
 
+// ─── Rótulo pt-BR por token de alérgeno (badges derivados no card de refeição) ─
+// restriction_tokens não tem coluna de nome traduzido, só o código -- mapa
+// fixo aqui.
+const TOKEN_LABEL_PTBR: Record<string, string> = {
+  milk: 'leite', gluten: 'glúten', wheat: 'trigo', rye: 'centeio',
+  egg: 'ovo', soy: 'soja', peanuts: 'amendoim', tree_nuts: 'castanhas',
+  nuts: 'castanhas', fish: 'peixe', shellfish: 'crustáceos',
+  crustacean: 'crustáceos', mollusk: 'moluscos', sesame: 'gergelim',
+  lupin: 'tremoço', mustard: 'mostarda', sulfites: 'sulfitos',
+  pork: 'carne suína', red_meat: 'carne vermelha',
+}
+// Tokens que contam como "alérgeno confirmado presente" (badge "Contém").
+// pork e red_meat ficam fora daqui -- não são alérgeno clínico, viram o
+// badge separado "preferência de carne" (ver MEAT_PREFERENCE_TOKENS).
+// gluten_free_if_certified também fica fora -- não é presença confirmada,
+// vira o badge próprio de contaminação cruzada.
+const ALLERGEN_TOKENS_FOR_BADGE = new Set([
+  'milk', 'gluten', 'wheat', 'rye', 'egg', 'soy', 'peanuts', 'tree_nuts',
+  'nuts', 'fish', 'shellfish', 'crustacean', 'mollusk', 'sesame', 'lupin',
+  'mustard', 'sulfites',
+])
+// Risco de contaminação cruzada pendente de certificação do fornecedor --
+// achado 2026-09-02: silêncio aqui repetia o bug do array vazio (11 foods,
+// incl. aveia/quinoa/trigo sarraceno, não geravam badge nenhum). Card sem
+// aviso comunica "sem risco" pra quem tem doença celíaca -- errado.
+const CROSS_CONTACT_TOKENS = new Set(['gluten_free_if_certified'])
+// Preferência alimentar/religiosa/convicção -- não é alérgeno clínico, mas
+// omitir também é silêncio que custa (quem evita carne suína por religião
+// lê o card justamente pra saber isso). Badge PRÓPRIO, não entra no chip de
+// alérgeno -- "Contém carne suína" não é a mesma informação que "Contém leite".
+const MEAT_PREFERENCE_TOKENS = new Set(['pork', 'red_meat'])
+
 // ─── Categoria macro por grupo muscular (só pro card "Distribuição de Exercícios") ─
 // muscle_groups no banco é taxonomia anatômica granular (60+ músculos), sem
 // coluna de categoria. Este mapa é taxonomia de EXIBIÇÃO (decisão feita sem
@@ -225,7 +257,7 @@ async function buildTrainingSection(
 
   const { data: planRow, error: planErr } = await supabase
     .from('training_plans')
-    .select('training_plan_id, name_ptbr, created_at, caution_warnings, is_active')
+    .select('training_plan_id, name_ptbr, created_at, caution_warnings, is_active, ai_filled_slots, deterministic_fallback_slots')
     .eq('id', profile.current_training_plan_id)
     .maybeSingle()
   if (planErr) throw new Error(`Lookup do training_plan falhou: ${planErr.message}`)
@@ -422,6 +454,11 @@ async function buildTrainingSection(
       // MOLDE_IDS (moldes tr_2xx nunca podem ser desativados, ver lá). Usado
       // pela lista de planos do UserDetail pra computar a tag de status.
       is_active: planRow.is_active,
+      // Observabilidade IA vs. determinístico (2026-08-27) -- null pra planos
+      // criados antes desta coluna existir, ou pra moldes/catálogo (nunca
+      // gerados por IA). Ver badge em UserDetail.jsx.
+      ai_filled_slots: planRow.ai_filled_slots,
+      deterministic_fallback_slots: planRow.deterministic_fallback_slots,
       environment_ptbr: environmentPtbr,
       days_per_week: profile.training_days_per_week ?? days.length,
       session_duration_min: profile.training_duration_minutes ?? null,
@@ -435,14 +472,68 @@ async function buildTrainingSection(
 }
 
 // ─── Seção de nutrição ──────────────────────────────────────────────────────
-const MEAL_TIME_PTBR: Record<string, string> = {
-  // DECISÃO sem instrução explícita: não há horário persistido por meal_type,
-  // horários fixos de exibição só (não afetam nenhuma lógica de geração).
-  breakfast: '07:00',
-  lunch: '12:00',
-  snack: '15:30',
-  dinner: '19:00',
-  dessert: '20:00',
+// Horário exibido é DERIVADO da posição real no dia (meal_order), não mais
+// fixo por meal_type -- achado 2026-08-30: todo 'snack' caía no mesmo horário
+// (15:30) mesmo quando eram vários no mesmo dia (lanche da manhã E ceia
+// mostravam a mesma hora). breakfast/lunch/dinner são âncoras de horário fixo
+// (únicos tipos com posição sempre previsível no dayLayout do gerador —
+// ver ybytu-generate-meal-plan `daySlots`); qualquer outro tipo (hoje só
+// 'snack', mas o cálculo é genérico) é interpolado entre as âncoras vizinhas
+// pela ordem real dentro do dia, ou extrapolado a partir da última/primeira
+// âncora quando cai fora do intervalo (ex: 3º lanche depois do jantar = ceia).
+const ANCHOR_MINUTES_BY_TYPE: Record<string, number> = {
+  breakfast: 7 * 60,
+  lunch: 12 * 60,
+  dinner: 19 * 60,
+}
+const TRAILING_STEP_MIN = 120 // passo entre lanches extras depois da última âncora (jantar)
+const LEADING_STEP_MIN = 60 // passo entre lanches extras antes da primeira âncora (café) -- não ocorre no dayLayout atual, só robustez
+
+function formatMinutesAsPtbrTime(minutes: number): string {
+  const normalized = ((minutes % 1440) + 1440) % 1440
+  const h = Math.floor(normalized / 60)
+  const m = normalized % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
+function computeMealTimesForDay(
+  rows: Array<{ meal_order: number; meal_type_id: string }>,
+): Map<number, string | null> {
+  const sorted = [...rows].sort((a, b) => a.meal_order - b.meal_order)
+  const anchors = sorted
+    .filter(r => r.meal_type_id in ANCHOR_MINUTES_BY_TYPE)
+    .map(r => ({ order: r.meal_order, minutes: ANCHOR_MINUTES_BY_TYPE[r.meal_type_id] }))
+
+  const times = new Map<number, string | null>()
+  for (const a of anchors) times.set(a.order, formatMinutesAsPtbrTime(a.minutes))
+
+  const others = sorted.filter(r => !(r.meal_type_id in ANCHOR_MINUTES_BY_TYPE))
+  for (const row of others) {
+    const prev = [...anchors].reverse().find(a => a.order < row.meal_order)
+    const next = anchors.find(a => a.order > row.meal_order)
+
+    if (prev && next) {
+      // várias refeições podem cair no mesmo intervalo entre 2 âncoras --
+      // distribui o intervalo igualmente entre elas, na ordem real.
+      const siblingsInGap = others.filter(o => o.meal_order > prev.order && o.meal_order < next.order)
+      const rank = siblingsInGap.findIndex(o => o.meal_order === row.meal_order) + 1
+      const step = (next.minutes - prev.minutes) / (siblingsInGap.length + 1)
+      times.set(row.meal_order, formatMinutesAsPtbrTime(prev.minutes + step * rank))
+    } else if (prev && !next) {
+      const trailing = others.filter(o => o.meal_order > prev.order)
+      const rank = trailing.findIndex(o => o.meal_order === row.meal_order) + 1
+      times.set(row.meal_order, formatMinutesAsPtbrTime(prev.minutes + TRAILING_STEP_MIN * rank))
+    } else if (next && !prev) {
+      const leading = others.filter(o => o.meal_order < next.order)
+      const rankFromEnd = leading.length - leading.findIndex(o => o.meal_order === row.meal_order)
+      times.set(row.meal_order, formatMinutesAsPtbrTime(next.minutes - LEADING_STEP_MIN * rankFromEnd))
+    } else {
+      // dia sem NENHUMA âncora (breakfast/lunch/dinner) -- não acontece no
+      // dayLayout atual do gerador, mas evita horário inventado sem base.
+      times.set(row.meal_order, null)
+    }
+  }
+  return times
 }
 
 async function buildNutritionSection(
@@ -455,7 +546,7 @@ async function buildNutritionSection(
 
   const { data: planRow, error: planErr } = await supabase
     .from('meal_plans')
-    .select('name_ptbr, calories, meals_per_day, days_per_week, created_at, is_active')
+    .select('meal_plan_id, name_ptbr, calories, meals_per_day, days_per_week, created_at, is_active, ai_filled_slots, deterministic_fallback_slots')
     .eq('id', profile.current_meal_plan_id)
     .maybeSingle()
   if (planErr) throw new Error(`Lookup do meal_plan falhou: ${planErr.message}`)
@@ -499,16 +590,68 @@ async function buildNutritionSection(
   }
   const { data: foodRows, error: foodErr } = await supabase
     .from('foods')
-    .select('food_id, name_ptbr')
+    .select('food_id, name_ptbr, allergen_review_status')
     .in('food_id', [...allFoodIds])
   if (foodErr) throw new Error(`Lookup de foods falhou: ${foodErr.message}`)
   const foodNameBySlug = new Map((foodRows ?? []).map((r: any) => [r.food_id, r.name_ptbr]))
+  const foodReviewStatusBySlug = new Map((foodRows ?? []).map((r: any) => [r.food_id, r.allergen_review_status]))
+  const resolvedFoodIds = new Set((foodRows ?? []).map((r: any) => r.food_id))
+
+  // Badge de alérgeno derivado (card de refeição, não por ingrediente -- ver
+  // decisão de conteúdo 2026-09-02). Segunda query batched, mesmo padrão da
+  // de foods acima: 1 round-trip pro plano inteiro, não por refeição.
+  const { data: tagRows, error: tagErr } = await supabase
+    .from('food_restriction_tags')
+    .select('food_id, token')
+    .in('food_id', [...allFoodIds])
+  if (tagErr) throw new Error(`Lookup de food_restriction_tags falhou: ${tagErr.message}`)
+  const tokensByFoodId = new Map<string, string[]>()
+  for (const row of (tagRows ?? []) as Array<{ food_id: string; token: string }>) {
+    const list = tokensByFoodId.get(row.food_id) ?? []
+    list.push(row.token)
+    tokensByFoodId.set(row.food_id, list)
+  }
+
+  // 4 sinais INDEPENDENTES, não um estado exclusivo -- decisão 2026-09-02:
+  // "contém alérgeno confirmado" e "tem ingrediente de contaminação cruzada"
+  // são informações diferentes, mostram os dois badges juntos se os dois
+  // acontecerem na mesma refeição. Mesmo raciocínio se estende a
+  // "não verificado": um ingrediente unreviewed não apaga o que JÁ está
+  // confirmado nos outros ingredientes -- omitir o alérgeno confirmado
+  // porque outro ingrediente ainda não foi revisado seria pior, não melhor.
+  // Nenhum dos 4 fica em branco quando aplicável -- nunca vira silêncio
+  // sozinho exceto quando os 4 são vazios/false (aí sim é "sem alérgenos",
+  // confirmado, silêncio correto).
+  function deriveMealAllergens(ingredientsJson: Array<{ id: string }>): {
+    contains_ptbr: string[]; crossContact: boolean; meat_ptbr: string[]; unverified: boolean
+  } {
+    let unverified = false
+    const containsSet = new Set<string>()
+    const meatSet = new Set<string>()
+    let crossContact = false
+    for (const ing of ingredientsJson ?? []) {
+      if (!resolvedFoodIds.has(ing.id)) { unverified = true; continue }
+      if (foodReviewStatusBySlug.get(ing.id) === 'unreviewed') { unverified = true; continue }
+      for (const token of tokensByFoodId.get(ing.id) ?? []) {
+        if (ALLERGEN_TOKENS_FOR_BADGE.has(token)) containsSet.add(token)
+        if (MEAT_PREFERENCE_TOKENS.has(token)) meatSet.add(token)
+        if (CROSS_CONTACT_TOKENS.has(token)) crossContact = true
+      }
+    }
+    return {
+      contains_ptbr: [...containsSet].map(t => TOKEN_LABEL_PTBR[t] ?? t).sort(),
+      crossContact,
+      meat_ptbr: [...meatSet].map(t => TOKEN_LABEL_PTBR[t] ?? t).sort(),
+      unverified,
+    }
+  }
 
   const dayOrders = [...new Set(mpmRows.map(r => r.day_order))].sort((a, b) => a - b)
   const dailyTotals: Array<{ protein: number; carbs: number; fat: number }> = []
 
   const menus = dayOrders.map(dayOrder => {
     const rowsForDay = mpmRows.filter(r => r.day_order === dayOrder)
+    const mealTimesByOrder = computeMealTimesForDay(rowsForDay)
     let dayProtein = 0, dayCarbs = 0, dayFat = 0
 
     const meals = rowsForDay.map(row => {
@@ -517,17 +660,21 @@ async function buildNutritionSection(
       dayCarbs += Number(meal?.carbs_g ?? 0)
       dayFat += Number(meal?.fat_g ?? 0)
 
-      const ingredients = ((meal?.ingredients_json ?? []) as Array<{ id: string; qtd: number; unit: string }>).map(ing => ({
+      const ingredientsJson = (meal?.ingredients_json ?? []) as Array<{ id: string; qtd: number; unit: string }>
+      const ingredients = ingredientsJson.map(ing => ({
         name_ptbr: foodNameBySlug.get(ing.id) ?? null,
         quantity_ptbr: `${ing.qtd}${ing.unit === 'g' || ing.unit === 'ml' ? ing.unit : ` ${ing.unit}`}`,
       }))
 
       return {
         name_ptbr: mealTypeNameBySlug.get(row.meal_type_id) ?? row.meal_type_id,
-        time_ptbr: MEAL_TIME_PTBR[row.meal_type_id] ?? null,
+        time_ptbr: mealTimesByOrder.get(row.meal_order) ?? null,
         kcal: meal ? Math.round(Number(meal.calories)) : null,
         macros: meal ? { protein_g: Number(meal.protein_g), carb_g: Number(meal.carbs_g), fat_g: Number(meal.fat_g) } : null,
         ingredients,
+        allergens: meal
+          ? deriveMealAllergens(ingredientsJson)
+          : { contains_ptbr: [], crossContact: false, meat_ptbr: [], unverified: true },
         prep_ptbr: meal?.instruction_ptbr ?? null,
         meal_name_ptbr: meal?.name_ptbr ?? null, // extra: nome do prato em si, não estava no shape original mas é necessário pro card
       }
@@ -556,11 +703,22 @@ async function buildNutritionSection(
     issuedAt: planRow.created_at ? new Date(planRow.created_at) : null,
     section: {
       preference_ptbr: preferencePtbr,
+      // Slug (mp_ai_xxx) -- plan_reviews.meal_plan_id tem FK pra
+      // meal_plans.meal_plan_id (texto), igual training_plan_id do lado
+      // treino. Faltava aqui: sem isso, todo parecer de nutricionista
+      // gravava meal_plan_id=null (achado 2026-08-27, mesma revisão que
+      // moveu o parecer pra dentro do card).
+      meal_plan_id: planRow.meal_plan_id,
       // Nome real do plano alimentar -- mesmo motivo do lado treino acima.
       name_ptbr: planRow.name_ptbr,
       // is_active = "publicado" (rascunho vs publicado) — mesmo significado
       // do lado treino acima, usado pra tag de status na lista de planos.
       is_active: planRow.is_active,
+      // Observabilidade IA vs. determinístico (2026-08-27) -- null pra planos
+      // criados antes desta coluna existir, ou pra catálogo (nunca gerados
+      // por IA). Ver badge em UserDetail.jsx.
+      ai_filled_slots: planRow.ai_filled_slots,
+      deterministic_fallback_slots: planRow.deterministic_fallback_slots,
       days_per_week: profile.nutrition_days_per_week ?? planRow.days_per_week,
       meals_per_day: profile.meals_per_day ?? planRow.meals_per_day,
       daily_kcal_target: planRow.calories,

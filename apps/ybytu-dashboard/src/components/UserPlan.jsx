@@ -298,6 +298,9 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
         .chip.brand { background:var(--brand); color:#fff; border-color:var(--brand); }
         .chip.soft { background:var(--brand-soft); color:var(--brand-ink); border-color:transparent; }
         .chip.warn { background:#FEF3E2; color:var(--amber); border-color:#F6E0BE; }
+        .chip.unverified { background:var(--panel); color:var(--muted); border:1px dashed var(--faint); }
+        .chip.crosscontact { background:rgba(59,130,246,.12); color:var(--blue); border-color:transparent; }
+        .meal-allergen { margin:2px 0 8px; display:flex; flex-wrap:wrap; gap:6px; }
         .chip.dot::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
 
         .diag { display:flex; gap:14px; align-items:flex-start; padding:18px; border-radius:16px; border:1px solid var(--line); box-shadow:var(--shadow); }
@@ -867,6 +870,22 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                                       <div><p className="nm">{meal.name_ptbr}</p>{when && <p className="when">{when}</p>}</div>
                                       <div className="kcal"><p className="n">{meal.kcal ?? '—'}</p><p className="l">kcal</p></div>
                                     </div>
+                                    {meal.allergens && (meal.allergens.contains_ptbr.length > 0 || meal.allergens.crossContact || meal.allergens.meat_ptbr.length > 0 || meal.allergens.unverified) && (
+                                      <div className="meal-allergen">
+                                        {meal.allergens.contains_ptbr.length > 0 && (
+                                          <span className="chip warn">⚠️ Contém: {meal.allergens.contains_ptbr.join(', ')}</span>
+                                        )}
+                                        {meal.allergens.crossContact && (
+                                          <span className="chip crosscontact">Pode conter traços de glúten (fornecedor não certificado)</span>
+                                        )}
+                                        {meal.allergens.unverified && (
+                                          <span className="chip unverified">Alérgenos não verificados</span>
+                                        )}
+                                        {meal.allergens.meat_ptbr.length > 0 && (
+                                          <span className="chip">Contém: {meal.allergens.meat_ptbr.join(', ')}</span>
+                                        )}
+                                      </div>
+                                    )}
                                     {meal.ingredients.map((ing, j) => (
                                       <div className="ing" key={j}><span>{ing.name_ptbr || '—'}</span><span className="q">{ing.quantity_ptbr}</span></div>
                                     ))}
