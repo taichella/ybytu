@@ -399,7 +399,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
           .toolbar { top: 10px; right: 10px; }
           .toolbar button { padding: 9px 13px; font-size: 12px; }
 
-          .cover { padding: 24px 18px 60px; }
+          .cover { padding: 54px 18px 60px; }
           .cover .peak { width: 190px; }
           .brandrow { flex-wrap: wrap; row-gap: 8px; }
           .brandrow .tag { margin-left: 0; font-size: 9px; white-space: normal; max-width: 100%; letter-spacing: .04em; line-height: 1.4; }
@@ -436,7 +436,11 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
           .day-head .time { margin-left: 0; }
 
           .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -1px; }
-          table.ex { min-width: 560px; }
+          table.ex { width: 100%; min-width: auto; }
+          table.ex th { padding: 8px 6px; font-size: 8.5px; }
+          table.ex td { padding: 8px 6px; font-size: 11px; }
+          .exname { gap: 6px; }
+          .exname .ltr { width: 18px; height: 18px; font-size: 9px; }
 
           .meal-head { flex-wrap: wrap; row-gap: 6px; }
           .meal-head .kcal { margin-left: auto; }
