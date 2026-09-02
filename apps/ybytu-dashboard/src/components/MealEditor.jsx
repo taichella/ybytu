@@ -285,7 +285,12 @@ export default function MealEditor() {
             <p style={{ margin: '0 0 10px', fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase' }}>Configuração</p>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--muted)' }}>Tipo de refeição</label>
             <select value={form.meal_type} onChange={(e) => set('meal_type', e.target.value)} style={{ ...inputStyle, marginBottom: '12px', cursor: 'pointer' }}>
-              {(lookups?.meal_types ?? []).map((t) => <option key={t.id} value={t.meal_type_id}>{t.name_ptbr}</option>)}
+              {/* 'dessert' excluído de propósito (2026-09-02): opção morta, nunca usada em
+                  nenhuma meal, sem suporte na RPC de matching nem no payload -- e agora
+                  rejeitada pelo CHECK constraint meals_meal_type_check. meal_types não tem
+                  coluna is_active pra desativar a linha no banco (confirmado), filtro fica
+                  só aqui até decisão sobre a tabela. */}
+              {(lookups?.meal_types ?? []).filter((t) => t.meal_type_id !== 'dessert').map((t) => <option key={t.id} value={t.meal_type_id}>{t.name_ptbr}</option>)}
             </select>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, marginBottom: '6px', color: 'var(--muted)' }}>Tempo de preparo (min)</label>
             <input type="number" value={form.prep_time_min} onChange={(e) => set('prep_time_min', e.target.value)} style={{ ...inputStyle, marginBottom: '14px' }} />
