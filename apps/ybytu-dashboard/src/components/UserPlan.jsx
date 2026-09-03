@@ -294,13 +294,14 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
         .stat .hint { font-size:11px; color:var(--green); font-weight:700; margin-top:6px; }
 
         .chips { display:flex; flex-wrap:wrap; gap:7px; }
-        .chip { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; padding:6px 12px; border-radius:999px; background:var(--panel); border:1px solid var(--line); color:var(--ink); }
+        .chip { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; padding:6px 12px; border-radius:999px; background:var(--panel); border:1px solid var(--line); color:var(--ink); max-width:100%; white-space:normal; text-align:left; }
         .chip.brand { background:var(--brand); color:#fff; border-color:var(--brand); }
         .chip.soft { background:var(--brand-soft); color:var(--brand-ink); border-color:transparent; }
         .chip.warn { background:#FEF3E2; color:var(--amber); border-color:#F6E0BE; }
         .chip.unverified { background:var(--panel); color:var(--muted); border:1px dashed var(--faint); }
         .chip.crosscontact { background:rgba(59,130,246,.12); color:var(--blue); border-color:transparent; }
         .meal-allergen { margin:2px 0 8px; display:flex; flex-wrap:wrap; gap:6px; }
+        .meal-allergen .chip { min-width:0; }
         .chip.dot::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
 
         .diag { display:flex; gap:14px; align-items:flex-start; padding:18px; border-radius:16px; border:1px solid var(--line); box-shadow:var(--shadow); }
@@ -876,7 +877,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                                           <span className="chip warn">⚠️ Contém: {meal.allergens.contains_ptbr.join(', ')}</span>
                                         )}
                                         {meal.allergens.crossContact && (
-                                          <span className="chip crosscontact">Pode conter traços de glúten (fornecedor não certificado)</span>
+                                          <span className="chip crosscontact">Traços de glúten possíveis</span>
                                         )}
                                         {meal.allergens.unverified && (
                                           <span className="chip unverified">Alérgenos não verificados</span>
