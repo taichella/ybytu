@@ -85,7 +85,7 @@ export default function Meals() {
 
   return (
     <>
-      <header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
+      <header className="yb-work-header" style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '420px' }}>
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar refeição, receita…" style={{ width: '100%', padding: '10px 16px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
         </div>
@@ -99,7 +99,7 @@ export default function Meals() {
         </div>
       </header>
 
-      <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+      <main className="yb-work-main" style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{ marginBottom: '22px' }}>
             <h1 style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-.02em', margin: 0, textTransform: 'uppercase' }}>Refeições & Receitas</h1>
@@ -120,7 +120,7 @@ export default function Meals() {
           {error && <p style={{ color: '#ef4444' }}>{error}</p>}
 
           {!loading && !error && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '18px' }}>
+            <div className="yb-work-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '18px' }}>
               {filtered.map((m) => (
                 <div key={m.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ position: 'relative' }}>

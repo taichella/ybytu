@@ -45,36 +45,42 @@ export default function Campaign() {
           </div>
 
           {/* Planos aguardando validação */}
-          {!pendingLoading && !pendingError && (
-            pending.length > 0 ? (
-            <div id="pending-section" style={{ background: 'rgba(245,95,22,.08)', border: '1px solid var(--brand)', borderRadius: '18px', padding: '20px 22px', marginBottom: '18px' }}>
+          {!pendingError && (
+            <div id="pending-section" style={{ background: 'rgba(245,95,22,.08)', border: pending.length > 0 || pendingLoading ? '1px solid var(--brand)' : '1px dashed var(--brand)', borderRadius: '18px', padding: '20px 22px', marginBottom: '18px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
                   </span>
                   <div>
-                    <p style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>{pending.length} plano{pending.length > 1 ? 's' : ''} aguardando validação</p>
+                    <p style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>
+                      {pendingLoading ? 'Planos aguardando validação' : `${pending.length} plano${pending.length > 1 ? 's' : ''} aguardando validação`}
+                    </p>
                     <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Alunos com plano gerado esperando parecer profissional</p>
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {pending.map((p) => (
-                  <Link key={p.id} to={`/users/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
-                    <span style={{ fontWeight: 700, fontSize: '14px' }}>{p.full_name || 'Aluno(a)'}</span>
-                    <span style={{ fontSize: '12px', color: 'var(--brand)', fontWeight: 800 }}>
-                      falta: {p.missing_roles.map((r) => r === 'personal' ? 'personal' : 'nutricionista').join(', ')}
-                    </span>
-                  </Link>
-                ))}
-              </div>
+              {pendingLoading ? (
+                <div style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '14px', padding: '10px 0' }}>
+                  Carregando planos pendentes...
+                </div>
+              ) : pending.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {pending.map((p) => (
+                    <Link key={p.id} to={`/users/${p.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+                      <span style={{ fontWeight: 700, fontSize: '14px' }}>{p.full_name || 'Aluno(a)'}</span>
+                      <span style={{ fontSize: '12px', color: 'var(--brand)', fontWeight: 800 }}>
+                        falta: {p.missing_roles.map((r) => r === 'personal' ? 'personal' : 'nutricionista').join(', ')}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '14px', padding: '10px 0' }}>
+                  Nenhum plano aguardando validação no momento.
+                </div>
+              )}
             </div>
-            ) : (
-              <div id="pending-section" style={{ background: 'rgba(245,95,22,.08)', border: '1px dashed var(--brand)', borderRadius: '18px', padding: '20px 22px', marginBottom: '18px', textAlign: 'center', color: 'var(--muted)', fontSize: '14px' }}>
-                Nenhum plano aguardando validação no momento.
-              </div>
-            )
           )}
 
           {statsError && (

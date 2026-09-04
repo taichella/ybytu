@@ -75,7 +75,7 @@ export default function Foods() {
 
   return (
     <>
-      <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+      <main className="yb-work-main" style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
         <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
           
           <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
@@ -206,7 +206,7 @@ export default function Foods() {
           )}
 
           {!loading && !error && filtered.length > 0 && view === 'grid' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '18px' }}>
+            <div className="yb-work-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '18px' }}>
               {filtered.map((f) => {
                 const tags = getTags(f);
                 return (
