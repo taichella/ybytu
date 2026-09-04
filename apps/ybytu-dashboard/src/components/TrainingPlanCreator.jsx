@@ -92,6 +92,19 @@ export default function TrainingPlanCreator() {
 
   const currentSlots = slotsByDay[day] ?? [];
 
+  const dayMuscleGroups = useMemo(() => {
+    const groups = new Set();
+    currentSlots.forEach(slot => {
+      const mg = slot.exercise?.muscle_groups;
+      if (Array.isArray(mg)) {
+        mg.forEach(g => {
+          if (g) groups.add(g);
+        });
+      }
+    });
+    return Array.from(groups).sort();
+  }, [currentSlots]);
+
   const addExercise = (ex) => {
     setSlotsByDay((prev) => {
       const list = prev[day] ?? [];
@@ -260,7 +273,14 @@ export default function TrainingPlanCreator() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '18px' }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 900 }}>Dia {day}</h2>
-                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--muted)' }}>{currentSlots.length} exercícios na ficha</p>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--muted)' }}>
+                  {currentSlots.length} exercícios na ficha
+                  {dayMuscleGroups.length > 0 && (
+                    <span style={{ display: 'inline-block', marginLeft: '6px' }}>
+                      · Foco: {dayMuscleGroups.join(', ')}
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
 
