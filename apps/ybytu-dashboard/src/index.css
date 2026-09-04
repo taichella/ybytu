@@ -62,6 +62,15 @@ a {
   .yb-side { display: none !important; }
   .yb-mnav { display: flex !important; }
   .yb-main-content { padding-bottom: 92px !important; }
+
+  .yb-work-main { padding: 16px !important; }
+  .yb-work-header {
+    height: auto !important;
+    padding: 16px !important;
+    flex-wrap: wrap !important;
+  }
+  .yb-work-grid { grid-template-columns: 1fr !important; }
+  .yb-work-actions { flex-wrap: wrap !important; }
 }
 
 @keyframes ybFade {

@@ -300,7 +300,7 @@ export default function UserDetail() {
 
   return (
     <>
-      <header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
+      <header className="yb-work-header" style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
           <button onClick={() => navigate('/users')} style={{ display: 'inline-flex', width: '38px', height: '38px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
@@ -313,7 +313,7 @@ export default function UserDetail() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+        <div className="yb-work-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
@@ -329,7 +329,7 @@ export default function UserDetail() {
 
 
       {/* ===================== MAIN CONTENT ===================== */}
-      <main style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
+      <main className="yb-work-main" style={{ flex: 1, overflowY: 'auto', padding: '28px' }}>
         <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
 
           {/* Profile Hero (Avatar à frente e SVG decorativo laranja)[cite: 9] */}
@@ -364,7 +364,7 @@ export default function UserDetail() {
 
           {/* ===== TAB: VISÃO GERAL ===== */}
           {tab === 'overview' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
+            <div className="yb-work-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Dados Pessoais</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -503,7 +503,7 @@ export default function UserDetail() {
 
               {planPayload ? (
                 <>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+                  <div className="yb-work-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
                     {planPayload.training && (() => {
                       const status = planStatus(planPayload.training.is_active, Boolean(planPayload.review?.personal));
                       const verdict = reviewVerdict(planPayload.review?.personal?.status);
