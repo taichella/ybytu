@@ -703,8 +703,8 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
 
                       {training.days.map((day) => (
                         <div className="day" key={day.day_number}>
-                          <div className="day-head" style={day.adapted_note_ptbr ? { borderLeftColor: 'var(--amber)' } : undefined}>
-                            <span className="tagn" style={day.adapted_note_ptbr ? { background: 'linear-gradient(135deg,#D97706,#F59E0B)' } : undefined}>{day.day_number}</span>
+                          <div className="day-head" style={(day.adapted_note_ptbr || day.skipped_note_ptbr) ? { borderLeftColor: 'var(--amber)' } : undefined}>
+                            <span className="tagn" style={(day.adapted_note_ptbr || day.skipped_note_ptbr) ? { background: 'linear-gradient(135deg,#D97706,#F59E0B)' } : undefined}>{day.day_number}</span>
                             <div>
                               <p className="t">
                                 {day.region_label_ptbr}{day.muscle_groups_ptbr?.length ? ` — ${day.muscle_groups_ptbr.join(' & ')}` : ''}
@@ -712,6 +712,9 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                                   <span style={{ fontWeight: 700, color: 'var(--amber)', fontSize: '11px', background: '#FEF3E2', padding: '2px 8px', borderRadius: '999px', marginLeft: '6px' }}>{day.adapted_note_ptbr}</span>
                                 )}
                               </p>
+                              {day.skipped_note_ptbr && (
+                                <p style={{ margin: '4px 0 0', fontSize: '12px', fontWeight: 600, color: '#92400E' }}>⚠ {day.skipped_note_ptbr}</p>
+                              )}
                               <p className="m">{day.weekday_ptbr || '—'}</p>
                             </div>
                             <span className="time"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> ~{day.estimated_minutes} min</span>
