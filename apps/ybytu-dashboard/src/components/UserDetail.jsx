@@ -350,6 +350,15 @@ export default function UserDetail() {
                 <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>
                   {memberSinceLabel ? `Membro desde ${memberSinceLabel} · ` : ''}ID {userData.id.slice(0, 4)}…{userData.id.slice(-4)}
                 </p>
+                {(resolvedLabels?.failedWhatsappNotifications?.length > 0) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px' }}>
+                    {resolvedLabels.failedWhatsappNotifications.map((n, i) => (
+                      <span key={i} style={{ display: 'inline-flex', width: 'fit-content', alignItems: 'center', gap: '6px', padding: '4px 10px', borderRadius: '7px', fontSize: '11.5px', fontWeight: 700, background: 'rgba(239,68,68,.1)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,.2)' }}>
+                        ⚠ WhatsApp não entregue ({n.delivery_status_at ? new Date(n.delivery_status_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}) — {n.delivery_error || 'motivo não informado'}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

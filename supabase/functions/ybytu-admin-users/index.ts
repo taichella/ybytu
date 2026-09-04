@@ -133,6 +133,20 @@ serve(async (req) => {
       const { data: authUserData } = await supabase.auth.admin.getUserById(userId)
       if (authUserData?.user) lastSignInAt = authUserData.user.last_sign_in_at
 
+      // Entregas de WhatsApp que a Meta aceitou mas falharam (delivery_status
+      // gravado async pelo webhook, ver whatsapp-webhook/index.ts) -- o dado já
+      // existia, só não tinha lugar nenhum pro staff ver. Achado 2026-09-04
+      // testando a conta da Marina Santos (numero digitado errado): Meta aceita
+      // o envio (status='sent') e só reporta a falha minutos depois, sem
+      // alertar ninguém -- ver docs/ (achado ainda sem doc dedicado, registrar
+      // se replicar).
+      const { data: failedNotificationRows } = await supabase
+        .from('whatsapp_notifications')
+        .select('template, target_phone, delivery_error, delivery_status_at')
+        .eq('user_id', userId)
+        .eq('delivery_status', 'failed')
+        .order('delivery_status_at', { ascending: false })
+
       const resolved = {
         gender,
         activityLevel,
@@ -150,6 +164,7 @@ serve(async (req) => {
         subscriptionIncludesMeals: subIncludesMeals,
         lastSignInAt,
         planHistory,
+        failedWhatsappNotifications: failedNotificationRows ?? [],
       }
 
       return new Response(JSON.stringify({ profile, resolved }), {
