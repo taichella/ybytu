@@ -264,8 +264,8 @@ export default function UserDetail() {
   };
 
   const initialsStr = userData?.full_name ? userData.full_name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase() : 'U';
-  const isActive = userData?.subscription_type_id ? true : false;
-  const isBlockedMode = isBlocked;
+
+
 
   const memberSinceLabel = userData?.created_at
     ? new Date(userData.created_at).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
@@ -415,7 +415,7 @@ export default function UserDetail() {
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Condições Físicas & Lesões</h3>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {(resolvedLabels.physicalConditions && resolvedLabels.physicalConditions.length > 0) ? resolvedLabels.physicalConditions.map((g, i) => (
+                  {(resolvedLabels?.physicalConditions?.length > 0) ? resolvedLabels?.physicalConditions.map((g, i) => (
                       <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 13px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'rgba(217,119,6,.12)', color: '#d97706', border: '1px solid rgba(217,119,6,.2)' }}>{g}</span>
                   )) : <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Não informado</span>}
                 </div>
@@ -424,7 +424,7 @@ export default function UserDetail() {
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <h3 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Restrições Alimentares</h3>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {(resolvedLabels.dietaryRestrictions && resolvedLabels.dietaryRestrictions.length > 0) ? resolvedLabels.dietaryRestrictions.map((g, i) => (
+                  {(resolvedLabels?.dietaryRestrictions?.length > 0) ? resolvedLabels?.dietaryRestrictions.map((g, i) => (
                       <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 13px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)' }}>{g}</span>
                   )) : <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Não informado</span>}
                 </div>
@@ -534,6 +534,30 @@ export default function UserDetail() {
                             <button onClick={() => navigate(`/users/${id}/plano`)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '11px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver plano</button>
                             <button onClick={() => navigate('/trainings')} title="Escolher outro plano de treino no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
                           </div>
+
+                          {/* LIMITAÇÕES E RESTRIÇÕES */}
+                          <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '14px' }}>
+                            <p style={{ margin: '0 0 8px', fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Limitações declaradas</p>
+
+                            <div style={{ marginBottom: '12px' }}>
+                              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>Físicas & Lesões</p>
+                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                {(resolvedLabels?.physicalConditions?.length > 0) ? resolvedLabels?.physicalConditions.map((g, i) => (
+                                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '7px', fontSize: '11.5px', fontWeight: 700, background: g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.1)' : 'rgba(217,119,6,.12)', color: g.toLowerCase().includes('outra') ? 'var(--danger)' : '#d97706', border: `1px solid ${g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.2)' : 'rgba(217,119,6,.2)'}` }}>{g}</span>
+                                )) : <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Nenhuma limitação declarada</span>}
+                              </div>
+                            </div>
+
+                            <div>
+                              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>Alimentares</p>
+                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                {(resolvedLabels?.dietaryRestrictions?.length > 0) ? resolvedLabels?.dietaryRestrictions.map((g, i) => (
+                                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '7px', fontSize: '11.5px', fontWeight: 700, background: g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.1)' : 'var(--surface-2)', color: g.toLowerCase().includes('outra') ? 'var(--danger)' : 'var(--text)', border: `1px solid ${g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.2)' : 'var(--border)'}` }}>{g}</span>
+                                )) : <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Nenhuma limitação declarada</span>}
+                              </div>
+                            </div>
+                          </div>
+
                           <ParecerMiniForm
                             roleLabel="Personal"
                             existingReview={planPayload.review?.personal ?? null}
@@ -576,6 +600,30 @@ export default function UserDetail() {
                             <button onClick={() => navigate(`/users/${id}/plano`)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '11px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver plano</button>
                             <button onClick={() => navigate('/meal-plans')} title="Escolher outro plano alimentar no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
                           </div>
+
+                          {/* LIMITAÇÕES E RESTRIÇÕES */}
+                          <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '14px' }}>
+                            <p style={{ margin: '0 0 8px', fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Limitações declaradas</p>
+
+                            <div style={{ marginBottom: '12px' }}>
+                              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>Físicas & Lesões</p>
+                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                {(resolvedLabels?.physicalConditions?.length > 0) ? resolvedLabels?.physicalConditions.map((g, i) => (
+                                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '7px', fontSize: '11.5px', fontWeight: 700, background: g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.1)' : 'rgba(217,119,6,.12)', color: g.toLowerCase().includes('outra') ? 'var(--danger)' : '#d97706', border: `1px solid ${g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.2)' : 'rgba(217,119,6,.2)'}` }}>{g}</span>
+                                )) : <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Nenhuma limitação declarada</span>}
+                              </div>
+                            </div>
+
+                            <div>
+                              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>Alimentares</p>
+                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                {(resolvedLabels?.dietaryRestrictions?.length > 0) ? resolvedLabels?.dietaryRestrictions.map((g, i) => (
+                                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '7px', fontSize: '11.5px', fontWeight: 700, background: g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.1)' : 'var(--surface-2)', color: g.toLowerCase().includes('outra') ? 'var(--danger)' : 'var(--text)', border: `1px solid ${g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.2)' : 'var(--border)'}` }}>{g}</span>
+                                )) : <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Nenhuma limitação declarada</span>}
+                              </div>
+                            </div>
+                          </div>
+
                           <ParecerMiniForm
                             roleLabel="Nutricionista"
                             existingReview={planPayload.review?.nutricionista ?? null}
