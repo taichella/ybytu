@@ -664,6 +664,12 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                     </div>
                   ) : (
                     <>
+                      {profile.has_unclassified_physical_condition && (
+                        <div className="note" style={{ marginBottom: '16px', background: '#FEF3E2', borderColor: '#D97706', color: '#92400E' }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+                          <span><strong>Atenção:</strong> você declarou uma limitação física que não está na nossa lista padrão, e por isso não pôde ser considerada automaticamente na montagem deste treino. Aguarde contato da nossa equipe antes de começar a treinar.</span>
+                        </div>
+                      )}
                       <div className="note" style={{ marginBottom: '16px' }}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>
                         <span>Ajuste as cargas para manter a faixa de repetições com boa execução. Aqueça 5–8 min antes de cada sessão e alongue ao final.</span>
