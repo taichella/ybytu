@@ -646,9 +646,9 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                         <div className="grid" style={{ gridTemplateColumns: `repeat(${Math.min(cycleGoals.length, 4)},minmax(0,1fr))` }}>
                           {cycleGoals.map((g, i) => (
                             <div key={i}>
-                              <p style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-.01em' }}>{g.expectation_ptbr}</p>
-                              <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>{GOAL_LABELS[g.goal] || g.goal}</p>
-                              {g.window_ptbr && <p style={{ margin: '2px 0 0', fontSize: '10.5px', color: 'var(--faint)', fontWeight: 600 }}>{g.window_ptbr}</p>}
+                              <p style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-.01em' }}>{GOAL_LABELS[g.goal] || g.goal}</p>
+                              <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text)', fontWeight: 500, lineHeight: 1.45 }}>{g.expectation_ptbr}</p>
+                              {g.window_ptbr && <p style={{ margin: '6px 0 0', fontSize: '10.5px', color: 'var(--faint)', fontWeight: 600 }}>{g.window_ptbr}</p>}
                             </div>
                           ))}
                         </div>

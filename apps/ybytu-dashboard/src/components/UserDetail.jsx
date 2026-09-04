@@ -218,6 +218,20 @@ export default function UserDetail() {
   // admin edita os 2, quem só tem UM papel só edita o card daquele papel.
   const canReview = (role) => !!staff?.roles && (staff.roles.includes(role) || staff.roles.includes('admin'));
 
+  // "Editar" movido do botão flutuante sobreposto ao documento (UserPlanPage.jsx)
+  // pra dentro do card "Plano Ativo" (UsuarioDetalhe.dc.html: Ver plano/Trocar/
+  // Editar juntos) -- decisão 2026-09-04. Mesma lógica de navegação que já
+  // existia, só realocada; construtor continua sendo tela própria
+  // (/training-creator, /meal-plan-creator), não editar em cima do documento.
+  const openTrainingBuilder = () => {
+    const qs = new URLSearchParams({ forUser: id, forUserName: userData?.full_name || '' });
+    navigate(`/training-creator/${userData?.current_training_plan_id}?${qs.toString()}`);
+  };
+  const openMealBuilder = () => {
+    const qs = new URLSearchParams({ forUser: id, forUserName: userData?.full_name || '' });
+    navigate(`/meal-plan-creator/${userData?.current_meal_plan_id}?${qs.toString()}`);
+  };
+
   // Status computado (#2) -- nunca um campo novo no schema: is_active
   // (rascunho/publicado, controlado por ybytu-admin-trainings/-meal-plans)
   // cruzado com plan_reviews (parecer do personal pro treino, do
@@ -541,6 +555,9 @@ export default function UserDetail() {
                           </div>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button onClick={() => navigate(`/users/${id}/plano`)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '11px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver plano</button>
+                            {canReview('personal') && (
+                              <button onClick={openTrainingBuilder} title="Editar este plano de treino" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"></path></svg> Editar</button>
+                            )}
                             <button onClick={() => navigate('/trainings')} title="Escolher outro plano de treino no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
                           </div>
                           <ParecerMiniForm
@@ -583,6 +600,9 @@ export default function UserDetail() {
                           </div>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button onClick={() => navigate(`/users/${id}/plano`)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '11px', background: 'var(--brand-soft)', color: 'var(--brand)', fontSize: '13px', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver plano</button>
+                            {canReview('nutricionista') && (
+                              <button onClick={openMealBuilder} title="Editar este plano alimentar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"></path></svg> Editar</button>
+                            )}
                             <button onClick={() => navigate('/meal-plans')} title="Escolher outro plano alimentar no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
                           </div>
                           <ParecerMiniForm
@@ -680,9 +700,9 @@ export default function UserDetail() {
                   <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(planPayload.cycle_goals.length, 4)}, minmax(0,1fr))`, gap: '14px' }}>
                     {planPayload.cycle_goals.map((g, i) => (
                       <div key={i}>
-                        <p style={{ margin: 0, fontSize: '14px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-.01em' }}>{g.expectation_ptbr}</p>
-                        <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>{GOAL_LABELS[g.goal] || g.goal}</p>
-                        {g.window_ptbr && <p style={{ margin: '2px 0 0', fontSize: '10.5px', color: 'var(--faint, var(--muted))', fontWeight: 600 }}>{g.window_ptbr}</p>}
+                        <p style={{ margin: 0, fontSize: '14px', fontWeight: 900, color: 'var(--brand)', letterSpacing: '-.01em' }}>{GOAL_LABELS[g.goal] || g.goal}</p>
+                        <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--text)', fontWeight: 500, lineHeight: 1.45 }}>{g.expectation_ptbr}</p>
+                        {g.window_ptbr && <p style={{ margin: '6px 0 0', fontSize: '10.5px', color: 'var(--faint, var(--muted))', fontWeight: 600 }}>{g.window_ptbr}</p>}
                       </div>
                     ))}
                   </div>
