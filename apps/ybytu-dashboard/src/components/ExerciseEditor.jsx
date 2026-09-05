@@ -143,7 +143,11 @@ export default function ExerciseEditor() {
         <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
           {error && <p style={{ color: '#ef4444', marginBottom: '16px' }}>{error}</p>}
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 16px', marginBottom: '22px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '12px 16px', marginBottom: '22px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"></path></svg>
+              <span style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>Conteúdo exibido ao usuário no idioma do app — edite cada idioma.</span>
+            </div>
             <div style={{ display: 'flex', background: 'var(--field)', border: '1px solid var(--border)', borderRadius: '10px', padding: '4px' }}>
               <button onClick={() => setLang('pt')} style={langBtnStyle(lang === 'pt')}>🇧🇷 Português</button>
               <button onClick={() => setLang('en')} style={langBtnStyle(lang === 'en')}>🇬🇧 English</button>

@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import Exercises from '../src/components/Exercises.jsx';
+import ExerciseEditor from '../src/components/ExerciseEditor.jsx';
 import '../src/index.css';
 
 // Registro de telas disponíveis pro harness -- adicione uma entrada aqui pra
@@ -11,6 +12,7 @@ import '../src/index.css';
 // vite.preview.config.js, do jeito que exerciseService.js já tem.
 const SCREENS = {
   exercises: Exercises,
+  'exercise-editor': ExerciseEditor,
 };
 
 const screenName = new URLSearchParams(window.location.search).get('screen') || 'exercises';
