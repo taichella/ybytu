@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#F8F9FA; --surface:#FFFFFF; --surface-2:#F1F5F9; --border:#E2E8F0; --text:#1A202C; --muted:#718096; --field:#F8F9FA;
+    --prot:#3b82f6; --carb:#f59e0b; --fat:#a855f7; }
+  :root[data-theme="dark"]{ --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --border:#333333; --text:#DBD9D8; --muted:#9C9C9C; --field:#161616; --brand-soft:rgba(245,95,22,.14); }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;} ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</helmet>
+
+<div style="display:flex;height:100vh;width:100%;overflow:hidden;background:var(--bg);color:var(--text);">
+  <div class="yb-side"><dc-import name="Sidebar" active="usuarios" hint-size="260px,100%"></dc-import></div>
+  <dc-import name="MobileNav" active="usuarios" hint-size="0,0"></dc-import>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <!-- Header -->
+    <header style="height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:20px;">
+      <div style="display:flex;align-items:center;gap:14px;min-width:0;">
+        <a href="Usuarios.dc.html" style="display:inline-flex;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;" style-hover="color:var(--brand);border-color:var(--brand);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg></a>
+        <div style="min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600;"><a href="Usuarios.dc.html" style="color:var(--muted);text-decoration:none;" style-hover="color:var(--brand);">Usuários</a><span>/</span><span style="color:var(--text);">Perfil</span></div>
+          <h2 style="margin:2px 0 0;font-size:18px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Mariana Silva</h2>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <button onClick="{{ toggleTheme }}" title="Alternar tema" style="width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+        </button>
+        <button style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:11px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);">Mensagem</button>
+        <button style="display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Reatribuir plano</button>
+      </div>
+    </header>
+
+    <main style="flex:1;overflow-y:auto;padding:28px;">
+      <div style="max-width:1120px;margin:0 auto;">
+
+        <!-- Profile hero -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:22px;">
+          <div style="height:84px;background:linear-gradient(135deg,#F55F16,#FF7A3D);position:relative;">
+            <svg viewBox="119 94 275 323" style="position:absolute;right:-30px;top:-40px;width:200px;opacity:.14;" fill="#fff"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
+          </div>
+          <div style="padding:0 24px 22px;display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin-top:-36px;">
+            <div style="width:84px;height:84px;border-radius:22px;background:#ec4899;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:30px;border:4px solid var(--surface);flex-shrink:0;">MS</div>
+            <div style="flex:1;min-width:200px;padding-bottom:2px;">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <h1 style="margin:0;font-size:24px;font-weight:900;letter-spacing:-.02em;">Mariana Silva</h1>
+                <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:7px;font-size:11px;font-weight:800;background:rgba(245,95,22,.14);color:#F55F16;text-transform:uppercase;">Pro</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:7px;font-size:11px;font-weight:800;background:rgba(22,163,74,.12);color:#16a34a;text-transform:uppercase;"><span style="width:7px;height:7px;border-radius:50%;background:#16a34a;"></span> Ativo</span>
+              </div>
+              <p style="margin:6px 0 0;font-size:13px;color:var(--muted);font-weight:600;">Membro desde mar 2025 · São Paulo, BR · ID 8f3a…c21</p>
+            </div>
+            <div style="display:flex;gap:26px;padding-bottom:4px;">
+              <div><p style="margin:0;font-size:22px;font-weight:900;">88<span style="font-size:13px;color:var(--muted);">%</span></p><p style="margin:1px 0 0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Adesão</p></div>
+              <div><p style="margin:0;font-size:22px;font-weight:900;">142</p><p style="margin:1px 0 0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Treinos</p></div>
+              <div><p style="margin:0;font-size:22px;font-weight:900;">37</p><p style="margin:1px 0 0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Dias seguidos</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:22px;overflow-x:auto;">
+          <button onClick="{{ pickOverview }}" style="{{ tabOverview }}">Visão geral</button>
+          <button onClick="{{ pickHealth }}" style="{{ tabHealth }}">Saúde & metas</button>
+          <button onClick="{{ pickPlans }}" style="{{ tabPlans }}">Planos atribuídos</button>
+          <button onClick="{{ pickActivity }}" style="{{ tabActivity }}">Atividade & adesão</button>
+        </div>
+
+        <!-- ===== TAB: VISÃO GERAL ===== -->
+        <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;">
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+            <h3 style="margin:0 0 16px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Dados Pessoais</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Nome completo</span><span style="font-weight:700;">Mariana Silva</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Gênero</span><span style="font-weight:700;">Feminino</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Idade</span><span style="font-weight:700;">32 anos</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Peso</span><span style="font-weight:700;">64 kg</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Altura</span><span style="font-weight:700;">168 cm</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;border-top:1px solid var(--border);padding-top:12px;"><span style="color:var(--muted);font-weight:600;">IMC</span><span style="font-weight:800;color:#16a34a;">22.7 · Saudável</span></div>
+            </div>
+          </section>
+
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+            <h3 style="margin:0 0 16px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Conta & Assinatura</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Plano</span><span style="display:inline-flex;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:800;background:rgba(245,95,22,.14);color:#F55F16;">Pro · Anual</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Próx. cobrança</span><span style="font-weight:700;">12 mar 2026</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Valor</span><span style="font-weight:700;">R$ 299,00/ano</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Onboarding</span><span style="display:inline-flex;align-items:center;gap:5px;font-weight:800;color:#16a34a;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg> Completo</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Último acesso</span><span style="font-weight:700;">há 2 horas</span></div>
+            </div>
+          </section>
+
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+            <h3 style="margin:0 0 16px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Resumo de Atividade</h3>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;color:var(--muted);">Treinos esta semana</span><span style="font-size:13px;font-weight:800;">4 / 5</span></div>
+                <div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;"><div style="height:100%;width:80%;background:#F55F16;border-radius:4px;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;color:var(--muted);">Refeições registradas</span><span style="font-size:13px;font-weight:800;">26 / 35</span></div>
+                <div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;"><div style="height:100%;width:74%;background:#16a34a;border-radius:4px;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;color:var(--muted);">Meta calórica média</span><span style="font-size:13px;font-weight:800;">1.760 / 1.800</span></div>
+                <div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;"><div style="height:100%;width:97%;background:#3b82f6;border-radius:4px;"></div></div>
+              </div>
+            </div>
+          </section>
+        </div>
+        </sc-if>
+
+        <!-- ===== TAB: SAÚDE & METAS ===== -->
+        <sc-if value="{{ isHealth }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;">
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+            <h3 style="margin:0 0 16px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Objetivos</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <span style="display:inline-flex;padding:6px 13px;border-radius:9px;font-size:13px;font-weight:700;background:var(--brand);color:#fff;">Hipertrofia</span>
+              <span style="display:inline-flex;padding:6px 13px;border-radius:9px;font-size:13px;font-weight:700;background:var(--brand-soft);color:var(--brand);">Definição</span>
+              <span style="display:inline-flex;padding:6px 13px;border-radius:9px;font-size:13px;font-weight:700;background:var(--brand-soft);color:var(--brand);">Mais energia</span>
+            </div>
+          </section>
+
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+            <h3 style="margin:0 0 16px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Condições de Saúde</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:9px;font-size:13px;font-weight:700;background:rgba(217,119,6,.12);color:#d97706;border:1px solid rgba(217,119,6,.25);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg> Lesão no joelho (direito)</span>
+              <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:9px;font-size:13px;font-weight:700;background:var(--surface-2);color:var(--text);border:1px solid var(--border);">Sem outras condições</span>
+            </div>
+            <p style="margin:14px 0 0;font-size:13px;color:var(--muted);line-height:1.5;">Exercícios contraindicados são ocultados automaticamente no plano da usuária.</p>
+          </section>
+
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+            <h3 style="margin:0 0 16px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Preferências de Treino</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Nível</span><span style="font-weight:700;">Intermediário</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Ambiente</span><span style="font-weight:700;">Academia</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Dias/semana</span><span style="font-weight:700;">5 dias</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Duração/sessão</span><span style="font-weight:700;">45 min</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:14px;"><span style="color:var(--muted);font-weight:600;flex-shrink:0;">Equipamentos</span><span style="font-weight:700;text-align:right;">Barra, Halteres, Máquina</span></div>
+            </div>
+          </section>
+
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+            <h3 style="margin:0 0 16px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Preferências Nutricionais</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Preferência</span><span style="font-weight:700;">Onívoro</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:14px;"><span style="color:var(--muted);font-weight:600;flex-shrink:0;">Restrições</span><span style="font-weight:700;text-align:right;">Sem lactose</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Refeições/dia</span><span style="font-weight:700;">5</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:14px;"><span style="color:var(--muted);font-weight:600;">Dias/semana</span><span style="font-weight:700;">7 dias</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:14px;"><span style="color:var(--muted);font-weight:600;flex-shrink:0;">Não gosta de</span><span style="font-weight:700;text-align:right;">Fígado, jiló</span></div>
+            </div>
+          </section>
+        </div>
+        </sc-if>
+
+        <!-- ===== TAB: PLANOS ATRIBUÍDOS ===== -->
+        <sc-if value="{{ isPlans }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+
+          <!-- ===== SUBSCRIPTION BAND ===== -->
+          <section style="background:linear-gradient(135deg,#F55F16,#FF7A3D);border-radius:18px;padding:22px;color:#fff;position:relative;overflow:hidden;">
+            <svg viewBox="119 94 275 323" style="position:absolute;right:-30px;top:-40px;width:190px;opacity:.14;" fill="#fff"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
+            <div style="position:relative;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+              <span style="width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.4 9.3 8 10 4.6-.7 8-5 8-10V6Z"></path><path d="m9 12 2 2 4-4"></path></svg></span>
+              <div style="flex:1;min-width:220px;">
+                <p style="margin:0;font-size:11px;font-weight:800;letter-spacing:.08em;opacity:.9;text-transform:uppercase;">Tipo de assinatura</p>
+                <p style="margin:5px 0 0;font-size:22px;font-weight:900;letter-spacing:-.02em;">{{ subName }}</p>
+                <p style="margin:4px 0 0;font-size:13px;opacity:.94;font-weight:500;">{{ subDesc }}</p>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <span style="{{ modTreinoPill }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Treino</span>
+                <span style="{{ modNutriPill }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75-1.06 4-2.94 1.5-2.25 2-5.5 2-7 0-2.5-1.5-4-3.5-4-1.5 0-2.5 1-3 1.5-.5-.5-1.5-1.5-3-1.5C5 7 3.5 8.5 3.5 11c0 1.5.5 4.75 2 7 1.25 1.88 2.5 2.94 4 2.94Z"></path></svg> Nutrição</span>
+                <span style="{{ modProPill }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg> Acompanhamento</span>
+              </div>
+            </div>
+            <div style="position:relative;display:flex;gap:26px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.22);flex-wrap:wrap;">
+              <div><p style="margin:0;font-size:10.5px;font-weight:800;opacity:.85;text-transform:uppercase;letter-spacing:.05em;">Desde</p><p style="margin:3px 0 0;font-size:14px;font-weight:800;">12 jan 2026</p></div>
+              <div><p style="margin:0;font-size:10.5px;font-weight:800;opacity:.85;text-transform:uppercase;letter-spacing:.05em;">Renovação</p><p style="margin:3px 0 0;font-size:14px;font-weight:800;">12 mar 2026</p></div>
+              <div><p style="margin:0;font-size:10.5px;font-weight:800;opacity:.85;text-transform:uppercase;letter-spacing:.05em;">Profissionais</p><p style="margin:3px 0 0;font-size:14px;font-weight:800;">Coach Bruno · Nutri Tatiane</p></div>
+            </div>
+          </section>
+
+          <!-- ===== ACTIVE PLANS ===== -->
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Plano Ativo</h3>
+              <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;background:rgba(22,163,74,.12);color:#16a34a;"><span style="width:6px;height:6px;border-radius:50%;background:#16a34a;"></span> Em andamento</span>
+              <div style="flex:1;height:1px;background:var(--border);"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;">
+              <sc-for list="{{ activePlans }}" as="p" hint-placeholder-count="2">
+              <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+                <div style="height:5px;background:{{ p.accent }};"></div>
+                <div style="padding:20px;">
+                  <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;">
+                    <span style="width:48px;height:48px;border-radius:13px;background:{{ p.accent }};color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">{{ p.icon }}</span>
+                    <div style="flex:1;min-width:0;">
+                      <p style="margin:0;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;">{{ p.kind }}</p>
+                      <p style="margin:3px 0 0;font-size:17px;font-weight:900;letter-spacing:-.01em;">{{ p.name }}</p>
+                      <p style="margin:3px 0 0;font-size:12.5px;color:var(--muted);font-weight:500;">{{ p.meta }}</p>
+                    </div>
+                  </div>
+
+                  <!-- adherence -->
+                  <div style="background:var(--field);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:14px;">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;">
+                      <span style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;">Aderência (30d)</span>
+                      <span style="font-size:19px;font-weight:900;color:{{ p.adColor }};">{{ p.adherence }}%</span>
+                    </div>
+                    <div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;"><div style="height:100%;width:{{ p.adherence }}%;background:{{ p.adColor }};border-radius:4px;"></div></div>
+                    <div style="display:flex;justify-content:space-between;margin-top:10px;">
+                      <span style="font-size:12px;color:var(--muted);font-weight:600;">{{ p.doneLabel }}</span>
+                      <span style="font-size:12px;color:var(--muted);font-weight:600;">Semana {{ p.week }}</span>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;gap:8px;">
+                    <a href="{{ p.href }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:11px;background:var(--brand-soft);color:var(--brand);font-size:13px;font-weight:800;text-decoration:none;" style-hover="background:var(--brand);color:#fff;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver plano</a>
+                    <button style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border-radius:11px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
+                  </div>
+                </div>
+              </section>
+              </sc-for>
+
+              <!-- locked module (not in subscription) -->
+              <sc-if value="{{ hasLocked }}" hint-placeholder-val="{{ false }}">
+              <section style="background:var(--field);border:1px dashed var(--border);border-radius:18px;padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;min-height:200px;">
+                <span style="width:46px;height:46px;border-radius:13px;background:var(--surface-2);color:var(--muted);display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+                <p style="margin:0;font-size:15px;font-weight:900;">{{ lockedLabel }}</p>
+                <p style="margin:0;font-size:13px;color:var(--muted);line-height:1.5;max-width:230px;">Não incluído no plano atual. Faça upgrade para liberar este módulo.</p>
+                <button style="margin-top:4px;padding:9px 16px;border-radius:10px;background:var(--brand);color:#fff;border:none;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;">Fazer upgrade</button>
+              </section>
+              </sc-if>
+            </div>
+          </div>
+
+          <!-- ===== GENERATED DOCUMENT ===== -->
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+            <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <div>
+                <h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Documento do Aluno</h3>
+                <p style="margin:3px 0 0;font-size:12.5px;color:var(--muted);">{{ docScope }}</p>
+              </div>
+              <span style="{{ docStatusStyle }}">{{ docStatus }}</span>
+            </div>
+
+            <div style="padding:20px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <span style="width:52px;height:52px;border-radius:13px;background:rgba(239,68,68,.10);color:#ef4444;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:900;font-family:monospace;">PDF</span>
+              <div style="flex:1;min-width:200px;">
+                <p style="margin:0;font-size:15.5px;font-weight:900;">{{ docName }}</p>
+                <p style="margin:3px 0 0;font-size:12.5px;color:var(--muted);">Gerado em {{ docDate }} · versão {{ docVersion }} · {{ docPages }}</p>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <a href="PlanoDeTreino.html" style="display:inline-flex;align-items:center;gap:7px;padding:10px 15px;border-radius:11px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;text-decoration:none;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Pré-visualizar</a>
+                <button onClick="{{ regenDoc }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:11px;background:var(--brand);color:#fff;border:none;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> {{ docAction }}</button>
+              </div>
+            </div>
+
+            <!-- source plans feeding the document -->
+            <div style="padding:0 22px 18px;">
+              <p style="margin:0 0 9px;font-size:10.5px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Conteúdo gerado a partir de</p>
+              <div style="display:flex;flex-direction:column;gap:7px;">
+                <sc-for list="{{ docSources }}" as="s" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;background:var(--field);border:1px solid var(--border);">
+                  <span style="width:28px;height:28px;border-radius:8px;background:{{ s.bg }};color:{{ s.color }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">{{ s.icon }}</span>
+                  <div style="flex:1;min-width:0;"><p style="margin:0;font-size:13px;font-weight:700;">{{ s.name }}</p><p style="margin:1px 0 0;font-size:11.5px;color:var(--muted);">{{ s.meta }}</p></div>
+                  <sc-if value="{{ s.stale }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:999px;background:rgba(217,119,6,.14);color:#d97706;text-transform:uppercase;letter-spacing:.03em;">Alterado</span></sc-if>
+                  <sc-if value="{{ s.fresh }}" hint-placeholder-val="{{ true }}"><span style="color:#16a34a;display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span></sc-if>
+                </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ docStale }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:11px;align-items:flex-start;margin-top:13px;padding:12px 14px;border-radius:12px;background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.22);">
+                <span style="color:#d97706;flex-shrink:0;display:flex;margin-top:1px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg></span>
+                <p style="margin:0;font-size:12.5px;color:var(--text);line-height:1.5;">Um dos planos foi alterado depois da última geração. Atualize o PDF para que o aluno receba a versão vigente.</p>
+              </div>
+              </sc-if>
+            </div>
+
+            <div style="padding:14px 22px;border-top:1px solid var(--border);background:var(--field);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <span style="font-size:12px;color:var(--muted);font-weight:600;">Disponível no app do aluno desde {{ docDate }}</span>
+              <button style="display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--brand);font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;padding:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> Ver versões anteriores</button>
+            </div>
+          </section>
+
+          <!-- ===== HISTORY ===== -->
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+            <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+              <div>
+                <h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Histórico de Atribuições</h3>
+                <p style="margin:3px 0 0;font-size:12.5px;color:var(--muted);">Planos anteriores com aderência final e PDFs arquivados.</p>
+              </div>
+              <span style="font-size:12px;color:var(--muted);font-weight:700;">{{ historyCount }} registros</span>
+            </div>
+            <div>
+              <sc-for list="{{ history }}" as="h" hint-placeholder-count="4">
+              <div style="border-bottom:1px solid var(--border);">
+                <div onClick="{{ h.toggle }}" style="display:flex;align-items:center;gap:13px;padding:15px 22px;cursor:pointer;" style-hover="background:var(--surface-2);">
+                  <span style="width:38px;height:38px;border-radius:10px;background:{{ h.iconBg }};color:{{ h.iconColor }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">{{ h.icon }}</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                      <p style="margin:0;font-size:14.5px;font-weight:800;">{{ h.name }}</p>
+                      <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;background:{{ h.statusBg }};color:{{ h.statusColor }};text-transform:uppercase;letter-spacing:.03em;">{{ h.status }}</span>
+                    </div>
+                    <p style="margin:3px 0 0;font-size:12.5px;color:var(--muted);">{{ h.kind }} · {{ h.period }}</p>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:16px;flex-shrink:0;">
+                    <div style="text-align:right;"><p style="margin:0;font-size:15px;font-weight:900;color:{{ h.adColor }};">{{ h.adherence }}%</p><p style="margin:1px 0 0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Aderência</p></div>
+                    <span style="color:var(--muted);display:flex;transform:{{ h.caretRotate }};transition:transform .2s;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></span>
+                  </div>
+                </div>
+                <sc-if value="{{ h.open }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:0 22px 18px 73px;background:var(--field);border-top:1px solid var(--border);padding-top:16px;">
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-bottom:14px;">
+                    <div><p style="margin:0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Duração</p><p style="margin:3px 0 0;font-size:13.5px;font-weight:700;">{{ h.duration }}</p></div>
+                    <div><p style="margin:0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Concluído</p><p style="margin:3px 0 0;font-size:13.5px;font-weight:700;">{{ h.done }}</p></div>
+                    <div><p style="margin:0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Assinatura na época</p><p style="margin:3px 0 0;font-size:13.5px;font-weight:700;">{{ h.subAtTime }}</p></div>
+                    <div><p style="margin:0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Responsável</p><p style="margin:3px 0 0;font-size:13.5px;font-weight:700;">{{ h.owner }}</p></div>
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <a href="PlanoDeTreino.html" style="display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:12.5px;font-weight:700;text-decoration:none;" style-hover="border-color:var(--brand);color:var(--brand);"><span style="font-size:9px;font-weight:900;font-family:monospace;color:#ef4444;">PDF</span> {{ h.pdfName }}</a>
+                    <a href="{{ h.href }}" style="display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:10px;background:var(--brand-soft);color:var(--brand);font-size:12.5px;font-weight:800;text-decoration:none;" style-hover="background:var(--brand);color:#fff;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Ver infos e adesão</a>
+                  </div>
+                </div>
+                </sc-if>
+              </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+        </sc-if>
+
+        <!-- ===== TAB: ATIVIDADE & ADESÃO ===== -->
+        <sc-if value="{{ isActivity }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <!-- heatmap -->
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
+              <div>
+                <h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Adesão aos Treinos</h3>
+                <p style="margin:3px 0 0;font-size:13px;color:var(--muted);">Treinos concluídos nas últimas 12 semanas</p>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);font-weight:700;">
+                Menos
+                <span style="width:13px;height:13px;border-radius:3px;background:var(--surface-2);"></span>
+                <span style="width:13px;height:13px;border-radius:3px;background:rgba(245,95,22,.3);"></span>
+                <span style="width:13px;height:13px;border-radius:3px;background:rgba(245,95,22,.6);"></span>
+                <span style="width:13px;height:13px;border-radius:3px;background:#F55F16;"></span>
+                Mais
+              </div>
+            </div>
+            {{ heatmap }}
+          </section>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;">
+            <!-- recent completed workouts -->
+            <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+              <div style="padding:18px 22px;border-bottom:1px solid var(--border);"><h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Treinos Concluídos</h3></div>
+              <div>
+                <sc-for list="{{ workouts }}" as="w" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 22px;border-bottom:1px solid var(--border);" style-hover="background:var(--surface-2);">
+                  <span style="width:32px;height:32px;border-radius:9px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                  <div style="flex:1;"><p style="margin:0;font-size:13px;font-weight:700;">{{ w.name }}</p><p style="margin:2px 0 0;font-size:12px;color:var(--muted);">{{ w.detail }}</p></div>
+                  <span style="font-size:12px;color:var(--muted);font-weight:600;">{{ w.when }}</span>
+                </div>
+                </sc-for>
+              </div>
+            </section>
+
+            <!-- recent completed meals -->
+            <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+              <div style="padding:18px 22px;border-bottom:1px solid var(--border);"><h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Refeições Registradas</h3></div>
+              <div>
+                <sc-for list="{{ meals }}" as="m" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;padding:13px 22px;border-bottom:1px solid var(--border);" style-hover="background:var(--surface-2);">
+                  <span style="width:32px;height:32px;border-radius:9px;background:rgba(22,163,74,.12);color:#16a34a;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">{{ m.emoji }}</span>
+                  <div style="flex:1;"><p style="margin:0;font-size:13px;font-weight:700;">{{ m.name }}</p><p style="margin:2px 0 0;font-size:12px;color:var(--muted);">{{ m.kcal }} kcal consumidas</p></div>
+                  <span style="font-size:12px;color:var(--muted);font-weight:600;">{{ m.when }}</span>
+                </div>
+                </sc-for>
+              </div>
+            </section>
+          </div>
+        </div>
+        </sc-if>
+
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960},&quot;subType&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;treino&quot;,&quot;nutri&quot;,&quot;full&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;pro&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Assinatura&quot;}}">
+class Component extends DCLogic {
+  state = { theme: 'dark', tab: 'overview', openHist: {}, subType: 'pro', docStale: true, docGenerated: false };
+  toggleHist = (id) => () => this.setState(s => ({ openHist: { ...s.openHist, [id]: !s.openHist[id] } }));
+  regenDoc = () => this.setState({ docStale: false, docGenerated: true });
+  componentDidMount(){ this.applyTheme(); }
+  applyTheme(){ try{ document.documentElement.dataset.theme = this.state.theme; }catch(e){} }
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }), this.applyTheme);
+  pick = (tab) => () => this.setState({ tab });
+
+  plansData(){
+    const SUBS = {
+      treino: { name:'Plano de Treino Básico', desc:'Acesso ao módulo de treino com planos da biblioteca Ybytu.', treino:true, nutri:false, pro:false },
+      nutri:  { name:'Plano de Nutrição Básico', desc:'Acesso ao módulo de nutrição com planos alimentares da biblioteca.', treino:false, nutri:true, pro:false },
+      full:   { name:'Plano Completo · Treino + Nutrição', desc:'Ambos os módulos liberados, sem acompanhamento profissional.', treino:true, nutri:true, pro:false },
+      pro:    { name:'Plano Pro · Treino + Nutrição', desc:'Ambos os módulos com acompanhamento de personal e nutricionista.', treino:true, nutri:true, pro:true },
+    };
+    const S = SUBS[this.props.subType || this.state.subType] || SUBS.pro;
+    const pill = (on) => 'display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;padding:6px 12px;border-radius:999px;' + (on
+      ? 'background:rgba(255,255,255,.24);color:#fff;'
+      : 'background:rgba(0,0,0,.16);color:rgba(255,255,255,.5);');
+    const adColor = (v) => v >= 80 ? '#16a34a' : (v >= 40 ? '#d97706' : '#ef4444');
+    const svgT = React.createElement('svg',{width:24,height:24,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round'},React.createElement('path',{d:'M22 12h-4l-3 9L9 3l-3 9H2'}));
+    const svgTs = React.createElement('svg',{width:15,height:15,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.2,strokeLinecap:'round',strokeLinejoin:'round'},React.createElement('path',{d:'M22 12h-4l-3 9L9 3l-3 9H2'}));
+    const svgNs = React.createElement('svg',{width:15,height:15,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2.2,strokeLinecap:'round',strokeLinejoin:'round'},React.createElement('path',{d:'M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'}));
+    const svgN = React.createElement('svg',{width:24,height:24,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round'},React.createElement('path',{d:'M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7'}));
+
+    const active = [];
+    if (S.treino) active.push({
+      kind:'Plano de Treino', name:'Hipertrofia 12 Semanas', meta:'5 dias/sem · 45 min · Intermediário',
+      accent:'linear-gradient(135deg,#F55F16,#FF7A3D)', icon:svgT,
+      adherence:88, adColor:adColor(88), doneLabel:'42 de 48 treinos', week:'6 de 12',
+      href:'DetalhePlano.dc.html',
+      pdfs:[{ name:'Plano_Treino_Mariana_S6.pdf', meta:'Enviado 18 fev 2026 · Coach Bruno' }],
+    });
+    if (S.nutri) active.push({
+      kind:'Plano Alimentar', name:'Cutting 1.800 kcal', meta:'5 refeições/dia · 40P / 35C / 25G',
+      accent:'linear-gradient(135deg,#16a34a,#4ade80)', icon:svgN,
+      adherence:74, adColor:adColor(74), doneLabel:'26 de 35 registros', week:'6 de 12',
+      href:'PlanosAlimentares.dc.html',
+      pdfs:[{ name:'Plano_Nutricional_Mariana_S6.pdf', meta:'Enviado 18 fev 2026 · Nutri Tatiane' }],
+    });
+
+    const hist = (id,icon,name,kind,period,adherence,status,statusBg,statusColor,duration,done,subAtTime,owner,pdfName,href) => {
+      const open = !!this.state.openHist[id];
+      return { id,icon,iconBg:'var(--surface-2)',iconColor:'var(--muted)',name,kind,period,
+        adherence,adColor:adColor(adherence),status,statusBg,statusColor,
+        duration,done,subAtTime,owner,pdfName,href,
+        open, toggle:this.toggleHist(id), caretRotate: open ? 'rotate(180deg)' : 'rotate(0deg)' };
+    };
+    const OK = ['Concluído','rgba(22,163,74,.12)','#16a34a'];
+    const AB = ['Interrompido','rgba(239,68,68,.12)','#ef4444'];
+
+    // ---- generated document: single PDF when both modules are active ----
+    const both = S.treino && S.nutri;
+    const stale = !!this.state.docStale;
+    const docSources = [];
+    if (S.treino) docSources.push({ icon:svgTs, bg:'var(--brand-soft)', color:'#F55F16', name:'Hipertrofia 12 Semanas', meta:'Plano de treino · atualizado 24 fev 2026', stale:stale, fresh:!stale });
+    if (S.nutri) docSources.push({ icon:svgNs, bg:'rgba(22,163,74,.12)', color:'#16a34a', name:'Cutting 1.800 kcal', meta:'Plano alimentar · atualizado 18 fev 2026', stale:false, fresh:true });
+
+    const generated = !!this.state.docGenerated;
+    const docStatusStyle = (kind) => 'display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;padding:4px 11px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em;' + (
+      kind === 'stale' ? 'background:rgba(217,119,6,.14);color:#d97706;'
+      : 'background:rgba(22,163,74,.12);color:#16a34a;');
+
+    return {
+      docScope: both
+        ? 'PDF único com o plano de treino e o plano alimentar do aluno.'
+        : (S.treino ? 'PDF do plano de treino do aluno.' : 'PDF do plano alimentar do aluno.'),
+      docName: both ? 'Plano_Treino_Nutricao_Mariana_Silva.pdf'
+        : (S.treino ? 'Plano_Treino_Mariana_Silva.pdf' : 'Plano_Nutricional_Mariana_Silva.pdf'),
+      docDate: generated ? '25 ago 2026' : '18 fev 2026',
+      docVersion: generated ? 'v4' : (stale ? 'v3' : 'v3'),
+      docPages: both ? '6 páginas' : '3 páginas',
+      docStatus: stale ? 'Desatualizado' : 'Atualizado',
+      docStatusStyle: docStatusStyle(stale ? 'stale' : 'ok'),
+      docAction: stale ? 'Atualizar PDF' : 'Gerar novamente',
+      docStale: stale,
+      docSources,
+      regenDoc: this.regenDoc,
+
+      subName: S.name, subDesc: S.desc,
+      modTreinoPill: pill(S.treino), modNutriPill: pill(S.nutri), modProPill: pill(S.pro),
+      hasLocked: !(S.treino && S.nutri),
+      lockedLabel: S.treino ? 'Módulo de Nutrição' : 'Módulo de Treino',
+      activePlans: active,
+      historyCount: 4,
+      history: [
+        hist('h1', svgT,'Full Body Iniciante','Plano de treino','out – dez 2025',81,...OK,'8 semanas','38 de 47 treinos','Treino Básico','Coach Bruno','Plano_Treino_FullBody.pdf','DetalhePlano.dc.html'),
+        hist('h2', svgN,'Manutenção 2.100 kcal','Plano alimentar','out – dez 2025',69,...OK,'8 semanas','41 de 59 registros','Completo','Nutri Tatiane','Plano_Nutri_Manutencao.pdf','PlanosAlimentares.dc.html'),
+        hist('h3', svgT,'Cardio & Resistência','Plano de treino','ago – set 2025',34,...AB,'4 semanas','9 de 26 treinos','Treino Básico','Coach Bruno','Plano_Treino_Cardio.pdf','DetalhePlano.dc.html'),
+        hist('h4', svgN,'Low Carb 1.700 kcal','Plano alimentar','jun – jul 2025',77,...OK,'6 semanas','32 de 42 registros','Nutrição Básico','Nutri Tatiane','Plano_Nutri_LowCarb.pdf','PlanosAlimentares.dc.html'),
+      ],
+    };
+  }
+
+  buildHeatmap(){
+    const weeks = 12, days = 7;
+    const colors = ['var(--surface-2)', 'rgba(245,95,22,.3)', 'rgba(245,95,22,.6)', '#F55F16'];
+    // deterministic pseudo-random intensities
+    const cells = [];
+    for (let w = 0; w < weeks; w++){
+      const col = [];
+      for (let d = 0; d < days; d++){
+        const seed = (w*7 + d) * 2654435761 % 100;
+        let lvl = 0;
+        if (d === 6 || d === 0) lvl = seed % 4 < 2 ? 0 : 1; // weekends lighter
+        else lvl = [0,1,2,3,2,3,1,3,2,3][(seed) % 10];
+        if (w < 2) lvl = Math.max(0, lvl - 1); // ramp-up early
+        col.push(React.createElement('div', {
+          key: 'c'+w+'-'+d,
+          title: 'Semana '+(w+1)+', dia '+(d+1),
+          style: { width: 15, height: 15, borderRadius: 3, background: colors[lvl] }
+        }));
+      }
+      cells.push(React.createElement('div', { key: 'w'+w, style: { display:'flex', flexDirection:'column', gap:4 } }, col));
+    }
+    return React.createElement('div', { style:{ display:'flex', gap:4, overflowX:'auto', paddingBottom:4 } }, cells);
+  }
+
+  renderVals(){
+    const dark = this.state.theme === 'dark', T = this.state.tab;
+    const tab = (on) => 'border:none;background:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;padding:11px 16px;white-space:nowrap;border-bottom:2px solid ' + (on ? 'var(--brand);color:var(--brand);' : 'transparent;color:var(--muted);');
+    return {
+      isDark: dark, isLight: !dark, toggleTheme: this.toggleTheme,
+      pickOverview: this.pick('overview'), pickHealth: this.pick('health'), pickPlans: this.pick('plans'), pickActivity: this.pick('activity'),
+      tabOverview: tab(T==='overview'), tabHealth: tab(T==='health'), tabPlans: tab(T==='plans'), tabActivity: tab(T==='activity'),
+      isOverview: T==='overview', isHealth: T==='health', isPlans: T==='plans', isActivity: T==='activity',
+      heatmap: this.buildHeatmap(),
+      ...this.plansData(),
+      workouts: [
+        { name:'Treino A · Peito & Tríceps', detail:'5 exercícios · 48 min', when:'hoje, 07:12' },
+        { name:'Treino C · Pernas', detail:'6 exercícios · 55 min', when:'ontem, 18:30' },
+        { name:'Treino B · Costas & Bíceps', detail:'5 exercícios · 50 min', when:'2 dias atrás' },
+        { name:'Treino A · Peito & Tríceps', detail:'5 exercícios · 46 min', when:'4 dias atrás' },
+      ],
+      meals: [
+        { emoji:'🥗', name:'Bowl de Frango com Quinoa', kcal:520, when:'hoje, 13:05' },
+        { emoji:'🥞', name:'Panqueca de Banana & Aveia', kcal:340, when:'hoje, 08:00' },
+        { emoji:'🍽️', name:'Salmão com Legumes', kcal:460, when:'ontem, 20:15' },
+        { emoji:'🥛', name:'Iogurte com Frutas', kcal:260, when:'ontem, 16:00' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

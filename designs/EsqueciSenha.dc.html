@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#F8F9FA; --surface:#FFFFFF; --surface-2:#F1F5F9; --border:#E2E8F0;
+    --text:#1A202C; --muted:#718096; --field:#F8F9FA;
+  }
+  :root[data-theme="dark"]{
+    --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --border:#333333;
+    --text:#DBD9D8; --muted:#9C9C9C; --field:#161616; --brand-soft:rgba(245,95,22,.14);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .3s,color .3s;}
+  @keyframes ybFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+  @keyframes ybPop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  @media(min-width:820px){ .yb-brandpanel{display:flex !important;} }
+</style>
+</helmet>
+
+<div style="display:flex;min-height:100vh;width:100%;">
+
+  <!-- ===================== BRAND PANEL ===================== -->
+  <div class="yb-brandpanel" style="flex:0 0 44%;order:{{ brandOrder }};position:relative;overflow:hidden;display:none;color:#fff;padding:56px;background:{{ brandBg }};">
+    <sc-if value="{{ isA }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 20% 0%,rgba(255,255,255,.18),transparent 55%);"></div>
+      <svg viewBox="119 94 275 323" style="position:absolute;right:-70px;bottom:-60px;width:430px;height:auto;opacity:.13;color:#fff;animation:ybFloat 9s ease-in-out infinite;" fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
+      <div style="position:relative;display:flex;flex-direction:column;justify-content:space-between;height:100%;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <svg viewBox="119 94 275 323" style="width:34px;height:auto;color:#fff;" fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
+          <span style="font-weight:900;font-size:22px;letter-spacing:.12em;">YBYTU</span>
+          <span style="font-size:11px;font-weight:800;letter-spacing:.15em;background:rgba(255,255,255,.2);padding:3px 8px;border-radius:6px;">ADMIN</span>
+        </div>
+        <div>
+          <h2 style="font-size:40px;line-height:1.05;font-weight:900;margin:0 0 18px;text-wrap:balance;">Sem estresse.<br>Recupere o acesso.</h2>
+          <p style="font-size:16px;line-height:1.6;opacity:.92;max-width:380px;margin:0;font-weight:400;">Enviamos um link seguro para o seu e-mail. Em poucos minutos você volta ao painel.</p>
+        </div>
+        <p style="font-size:13px;opacity:.8;margin:0;font-weight:500;">Precisa de ajuda? Fale com o suporte Ybytu.</p>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isB }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:radial-gradient(90% 70% at 80% 10%,rgba(245,95,22,.35),transparent 55%),radial-gradient(70% 60% at 10% 100%,rgba(245,95,22,.18),transparent 60%);"></div>
+      <svg viewBox="119 94 275 323" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:340px;height:auto;opacity:.07;color:#fff;" fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
+      <div style="position:relative;display:flex;flex-direction:column;justify-content:space-between;height:100%;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <svg viewBox="119 94 275 323" style="width:30px;height:auto;color:#fff;" fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
+          <span style="font-weight:900;font-size:18px;letter-spacing:.06em;">YBYTU</span>
+        </div>
+        <div>
+          <span style="display:inline-flex;width:56px;height:56px;border-radius:16px;background:rgba(245,95,22,.18);border:1px solid rgba(245,95,22,.3);align-items:center;justify-content:center;color:var(--brand);margin-bottom:22px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+          <p style="font-size:22px;line-height:1.5;font-weight:600;margin:0;text-wrap:pretty;">Segurança em primeiro lugar. Links de redefinição expiram em 30 minutos.</p>
+        </div>
+        <span></span>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ===================== FORM PANEL ===================== -->
+  <div style="flex:1;order:1;display:flex;align-items:center;justify-content:center;padding:48px 24px;position:relative;background:var(--bg);">
+    <button onClick="{{ toggleTheme }}" title="Alternar tema" style="position:absolute;top:24px;right:24px;width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);">
+      <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+      <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+    </button>
+
+    <div style="width:100%;max-width:400px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:var(--brand);color:#fff;"><svg viewBox="119 94 275 323" style="width:20px;height:auto;" fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg></span>
+        <span style="font-weight:900;font-size:18px;letter-spacing:.04em;">Ybytu <span style="color:var(--brand);font-size:11px;">ADMIN</span></span>
+      </div>
+
+      <!-- STATE: request -->
+      <sc-if value="{{ isRequest }}" hint-placeholder-val="{{ true }}">
+        <h1 style="font-size:28px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px;">Esqueceu a senha?</h1>
+        <p style="color:var(--muted);font-size:15px;margin:0 0 28px;line-height:1.55;">Digite o e-mail da sua conta. Enviaremos um link para você criar uma nova senha.</p>
+
+        <label style="display:block;font-size:13px;font-weight:700;margin-bottom:7px;">E-mail</label>
+        <div style="position:relative;margin-bottom:22px;">
+          <span style="position:absolute;left:15px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 5L2 7"></path></svg></span>
+          <input type="email" placeholder="admin@ybytu.com" style="width:100%;padding:14px 16px 14px 46px;border-radius:12px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);">
+        </div>
+
+        <button onClick="{{ sendLink }}" style="width:100%;padding:15px;border-radius:12px;background:var(--brand);color:#fff;font-weight:800;font-size:15px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,transform .1s;" style-hover="background:var(--brand-hover);" style-active="transform:scale(.99);">
+          Enviar link de redefinição <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+        </button>
+      </sc-if>
+
+      <!-- STATE: sent -->
+      <sc-if value="{{ isSent }}" hint-placeholder-val="{{ false }}">
+        <span style="display:inline-flex;width:60px;height:60px;border-radius:50%;background:var(--brand-soft);align-items:center;justify-content:center;color:var(--brand);margin-bottom:22px;animation:ybPop .4s ease-out both;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 5L2 7"></path></svg></span>
+        <h1 style="font-size:28px;font-weight:900;letter-spacing:-.02em;margin:0 0 8px;">Verifique seu e-mail</h1>
+        <p style="color:var(--muted);font-size:15px;margin:0 0 8px;line-height:1.55;">Enviamos um link de redefinição para o e-mail informado. Verifique sua caixa de entrada — o link expira em 30 minutos.</p>
+        <p style="color:var(--muted);font-size:14px;margin:0 0 26px;">Não recebeu? <button onClick="{{ resend }}" style="background:none;border:none;color:var(--brand);font-weight:700;cursor:pointer;font-family:inherit;font-size:14px;padding:0;">Reenviar</button></p>
+        <button onClick="{{ reset }}" style="width:100%;padding:14px;border-radius:12px;background:var(--surface);color:var(--text);font-weight:700;font-size:15px;border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:border-color .2s;" style-hover="border-color:var(--brand);color:var(--brand);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg> Voltar
+        </button>
+      </sc-if>
+
+      <a href="Login.dc.html" style="display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;color:var(--muted);text-decoration:none;margin-top:26px;font-weight:600;" style-hover="color:var(--brand);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg> Voltar para o login
+      </a>
+    </div>
+  </div>
+
+  <!-- ===================== VARIATION SWITCHER ===================== -->
+  <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:6px;box-shadow:0 8px 30px rgba(0,0,0,.18);">
+    <span style="font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);padding:0 8px 0 10px;text-transform:uppercase;">Layout</span>
+    <button onClick="{{ pickA }}" style="{{ tabA }}">Brand Spotlight</button>
+    <button onClick="{{ pickB }}" style="{{ tabB }}">Editorial Dark</button>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:820}}">
+class Component extends DCLogic {
+  state = { variation: 'A', theme: 'dark', sent: false };
+
+  componentDidMount(){ this.applyTheme(); }
+  applyTheme(){ try{ document.documentElement.dataset.theme = this.state.theme; }catch(e){} }
+
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }), this.applyTheme);
+  pickA = () => this.setState({ variation: 'A' });
+  pickB = () => this.setState({ variation: 'B' });
+  sendLink = () => this.setState({ sent: true });
+  resend = () => this.setState({ sent: true });
+  reset = () => this.setState({ sent: false });
+
+  renderVals(){
+    const v = this.state.variation, dark = this.state.theme === 'dark';
+    const tab = (on) => on
+      ? 'border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:8px 16px;border-radius:999px;background:var(--brand);color:#fff;'
+      : 'border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:8px 16px;border-radius:999px;background:transparent;color:var(--muted);';
+    return {
+      isA: v === 'A', isB: v === 'B',
+      brandOrder: v === 'A' ? 0 : 2,
+      brandBg: v === 'A' ? 'linear-gradient(150deg,#F55F16 0%,#FF7A3D 60%,#ff8c52 100%)' : '#0E0E0E',
+      isDark: dark, isLight: !dark,
+      isRequest: !this.state.sent, isSent: this.state.sent,
+      toggleTheme: this.toggleTheme, sendLink: this.sendLink, resend: this.resend, reset: this.reset,
+      pickA: this.pickA, pickB: this.pickB,
+      tabA: tab(v === 'A'), tabB: tab(v === 'B'),
+    };
+  }
+}
+</script>
+</body>
+</html>

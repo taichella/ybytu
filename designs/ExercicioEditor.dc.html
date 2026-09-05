@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#F8F9FA; --surface:#FFFFFF; --surface-2:#F1F5F9; --border:#E2E8F0; --text:#1A202C; --muted:#718096; --field:#F8F9FA; }
+  :root[data-theme="dark"]{ --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --border:#333333; --text:#DBD9D8; --muted:#9C9C9C; --field:#161616; --brand-soft:rgba(245,95,22,.14); }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  textarea{resize:vertical;}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;} ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</helmet>
+
+<div style="display:flex;height:100vh;width:100%;overflow:hidden;background:var(--bg);color:var(--text);">
+  <div class="yb-side"><dc-import name="Sidebar" active="exercicios" hint-size="260px,100%"></dc-import></div>
+  <dc-import name="MobileNav" active="treino" hint-size="0,0"></dc-import>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <!-- Header -->
+    <header style="height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:20px;">
+      <div style="display:flex;align-items:center;gap:14px;min-width:0;">
+        <a href="Exercicios.dc.html" style="display:inline-flex;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;" style-hover="color:var(--brand);border-color:var(--brand);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg></a>
+        <div style="min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600;"><a href="Exercicios.dc.html" style="color:var(--muted);text-decoration:none;" style-hover="color:var(--brand);">Exercícios</a><span>/</span><span style="color:var(--text);">Editar</span><span style="font-family:monospace;background:var(--surface-2);padding:2px 7px;border-radius:6px;font-size:11px;">EX-0142</span></div>
+          <h2 style="margin:2px 0 0;font-size:18px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Agachamento Livre</h2>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <button onClick="{{ toggleTheme }}" title="Alternar tema" style="width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+        </button>
+        <button style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:11px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--muted);">Cancelar</button>
+        <button style="display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8M7 3v5h8"></path></svg> Salvar</button>
+      </div>
+    </header>
+
+    <main style="flex:1;overflow-y:auto;padding:28px;">
+      <div style="max-width:1180px;margin:0 auto;">
+
+        <!-- Language bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:22px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z"></path></svg>
+            <span style="font-size:13px;color:var(--muted);font-weight:600;">Conteúdo exibido ao usuário no idioma do app — edite cada idioma.</span>
+          </div>
+          <div style="display:flex;background:var(--field);border:1px solid var(--border);border-radius:10px;padding:4px;">
+            <button onClick="{{ pickPt }}" style="{{ langPt }}">🇧🇷 Português</button>
+            <button onClick="{{ pickEn }}" style="{{ langEn }}">🇬🇧 English</button>
+            <button onClick="{{ pickFr }}" style="{{ langFr }}">🇫🇷 Français</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:22px;align-items:start;">
+
+          <!-- LEFT column -->
+          <div style="display:flex;flex-direction:column;gap:22px;">
+            <!-- Media -->
+            <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+              <h3 style="margin:0 0 4px;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Mídia de Execução</h3>
+              <p style="margin:0 0 16px;font-size:13px;color:var(--muted);">Vídeo e imagem exibidos no app durante o treino.</p>
+              <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="editor-video" shape="rounded" radius="14" placeholder="Arraste o vídeo / GIF de demonstração" style="width:100%;height:280px;display:block;" hint-size="100%,280px"></x-import>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;">
+                <div><label style="display:block;font-size:11px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">video_url</label><input type="text" value="https://cdn.ybytu.com/ex/agachamento.mp4" style="width:100%;padding:11px 13px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:12px;font-family:monospace;outline:none;" style-focus="border-color:var(--brand);"></div>
+                <div><label style="display:block;font-size:11px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">image_url</label><input type="text" value="https://cdn.ybytu.com/ex/agachamento.jpg" style="width:100%;padding:11px 13px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:12px;font-family:monospace;outline:none;" style-focus="border-color:var(--brand);"></div>
+              </div>
+            </section>
+
+            <!-- Instruction (multilingual) -->
+            <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+                <h3 style="margin:0;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Instruções de Execução</h3>
+                <span style="font-size:11px;font-weight:800;padding:4px 10px;border-radius:7px;background:var(--brand-soft);color:var(--brand);text-transform:uppercase;letter-spacing:.04em;">{{ langTag }}</span>
+              </div>
+              <sc-if value="{{ isPt }}" hint-placeholder-val="{{ true }}">
+                <textarea rows="7" style="width:100%;padding:14px;border-radius:12px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;line-height:1.6;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);">1. Posicione a barra sobre o trapézio, pés na largura dos ombros e pontas levemente para fora.
+2. Inspire, contraia o core e desça empurrando o quadril para trás.
+3. Desça até as coxas ficarem ao menos paralelas ao chão, calcanhares apoiados.
+4. Suba empurrando o chão com os pés, expirando ao final do movimento.</textarea>
+              </sc-if>
+              <sc-if value="{{ isEn }}" hint-placeholder-val="{{ false }}">
+                <textarea rows="7" style="width:100%;padding:14px;border-radius:12px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;line-height:1.6;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);">1. Position the bar on your traps, feet shoulder-width apart, toes slightly out.
+2. Inhale, brace your core and descend by pushing your hips back.
+3. Lower until thighs are at least parallel to the floor, heels planted.
+4. Drive through your feet to stand up, exhaling at the top.</textarea>
+              </sc-if>
+              <sc-if value="{{ isFr }}" hint-placeholder-val="{{ false }}">
+                <textarea rows="7" style="width:100%;padding:14px;border-radius:12px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;line-height:1.6;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);">1. Placez la barre sur les trapèzes, pieds écartés à la largeur des épaules.
+2. Inspirez, gainez et descendez en poussant les hanches vers l'arrière.
+3. Descendez jusqu'à ce que les cuisses soient au moins parallèles au sol.
+4. Remontez en poussant dans les pieds, expirez en haut du mouvement.</textarea>
+              </sc-if>
+            </section>
+
+            <!-- Health conditions -->
+            <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+              <h3 style="margin:0 0 4px;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Condições de Saúde</h3>
+              <p style="margin:0 0 18px;font-size:13px;color:var(--muted);">O app oculta ou alerta o exercício conforme as condições do usuário.</p>
+
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                <span style="color:#ef4444;display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg></span>
+                <p style="margin:0;font-size:12px;font-weight:800;color:#ef4444;text-transform:uppercase;letter-spacing:.04em;">Evitar — contraindicado</p>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
+                <sc-for list="{{ avoid }}" as="c" hint-placeholder-count="2"><span style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;background:rgba(239,68,68,.10);color:#ef4444;border:1px solid rgba(239,68,68,.25);">{{ c }} <button style="background:none;border:none;color:#ef4444;cursor:pointer;display:flex;padding:0;opacity:.7;" style-hover="opacity:1;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></span></sc-for>
+                <button style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;background:none;border:1px dashed var(--border);color:var(--muted);cursor:pointer;font-family:inherit;" style-hover="border-color:#ef4444;color:#ef4444;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Adicionar</button>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                <span style="color:#d97706;display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg></span>
+                <p style="margin:0;font-size:12px;font-weight:800;color:#d97706;text-transform:uppercase;letter-spacing:.04em;">Cautela — orientar adaptação</p>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <sc-for list="{{ caution }}" as="c" hint-placeholder-count="1"><span style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;background:rgba(217,119,6,.10);color:#d97706;border:1px solid rgba(217,119,6,.25);">{{ c }} <button style="background:none;border:none;color:#d97706;cursor:pointer;display:flex;padding:0;opacity:.7;" style-hover="opacity:1;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></span></sc-for>
+                <button style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;background:none;border:1px dashed var(--border);color:var(--muted);cursor:pointer;font-family:inherit;" style-hover="border-color:#d97706;color:#d97706;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Adicionar</button>
+              </div>
+            </section>
+          </div>
+
+          <!-- RIGHT column -->
+          <div style="display:flex;flex-direction:column;gap:22px;">
+            <!-- Identificação -->
+            <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+              <h3 style="margin:0 0 16px;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Identificação</h3>
+              <div style="display:flex;flex-direction:column;gap:14px;">
+                <div>
+                  <label style="display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Nome do exercício <span style="font-size:11px;font-weight:800;padding:2px 7px;border-radius:5px;background:var(--brand-soft);color:var(--brand);">{{ langTag }}</span></label>
+                  <sc-if value="{{ isPt }}" hint-placeholder-val="{{ true }}"><input type="text" value="Agachamento Livre" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></sc-if>
+                  <sc-if value="{{ isEn }}" hint-placeholder-val="{{ false }}"><input type="text" value="Barbell Back Squat" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></sc-if>
+                  <sc-if value="{{ isFr }}" hint-placeholder-val="{{ false }}"><input type="text" value="Squat à la barre" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></sc-if>
+                </div>
+                <div>
+                  <label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Código de referência (exercise_id)</label>
+                  <input type="text" value="EX-0142" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:monospace;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);">
+                </div>
+              </div>
+            </section>
+
+            <!-- Classificação -->
+            <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+              <h3 style="margin:0 0 16px;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Classificação</h3>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                  <label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Nível</label>
+                  <select style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;"><option>Avançado</option><option>Intermediário</option><option>Iniciante</option></select>
+                </div>
+                <div>
+                  <label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Calorias (kcal/min)</label>
+                  <input type="text" value="8" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:700;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);">
+                </div>
+              </div>
+            </section>
+
+            <!-- Grupos musculares -->
+            <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+              <h3 style="margin:0 0 16px;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Grupos Musculares</h3>
+              <div style="display:flex;gap:18px;align-items:center;">
+                <svg viewBox="0 0 90 170" style="width:80px;flex-shrink:0;">
+                  <ellipse cx="45" cy="14" rx="10" ry="12" fill="var(--surface-2)" stroke="var(--border)"/>
+                  <rect x="33" y="28" width="24" height="40" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+                  <rect x="20" y="32" width="11" height="38" rx="5" fill="var(--surface-2)" stroke="var(--border)"/>
+                  <rect x="59" y="32" width="11" height="38" rx="5" fill="var(--surface-2)" stroke="var(--border)"/>
+                  <rect x="33" y="70" width="11" height="48" rx="5" fill="#F55F16" opacity="0.85"/>
+                  <rect x="46" y="70" width="11" height="48" rx="5" fill="#F55F16" opacity="0.85"/>
+                  <rect x="33" y="120" width="11" height="42" rx="5" fill="#F55F16" opacity="0.4"/>
+                  <rect x="46" y="120" width="11" height="42" rx="5" fill="#F55F16" opacity="0.4"/>
+                </svg>
+                <div style="flex:1;">
+                  <p style="margin:0 0 8px;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Selecionados</p>
+                  <div style="display:flex;flex-wrap:wrap;gap:7px;">
+                    <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--brand);color:#fff;">Quadríceps <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="opacity:.8;"><path d="M18 6 6 18M6 6l12 12"></path></svg></span>
+                    <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--brand);color:#fff;">Glúteos <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="opacity:.8;"><path d="M18 6 6 18M6 6l12 12"></path></svg></span>
+                    <span style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--brand-soft);color:var(--brand);">Core <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="opacity:.8;"><path d="M18 6 6 18M6 6l12 12"></path></svg></span>
+                    <button style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:none;border:1px dashed var(--border);color:var(--muted);cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Adicionar</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Equipamentos -->
+            <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+              <h3 style="margin:0 0 16px;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Equipamentos</h3>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;background:var(--surface-2);color:var(--text);border:1px solid var(--border);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"></circle><path d="M6.5 8a2 2 0 0 0-1.905 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.925-2.54L19.4 9.5A2 2 0 0 0 17.48 8Z"></path></svg> Barra <button style="background:none;border:none;color:var(--muted);cursor:pointer;display:flex;padding:0;" style-hover="color:#ef4444;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></span>
+                <span style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;background:var(--surface-2);color:var(--text);border:1px solid var(--border);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"></circle><path d="M6.5 8a2 2 0 0 0-1.905 1.46L2.1 18.5A2 2 0 0 0 4 21h16a2 2 0 0 0 1.925-2.54L19.4 9.5A2 2 0 0 0 17.48 8Z"></path></svg> Anilha <button style="background:none;border:none;color:var(--muted);cursor:pointer;display:flex;padding:0;" style-hover="color:#ef4444;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></span>
+                <button style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:9px;font-size:13px;font-weight:700;background:none;border:1px dashed var(--border);color:var(--muted);cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Adicionar equipamento</button>
+              </div>
+            </section>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1040}}">
+class Component extends DCLogic {
+  state = { theme: 'dark', lang: 'pt' };
+  componentDidMount(){ this.applyTheme(); }
+  applyTheme(){ try{ document.documentElement.dataset.theme = this.state.theme; }catch(e){} }
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }), this.applyTheme);
+  pickPt = () => this.setState({ lang: 'pt' });
+  pickEn = () => this.setState({ lang: 'en' });
+  pickFr = () => this.setState({ lang: 'fr' });
+
+  renderVals(){
+    const dark = this.state.theme === 'dark', L = this.state.lang;
+    const lt = (on) => 'border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:8px 14px;border-radius:7px;white-space:nowrap;' + (on
+      ? 'background:var(--brand);color:#fff;' : 'background:transparent;color:var(--muted);');
+    return {
+      isDark: dark, isLight: !dark, toggleTheme: this.toggleTheme,
+      isPt: L === 'pt', isEn: L === 'en', isFr: L === 'fr',
+      pickPt: this.pickPt, pickEn: this.pickEn, pickFr: this.pickFr,
+      langPt: lt(L === 'pt'), langEn: lt(L === 'en'), langFr: lt(L === 'fr'),
+      langTag: L === 'pt' ? 'PT-BR' : (L === 'en' ? 'EN' : 'FR'),
+      avoid: ['Hérnia de disco', 'Lesão lombar'],
+      caution: ['Lesão no joelho'],
+    };
+  }
+}
+</script>
+</body>
+</html>

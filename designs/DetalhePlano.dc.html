@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#F8F9FA; --surface:#FFFFFF; --surface-2:#F1F5F9; --border:#E2E8F0; --text:#1A202C; --muted:#718096; --field:#F8F9FA; }
+  :root[data-theme="dark"]{ --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --border:#333333; --text:#DBD9D8; --muted:#9C9C9C; --field:#161616; --brand-soft:rgba(245,95,22,.14); }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;} ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</helmet>
+
+<div style="display:flex;height:100vh;width:100%;overflow:hidden;background:var(--bg);color:var(--text);">
+  <div class="yb-side"><dc-import name="Sidebar" active="treinos" hint-size="260px,100%"></dc-import></div>
+  <dc-import name="MobileNav" active="treino" hint-size="0,0"></dc-import>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <header style="height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:20px;">
+      <div style="display:flex;align-items:center;gap:14px;min-width:0;">
+        <a href="Treinos.dc.html" style="display:inline-flex;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;" style-hover="color:var(--brand);border-color:var(--brand);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg></a>
+        <div style="min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600;"><a href="Treinos.dc.html" style="color:var(--muted);text-decoration:none;" style-hover="color:var(--brand);">Planos</a><span>/</span><span style="color:var(--text);">Detalhe</span></div>
+          <h2 style="margin:2px 0 0;font-size:18px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Hipertrofia 12 Semanas</h2>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <button onClick="{{ toggleTheme }}" title="Alternar tema" style="width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+        </button>
+        <button style="display:flex;align-items:center;gap:7px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:11px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg> Atribuir</button>
+        <a href="ConstrutorPlano.dc.html" style="display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg> Editar</a>
+      </div>
+    </header>
+
+    <main style="flex:1;overflow-y:auto;padding:28px;">
+      <div style="max-width:1080px;margin:0 auto;">
+
+        <!-- Hero -->
+        <div style="border-radius:20px;overflow:hidden;border:1px solid var(--border);margin-bottom:22px;">
+          <div style="background:linear-gradient(135deg,#F55F16,#FF7A3D);padding:28px;position:relative;overflow:hidden;color:#fff;">
+            <svg viewBox="119 94 275 323" style="position:absolute;right:-40px;top:-50px;width:240px;opacity:.14;" fill="#fff"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
+            <div style="position:relative;">
+              <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+                <span style="display:inline-flex;padding:4px 11px;border-radius:7px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:rgba(0,0,0,.25);backdrop-filter:blur(4px);">Hipertrofia</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:7px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:rgba(0,0,0,.25);backdrop-filter:blur(4px);">🏋️ Academia</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:7px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;background:rgba(255,255,255,.22);"><span style="width:7px;height:7px;border-radius:50%;background:#4ade80;"></span> Ativo</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:7px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:rgba(255,255,255,.92);color:#7c3aed;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M5.6 5.6l1.4 1.4M3 12h2M5.6 18.4l1.4-1.4M12 19v2M17 12h2M18.4 5.6 17 7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path></svg> Gerado por IA</span>
+              </div>
+              <h1 style="margin:0;font-size:30px;font-weight:900;letter-spacing:-.02em;">Hipertrofia 12 Semanas</h1>
+              <p style="margin:8px 0 0;font-size:15px;opacity:.94;max-width:560px;line-height:1.55;">Programa ABC focado em volume progressivo para ganho de massa muscular. Indicado para alunos intermediários a avançados.</p>
+              <div style="display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap;">
+                <div style="display:flex;gap:4px;"><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800;background:rgba(255,255,255,.92);color:#1A202C;">PT</span><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800;background:rgba(255,255,255,.92);color:#1A202C;">EN</span><span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800;background:rgba(255,255,255,.92);color:#1A202C;">FR</span></div>
+                <span style="font-size:12px;font-weight:600;opacity:.85;">Criado em 14 mai 2026</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));background:var(--surface);">
+            <div style="padding:18px;border-right:1px solid var(--border);"><p style="margin:0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Frequência</p><p style="margin:5px 0 0;font-size:20px;font-weight:900;">5×/sem</p></div>
+            <div style="padding:18px;border-right:1px solid var(--border);"><p style="margin:0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Duração/sessão</p><p style="margin:5px 0 0;font-size:20px;font-weight:900;">52 min</p></div>
+            <div style="padding:18px;border-right:1px solid var(--border);"><p style="margin:0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Nível</p><p style="margin:5px 0 0;font-size:20px;font-weight:900;">Avançado</p></div>
+            <div style="padding:18px;border-right:1px solid var(--border);"><p style="margin:0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Exercícios</p><p style="margin:5px 0 0;font-size:20px;font-weight:900;">32</p></div>
+            <div style="padding:18px;border-right:1px solid var(--border);"><p style="margin:0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Equipamentos</p><p style="margin:5px 0 0;font-size:20px;font-weight:900;">Barra +3</p></div>
+            <div style="padding:18px;"><p style="margin:0;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Usuários</p><p style="margin:5px 0 0;font-size:20px;font-weight:900;color:var(--brand);">1.240</p></div>
+          </div>
+        </div>
+
+        <!-- Day nav -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+          <sc-for list="{{ dayTabs }}" as="d" hint-placeholder-count="5">
+          <button onClick="{{ d.pick }}" style="{{ d.style }}">
+            <span style="font-weight:900;">{{ d.label }}</span><span style="opacity:.7;font-weight:600;margin-left:6px;">{{ d.muscle }}</span>
+          </button>
+          </sc-for>
+        </div>
+
+        <!-- Day content -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+          <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div><h3 style="margin:0;font-size:17px;font-weight:900;">{{ currentName }}</h3><p style="margin:3px 0 0;font-size:13px;color:var(--muted);">{{ currentMeta }}</p></div>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg> ~52 min</span>
+          </div>
+          <div>
+            <sc-for list="{{ exercises }}" as="ex" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:16px;padding:16px 22px;border-bottom:1px solid var(--border);" style-hover="background:var(--surface-2);">
+              <span style="width:32px;height:32px;border-radius:9px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;">{{ ex.letter }}</span>
+              <div style="width:64px;height:46px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></div>
+              <div style="flex:1;min-width:0;">
+                <p style="margin:0;font-weight:800;font-size:15px;">{{ ex.name }}</p>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;">
+                  <span style="font-size:12px;color:var(--muted);font-weight:600;">{{ ex.group }}</span>
+                  <sc-if value="{{ ex.hasTag }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:5px;background:var(--brand-soft);color:var(--brand);">{{ ex.tag }}</span></sc-if>
+                </div>
+              </div>
+              <div style="display:flex;gap:22px;flex-shrink:0;">
+                <div style="text-align:center;"><p style="margin:0;font-size:18px;font-weight:900;">{{ ex.sets }}</p><p style="margin:1px 0 0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Séries</p></div>
+                <div style="text-align:center;"><p style="margin:0;font-size:18px;font-weight:900;">{{ ex.reps }}</p><p style="margin:1px 0 0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Reps</p></div>
+                <div style="text-align:center;"><p style="margin:0;font-size:18px;font-weight:900;">{{ ex.rest }}</p><p style="margin:1px 0 0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Desc.</p></div>
+              </div>
+            </div>
+            </sc-for>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960}}">
+class Component extends DCLogic {
+  state = { theme: 'dark', day: 0 };
+  componentDidMount(){ this.applyTheme(); }
+  applyTheme(){ try{ document.documentElement.dataset.theme = this.state.theme; }catch(e){} }
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }), this.applyTheme);
+  setDay = (i) => () => this.setState({ day: i });
+
+  renderVals(){
+    const dark = this.state.theme === 'dark', day = this.state.day;
+    const dayStyle = (on) => 'border:1px solid ' + (on ? 'var(--brand);background:var(--brand-soft);color:var(--brand);' : 'var(--border);background:var(--surface);color:var(--text);') + 'cursor:pointer;font-family:inherit;font-size:13px;padding:10px 16px;border-radius:11px;white-space:nowrap;';
+    const dayDefs = [['Treino A','Peito & Tríceps'],['Treino B','Costas & Bíceps'],['Treino C','Pernas'],['Treino D','Ombros'],['Treino E','Core & Cardio']];
+    const ex = (letter,name,group,tag,sets,reps,rest) => ({ letter,name,group,tag,hasTag:!!tag,sets,reps,rest });
+    const byDay = [
+      [ ex('A','Supino Reto','Peitoral','',4,'8–12','90s'), ex('B','Supino Inclinado Halteres','Peitoral','Bi-set',3,'10–12','75s'), ex('C','Crossover','Peitoral','Drop-set',3,'12–15','60s'), ex('D','Tríceps Pulley','Tríceps','',3,'12–15','45s'), ex('E','Tríceps Testa','Tríceps','Falha',3,'10–12','60s') ],
+      [ ex('A','Puxada Frontal','Costas','',4,'10–12','90s'), ex('B','Remada Curvada','Costas','',4,'8–10','90s'), ex('C','Remada Unilateral','Costas','',3,'10–12','60s'), ex('D','Rosca Direta','Bíceps','',3,'10–12','45s'), ex('E','Rosca Martelo','Bíceps','Bi-set',3,'12','45s') ],
+      [ ex('A','Agachamento Livre','Quadríceps','',4,'6–10','120s'), ex('B','Leg Press 45º','Quadríceps','',4,'12–15','90s'), ex('C','Cadeira Extensora','Quadríceps','Drop-set',3,'15','60s'), ex('D','Stiff','Posterior','',4,'10–12','90s'), ex('E','Panturrilha em Pé','Panturrilha','',4,'15–20','45s') ],
+      [ ex('A','Desenvolvimento Militar','Ombros','',4,'8–10','90s'), ex('B','Elevação Lateral','Ombros','',4,'12–15','45s'), ex('C','Elevação Frontal','Ombros','',3,'12','45s'), ex('D','Crucifixo Inverso','Posterior Ombro','',3,'15','45s') ],
+      [ ex('A','Prancha','Core','',3,'45s','30s'), ex('B','Abdominal Infra','Core','',3,'15–20','30s'), ex('C','Russian Twist','Core','',3,'20','30s'), ex('D','Esteira (HIIT)','Cardio','',1,'15min','—') ],
+    ];
+    const cur = byDay[day], def = dayDefs[day];
+    return {
+      isDark: dark, isLight: !dark, toggleTheme: this.toggleTheme,
+      dayTabs: dayDefs.map((d,i) => ({ label:d[0].replace('Treino ',''), muscle:d[1], style:dayStyle(i===day), pick:this.setDay(i) })),
+      currentName: def[0] + ' · ' + def[1],
+      currentMeta: cur.length + ' exercícios · ' + cur.reduce((a,e)=>a+(+e.sets||0),0) + ' séries totais',
+      exercises: cur,
+    };
+  }
+}
+</script>
+</body>
+</html>

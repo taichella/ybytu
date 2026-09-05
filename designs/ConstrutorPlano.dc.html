@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#F8F9FA; --surface:#FFFFFF; --surface-2:#F1F5F9; --border:#E2E8F0; --text:#1A202C; --muted:#718096; --field:#F8F9FA; }
+  :root[data-theme="dark"]{ --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --border:#333333; --text:#DBD9D8; --muted:#9C9C9C; --field:#161616; --brand-soft:rgba(245,95,22,.14); }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;} ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</helmet>
+
+<div style="display:flex;height:100vh;width:100%;overflow:hidden;background:var(--bg);color:var(--text);">
+  <div class="yb-side"><dc-import name="Sidebar" active="treinos" hint-size="260px,100%"></dc-import></div>
+  <dc-import name="MobileNav" active="treino" hint-size="0,0"></dc-import>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <!-- Header -->
+    <header style="height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:20px;">
+      <div style="display:flex;align-items:center;gap:14px;min-width:0;flex:1;">
+        <a href="Treinos.dc.html" style="display:inline-flex;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;" style-hover="color:var(--brand);border-color:var(--brand);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg></a>
+        <div style="min-width:0;flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600;"><a href="Treinos.dc.html" style="color:var(--muted);text-decoration:none;" style-hover="color:var(--brand);">Planos</a><span>/</span><span style="color:var(--text);">Construtor</span></div>
+          <input type="text" value="Hipertrofia 12 Semanas" style="margin:2px 0 0;font-size:18px;font-weight:900;background:none;border:none;color:var(--text);font-family:inherit;outline:none;padding:2px 4px;border-radius:6px;width:100%;" style-focus="background:var(--field);">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <button onClick="{{ toggleTheme }}" title="Alternar tema" style="width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+        </button>
+        <button onClick="{{ toggleSettings }}" style="{{ cfgBtn }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Configurações</button>
+        <button style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:11px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--muted);">Salvar rascunho</button>
+        <button style="display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg> Publicar</button>
+      </div>
+    </header>
+
+    <!-- Day tabs -->
+    <div style="flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;gap:6px;overflow-x:auto;">
+      <sc-for list="{{ days }}" as="d" hint-placeholder-count="5">
+        <button onClick="{{ d.pick }}" style="{{ d.style }}">{{ d.label }} <span style="opacity:.6;font-weight:600;">· {{ d.muscle }}</span></button>
+      </sc-for>
+      <button style="border:none;background:none;cursor:pointer;color:var(--muted);padding:11px 12px;display:flex;align-items:center;gap:5px;font-family:inherit;font-size:13px;font-weight:700;white-space:nowrap;" style-hover="color:var(--brand);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Dia</button>
+    </div>
+
+    <!-- Plan settings panel -->
+    <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ true }}">
+    <div style="flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);padding:18px 28px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h3 style="margin:0;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);">Configurações do plano</h3>
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;padding:4px 10px;border-radius:7px;background:rgba(124,58,237,.12);color:#7c3aed;text-transform:uppercase;letter-spacing:.04em;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M5.6 5.6l1.4 1.4M3 12h2M5.6 18.4l1.4-1.4M12 19v2M17 12h2M18.4 5.6 17 7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path></svg> Gerado por IA</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Objetivos</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--brand);color:#fff;">Hipertrofia <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="opacity:.8;"><path d="M18 6 6 18M6 6l12 12"></path></svg></span>
+            <button style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;background:none;border:1px dashed var(--border);color:var(--muted);cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Add</button>
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Ambientes</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--text);border:1px solid var(--border);">🏋️ Academia</span>
+            <button style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;background:none;border:1px dashed var(--border);color:var(--muted);cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Add</button>
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Nível</label>
+          <select style="width:100%;padding:10px 13px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;"><option>Avançado</option><option>Intermediário</option><option>Iniciante</option></select>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Dias por semana</label>
+          <input type="text" value="5" style="width:100%;padding:10px 13px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;" style-focus="border-color:var(--brand);">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Duração/sessão (min)</label>
+          <input type="text" value="52" style="width:100%;padding:10px 13px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;" style-focus="border-color:var(--brand);">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Idiomas do conteúdo</label>
+          <div style="display:flex;gap:5px;">
+            <span style="display:inline-flex;align-items:center;justify-content:center;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:800;background:var(--brand);color:#fff;">PT</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:800;background:var(--brand);color:#fff;">EN</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:800;background:var(--surface-2);color:var(--muted);border:1px solid var(--border);">FR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- Body: builder -->
+    <div class="yb-builder" style="flex:1;display:flex;min-height:0;">
+
+      <!-- Exercise library panel -->
+      <aside class="yb-libpanel" style="width:300px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;min-height:0;">
+        <div style="padding:18px 18px 12px;border-bottom:1px solid var(--border);">
+          <p style="margin:0 0 10px;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;">Biblioteca · arraste p/ adicionar</p>
+          <div style="position:relative;">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
+            <input type="text" placeholder="Buscar exercício…" style="width:100%;padding:9px 12px 9px 36px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;outline:none;" style-focus="border-color:var(--brand);">
+          </div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ library }}" as="lib" hint-placeholder-count="7">
+          <div draggable="true" style="display:flex;align-items:center;gap:11px;padding:10px;border:1px solid var(--border);border-radius:11px;background:var(--field);cursor:grab;" style-hover="border-color:var(--brand);background:var(--brand-soft);">
+            <span style="width:34px;height:34px;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span>
+            <div style="flex:1;min-width:0;"><p style="margin:0;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ lib.name }}</p><p style="margin:1px 0 0;font-size:11px;color:var(--muted);">{{ lib.group }}</p></div>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg>
+          </div>
+          </sc-for>
+        </div>
+      </aside>
+
+      <!-- Build area -->
+      <main style="flex:1;overflow-y:auto;padding:24px;min-width:0;">
+        <div style="max-width:840px;margin:0 auto;">
+          <!-- Day summary -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+            <div>
+              <h2 style="margin:0;font-size:20px;font-weight:900;">Treino A · Peito & Tríceps</h2>
+              <p style="margin:4px 0 0;font-size:13px;color:var(--muted);">5 exercícios · ~22 séries · 52 min estimados</p>
+            </div>
+            <!-- Variation switch for builder treatment -->
+            <div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;">
+              <button onClick="{{ pickCard }}" style="{{ segCard }}">Cards</button>
+              <button onClick="{{ pickTable }}" style="{{ segTable }}">Planilha</button>
+            </div>
+          </div>
+
+          <!-- ====== VARIATION A: CARD ROWS ====== -->
+          <sc-if value="{{ isCard }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="3">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--field);">
+                <span style="color:var(--muted);cursor:grab;display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg></span>
+                <span style="width:28px;height:28px;border-radius:8px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">{{ b.letter }}</span>
+                <div style="flex:1;min-width:0;"><p style="margin:0;font-weight:800;font-size:15px;">{{ b.name }}</p><p style="margin:1px 0 0;font-size:12px;color:var(--muted);">{{ b.group }}</p></div>
+                <sc-if value="{{ b.hasTag }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:4px 9px;border-radius:6px;background:var(--brand-soft);color:var(--brand);">{{ b.tag }}</span></sc-if>
+                <button style="color:var(--muted);background:none;border:none;cursor:pointer;display:flex;padding:5px;border-radius:7px;" style-hover="color:#ef4444;background:rgba(239,68,68,.08);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg></button>
+              </div>
+              <div style="padding:8px 16px 14px;">
+                <div style="display:grid;grid-template-columns:34px 1fr 1fr 1fr 34px;gap:10px;align-items:center;padding:8px 0;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">
+                  <span>Set</span><span>Reps</span><span>Carga</span><span>Descanso</span><span></span>
+                </div>
+                <sc-for list="{{ b.sets }}" as="s" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:34px 1fr 1fr 1fr 34px;gap:10px;align-items:center;padding:5px 0;">
+                  <span style="width:28px;height:28px;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;">{{ s.n }}</span>
+                  <input type="text" value="{{ s.reps }}" style="width:100%;padding:9px 10px;border-radius:9px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;text-align:center;" style-focus="border-color:var(--brand);">
+                  <input type="text" value="{{ s.load }}" style="width:100%;padding:9px 10px;border-radius:9px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;text-align:center;" style-focus="border-color:var(--brand);">
+                  <input type="text" value="{{ s.rest }}" style="width:100%;padding:9px 10px;border-radius:9px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;text-align:center;" style-focus="border-color:var(--brand);">
+                  <button style="color:var(--muted);background:none;border:none;cursor:pointer;display:flex;justify-content:center;padding:5px;" style-hover="color:#ef4444;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg></button>
+                </div>
+                </sc-for>
+                <button style="display:flex;align-items:center;gap:6px;margin-top:8px;background:none;border:1px dashed var(--border);border-radius:9px;padding:8px 12px;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;justify-content:center;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Adicionar série</button>
+              </div>
+            </div>
+            </sc-for>
+          </div>
+          </sc-if>
+
+          <!-- ====== VARIATION B: SPREADSHEET ====== -->
+          <sc-if value="{{ isTable }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+            <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;white-space:nowrap;">
+              <thead><tr style="background:var(--field);">
+                <th style="text-align:left;padding:12px 16px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Exercício</th>
+                <th style="text-align:center;padding:12px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Séries</th>
+                <th style="text-align:center;padding:12px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Reps</th>
+                <th style="text-align:center;padding:12px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Carga</th>
+                <th style="text-align:center;padding:12px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Descanso</th>
+                <th style="text-align:center;padding:12px;font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Método</th>
+                <th style="width:40px;"></th>
+              </tr></thead>
+              <tbody>
+              <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="5">
+              <tr style="border-top:1px solid var(--border);" style-hover="background:var(--surface-2);">
+                <td style="padding:11px 16px;"><div style="display:flex;align-items:center;gap:10px;"><span style="width:26px;height:26px;border-radius:7px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;">{{ b.letter }}</span><span style="font-weight:700;font-size:14px;">{{ b.name }}</span></div></td>
+                <td style="padding:8px;"><input type="text" value="{{ b.setCount }}" style="width:54px;padding:8px;border-radius:8px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;text-align:center;" style-focus="border-color:var(--brand);"></td>
+                <td style="padding:8px;"><input type="text" value="{{ b.repRange }}" style="width:66px;padding:8px;border-radius:8px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;text-align:center;" style-focus="border-color:var(--brand);"></td>
+                <td style="padding:8px;"><input type="text" value="{{ b.loadVal }}" style="width:70px;padding:8px;border-radius:8px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;text-align:center;" style-focus="border-color:var(--brand);"></td>
+                <td style="padding:8px;"><input type="text" value="{{ b.restVal }}" style="width:60px;padding:8px;border-radius:8px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;text-align:center;" style-focus="border-color:var(--brand);"></td>
+                <td style="padding:8px;text-align:center;"><select style="padding:8px 10px;border-radius:8px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:12px;font-family:inherit;font-weight:700;outline:none;cursor:pointer;"><option>Normal</option><option>Drop-set</option><option>Bi-set</option><option>Falha</option></select></td>
+                <td style="padding:8px;text-align:center;"><button style="color:var(--muted);background:none;border:none;cursor:pointer;display:flex;padding:5px;" style-hover="color:#ef4444;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg></button></td>
+              </tr>
+              </sc-for>
+              </tbody>
+            </table>
+            </div>
+          </div>
+          </sc-if>
+
+          <!-- drop zone -->
+          <div style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:8px;padding:18px;border:2px dashed var(--border);border-radius:14px;color:var(--muted);font-size:13px;font-weight:700;" style-hover="border-color:var(--brand);color:var(--brand);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Arraste um exercício aqui ou clique para adicionar
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960}}">
+class Component extends DCLogic {
+  state = { theme: 'dark', mode: 'card', day: 0, settings: true };
+  componentDidMount(){ this.applyTheme(); }
+  applyTheme(){ try{ document.documentElement.dataset.theme = this.state.theme; }catch(e){} }
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }), this.applyTheme);
+  toggleSettings = () => this.setState(s => ({ settings: !s.settings }));
+  pickCard = () => this.setState({ mode: 'card' });
+  pickTable = () => this.setState({ mode: 'table' });
+  setDay = (i) => () => this.setState({ day: i });
+
+  renderVals(){
+    const dark = this.state.theme === 'dark', m = this.state.mode, day = this.state.day;
+    const seg = (on) => 'border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:7px 16px;border-radius:7px;white-space:nowrap;' + (on
+      ? 'background:var(--field);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.12);' : 'background:transparent;color:var(--muted);');
+    const dayStyle = (on) => 'border:none;background:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;padding:18px 14px;white-space:nowrap;border-bottom:2px solid ' + (on ? 'var(--brand);color:var(--brand);' : 'transparent;color:var(--muted);');
+    const dayDefs = [['Treino A','Peito & Tríceps'],['Treino B','Costas & Bíceps'],['Treino C','Pernas'],['Treino D','Ombros'],['Treino E','Core & Cardio']];
+
+    const set = (n,reps,load,rest) => ({ n,reps,load,rest });
+    const block = (letter,name,group,tag,setCount,repRange,loadVal,restVal,sets) => ({
+      letter,name,group,tag,hasTag:!!tag,setCount,repRange,loadVal,restVal,sets
+    });
+
+    return {
+      isDark: dark, isLight: !dark, toggleTheme: this.toggleTheme,
+      isCard: m === 'card', isTable: m === 'table',
+      isSettings: this.state.settings, toggleSettings: this.toggleSettings,
+      cfgBtn: 'display:flex;align-items:center;gap:7px;border-radius:11px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;' + (this.state.settings ? 'background:var(--brand-soft);color:var(--brand);border:1px solid rgba(245,95,22,.4);' : 'background:var(--surface);color:var(--text);border:1px solid var(--border);'),
+      pickCard: this.pickCard, pickTable: this.pickTable,
+      segCard: seg(m === 'card'), segTable: seg(m === 'table'),
+      days: dayDefs.map((d,i) => ({ label:d[0], muscle:d[1], style:dayStyle(i===day), pick:this.setDay(i) })),
+      library: [
+        { name:'Supino Reto', group:'Peitoral' },
+        { name:'Supino Inclinado', group:'Peitoral' },
+        { name:'Crucifixo Máquina', group:'Peitoral' },
+        { name:'Tríceps Pulley', group:'Tríceps' },
+        { name:'Tríceps Testa', group:'Tríceps' },
+        { name:'Crossover', group:'Peitoral' },
+        { name:'Mergulho', group:'Tríceps' },
+      ],
+      blocks: [
+        block('A','Supino Reto','Peitoral','',4,'8–12','60 kg','90s',[ set(1,'12','50 kg','90s'), set(2,'10','60 kg','90s'), set(3,'8','65 kg','90s'), set(4,'8','65 kg','120s') ]),
+        block('B','Supino Inclinado Halteres','Peitoral','Bi-set',3,'10–12','24 kg','75s',[ set(1,'12','22 kg','60s'), set(2,'10','24 kg','60s'), set(3,'10','24 kg','75s') ]),
+        block('C','Crossover','Peitoral','Drop-set',3,'12–15','20 kg','60s',[ set(1,'15','18 kg','45s'), set(2,'12','20 kg','45s'), set(3,'12','20 kg','60s') ]),
+        block('D','Tríceps Pulley','Tríceps','',3,'12–15','30 kg','45s',[ set(1,'15','25 kg','45s'), set(2,'12','30 kg','45s'), set(3,'12','30 kg','45s') ]),
+        block('E','Tríceps Testa','Tríceps','Falha',3,'10–12','30 kg','60s',[ set(1,'12','25 kg','45s'), set(2,'10','30 kg','60s'), set(3,'10','30 kg','60s') ]),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
