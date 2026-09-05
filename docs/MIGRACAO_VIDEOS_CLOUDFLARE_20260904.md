@@ -28,10 +28,17 @@ thumbnail automático). Duas consequências que mudaram o desenho inteiro:
 
 ## Casamento de arquivo — regra central: nada ambíguo vira match automático
 
-Pra cada exercício: nome original do arquivo no Drive vem da Drive API (`fields=name,size`, só
-metadado, não baixa o vídeo), normalizado (minúsculas, sem acento, sem extensão — mesma função
-`normalizeExerciseName` já usada na dedupe de exercícios do gerador de treino). Comparado contra
-os nomes normalizados dos objetos do bucket R2.
+**Correção 2026-09-05: caminho preferido não usa Drive API.** O plano original comparava o nome
+do arquivo no R2 contra o nome original do arquivo no Drive (obtido via metadado da Drive API).
+Substituído pelo caminho mais direto: comparar o nome do arquivo no R2 direto contra
+`exercises.name_ptbr` — o nome real do exercício, que já temos pros 298 sem credencial nenhuma.
+Faz sentido porque os arquivos originais já foram nomeados a partir do nome do exercício (ex:
+"AGACHAMENTOLIVRE 2.MOV" para "Agachamento livre" — confirmado ao abrir amostras do Drive em
+2026-09-04). Normalização precisa ser mais agressiva que a `normalizeExerciseName` original
+(minúsculas, sem acento) — precisa também remover espaço e pontuação dos dois lados, já que
+"AGACHAMENTOLIVRE" (sem espaço) precisa casar com "Agachamento livre" (com espaço). Só recorre à
+Drive API (leitura de metadado, sem baixar vídeo) se o match direto por nome não tiver taxa de
+acerto suficiente numa amostra — testado com 15-20 nomes reais do bucket antes de decidir.
 
 **Dois riscos tratados como bloqueio de match automático, não como algo a resolver por
 desempate:**
@@ -55,7 +62,7 @@ correspondência estável entre as duas origens, risco de desalinhar tudo a part
 Ambíguo (motivo + tamanhos como referência) / Sem correspondência. Quem decide os ambíguos é
 quem está pilotando o produto, não um proxy automático.
 
-## Acesso ao bucket: público — domínio é `r2.dev` por AGORA, domínio customizado é o alvo permanente
+## Acesso ao bucket: público, Public Development URL do R2 (`r2.dev`) — decisão fechada
 
 **Decisão de controle de acesso (permanente): público, sem URL assinada.** Vídeo de demonstração
 de execução de exercício não é o produto — tem equivalente grátis em qualquer plataforma de
@@ -67,26 +74,29 @@ decisão que o registro de entrega do PDF** (`PENDENCIAS_USERDETAIL_...md`) — 
 com o volume porque envolve responsabilidade clínica assinada por profissional; aqui não, então
 não se aplica a mesma régua de "resolver antes de escalar".
 
-**Decisão de DOMÍNIO (temporária, corrigida 2026-09-05): Public Development URL do R2**
-(`https://pub-b8a8c93fcde740fcb7ad36f410c9737f.r2.dev`, bucket `videos`), não `videos.ybytu.app`.
+**Domínio: Public Development URL do bucket** (`https://pub-b8a8c93fcde740fcb7ad36f410c9737f.r2.dev`,
+bucket `videos`). Custom Domain (`videos.ybytu.app`) foi avaliado e descartado, não só adiado —
+ver motivo abaixo.
 
-Motivo da correção: Custom Domain do R2 exige que o domínio já seja uma zona ativa na conta
-Cloudflare — `ybytu.app` não é (confirmado no formulário do painel). Migrar a zona pro Cloudflare
-agora arriscaria mexer em DNS que já funciona (WordPress, Resend, Vercel) por uma tela que não é
-o produto — desproporcional pro que essa mudança vale hoje.
+**Por que Custom Domain está fora, não só adiado:** o R2 Custom Domain exige que o domínio já
+seja uma zona ativa na conta Cloudflare. `ybytu.app` não é. Colocar `ybytu.app` no Cloudflare
+exige um de dois caminhos: mover os nameservers do domínio inteiro pra lá (afeta WordPress,
+Resend e Vercel, que já funcionam hoje via OVH/DNS atual — risco real por um ganho que é só
+exibir vídeo de exercício), ou usar o modo de onboarding parcial (CNAME) — que a Cloudflare
+restringe a planos pagos/Enterprise, não disponível no plano atual. Nenhum dos dois se justifica
+pra este caso de uso. Fica registrado como opção futura caso o domínio inteiro venha a migrar pro
+Cloudflare por outro motivo — não como próximo passo natural desta migração.
 
-**`r2.dev` continua sendo domínio de teste, não de produção — o motivo do rate-limit mais
-agressivo (documentado pelo próprio Cloudflare, sem SLA) não deixou de valer.** Avaliado pra este
-volume: piloto com poucos alunos, poucos vídeos por sessão, fica bem abaixo de qualquer limiar
-razoável de anti-abuso — aceitável por agora, não pra sempre. **Migrar pra domínio próprio depois
-do piloto**, quando adicionar `ybytu.app` ao Cloudflare puder ser feito com calma, sem risco de
-mexer no DNS que já está no ar. Custo da troca então: uma linha (`getVideoUrl`/`getThumbnailUrl`),
-porque o banco guarda só a chave do objeto, nunca a URL resolvida (ver seção abaixo) — nenhuma
-das 297 linhas muda.
+**`r2.dev` é domínio de teste da Cloudflare, com rate-limit mais agressivo e sem SLA — avaliado e
+aceito pra este volume.** Piloto com poucos alunos, poucos vídeos por sessão fica bem abaixo de
+qualquer limiar razoável de anti-abuso. Se algum dia isso deixar de ser verdade (sinal: erro 429
+específico de rate-limit), a correção é uma linha (`getVideoUrl`/`getThumbnailUrl`), porque o
+banco guarda só a chave do objeto, nunca a URL resolvida (ver seção abaixo) — nenhuma das 297
+linhas muda.
 
-`r2.dev` não é sobre custo — confirmado que R2 não cobra egresso em nenhum caminho (público
-direto, domínio customizado, `r2.dev`, ou atrás de Worker/URL assinada); a escolha entre os dois
-domínios é só sobre confiabilidade em produção (rate-limit), neutra em preço.
+Domínio não é decisão de custo — confirmado que R2 não cobra egresso em nenhum caminho (público
+direto, domínio customizado, `r2.dev`, ou atrás de Worker/URL assinada); a escolha é só sobre
+confiabilidade em produção, neutra em preço.
 
 ## Banco: chave do objeto, não URL completa — porta pra URL assinada aberta de graça
 
