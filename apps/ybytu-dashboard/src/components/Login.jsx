@@ -88,11 +88,15 @@ const handleLogin = async (e) => {
               <h2 style={{ fontSize: '42px', lineHeight: 1.05, fontWeight: 900, margin: '0 0 18px', textWrap: 'balance' }}>O painel que move<br/>treino e nutrição.</h2>
               <p style={{ fontSize: '16px', lineHeight: 1.6, opacity: .92, maxWidth: '380px', margin: 0, fontWeight: 400 }}>Gerencie usuários, planos e a base de conteúdo do ecossistema Ybytu num só lugar.</p>
             </div>
-            <div style={{ display: 'flex', gap: '28px' }}>
-              <div><p style={{ fontSize: '28px', fontWeight: 900, margin: 0 }}>12k+</p><p style={{ fontSize: '12px', opacity: .85, margin: '2px 0 0', fontWeight: 600, letterSpacing: '.04em' }}>USUÁRIOS</p></div>
-              <div><p style={{ fontSize: '28px', fontWeight: 900, margin: 0 }}>1.4k</p><p style={{ fontSize: '12px', opacity: .85, margin: '2px 0 0', fontWeight: 600, letterSpacing: '.04em' }}>ALIMENTOS</p></div>
-              <div><p style={{ fontSize: '28px', fontWeight: 900, margin: 0 }}>99.9%</p><p style={{ fontSize: '12px', opacity: .85, margin: '2px 0 0', fontWeight: 600, letterSpacing: '.04em' }}>UPTIME</p></div>
-            </div>
+            {/* Faixa "12k+ USUÁRIOS / 1.4k ALIMENTOS / 99.9% UPTIME" removida
+                2026-09-05 -- eram os números de exemplo do mockup, nunca
+                trocados por dado real ("1.4k alimentos" chegou a afirmar algo
+                factualmente falso sobre o próprio catálogo, que tem 486). O
+                mockup (Login.dc.html) também não prevê conteúdo alternativo
+                pra esse espaço -- não há dado real equivalente pra pôr aqui
+                hoje, então o painel fica só com logo + headline (o
+                justify-content: space-between do container pai já distribui
+                o espaço sem ficar vazio). */}
           </div>
         </div>
 

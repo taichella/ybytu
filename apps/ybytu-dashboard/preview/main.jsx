@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import Exercises from '../src/components/Exercises.jsx';
 import ExerciseEditor from '../src/components/ExerciseEditor.jsx';
+import Login from '../src/components/Login.jsx';
+import Users from '../src/components/Users.jsx';
 import '../src/index.css';
 
 // Registro de telas disponíveis pro harness -- adicione uma entrada aqui pra
@@ -13,6 +15,8 @@ import '../src/index.css';
 const SCREENS = {
   exercises: Exercises,
   'exercise-editor': ExerciseEditor,
+  login: Login,
+  users: Users,
 };
 
 const screenName = new URLSearchParams(window.location.search).get('screen') || 'exercises';
