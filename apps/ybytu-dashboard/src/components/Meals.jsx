@@ -122,7 +122,7 @@ export default function Meals() {
           {!loading && !error && (
             <div className="yb-work-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(310px, 1fr))', gap: '18px' }}>
               {filtered.map((m) => (
-                <div key={m.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <div key={m.id} className="yb-hover-card" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ position: 'relative' }}>
                     <div style={{ width: '100%', height: '110px', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '28px', borderBottom: '1px solid var(--border)' }}>
                       {MEAL_TYPE_ICON[m.meal_type] ?? '🍽️'}

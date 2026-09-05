@@ -340,7 +340,7 @@ export default function Exercises() {
                 {paged.map((ex) => {
                   const d = cardData(ex);
                   return (
-                    <div key={ex.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <div key={ex.id} className="yb-hover-card" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                       {/* Slot de mídia (150px) -- image_url está vazio em 298/298
                           hoje, então na prática cai sempre no placeholder do
                           design até a migração dos vídeos pro R2 acontecer

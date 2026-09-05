@@ -97,7 +97,7 @@ export default function MealPlans() {
               {filtered.map((p, idx) => {
                 const goals = (Array.isArray(p.goals_ids) ? p.goals_ids : []).map((g) => goalName.get(g) ?? g);
                 return (
-                  <div key={p.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div key={p.id} className="yb-hover-card" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ height: '64px', position: 'relative', background: COVER_GRADIENTS[idx % COVER_GRADIENTS.length], display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '14px' }}>
                       <span style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: '7px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', background: 'rgba(0,0,0,.28)', color: '#fff' }}>{goals[0] ?? 'Sem objetivo'}</span>
                       {p.created_by_ai && <span style={{ display: 'inline-flex', padding: '4px 10px', borderRadius: '7px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', background: 'rgba(255,255,255,.92)', color: '#7c3aed' }}>IA</span>}
