@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#F8F9FA; --surface:#FFFFFF; --surface-2:#F1F5F9; --border:#E2E8F0; --text:#1A202C; --muted:#718096; --field:#F8F9FA;
+    --success:#16a34a; --info:#3b82f6; --warning:#d97706; --danger:#ef4444; --purple:#a855f7; }
+  :root[data-theme="dark"]{ --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --border:#333333; --text:#DBD9D8; --muted:#9C9C9C; --field:#161616; --brand-soft:rgba(245,95,22,.14); }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  @keyframes ybToastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  @keyframes ybFadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes ybPop{0%{transform:scale(.94);opacity:0}100%{transform:scale(1);opacity:1}}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;} ::-webkit-scrollbar-track{background:transparent;}
+  a{color:inherit;}
+</style>
+</helmet>
+
+<div style="display:flex;height:100vh;width:100%;overflow:hidden;background:var(--bg);color:var(--text);">
+
+  <!-- Section nav -->
+  <aside style="width:248px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;">
+    <div style="height:72px;display:flex;align-items:center;gap:11px;padding:0 22px;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;background:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(245,95,22,.3);"><svg viewBox="119 94 275 323" style="width:20px;height:auto;" fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg></span>
+      <div><p style="margin:0;font-weight:900;font-size:15px;letter-spacing:.02em;">Ybytu</p><p style="margin:0;font-size:11px;font-weight:700;color:var(--brand);letter-spacing:.06em;">DESIGN SYSTEM</p></div>
+    </div>
+    <nav style="flex:1;overflow-y:auto;padding:16px 0;">
+      <p style="font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;padding:0 22px;margin:6px 0 6px;">Fundamentos</p>
+      <a href="#brand" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Marca</a>
+      <a href="#cores" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Cores & Temas</a>
+      <a href="#tipografia" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Tipografia</a>
+      <a href="#fundacao" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Raio, Espaço & Sombra</a>
+      <a href="#icones" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Ícones</a>
+      <p style="font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;padding:0 22px;margin:18px 0 6px;">Componentes</p>
+      <a href="#botoes" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Botões</a>
+      <a href="#formularios" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Formulários</a>
+      <a href="#badges" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Badges & Status</a>
+      <a href="#avatares" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Avatares</a>
+      <a href="#abas" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Abas & Segmentos</a>
+      <a href="#cards" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Cards</a>
+      <a href="#tabela" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Tabela</a>
+      <a href="#progresso" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Progresso & Macros</a>
+      <a href="#feedback" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Feedback & Overlays</a>
+      <a href="#navmobile" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Navegação & Mobile</a>
+      <p style="font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;padding:0 22px;margin:18px 0 6px;">Diretrizes</p>
+      <a href="#guidelines" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Boas práticas</a>
+      <a href="#handoff" style="{{ navLink }}" style-hover="background:var(--surface-2);color:var(--brand);">Tokens & handoff</a>
+    </nav>
+  </aside>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <!-- Top bar -->
+    <header style="height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:20px;">
+      <div>
+        <h2 style="margin:0;font-size:18px;font-weight:900;">Guia de Estilo</h2>
+        <p style="margin:1px 0 0;font-size:12px;color:var(--muted);font-weight:600;">Referência viva · tokens, tipografia e componentes</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:8px;background:var(--field);border:1px solid var(--border);border-radius:999px;padding:5px;">
+          <button onClick="{{ setLight }}" style="{{ themeLight }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg> Light</button>
+          <button onClick="{{ setDark }}" style="{{ themeDark }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg> Dark</button>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;overflow-y:auto;padding:36px 36px 120px;scroll-behavior:smooth;">
+      <div style="max-width:1080px;margin:0 auto;">
+
+        <!-- Intro -->
+        <div style="margin-bottom:46px;">
+          <p style="font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--brand);margin:0 0 10px;text-transform:uppercase;">Ybytu Platform · v1.0</p>
+          <h1 style="font-size:38px;font-weight:900;letter-spacing:-.03em;margin:0 0 12px;line-height:1.05;text-wrap:balance;">Sistema de Design do Dashboard Admin</h1>
+          <p style="font-size:16px;color:var(--muted);line-height:1.6;max-width:680px;margin:0;">A linguagem visual que unifica os módulos de Treino, Nutrição e Gestão. Tudo aqui suporta os temas claro e escuro via tokens semânticos — alterne no topo para ver cada componente reagir.</p>
+        </div>
+
+        <!-- ============ MARCA ============ -->
+        <section id="brand" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">01</span><h2 style="{{ secTitle }}">Marca</h2></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">
+            <div style="{{ card }}padding:0;overflow:hidden;">
+              <div style="background:linear-gradient(150deg,#F55F16 0%,#FF7A3D 100%);padding:34px;display:flex;align-items:center;justify-content:center;">
+                <svg viewBox="119 94 275 323" style="width:72px;height:auto;color:#fff;" fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
+              </div>
+              <div style="padding:16px 18px;"><p style="margin:0;font-weight:800;font-size:14px;">Símbolo</p><p style="margin:3px 0 0;font-size:12px;color:var(--muted);">Montanha Ybytu · usar sobre laranja ou superfície</p></div>
+            </div>
+            <div style="{{ card }}display:flex;flex-direction:column;justify-content:center;gap:18px;">
+              <div style="display:flex;align-items:center;gap:11px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:var(--brand);color:#fff;"><svg viewBox="119 94 275 323" style="width:22px;height:auto;" fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg></span><span style="font-weight:900;font-size:20px;letter-spacing:.02em;">Ybytu <span style="color:var(--brand);font-size:12px;">ADMIN</span></span></div>
+              <div style="height:1px;background:var(--border);"></div>
+              <p style="margin:0;font-size:13px;color:var(--muted);line-height:1.6;">Lockup horizontal para topo do app. O selo <strong style="color:var(--text);">ADMIN</strong> diferencia o painel do app do usuário.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ CORES ============ -->
+        <section id="cores" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">02</span><h2 style="{{ secTitle }}">Cores & Temas</h2></div>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;margin:0 0 22px;max-width:680px;">Tokens semânticos — nunca cores cruas nos componentes. Cada token resolve para um valor diferente em claro/escuro. O laranja da marca é o único constante entre os temas.</p>
+
+          <p style="font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 12px;">Marca</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:26px;">
+            <sc-for list="{{ brandSwatches }}" as="s" hint-placeholder-count="3">
+              <div style="{{ card }}padding:0;overflow:hidden;">
+                <div style="height:72px;background:{{ s.value }};"></div>
+                <div style="padding:11px 13px;"><p style="margin:0;font-family:monospace;font-size:12px;font-weight:700;">{{ s.token }}</p><p style="margin:3px 0 0;font-size:11px;color:var(--muted);">{{ s.hex }}</p></div>
+              </div>
+            </sc-for>
+          </div>
+
+          <p style="font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 12px;">Superfícies & Texto <span style="color:var(--brand);">· valor muda por tema</span></p>
+          <div style="{{ card }}padding:0;overflow:hidden;margin-bottom:26px;">
+            <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;padding:11px 18px;background:var(--bg);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);">
+              <span>Token</span><span>Light</span><span>Dark</span>
+            </div>
+            <sc-for list="{{ surfaceTokens }}" as="t" hint-placeholder-count="7">
+              <div style="display:grid;grid-template-columns:1.4fr 1fr 1fr;align-items:center;padding:11px 18px;border-top:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:11px;"><span style="width:26px;height:26px;border-radius:7px;background:{{ t.swatch }};border:1px solid var(--border);flex-shrink:0;"></span><span style="font-family:monospace;font-size:12px;font-weight:700;">{{ t.token }}</span></div>
+                <span style="font-family:monospace;font-size:12px;color:var(--muted);">{{ t.light }}</span>
+                <span style="font-family:monospace;font-size:12px;color:var(--muted);">{{ t.dark }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <p style="font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin:0 0 12px;">Semânticas (status & dados)</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
+            <sc-for list="{{ semanticSwatches }}" as="s" hint-placeholder-count="5">
+              <div style="{{ card }}display:flex;align-items:center;gap:11px;padding:13px;">
+                <span style="width:30px;height:30px;border-radius:8px;background:{{ s.value }};flex-shrink:0;"></span>
+                <div style="min-width:0;"><p style="margin:0;font-size:12px;font-weight:800;">{{ s.label }}</p><p style="margin:2px 0 0;font-family:monospace;font-size:11px;color:var(--muted);">{{ s.hex }}</p></div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- ============ TIPOGRAFIA ============ -->
+        <section id="tipografia" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">03</span><h2 style="{{ secTitle }}">Tipografia</h2></div>
+          <div style="{{ card }}display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:18px;">
+            <div><p style="margin:0;font-size:13px;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.08em;">Família</p><p style="margin:6px 0 0;font-size:40px;font-weight:900;letter-spacing:-.02em;">Inter</p><p style="margin:4px 0 0;font-size:13px;color:var(--muted);">Pesos 300–900 · títulos em 900 / uppercase</p></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <sc-for list="{{ weights }}" as="w" hint-placeholder-count="5">
+                <div style="text-align:center;"><p style="margin:0;font-size:26px;font-weight:{{ w.val }};">Aa</p><p style="margin:2px 0 0;font-size:11px;color:var(--muted);font-weight:600;">{{ w.name }}</p></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="{{ card }}">
+            <sc-for list="{{ typeScale }}" as="t" hint-placeholder-count="6">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;padding:14px 0;border-bottom:1px solid var(--border);">
+                <p style="margin:0;font-size:{{ t.px }}px;font-weight:{{ t.weight }};letter-spacing:{{ t.ls }};text-transform:{{ t.transform }};line-height:1.1;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.sample }}</p>
+                <div style="text-align:right;flex-shrink:0;"><p style="margin:0;font-size:13px;font-weight:800;">{{ t.label }}</p><p style="margin:2px 0 0;font-size:12px;color:var(--muted);">{{ t.meta }}</p></div>
+              </div>
+            </sc-for>
+            <p style="margin:14px 0 0;font-size:12px;color:var(--muted);">Mínimo de 24px em telas de slide; 12px é o piso para o painel.</p>
+          </div>
+        </section>
+
+        <!-- ============ FUNDAÇÃO ============ -->
+        <section id="fundacao" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">04</span><h2 style="{{ secTitle }}">Raio, Espaço & Sombra</h2></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">
+            <div style="{{ card }}">
+              <p style="margin:0 0 16px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Raio de canto</p>
+              <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;">
+                <sc-for list="{{ radii }}" as="r" hint-placeholder-count="4">
+                  <div style="text-align:center;"><div style="width:56px;height:56px;background:var(--brand-soft);border:1.5px solid var(--brand);border-radius:{{ r.px }};border-bottom-left-radius:0;border-bottom-right-radius:0;"></div><p style="margin:7px 0 0;font-size:12px;font-weight:700;">{{ r.label }}</p><p style="margin:1px 0 0;font-size:11px;color:var(--muted);">{{ r.px }}</p></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="{{ card }}">
+              <p style="margin:0 0 16px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Escala de espaço</p>
+              <div style="display:flex;flex-direction:column;gap:9px;">
+                <sc-for list="{{ spacing }}" as="s" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:12px;"><span style="font-family:monospace;font-size:12px;color:var(--muted);width:42px;flex-shrink:0;">{{ s.px }}</span><div style="height:14px;width:{{ s.px }};background:var(--brand);border-radius:3px;"></div></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="{{ card }}">
+              <p style="margin:0 0 16px;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Elevação</p>
+              <div style="display:flex;gap:18px;flex-wrap:wrap;">
+                <div style="text-align:center;"><div style="width:72px;height:54px;background:var(--surface);border:1px solid var(--border);border-radius:12px;"></div><p style="margin:9px 0 0;font-size:12px;font-weight:700;">Plano</p><p style="margin:1px 0 0;font-size:11px;color:var(--muted);">borda 1px</p></div>
+                <div style="text-align:center;"><div style="width:72px;height:54px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 12px rgba(245,95,22,.25);"></div><p style="margin:9px 0 0;font-size:12px;font-weight:700;">Ação</p><p style="margin:1px 0 0;font-size:11px;color:var(--muted);">brand glow</p></div>
+                <div style="text-align:center;"><div style="width:72px;height:54px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.28);"></div><p style="margin:9px 0 0;font-size:12px;font-weight:700;">Overlay</p><p style="margin:1px 0 0;font-size:11px;color:var(--muted);">modal/toast</p></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ ÍCONES ============ -->
+        <section id="icones" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">05</span><h2 style="{{ secTitle }}">Ícones</h2></div>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;margin:0 0 18px;max-width:680px;">Estilo Lucide — contorno, <strong style="color:var(--text);">stroke 2</strong>, cantos arredondados. Tamanhos 14–22px conforme contexto. Cor herda de <code style="font-family:monospace;background:var(--surface-2);padding:1px 6px;border-radius:5px;">currentColor</code>.</p>
+          <div style="{{ card }}display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;">
+            <sc-for list="{{ icons }}" as="i" hint-placeholder-count="10">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border-radius:12px;color:var(--text);" style-hover="background:var(--surface-2);color:var(--brand);">
+                <span style="display:flex;">{{ i.svg }}</span>
+                <span style="font-size:11px;color:var(--muted);font-weight:600;">{{ i.name }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- ============ BOTÕES ============ -->
+        <section id="botoes" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">06</span><h2 style="{{ secTitle }}">Botões</h2></div>
+          <div style="{{ card }}display:flex;flex-direction:column;gap:22px;">
+            <div>
+              <p style="{{ exLabel }}">Variantes</p>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                <button style="display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:11px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Primário</button>
+                <button style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:11px;padding:11px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);">Secundário</button>
+                <button style="background:var(--brand-soft);color:var(--brand);border:none;border-radius:11px;padding:11px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="background:var(--brand);color:#fff;">Suave</button>
+                <button style="background:none;color:var(--muted);border:none;border-radius:11px;padding:11px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="color:var(--brand);">Ghost</button>
+                <button style="display:flex;align-items:center;gap:7px;background:rgba(239,68,68,.1);color:var(--danger);border:none;border-radius:11px;padding:11px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="background:var(--danger);color:#fff;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg> Excluir</button>
+              </div>
+            </div>
+            <div style="height:1px;background:var(--border);"></div>
+            <div style="display:flex;gap:40px;flex-wrap:wrap;">
+              <div>
+                <p style="{{ exLabel }}">Tamanhos</p>
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                  <button style="background:var(--brand);color:#fff;border:none;border-radius:9px;padding:7px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">Pequeno</button>
+                  <button style="background:var(--brand);color:#fff;border:none;border-radius:11px;padding:11px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">Médio</button>
+                  <button style="background:var(--brand);color:#fff;border:none;border-radius:12px;padding:14px 24px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">Grande</button>
+                </div>
+              </div>
+              <div>
+                <p style="{{ exLabel }}">Ícone</p>
+                <div style="display:flex;gap:12px;align-items:center;">
+                  <button style="width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg></button>
+                  <button style="width:40px;height:40px;border-radius:10px;border:none;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ FORMULÁRIOS ============ -->
+        <section id="formularios" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">07</span><h2 style="{{ secTitle }}">Formulários</h2></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;">
+            <div style="{{ card }}display:flex;flex-direction:column;gap:16px;">
+              <div>
+                <label style="{{ fLabel }}">Campo de texto</label>
+                <input type="text" placeholder="Digite aqui…" style="{{ input }}" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);">
+              </div>
+              <div>
+                <label style="{{ fLabel }}">Com ícone</label>
+                <div style="position:relative;">
+                  <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
+                  <input type="text" placeholder="Buscar…" style="width:100%;padding:12px 14px 12px 42px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);">
+                </div>
+              </div>
+              <div>
+                <label style="{{ fLabel }}">Seleção</label>
+                <select style="{{ input }}cursor:pointer;"><option>Opção A</option><option>Opção B</option></select>
+              </div>
+            </div>
+            <div style="{{ card }}display:flex;flex-direction:column;gap:18px;">
+              <div>
+                <label style="{{ fLabel }}">Área de texto</label>
+                <textarea rows="3" placeholder="Descrição…" style="{{ input }}resize:vertical;"></textarea>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:13px;">
+                <label style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;cursor:pointer;"><input type="checkbox" checked style="width:17px;height:17px;accent-color:var(--brand);"> Checkbox marcado</label>
+                <div onClick="{{ toggleDemo }}" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+                  <span style="font-size:14px;font-weight:600;">Interruptor (toggle)</span>
+                  <span style="{{ demoTrack }}"><span style="{{ demoThumb }}"></span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ BADGES ============ -->
+        <section id="badges" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">08</span><h2 style="{{ secTitle }}">Badges & Status</h2></div>
+          <div style="{{ card }}display:flex;flex-direction:column;gap:22px;">
+            <div><p style="{{ exLabel }}">Assinatura</p><div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <span style="display:inline-flex;padding:4px 11px;border-radius:7px;font-size:12px;font-weight:800;background:var(--surface-2);color:var(--muted);">Free</span>
+              <span style="display:inline-flex;padding:4px 11px;border-radius:7px;font-size:12px;font-weight:800;background:rgba(59,130,246,.12);color:var(--info);">Start</span>
+              <span style="display:inline-flex;padding:4px 11px;border-radius:7px;font-size:12px;font-weight:800;background:rgba(245,95,22,.14);color:var(--brand);">Pro</span>
+            </div></div>
+            <div><p style="{{ exLabel }}">Nível</p><div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <span style="display:inline-flex;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:var(--surface-2);color:var(--muted);">Iniciante</span>
+              <span style="display:inline-flex;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:rgba(59,130,246,.12);color:var(--info);">Intermediário</span>
+              <span style="display:inline-flex;padding:3px 9px;border-radius:6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:rgba(245,95,22,.14);color:var(--brand);">Avançado</span>
+            </div></div>
+            <div><p style="{{ exLabel }}">Status</p><div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-size:11px;font-weight:800;background:rgba(22,163,74,.12);color:var(--success);"><span style="width:7px;height:7px;border-radius:50%;background:var(--success);"></span> Ativo</span>
+              <span style="display:inline-flex;padding:4px 11px;border-radius:999px;font-size:11px;font-weight:800;background:var(--surface-2);color:var(--muted);">Rascunho</span>
+              <span style="display:inline-flex;padding:4px 11px;border-radius:999px;font-size:11px;font-weight:800;background:rgba(217,119,6,.14);color:var(--warning);">Pendente</span>
+              <span style="display:inline-flex;padding:4px 11px;border-radius:999px;font-size:11px;font-weight:800;background:rgba(239,68,68,.12);color:var(--danger);">Falhou</span>
+            </div></div>
+            <div><p style="{{ exLabel }}">Tags & idiomas</p><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <span style="display:inline-flex;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--brand);color:#fff;">Vegano</span>
+              <span style="display:inline-flex;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--brand-soft);color:var(--brand);">Low carb</span>
+              <span style="display:inline-flex;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--text);border:1px solid var(--border);">Sem glúten</span>
+              <span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:800;background:var(--surface-2);color:var(--text);">PT</span>
+              <span style="display:inline-flex;align-items:center;justify-content:center;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:800;background:transparent;color:var(--muted);opacity:.5;border:1px dashed var(--border);">FR</span>
+            </div></div>
+          </div>
+        </section>
+
+        <!-- ============ AVATARES ============ -->
+        <section id="avatares" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">09</span><h2 style="{{ secTitle }}">Avatares</h2></div>
+          <div style="{{ card }}display:flex;gap:34px;flex-wrap:wrap;align-items:flex-end;">
+            <div><p style="{{ exLabel }}">Tamanhos</p><div style="display:flex;align-items:flex-end;gap:14px;">
+              <div style="width:32px;height:32px;border-radius:50%;background:#ec4899;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;">MS</div>
+              <div style="width:40px;height:40px;border-radius:50%;background:var(--info);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;">CE</div>
+              <div style="width:54px;height:54px;border-radius:50%;background:var(--success);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;">AC</div>
+              <div style="width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,#F55F16,#FF7A3D);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:26px;">A</div>
+            </div></div>
+            <div><p style="{{ exLabel }}">Paleta de iniciais</p><div style="display:flex;gap:9px;flex-wrap:wrap;">
+              <sc-for list="{{ avatarColors }}" as="c" hint-placeholder-count="6">
+                <div style="width:40px;height:40px;border-radius:50%;background:{{ c }};"></div>
+              </sc-for>
+            </div></div>
+          </div>
+        </section>
+
+        <!-- ============ ABAS ============ -->
+        <section id="abas" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">10</span><h2 style="{{ secTitle }}">Abas & Segmentos</h2></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;">
+            <div style="{{ card }}">
+              <p style="{{ exLabel }}">Abas (underline)</p>
+              <div style="display:flex;gap:6px;border-bottom:1px solid var(--border);">
+                <span style="font-size:14px;font-weight:700;padding:11px 16px;border-bottom:2px solid var(--brand);color:var(--brand);">Visão geral</span>
+                <span style="font-size:14px;font-weight:700;padding:11px 16px;border-bottom:2px solid transparent;color:var(--muted);">Saúde</span>
+                <span style="font-size:14px;font-weight:700;padding:11px 16px;border-bottom:2px solid transparent;color:var(--muted);">Planos</span>
+              </div>
+            </div>
+            <div style="{{ card }}">
+              <p style="{{ exLabel }}">Segmentos (pill)</p>
+              <div style="display:inline-flex;background:var(--field);border:1px solid var(--border);border-radius:10px;padding:4px;">
+                <span style="font-size:12px;font-weight:800;padding:7px 16px;border-radius:7px;background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.12);">Tabela</span>
+                <span style="font-size:12px;font-weight:800;padding:7px 16px;border-radius:7px;color:var(--muted);">Grade</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ CARDS ============ -->
+        <section id="cards" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">11</span><h2 style="{{ secTitle }}">Cards</h2></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
+                <span style="width:44px;height:44px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg></span>
+                <span style="display:flex;align-items:center;gap:3px;font-size:12px;font-weight:800;color:var(--success);background:rgba(22,163,74,.1);padding:3px 8px;border-radius:999px;">▲ 12%</span>
+              </div>
+              <p style="margin:0;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Stat card</p>
+              <p style="margin:5px 0 0;font-size:28px;font-weight:900;">12.450</p>
+            </div>
+            <div style="background:linear-gradient(135deg,#F55F16,#FF7A3D);border-radius:18px;padding:22px;color:#fff;position:relative;overflow:hidden;">
+              <svg viewBox="119 94 275 323" style="position:absolute;right:-30px;bottom:-30px;width:130px;opacity:.15;" fill="#fff"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
+              <p style="margin:0;font-size:11px;font-weight:800;letter-spacing:.05em;opacity:.9;text-transform:uppercase;">KPI destaque</p>
+              <p style="margin:8px 0 0;font-size:28px;font-weight:900;">R$ 142.500</p>
+              <p style="margin:6px 0 0;font-size:13px;font-weight:700;opacity:.95;">▲ 15,3% no mês</p>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+              <div style="height:70px;background:linear-gradient(135deg,#16a34a,#4ade80);"></div>
+              <div style="padding:16px;"><p style="margin:0;font-size:15px;font-weight:900;">Card de conteúdo</p><p style="margin:5px 0 0;font-size:13px;color:var(--muted);line-height:1.5;">Cabeçalho colorido + corpo. Usado em planos e refeições.</p></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ TABELA ============ -->
+        <section id="tabela" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">12</span><h2 style="{{ secTitle }}">Tabela</h2></div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+            <div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;white-space:nowrap;">
+              <thead><tr style="background:var(--bg);">
+                <th style="text-align:left;padding:13px 20px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Item</th>
+                <th style="text-align:left;padding:13px 16px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Categoria</th>
+                <th style="text-align:left;padding:13px 16px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Status</th>
+                <th style="text-align:right;padding:13px 20px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Ações</th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ tableRows }}" as="r" hint-placeholder-count="3">
+                <tr style="border-top:1px solid var(--border);" style-hover="background:var(--surface-2);">
+                  <td style="padding:13px 20px;"><div style="display:flex;align-items:center;gap:11px;"><span style="width:32px;height:32px;border-radius:9px;background:{{ r.iconBg }};color:{{ r.iconColor }};display:flex;align-items:center;justify-content:center;">{{ r.icon }}</span><span style="font-weight:700;font-size:14px;">{{ r.name }}</span></div></td>
+                  <td style="padding:13px 16px;font-size:13px;color:var(--muted);font-weight:600;">{{ r.cat }}</td>
+                  <td style="padding:13px 16px;"><span style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-size:11px;font-weight:800;background:{{ r.stBg }};color:{{ r.stColor }};">{{ r.status }}</span></td>
+                  <td style="padding:13px 20px;text-align:right;white-space:nowrap;">
+                    <button style="display:inline-flex;color:var(--muted);padding:6px;border-radius:8px;background:none;border:none;cursor:pointer;" style-hover="color:var(--brand);background:var(--brand-soft);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg></button>
+                    <button style="color:var(--muted);background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;" style-hover="color:var(--danger);background:rgba(239,68,68,.08);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg></button>
+                  </td>
+                </tr>
+                </sc-for>
+              </tbody>
+            </table></div>
+            <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted);background:var(--bg);">
+              <span>Mostrando <strong style="color:var(--text);">1–3</strong> de 3</span>
+              <div style="display:flex;gap:6px;"><button style="padding:6px 12px;border:none;border-radius:8px;background:var(--brand);color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;">1</button></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ PROGRESSO ============ -->
+        <section id="progresso" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">13</span><h2 style="{{ secTitle }}">Progresso & Macros</h2></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;">
+            <div style="{{ card }}">
+              <p style="{{ exLabel }}">Barras de adesão</p>
+              <div style="display:flex;flex-direction:column;gap:14px;">
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;color:var(--muted);">Alta</span><span style="font-size:13px;font-weight:800;color:var(--success);">88%</span></div><div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;"><div style="height:100%;width:88%;background:var(--success);border-radius:4px;"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;color:var(--muted);">Média</span><span style="font-size:13px;font-weight:800;color:var(--warning);">57%</span></div><div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;"><div style="height:100%;width:57%;background:var(--warning);border-radius:4px;"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;font-weight:700;color:var(--muted);">Baixa</span><span style="font-size:13px;font-weight:800;color:var(--danger);">22%</span></div><div style="height:8px;border-radius:4px;background:var(--surface-2);overflow:hidden;"><div style="height:100%;width:22%;background:var(--danger);border-radius:4px;"></div></div></div>
+              </div>
+            </div>
+            <div style="{{ card }}display:flex;align-items:center;gap:20px;">
+              <div style="text-align:center;">
+                <svg viewBox="0 0 42 42" style="width:120px;height:120px;transform:rotate(-90deg);">
+                  <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--surface-2)" stroke-width="5"/>
+                  <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--info)" stroke-width="5" stroke-dasharray="40 60" stroke-dashoffset="0"/>
+                  <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--warning)" stroke-width="5" stroke-dasharray="35 65" stroke-dashoffset="-40"/>
+                  <circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--purple)" stroke-width="5" stroke-dasharray="25 75" stroke-dashoffset="-75"/>
+                </svg>
+              </div>
+              <div style="flex:1;">
+                <p style="{{ exLabel }}">Anel de macros</p>
+                <div style="display:flex;flex-direction:column;gap:9px;">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--info);"></span><span style="font-weight:700;">Proteína</span><span style="margin-left:auto;color:var(--muted);font-weight:600;">40%</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--warning);"></span><span style="font-weight:700;">Carboidrato</span><span style="margin-left:auto;color:var(--muted);font-weight:600;">35%</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><span style="width:10px;height:10px;border-radius:3px;background:var(--purple);"></span><span style="font-weight:700;">Gordura</span><span style="margin-left:auto;color:var(--muted);font-weight:600;">25%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ FEEDBACK ============ -->
+        <section id="feedback" style="scroll-margin-top:20px;margin-bottom:30px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">14</span><h2 style="{{ secTitle }}">Feedback & Overlays</h2></div>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;margin:0 0 18px;max-width:680px;">Padrões reativos para criar / editar / excluir. Clique para ver o snackbar e o modal de confirmação ao vivo.</p>
+          <div style="{{ card }}display:flex;flex-direction:column;gap:22px;">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <button onClick="{{ showToast }}" style="display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:11px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg> Disparar snackbar</button>
+              <button onClick="{{ openModal }}" style="display:flex;align-items:center;gap:7px;background:rgba(239,68,68,.1);color:var(--danger);border:none;border-radius:11px;padding:11px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="background:var(--danger);color:#fff;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg> Abrir modal de exclusão</button>
+            </div>
+            <div style="height:1px;background:var(--border);"></div>
+            <div>
+              <p style="{{ exLabel }}">Estado vazio</p>
+              <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:36px 20px;background:var(--field);border-radius:14px;border:1px dashed var(--border);">
+                <span style="display:inline-flex;width:52px;height:52px;border-radius:15px;background:var(--surface-2);color:var(--muted);align-items:center;justify-content:center;margin-bottom:14px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
+                <p style="margin:0 0 4px;font-size:15px;font-weight:900;">Nenhum resultado</p>
+                <p style="margin:0;font-size:13px;color:var(--muted);">Ajuste os filtros ou adicione um novo item.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ NAVEGAÇÃO & MOBILE ============ -->
+        <section id="navmobile" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">15</span><div><h2 style="{{ secTitle }}">Navegação &amp; Mobile</h2></div></div>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;margin:0 0 18px;max-width:680px;">O painel usa sidebar fixa no desktop e <strong style="color:var(--text);">bottom tab bar</strong> abaixo de 860px. Item de menu, breadcrumb e nav inferior abaixo.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;">
+            <div style="{{ card }}">
+              <p style="{{ exLabel }}">Item de menu lateral</p>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <span style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:9px;font-size:14px;font-weight:700;color:var(--brand);background:var(--brand-soft);border-right:3px solid var(--brand);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Ativo</span>
+                <span style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:9px;font-size:14px;font-weight:600;color:var(--text);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75-1.06 4-2.94 1.5-2.25 2-5.5 2-7 0-2.5-1.5-4-3.5-4-1.5 0-2.5 1-3 1.5-.5-.5-1.5-1.5-3-1.5C5 7 3.5 8.5 3.5 11c0 1.5.5 4.75 2 7 1.25 1.88 2.5 2.94 4 2.94Z"></path></svg> Inativo</span>
+              </div>
+              <p style="{{ exLabel }}margin-top:18px;">Breadcrumb</p>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600;"><span>Exercícios</span><span>/</span><span style="color:var(--text);">Editar</span></div>
+            </div>
+            <div style="{{ card }}">
+              <p style="{{ exLabel }}">Bottom Tab Bar (&lt; 860px)</p>
+              <div style="border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface);">
+                <div style="height:54px;background:var(--field);display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:12px;font-weight:600;border-bottom:1px solid var(--border);">conteúdo da tela</div>
+                <div style="display:flex;justify-content:space-between;padding:8px 10px 10px;">
+                  <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9.5px;font-weight:800;color:var(--brand);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>Início</span>
+                  <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:var(--muted);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>Treino</span>
+                  <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:var(--muted);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75-1.06 4-2.94 1.5-2.25 2-5.5 2-7 0-2.5-1.5-4-3.5-4-1.5 0-2.5 1-3 1.5-.5-.5-1.5-1.5-3-1.5C5 7 3.5 8.5 3.5 11c0 1.5.5 4.75 2 7 1.25 1.88 2.5 2.94 4 2.94Z"></path></svg>Nutrição</span>
+                  <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:var(--muted);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>Usuários</span>
+                  <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9.5px;font-weight:700;color:var(--muted);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>Mais</span>
+                </div>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin:12px 0 0;line-height:1.5;">Tabelas viram <strong style="color:var(--text);">cards</strong>; construtores empilham painéis; safe-area respeitada.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ DIRETRIZES ============ -->
+        <section id="guidelines" style="scroll-margin-top:20px;margin-bottom:54px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">16</span><div><h2 style="{{ secTitle }}">Boas Práticas</h2></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+            <div style="{{ card }}border-color:rgba(22,163,74,.3);">
+              <p style="display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--success);text-transform:uppercase;margin:0 0 14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg> Faça</p>
+              <sc-for list="{{ dos }}" as="d" hint-placeholder-count="4">
+                <div style="display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line-2,var(--border));font-size:13.5px;line-height:1.5;"><span style="color:var(--success);flex-shrink:0;margin-top:3px;">●</span><span>{{ d }}</span></div>
+              </sc-for>
+            </div>
+            <div style="{{ card }}border-color:rgba(239,68,68,.3);">
+              <p style="display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--danger);text-transform:uppercase;margin:0 0 14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg> Evite</p>
+              <sc-for list="{{ donts }}" as="d" hint-placeholder-count="4">
+                <div style="display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line-2,var(--border));font-size:13.5px;line-height:1.5;"><span style="color:var(--danger);flex-shrink:0;margin-top:3px;">●</span><span>{{ d }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ TOKENS & HANDOFF ============ -->
+        <section id="handoff" style="scroll-margin-top:20px;margin-bottom:30px;">
+          <div style="{{ secHead }}"><span style="{{ secNum }}">17</span><div><h2 style="{{ secTitle }}">Tokens &amp; Handoff</h2></div></div>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;margin:0 0 18px;max-width:680px;">Os mesmos tokens deste guia estão disponíveis como arquivos para o time de desenvolvimento. Use <code style="font-family:monospace;background:var(--surface-2);padding:1px 6px;border-radius:5px;">var(--yb-*)</code> e troque o tema com <code style="font-family:monospace;background:var(--surface-2);padding:1px 6px;border-radius:5px;">data-theme="dark"</code>.</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+            <a href="tokens.css" download style="{{ card }}display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;" style-hover="border-color:var(--brand);">
+              <span style="width:44px;height:44px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900;font-size:12px;font-family:monospace;">CSS</span>
+              <div style="flex:1;"><p style="margin:0;font-size:14px;font-weight:800;">tokens.css</p><p style="margin:2px 0 0;font-size:12px;color:var(--muted);">Variáveis CSS · light/dark</p></div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>
+            </a>
+            <a href="tokens.json" download style="{{ card }}display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;" style-hover="border-color:var(--brand);">
+              <span style="width:44px;height:44px;border-radius:12px;background:rgba(59,130,246,.12);color:var(--info);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900;font-size:11px;font-family:monospace;">JSON</span>
+              <div style="flex:1;"><p style="margin:0;font-size:14px;font-weight:800;">tokens.json</p><p style="margin:2px 0 0;font-size:12px;color:var(--muted);">Tokens estruturados · Figma/Tailwind</p></div>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>
+            </a>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Snackbar -->
+  <sc-if value="{{ toastShown }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:90;display:flex;align-items:center;gap:11px;background:var(--text);color:var(--bg);padding:13px 18px;border-radius:13px;box-shadow:0 12px 40px rgba(0,0,0,.28);animation:ybToastIn .25s ease-out both;">
+    <span style="display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--success);color:#fff;align-items:center;justify-content:center;flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+    <span style="font-size:14px;font-weight:700;">Item salvo com sucesso</span>
+    <button onClick="{{ hideToast }}" style="background:none;border:none;color:var(--bg);opacity:.6;cursor:pointer;display:flex;padding:2px;margin-left:6px;" style-hover="opacity:1;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+  </div>
+  </sc-if>
+
+  <!-- Modal -->
+  <sc-if value="{{ modalShown }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:95;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:24px;animation:ybFadeIn .2s ease-out both;">
+    <div onClick="{{ stop }}" style="width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.4);animation:ybPop .22s ease-out both;">
+      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;">
+        <span style="width:46px;height:46px;border-radius:13px;background:rgba(239,68,68,.12);color:var(--danger);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg></span>
+        <div><h3 style="margin:0;font-size:18px;font-weight:900;">Excluir exercício?</h3><p style="margin:7px 0 0;font-size:14px;color:var(--muted);line-height:1.55;">Esta ação não pode ser desfeita. O exercício será removido de todos os planos que o utilizam.</p></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;">
+        <button onClick="{{ closeModal }}" style="background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:11px;padding:11px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--muted);">Cancelar</button>
+        <button onClick="{{ confirmDelete }}" style="display:flex;align-items:center;gap:7px;background:var(--danger);color:#fff;border:none;border-radius:11px;padding:11px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="background:#dc2626;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg> Excluir</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960}}">
+class Component extends DCLogic {
+  state = { theme: 'dark', toast: false, modal: false, demo: true };
+  componentDidMount(){ this.applyTheme(); }
+  componentWillUnmount(){ if (this._t) clearTimeout(this._t); }
+  applyTheme(){ try{ document.documentElement.dataset.theme = this.state.theme; }catch(e){} }
+  setLight = () => this.setState({ theme: 'light' }, this.applyTheme);
+  setDark = () => this.setState({ theme: 'dark' }, this.applyTheme);
+  toggleDemo = () => this.setState(s => ({ demo: !s.demo }));
+  showToast = () => { this.setState({ toast: true }); if (this._t) clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: false }), 3000); };
+  hideToast = () => { if (this._t) clearTimeout(this._t); this.setState({ toast: false }); };
+  openModal = () => this.setState({ modal: true });
+  closeModal = () => this.setState({ modal: false });
+  stop = (e) => { if (e && e.stopPropagation) e.stopPropagation(); };
+  confirmDelete = () => { this.setState({ modal: false }); this.showToast(); };
+
+  ic(path, extra){
+    return React.createElement('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+      ...path.map((d, i) => React.createElement('path', { key: 'p'+i, d })),
+      ...(extra || []));
+  }
+
+  renderVals(){
+    const dark = this.state.theme === 'dark';
+    const navLink = 'display:block;padding:9px 22px;font-size:13.5px;font-weight:600;color:var(--text);text-decoration:none;border-radius:0;';
+    const card = 'background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;';
+    const secHead = 'display:flex;align-items:center;gap:13px;margin-bottom:18px;';
+    const secNum = 'display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:9px;background:var(--brand-soft);color:var(--brand);font-weight:900;font-size:13px;';
+    const secTitle = 'margin:0;font-size:21px;font-weight:900;letter-spacing:-.02em;';
+    const exLabel = 'margin:0 0 12px;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;';
+    const fLabel = 'display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;';
+    const input = 'width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;outline:none;';
+    const themeBtn = (on) => 'display:flex;align-items:center;gap:6px;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:7px 14px;border-radius:999px;' + (on ? 'background:var(--brand);color:#fff;' : 'background:transparent;color:var(--muted);');
+    const track = (on) => 'flex-shrink:0;width:42px;height:24px;border-radius:999px;position:relative;transition:background .2s;background:' + (on ? 'var(--brand)' : 'var(--surface-2)') + ';border:1px solid ' + (on ? 'var(--brand)' : 'var(--border)') + ';';
+    const thumb = (on) => 'position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(' + (on ? '18px' : '0') + ');box-shadow:0 1px 3px rgba(0,0,0,.25);';
+
+    const sw = (token, value, hex) => ({ token, value, hex });
+
+    return {
+      navLink, card, secHead, secNum, secTitle, exLabel, fLabel, input,
+      setLight: this.setLight, setDark: this.setDark,
+      themeLight: themeBtn(!dark), themeDark: themeBtn(dark),
+      toggleDemo: this.toggleDemo, demoTrack: track(this.state.demo), demoThumb: thumb(this.state.demo),
+      showToast: this.showToast, hideToast: this.hideToast, toastShown: this.state.toast,
+      openModal: this.openModal, closeModal: this.closeModal, confirmDelete: this.confirmDelete, stop: this.stop, modalShown: this.state.modal,
+
+      brandSwatches: [
+        sw('--brand', 'var(--brand)', '#F55F16'),
+        sw('--brand-hover', 'var(--brand-hover)', '#FF7A3D'),
+        sw('--brand-soft', 'var(--brand-soft)', 'rgba(245,95,22,.10)'),
+      ],
+      surfaceTokens: [
+        { token:'--bg',        swatch:'var(--bg)',        light:'#F8F9FA', dark:'#121212' },
+        { token:'--surface',   swatch:'var(--surface)',   light:'#FFFFFF', dark:'#1E1E1E' },
+        { token:'--surface-2', swatch:'var(--surface-2)', light:'#F1F5F9', dark:'#2A2A2A' },
+        { token:'--field',     swatch:'var(--field)',     light:'#F8F9FA', dark:'#161616' },
+        { token:'--border',    swatch:'var(--border)',    light:'#E2E8F0', dark:'#333333' },
+        { token:'--text',      swatch:'var(--text)',      light:'#1A202C', dark:'#DBD9D8' },
+        { token:'--muted',     swatch:'var(--muted)',     light:'#718096', dark:'#9C9C9C' },
+      ],
+      semanticSwatches: [
+        { label:'Success', value:'var(--success)', hex:'#16a34a' },
+        { label:'Info',    value:'var(--info)',    hex:'#3b82f6' },
+        { label:'Warning', value:'var(--warning)', hex:'#d97706' },
+        { label:'Danger',  value:'var(--danger)',  hex:'#ef4444' },
+        { label:'Purple',  value:'var(--purple)',  hex:'#a855f7' },
+      ],
+      weights: [
+        { name:'Regular', val:400 }, { name:'Medium', val:500 }, { name:'Semibold', val:600 }, { name:'Bold', val:700 }, { name:'Black', val:900 },
+      ],
+      typeScale: [
+        { label:'Display',  sample:'Visão Geral', px:38, weight:900, ls:'-.03em', transform:'none', meta:'900 · -3%' },
+        { label:'Título H1', sample:'Biblioteca de Exercícios', px:28, weight:900, ls:'-.02em', transform:'uppercase', meta:'900 · uppercase' },
+        { label:'Título H2', sample:'Distribuição de Planos', px:21, weight:900, ls:'-.02em', transform:'none', meta:'900' },
+        { label:'Título H3', sample:'Músculos Trabalhados', px:15, weight:900, ls:'.02em', transform:'uppercase', meta:'900 · uppercase' },
+        { label:'Corpo',    sample:'Texto padrão de parágrafo e descrições.', px:14, weight:500, ls:'normal', transform:'none', meta:'400–600' },
+        { label:'Rótulo',   sample:'LABEL DE CAMPO', px:12, weight:800, ls:'.04em', transform:'uppercase', meta:'800 · uppercase' },
+        { label:'Legenda',  sample:'há 5 min · metadados', px:12, weight:600, ls:'normal', transform:'none', meta:'600 · muted' },
+      ],
+      radii: [ { label:'sm', px:'8px' }, { label:'md', px:'12px' }, { label:'lg', px:'18px' }, { label:'pill', px:'999px' } ],
+      spacing: [ { px:'6px' }, { px:'12px' }, { px:'18px' }, { px:'22px' }, { px:'28px' } ],
+      icons: [
+        { name:'dashboard', svg:this.ic(['M3 3h7v9H3z','M14 3h7v5h-7z','M14 12h7v9h-7z','M3 16h7v5H3z']) },
+        { name:'usuários', svg:this.ic(['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2','M22 21v-2a4 4 0 0 0-3-3.87'], [React.createElement('circle',{key:'c',cx:9,cy:7,r:4})]) },
+        { name:'treino', svg:this.ic(['M22 12h-4l-3 9L9 3l-3 9H2']) },
+        { name:'nutrição', svg:this.ic(['M12 20.94c1.5 0 2.75-1.06 4-2.94 1.5-2.25 2-5.5 2-7 0-2.5-1.5-4-3.5-4-1.5 0-2.5 1-3 1.5-.5-.5-1.5-1.5-3-1.5C5 7 3.5 8.5 3.5 11c0 1.5.5 4.75 2 7 1.25 1.88 2.5 2.94 4 2.94Z','M10 2c1 .5 2 2 2 5']) },
+        { name:'buscar', svg:this.ic(['m21 21-4.3-4.3'], [React.createElement('circle',{key:'c',cx:11,cy:11,r:8})]) },
+        { name:'editar', svg:this.ic(['M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z']) },
+        { name:'excluir', svg:this.ic(['M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2']) },
+        { name:'adicionar', svg:this.ic(['M12 5v14M5 12h14']) },
+        { name:'check', svg:this.ic(['M20 6 9 17l-5-5']) },
+        { name:'alerta', svg:this.ic(['M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z','M12 9v4M12 17h.01']) },
+        { name:'sino', svg:this.ic(['M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0']) },
+        { name:'config', svg:this.ic(['M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z'], [React.createElement('circle',{key:'c',cx:12,cy:12,r:3})]) },
+      ],
+      avatarColors: ['#ec4899','#3b82f6','#16a34a','#a855f7','#f59e0b','#06b6d4'],
+      dos: [
+        'Usar sempre tokens semânticos (var(--brand), var(--text)) — nunca hex cru nos componentes.',
+        'Títulos de página em 900 / uppercase; manter a hierarquia da escala Inter.',
+        'Laranja da marca só para ação primária, item ativo e destaque — não como fundo extenso.',
+        'Confirmar exclusões com modal; toda ação dispara snackbar de feedback.',
+        'Ícones Lucide com stroke 2 e currentColor para herdar a cor do contexto.',
+      ],
+      donts: [
+        'Não inventar cores fora da paleta — derive de tokens existentes se precisar.',
+        'Não usar gradientes decorativos, sombras pesadas ou emojis fora do contexto de comida.',
+        'Não misturar raios aleatórios — siga sm/md/lg (8/12/18px).',
+        'Não deixar texto abaixo de 12px no painel nem alvos de toque < 44px no mobile.',
+        'Não criar telas só com a sidebar — abaixo de 860px a bottom nav é obrigatória.',
+      ],
+      tableRows: [
+        { name:'Agachamento Livre', cat:'Pernas', icon:'🏋️', iconBg:'var(--brand-soft)', iconColor:'var(--brand)', status:'Ativo', stBg:'rgba(22,163,74,.12)', stColor:'var(--success)' },
+        { name:'Bowl de Frango', cat:'Almoço', icon:'🥗', iconBg:'rgba(22,163,74,.12)', iconColor:'var(--success)', status:'Ativo', stBg:'rgba(22,163,74,.12)', stColor:'var(--success)' },
+        { name:'Glúteos em Foco', cat:'Plano', icon:'📋', iconBg:'var(--surface-2)', iconColor:'var(--muted)', status:'Rascunho', stBg:'var(--surface-2)', stColor:'var(--muted)' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

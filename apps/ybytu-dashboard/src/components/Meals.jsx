@@ -124,7 +124,7 @@ export default function Meals() {
               {filtered.map((m) => (
                 <div key={m.id} className="yb-hover-card" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ position: 'relative' }}>
-                    <div style={{ width: '100%', height: '110px', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '28px', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ width: '100%', height: '150px', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: '28px', borderBottom: '1px solid var(--border)' }}>
                       {MEAL_TYPE_ICON[m.meal_type] ?? '🍽️'}
                     </div>
                     <span style={{ position: 'absolute', top: '10px', left: '10px', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '7px', fontSize: '11px', fontWeight: 800, background: 'rgba(0,0,0,.45)', color: '#fff', textTransform: 'uppercase' }}>

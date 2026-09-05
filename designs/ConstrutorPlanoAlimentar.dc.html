@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#F8F9FA; --surface:#FFFFFF; --surface-2:#F1F5F9; --border:#E2E8F0; --text:#1A202C; --muted:#718096; --field:#F8F9FA;
+    --prot:#3b82f6; --carb:#f59e0b; --fat:#a855f7; }
+  :root[data-theme="dark"]{ --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --border:#333333; --text:#DBD9D8; --muted:#9C9C9C; --field:#161616; --brand-soft:rgba(245,95,22,.14); }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;} ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</helmet>
+
+<div style="display:flex;height:100vh;width:100%;overflow:hidden;background:var(--bg);color:var(--text);">
+  <div class="yb-side"><dc-import name="Sidebar" active="planos-alimentares" hint-size="260px,100%"></dc-import></div>
+  <dc-import name="MobileNav" active="nutricao" hint-size="0,0"></dc-import>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <!-- Header -->
+    <header style="height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:20px;">
+      <div style="display:flex;align-items:center;gap:14px;min-width:0;flex:1;">
+        <a href="PlanosAlimentares.dc.html" style="display:inline-flex;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;" style-hover="color:var(--brand);border-color:var(--brand);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg></a>
+        <div style="min-width:0;flex:1;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600;"><a href="PlanosAlimentares.dc.html" style="color:var(--muted);text-decoration:none;" style-hover="color:var(--brand);">Planos Alimentares</a><span>/</span><span style="color:var(--text);">Construtor</span></div>
+          <input type="text" value="Cutting 1.800 kcal" style="margin:2px 0 0;font-size:18px;font-weight:900;background:none;border:none;color:var(--text);font-family:inherit;outline:none;padding:2px 4px;border-radius:6px;width:100%;" style-focus="background:var(--field);">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <button onClick="{{ toggleTheme }}" title="Alternar tema" style="width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+        </button>
+        <button onClick="{{ toggleSettings }}" style="{{ cfgBtn }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Configurações</button>
+        <button style="display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg> Publicar</button>
+      </div>
+    </header>
+
+    <!-- Plan settings -->
+    <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ true }}">
+    <div style="flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);padding:18px 28px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <h3 style="margin:0;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);">Configurações do plano</h3>
+        <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;padding:4px 10px;border-radius:7px;background:rgba(124,58,237,.12);color:#7c3aed;text-transform:uppercase;letter-spacing:.04em;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M5.6 5.6l1.4 1.4M3 12h2M5.6 18.4l1.4-1.4M12 19v2M17 12h2M18.4 5.6 17 7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path></svg> Gerado por IA</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;">
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Objetivos</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--brand);color:#fff;">Emagrecimento <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="opacity:.8;"><path d="M18 6 6 18M6 6l12 12"></path></svg></span>
+            <button style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;background:none;border:1px dashed var(--border);color:var(--muted);cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Add</button>
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Meta calórica (kcal/dia)</label>
+          <input type="text" value="1800" style="width:100%;padding:10px 13px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;" style-focus="border-color:var(--brand);">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Refeições por dia</label>
+          <input type="text" value="5" style="width:100%;padding:10px 13px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:700;outline:none;" style-focus="border-color:var(--brand);">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Preferência</label>
+          <select style="width:100%;padding:10px 13px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;"><option>Onívoro</option><option>Vegetariano</option><option>Vegano</option></select>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Restrições</label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:8px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--text);border:1px solid var(--border);">Sem lactose</span>
+            <button style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700;background:none;border:1px dashed var(--border);color:var(--muted);cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Add</button>
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;font-weight:800;margin-bottom:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Idiomas</label>
+          <div style="display:flex;gap:5px;">
+            <span style="display:inline-flex;align-items:center;justify-content:center;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:800;background:var(--brand);color:#fff;">PT</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:800;background:var(--brand);color:#fff;">EN</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:800;background:var(--surface-2);color:var(--muted);border:1px solid var(--border);">FR</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- Day tabs -->
+    <div style="flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;gap:6px;overflow-x:auto;">
+      <sc-for list="{{ days }}" as="d" hint-placeholder-count="7">
+        <button onClick="{{ d.pick }}" style="{{ d.style }}">{{ d.label }}</button>
+      </sc-for>
+      <span style="margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;padding-left:16px;">Meta: <strong style="color:var(--text);">1.800 kcal</strong></span>
+    </div>
+
+    <!-- Body -->
+    <div class="yb-builder" style="flex:1;display:flex;min-height:0;">
+
+      <!-- Meal library panel -->
+      <aside class="yb-libpanel" style="width:290px;flex-shrink:0;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;min-height:0;">
+        <div style="padding:18px 18px 12px;border-bottom:1px solid var(--border);">
+          <p style="margin:0 0 10px;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;">Refeições · clique p/ adicionar</p>
+          <div style="position:relative;">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
+            <input type="text" placeholder="Buscar refeição…" style="width:100%;padding:9px 12px 9px 36px;border-radius:10px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;outline:none;" style-focus="border-color:var(--brand);">
+          </div>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ library }}" as="lib" hint-placeholder-count="7">
+          <div style="display:flex;align-items:center;gap:11px;padding:10px;border:1px solid var(--border);border-radius:11px;background:var(--field);cursor:pointer;" style-hover="border-color:var(--brand);background:var(--brand-soft);">
+            <span style="width:34px;height:34px;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;">{{ lib.emoji }}</span>
+            <div style="flex:1;min-width:0;"><p style="margin:0;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ lib.name }}</p><p style="margin:1px 0 0;font-size:11px;color:var(--muted);">{{ lib.kcal }} kcal · {{ lib.type }}</p></div>
+            <span style="color:var(--brand);display:flex;flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg></span>
+          </div>
+          </sc-for>
+        </div>
+      </aside>
+
+      <!-- Build area -->
+      <main style="flex:1;overflow-y:auto;padding:24px;min-width:0;">
+        <div style="max-width:720px;margin:0 auto;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+            <div>
+              <h2 style="margin:0;font-size:20px;font-weight:900;">Segunda-feira</h2>
+              <p style="margin:4px 0 0;font-size:13px;color:var(--muted);">5 refeições planejadas</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 14px;">
+              <span style="font-size:12px;font-weight:700;color:var(--muted);">Total do dia</span>
+              <span style="font-size:18px;font-weight:900;">1.795 <span style="font-size:12px;color:var(--muted);">/ 1.800</span></span>
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:#16a34a;background:rgba(22,163,74,.1);padding:3px 8px;border-radius:6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg> No alvo</span>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <sc-for list="{{ slots }}" as="s" hint-placeholder-count="5">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+              <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--field);border-bottom:1px solid var(--border);">
+                <span style="width:32px;height:32px;border-radius:9px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">{{ s.icon }}</span>
+                <div style="flex:1;min-width:0;"><p style="margin:0;font-weight:800;font-size:14px;">{{ s.slot }}</p><p style="margin:1px 0 0;font-size:11px;color:var(--muted);">{{ s.time }}</p></div>
+                <span style="font-size:13px;font-weight:800;color:var(--muted);">{{ s.kcal }} kcal</span>
+              </div>
+              <sc-if value="{{ s.hasMeal }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:13px;padding:13px 16px;" style-hover="background:var(--surface-2);">
+                <span style="width:42px;height:42px;border-radius:10px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">{{ s.emoji }}</span>
+                <div style="flex:1;min-width:0;">
+                  <p style="margin:0;font-weight:700;font-size:14px;">{{ s.meal }}</p>
+                  <div style="display:flex;gap:9px;margin-top:3px;">
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);"><span style="width:7px;height:7px;border-radius:2px;background:var(--prot);"></span>P {{ s.prot }}</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);"><span style="width:7px;height:7px;border-radius:2px;background:var(--carb);"></span>C {{ s.carb }}</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--muted);"><span style="width:7px;height:7px;border-radius:2px;background:var(--fat);"></span>G {{ s.fat }}</span>
+                  </div>
+                </div>
+                <button style="color:var(--muted);background:none;border:none;cursor:pointer;display:flex;padding:6px;border-radius:8px;flex-shrink:0;" style-hover="color:var(--brand);background:var(--brand-soft);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path><path d="m9 11 3 3L22 4"></path></svg></button>
+                <button style="color:var(--muted);background:none;border:none;cursor:pointer;display:flex;padding:6px;border-radius:8px;flex-shrink:0;" style-hover="color:#ef4444;background:rgba(239,68,68,.08);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg></button>
+              </div>
+              </sc-if>
+              <sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:18px;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;" style-hover="color:var(--brand);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Adicionar refeição a este horário
+              </div>
+              </sc-if>
+            </div>
+            </sc-for>
+          </div>
+        </div>
+      </main>
+
+      <!-- Day summary -->
+      <aside class="yb-libpanel" style="width:270px;flex-shrink:0;border-left:1px solid var(--border);background:var(--surface);overflow-y:auto;padding:22px;">
+        <h3 style="margin:0 0 4px;font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);">Resumo do Dia</h3>
+        <p style="margin:0 0 18px;font-size:12px;color:var(--muted);">Soma das refeições de segunda.</p>
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:18px;">
+          {{ donut }}
+          <p style="margin:6px 0 0;font-size:12px;font-weight:700;color:#16a34a;">95 kcal abaixo da meta</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px;background:var(--field);border-radius:11px;border-left:3px solid var(--prot);"><div style="flex:1;"><p style="margin:0;font-size:11px;font-weight:700;color:var(--muted);">Proteínas</p><p style="margin:2px 0 0;font-size:16px;font-weight:900;">158 g</p></div><span style="font-size:11px;font-weight:800;color:var(--prot);">35%</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px;background:var(--field);border-radius:11px;border-left:3px solid var(--carb);"><div style="flex:1;"><p style="margin:0;font-size:11px;font-weight:700;color:var(--muted);">Carboidratos</p><p style="margin:2px 0 0;font-size:16px;font-weight:900;">157 g</p></div><span style="font-size:11px;font-weight:800;color:var(--carb);">35%</span></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px;background:var(--field);border-radius:11px;border-left:3px solid var(--fat);"><div style="flex:1;"><p style="margin:0;font-size:11px;font-weight:700;color:var(--muted);">Gorduras</p><p style="margin:2px 0 0;font-size:16px;font-weight:900;">60 g</p></div><span style="font-size:11px;font-weight:800;color:var(--fat);">30%</span></div>
+        </div>
+
+        <button style="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;border-radius:11px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px;" style-hover="border-color:var(--brand);color:var(--brand);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Duplicar para outro dia
+        </button>
+        <button style="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;border-radius:11px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);color:#7c3aed;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="background:rgba(124,58,237,.16);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M5.6 5.6l1.4 1.4M3 12h2M5.6 18.4l1.4-1.4M12 19v2M17 12h2M18.4 5.6 17 7M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"></path></svg> Preencher dia com IA
+        </button>
+      </aside>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960}}">
+class Component extends DCLogic {
+  state = { theme: 'dark', day: 0, settings: true };
+  componentDidMount(){ this.applyTheme(); }
+  applyTheme(){ try{ document.documentElement.dataset.theme = this.state.theme; }catch(e){} }
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }), this.applyTheme);
+  toggleSettings = () => this.setState(s => ({ settings: !s.settings }));
+  setDay = (i) => () => this.setState({ day: i });
+
+  donut(pctP, pctC, pctF, size){
+    const a=pctP, b=pctP+pctC;
+    const bg='conic-gradient(var(--prot) 0 '+a+'%, var(--carb) '+a+'% '+b+'%, var(--fat) '+b+'% 100%)';
+    const hole=Math.round(size*0.60);
+    return React.createElement('div',{style:{width:size,height:size,borderRadius:'50%',backgroundImage:bg,flexShrink:0,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}},
+      React.createElement('div',{style:{width:hole,height:hole,borderRadius:'50%',background:'var(--surface)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}},
+        React.createElement('span',{style:{fontSize:24,fontWeight:900,color:'var(--text)',lineHeight:1}}, '1.795'),
+        React.createElement('span',{style:{fontSize:10,fontWeight:700,color:'var(--muted)',marginTop:2}}, 'kcal hoje')));
+  }
+
+  renderVals(){
+    const dark = this.state.theme === 'dark', day = this.state.day;
+    const dayStyle = (on) => 'border:none;background:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;padding:18px 14px;white-space:nowrap;border-bottom:2px solid ' + (on ? 'var(--brand);color:var(--brand);' : 'transparent;color:var(--muted);');
+    const dayLabels = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+    const s = (icon, slot, time, kcal, emoji, meal, prot, carb, fat, empty) => ({ icon, slot, time, kcal, emoji, meal, prot, carb, fat, hasMeal:!empty, empty:!!empty });
+    return {
+      isDark: dark, isLight: !dark, toggleTheme: this.toggleTheme,
+      isSettings: this.state.settings, toggleSettings: this.toggleSettings,
+      cfgBtn: 'display:flex;align-items:center;gap:7px;border-radius:11px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;' + (this.state.settings ? 'background:var(--brand-soft);color:var(--brand);border:1px solid rgba(245,95,22,.4);' : 'background:var(--surface);color:var(--text);border:1px solid var(--border);'),
+      days: dayLabels.map((l,i) => ({ label:l, style:dayStyle(i===day), pick:this.setDay(i) })),
+      donut: this.donut(35, 35, 30, 130),
+      library: [
+        { emoji:'🥞', name:'Panqueca de Banana & Aveia', kcal:340, type:'Café' },
+        { emoji:'🍳', name:'Omelete de Espinafre', kcal:290, type:'Café' },
+        { emoji:'🥗', name:'Bowl de Frango com Quinoa', kcal:520, type:'Almoço' },
+        { emoji:'🍽️', name:'Salmão com Legumes', kcal:460, type:'Jantar' },
+        { emoji:'🥛', name:'Iogurte com Frutas', kcal:260, type:'Lanche' },
+        { emoji:'🌯', name:'Wrap de Grão-de-bico', kcal:410, type:'Almoço' },
+        { emoji:'🥤', name:'Shake Proteico', kcal:220, type:'Lanche' },
+      ],
+      slots: [
+        s('☀️','Café da manhã','07:00',340,'🥞','Panqueca de Banana & Aveia','12g','52g','8g',false),
+        s('🍎','Lanche da manhã','10:00',220,'🥤','Shake Proteico','25g','18g','4g',false),
+        s('🍽️','Almoço','13:00',520,'🥗','Bowl de Frango com Quinoa','42g','48g','14g',false),
+        s('🥛','Lanche da tarde','16:00',0,'','',' ',' ',' ',true),
+        s('🌙','Jantar','20:00',460,'🍽️','Salmão com Legumes','38g','18g','26g',false),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

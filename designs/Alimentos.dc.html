@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#F8F9FA; --surface:#FFFFFF; --surface-2:#F1F5F9; --border:#E2E8F0; --text:#1A202C; --muted:#718096; --field:#F8F9FA;
+    --prot:#3b82f6; --carb:#f59e0b; --fat:#a855f7; }
+  :root[data-theme="dark"]{ --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --border:#333333; --text:#DBD9D8; --muted:#9C9C9C; --field:#161616; --brand-soft:rgba(245,95,22,.14); }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;} ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</helmet>
+
+<div style="display:flex;height:100vh;width:100%;overflow:hidden;background:var(--bg);color:var(--text);">
+  <div class="yb-side"><dc-import name="Sidebar" active="alimentos" hint-size="260px,100%"></dc-import></div>
+  <dc-import name="MobileNav" active="nutricao" hint-size="0,0"></dc-import>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <!-- Header -->
+    <header style="height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:20px;">
+      <div style="position:relative;flex:1;max-width:420px;">
+        <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
+        <input type="text" placeholder="Buscar alimento, marca, grupo…" style="width:100%;padding:10px 16px 10px 42px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);">
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onClick="{{ toggleTheme }}" title="Alternar tema" style="width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+        </button>
+        <div style="width:1px;height:24px;background:var(--border);"></div>
+        <button style="display:flex;align-items:center;gap:7px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:11px;padding:9px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="border-color:var(--brand);color:var(--brand);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"></path></svg> Importar TACO
+        </button>
+        <a href="AlimentoEditor.dc.html" style="display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:10px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Novo alimento
+        </a>
+      </div>
+    </header>
+
+    <main style="flex:1;overflow-y:auto;padding:28px;">
+      <div style="max-width:1320px;margin:0 auto;">
+        <!-- Title row -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;margin-bottom:22px;">
+          <div>
+            <h1 style="font-size:28px;font-weight:900;letter-spacing:-.02em;margin:0;text-transform:uppercase;">Banco de Alimentos</h1>
+            <p style="color:var(--muted);font-size:14px;margin:5px 0 0;">Dicionário nutricional multilíngue (PT · EN · FR) com macros, micros e fatores de correção. <strong style="color:var(--text);">1.405</strong> alimentos.</p>
+          </div>
+          <div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;">
+            <button onClick="{{ pickTable }}" title="Tabela" style="{{ segTable }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"></path></svg> Tabela</button>
+            <button onClick="{{ pickGrid }}" title="Grade" style="{{ segGrid }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg> Grade</button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+          <div style="position:relative;flex:1;min-width:200px;max-width:260px;">
+            <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
+            <input type="text" placeholder="Filtrar nesta lista…" style="width:100%;padding:9px 14px 9px 38px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:inherit;outline:none;" style-focus="border-color:var(--brand);">
+          </div>
+          <select style="padding:9px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:13px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;"><option>Qualquer grupo</option><option>Proteínas</option><option>Carboidratos</option><option>Vegetais</option><option>Frutas</option><option>Laticínios</option><option>Gorduras</option></select>
+          <select style="padding:9px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:13px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;"><option>Qualquer fonte</option><option>TACO</option><option>USDA</option><option>IBGE</option><option>Rótulo</option></select>
+          <select style="padding:9px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:13px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;"><option>Preferência alimentar</option><option>Onívoro</option><option>Vegetariano</option><option>Vegano</option></select>
+          <select style="padding:9px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:13px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;"><option>Restrições</option><option>Sem glúten</option><option>Sem lactose</option><option>Low carb</option></select>
+        </div>
+
+        <!-- TABLE VIEW -->
+        <sc-if value="{{ isTable }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;white-space:nowrap;">
+              <thead>
+                <tr style="background:var(--bg);">
+                  <th style="width:44px;text-align:center;padding:13px 16px;"><input type="checkbox" style="width:15px;height:15px;accent-color:var(--brand);"></th>
+                  <th style="text-align:left;padding:13px 16px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Alimento</th>
+                  <th style="text-align:left;padding:13px 16px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Grupo</th>
+                  <th style="text-align:left;padding:13px 16px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Porção</th>
+                  <th style="text-align:right;padding:13px 16px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Kcal</th>
+                  <th style="text-align:right;padding:13px 12px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--prot);text-transform:uppercase;">Prot</th>
+                  <th style="text-align:right;padding:13px 12px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--carb);text-transform:uppercase;">Carb</th>
+                  <th style="text-align:right;padding:13px 12px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--fat);text-transform:uppercase;">Gord</th>
+                  <th style="text-align:left;padding:13px 16px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Dieta</th>
+                  <th style="text-align:right;padding:13px 16px;font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ foods }}" as="f" hint-placeholder-count="7">
+                <tr style="border-top:1px solid var(--border);" style-hover="background:var(--surface-2);">
+                  <td style="text-align:center;padding:12px 16px;"><input type="checkbox" style="width:15px;height:15px;accent-color:var(--brand);"></td>
+                  <td style="padding:12px 16px;">
+                    <div style="display:flex;align-items:center;gap:13px;">
+                      <div style="width:42px;height:42px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;">{{ f.emoji }}</div>
+                      <div><p style="margin:0;font-weight:700;font-size:14px;">{{ f.name }}</p><p style="margin:2px 0 0;font-size:11px;color:var(--muted);">{{ f.sub }}</p></div>
+                    </div>
+                  </td>
+                  <td style="padding:12px 16px;"><span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);"><span style="width:8px;height:8px;border-radius:50%;background:{{ f.groupColor }};"></span> {{ f.group }}</span></td>
+                  <td style="padding:12px 16px;font-size:13px;color:var(--muted);font-weight:600;">{{ f.portion }}</td>
+                  <td style="padding:12px 16px;text-align:right;font-size:14px;font-weight:800;">{{ f.kcal }}</td>
+                  <td style="padding:12px 12px;text-align:right;font-size:13px;font-weight:700;color:var(--prot);">{{ f.prot }}</td>
+                  <td style="padding:12px 12px;text-align:right;font-size:13px;font-weight:700;color:var(--carb);">{{ f.carb }}</td>
+                  <td style="padding:12px 12px;text-align:right;font-size:13px;font-weight:700;color:var(--fat);">{{ f.fat }}</td>
+                  <td style="padding:12px 16px;">
+                    <div style="display:flex;align-items:center;gap:5px;">
+                      <sc-for list="{{ f.tagsShown }}" as="t" hint-placeholder-count="1"><span style="display:inline-flex;padding:3px 9px;border-radius:7px;font-size:11px;font-weight:700;background:var(--surface-2);color:var(--text);border:1px solid var(--border);">{{ t }}</span></sc-for>
+                      <sc-if value="{{ f.hasMoreTags }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--muted);font-weight:700;">{{ f.moreTags }}</span></sc-if>
+                    </div>
+                  </td>
+                  <td style="padding:12px 16px;text-align:right;white-space:nowrap;">
+                    <a href="AlimentoEditor.dc.html" style="display:inline-flex;color:var(--muted);padding:6px;border-radius:8px;text-decoration:none;" style-hover="color:var(--brand);background:var(--brand-soft);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg></a>
+                    <button style="color:var(--muted);background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;margin-left:2px;" style-hover="color:#ef4444;background:rgba(239,68,68,.08);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                  </td>
+                </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+          <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted);background:var(--bg);flex-wrap:wrap;gap:10px;">
+            <span>Mostrando <strong style="color:var(--text);">1–7</strong> de 1.405 alimentos</span>
+            <div style="display:flex;gap:6px;">
+              <button style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--muted);font-weight:700;font-size:13px;cursor:not-allowed;opacity:.5;font-family:inherit;">Anterior</button>
+              <button style="padding:6px 12px;border:none;border-radius:8px;background:var(--brand);color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;">1</button>
+              <button style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">2</button>
+              <button style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;">Próximo</button>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- GRID VIEW -->
+        <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;">
+          <sc-for list="{{ foods }}" as="f" hint-placeholder-count="6">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;transition:border-color .2s,transform .15s;" style-hover="border-color:rgba(245,95,22,.5);transform:translateY(-2px);">
+            <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+              <div style="width:54px;height:54px;border-radius:13px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">{{ f.emoji }}</div>
+              <div style="flex:1;min-width:0;">
+                <p style="margin:0;font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ f.name }}</p>
+                <p style="margin:2px 0 0;font-size:12px;color:var(--muted);">{{ f.portion }} · {{ f.kcal }} kcal</p>
+                <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--muted);margin-top:4px;"><span style="width:7px;height:7px;border-radius:50%;background:{{ f.groupColor }};"></span> {{ f.group }}</span>
+              </div>
+            </div>
+            <!-- macro donut + legend -->
+            <div style="display:flex;align-items:center;gap:16px;padding:12px;background:var(--field);border-radius:12px;">
+              {{ f.donut }}
+              <div style="flex:1;display:flex;flex-direction:column;gap:7px;">
+                <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><span style="width:9px;height:9px;border-radius:3px;background:var(--prot);"></span><span style="font-weight:700;color:var(--text);">Proteína</span><span style="margin-left:auto;font-weight:800;color:var(--text);">{{ f.prot }}g</span></div>
+                <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><span style="width:9px;height:9px;border-radius:3px;background:var(--carb);"></span><span style="font-weight:700;color:var(--text);">Carbo</span><span style="margin-left:auto;font-weight:800;color:var(--text);">{{ f.carb }}g</span></div>
+                <div style="display:flex;align-items:center;gap:7px;font-size:12px;"><span style="width:9px;height:9px;border-radius:3px;background:var(--fat);"></span><span style="font-weight:700;color:var(--text);">Gordura</span><span style="margin-left:auto;font-weight:800;color:var(--text);">{{ f.fat }}g</span></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;">
+              <sc-for list="{{ f.tagsAll }}" as="t" hint-placeholder-count="2"><span style="display:inline-flex;padding:3px 9px;border-radius:7px;font-size:11px;font-weight:700;background:var(--surface-2);color:var(--text);border:1px solid var(--border);">{{ t }}</span></sc-for>
+            </div>
+            <a href="AlimentoEditor.dc.html" style="display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px;margin-top:14px;border-radius:10px;background:var(--surface-2);color:var(--text);font-size:13px;font-weight:700;text-decoration:none;border:1px solid var(--border);" style-hover="border-color:var(--brand);color:var(--brand);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg> Editar
+            </a>
+          </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:920}}">
+class Component extends DCLogic {
+  state = { theme: 'dark', view: 'table' };
+  componentDidMount(){ this.applyTheme(); }
+  applyTheme(){ try{ document.documentElement.dataset.theme = this.state.theme; }catch(e){} }
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }), this.applyTheme);
+  pickTable = () => this.setState({ view: 'table' });
+  pickGrid = () => this.setState({ view: 'grid' });
+
+  renderVals(){
+    const dark = this.state.theme === 'dark', v = this.state.view;
+    const seg = (on) => 'display:flex;align-items:center;gap:6px;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:7px 14px;border-radius:7px;white-space:nowrap;' + (on
+      ? 'background:var(--field);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.12);'
+      : 'background:transparent;color:var(--muted);');
+    const GROUPS = {
+      prot: { group:'Proteínas',    groupColor:'#3b82f6' },
+      carb: { group:'Carboidratos', groupColor:'#f59e0b' },
+      veg:  { group:'Vegetais',     groupColor:'#16a34a' },
+      fruit:{ group:'Frutas',       groupColor:'#ec4899' },
+      dairy:{ group:'Laticínios',   groupColor:'#06b6d4' },
+      fat:  { group:'Gorduras',     groupColor:'#a855f7' },
+    };
+    const donut = (dProt, dCarb, dFat, size, holeBg) => {
+      const a = dProt, b = dProt + dCarb;
+      const bg = 'conic-gradient(var(--prot) 0 ' + a + '%, var(--carb) ' + a + '% ' + b + '%, var(--fat) ' + b + '% 100%)';
+      const hole = Math.round(size * 0.56);
+      return React.createElement('div', { style:{ width:size, height:size, borderRadius:'50%', backgroundImage:bg, flexShrink:0, position:'relative', display:'flex', alignItems:'center', justifyContent:'center' } },
+        React.createElement('div', { style:{ width:hole, height:hole, borderRadius:'50%', background: holeBg || 'var(--field)' } }),
+      );
+    };
+    const f = (emoji, name, sub, grp, portion, kcal, prot, carb, fat, tags) => {
+      // macro donut: convert grams to kcal-share (P*4, C*4, F*9)
+      const pc = prot*4, cc = carb*4, fc = fat*9, tot = pc+cc+fc || 1;
+      const dProt = +(pc/tot*100).toFixed(1), dCarb = +(cc/tot*100).toFixed(1), dFat = +(100-dProt-dCarb).toFixed(1);
+      return {
+        emoji, name, sub, portion, kcal, prot, carb, fat, ...GROUPS[grp],
+        tagsShown: tags.slice(0,1), hasMoreTags: tags.length>1, moreTags: '+'+(tags.length-1), tagsAll: tags,
+        donut: donut(dProt, dCarb, dFat, 74, 'var(--field)'),
+      };
+    };
+    return {
+      isDark: dark, isLight: !dark,
+      isTable: v === 'table', isGrid: v === 'grid',
+      toggleTheme: this.toggleTheme, pickTable: this.pickTable, pickGrid: this.pickGrid,
+      segTable: seg(v === 'table'), segGrid: seg(v === 'grid'),
+      foods: [
+        f('🍗','Peito de Frango Grelhado','TACO · grelhado','prot','100 g',165,31,0,3.6,['Low carb','Sem glúten']),
+        f('🍚','Arroz Branco Cozido','TACO · cozido','carb','100 g',128,2.5,28,0.2,['Vegano','Sem lactose']),
+        f('🥚','Ovo de Galinha','TACO · cozido','prot','1 un (50 g)',78,6.3,0.6,5.3,['Vegetariano','Keto']),
+        f('🥦','Brócolis','TACO · cozido','veg','100 g',35,2.4,7,0.4,['Vegano','Sem glúten']),
+        f('🍌','Banana Prata','TACO · in natura','fruit','1 un (100 g)',98,1.3,26,0.1,['Vegano']),
+        f('🥑','Abacate','TACO · in natura','fat','100 g',96,1.2,6,8.4,['Keto','Vegano']),
+        f('🧀','Queijo Minas Frescal','Rótulo · Tirolez','dairy','30 g',73,5.4,0.9,5.5,['Vegetariano']),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
@@ -18,13 +18,14 @@ export default function Users() {
     pro: { sub: 'Pro', subBg: 'rgba(245,95,22,.14)', subColor: '#F55F16' },
   };
   
-  const getAdColor = (v) => v >= 80 ? '#16a34a' : (v >= 40 ? '#d97706' : '#ef4444');
   const avatars = ['#ec4899','#3b82f6','#16a34a','#a855f7','#f59e0b','#06b6d4','#ef4444','#8b5cf6'];
   
   const [usersData, setUsersData] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 20;
 
   useEffect(() => {
     let isMounted = true;
@@ -44,9 +45,6 @@ export default function Users() {
 
             const initialsStr = (u.full_name || 'U').split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
 
-            // adherance is not available, mock it or leave as N/A (for now, default to N/A or empty if not provided)
-            const adherence = Math.floor(Math.random() * 60) + 40; // mock random adherence for demo as requested by user originally or leave mock
-
             return {
               id: u.id,
               initials: initialsStr,
@@ -58,8 +56,13 @@ export default function Users() {
               level: u.resolvedLevel || '—',
               trainPlan: u.current_training_plan_id ? 'Sim' : '—',
               mealPlan: u.current_meal_plan_id ? 'Sim' : '—',
-              adherence: adherence,
-              adColor: getAdColor(adherence),
+              // Sem tabela de treino/refeicao concluido no schema hoje -- nao
+              // ha adesao real pra calcular. Antes disso era Math.random(),
+              // recalculado a cada render (achado 2026-09-05): mesmo aluno
+              // mostrava numero diferente a cada reload, como se fosse medicao
+              // real. "Sem dados ainda" e o padrao ja usado em Dashboard.jsx/
+              // Subscriptions.jsx/Account.jsx pro mesmo tipo de ausencia.
+              adherence: null,
               onbDone: u.onboarding_completed,
               avatarBg: avatars[i % avatars.length],
               needsReview: u.needsReview
@@ -77,6 +80,23 @@ export default function Users() {
     return () => { isMounted = false; };
   }, []);
 
+  // Paginacao real (mesmo padrao de Exercises.jsx) -- ate 2026-09-05 os
+  // controles "Mostrando 1-8 de 12.450" / botoes 1 2 3 eram so texto/JSX sem
+  // onClick nenhum: a tabela renderizava usersData inteiro, filtrado so pela
+  // busca, sem fatiar nada. Mesma categoria do achado de adesao fabricada --
+  // UI prometendo paginas que nao existiam.
+  const filtered = useMemo(() => {
+    const s = searchTerm.toLowerCase();
+    return usersData.filter((u) => u.name.toLowerCase().includes(s) || u.id.toLowerCase().includes(s));
+  }, [usersData, searchTerm]);
+
+  useEffect(() => { setPage(1); }, [searchTerm]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, pageCount);
+  const paged = useMemo(() => filtered.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE), [filtered, pageSafe]);
+  const pageStart = filtered.length === 0 ? 0 : (pageSafe - 1) * PAGE_SIZE + 1;
+  const pageEnd = Math.min(pageSafe * PAGE_SIZE, filtered.length);
 
   return (
     <>
@@ -107,15 +127,34 @@ export default function Users() {
           
           <div style={{ marginBottom: '22px' }}>
             <h1 style={{ fontSize: '28px', fontWeight: 900, letterSpacing: '-.02em', margin: 0, textTransform: 'uppercase' }}>Usuários</h1>
-            <p style={{ color: 'var(--muted)', fontSize: '14px', margin: '5px 0 0' }}>Base de usuários do app com perfil, assinatura, planos atribuídos e adesão. <strong style={{ color: 'var(--text)' }}>12.450</strong> usuários.</p>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', margin: '5px 0 0' }}>Base de usuários do app com perfil, assinatura, planos atribuídos e adesão. <strong style={{ color: 'var(--text)' }}>{isLoading ? '—' : usersData.length}</strong> usuários.</p>
           </div>
 
-          {/* Stat strip[cite: 8] */}
+          {/* Stat strip -- os 4 valores eram fixos, copiados do mockup, nunca
+              trocados por dado real (achado 2026-09-05). "Onboarding completo"
+              e "Assinantes pagos" SÃO calculáveis agora, do que já está em
+              usersData -- não é dado ausente, só não estava sendo calculado.
+              "Ativos (30d)" e "Adesão média" continuam "—": exigiriam rastreio
+              de sessão/atividade e de treino/refeição concluído que não
+              existe hoje (mesma ausência já registrada em
+              docs/PENDENCIAS_USERDETAIL_POS_PILOTO_20260904.md). */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '14px', marginBottom: '22px' }}>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}><p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Ativos (30d)</p><p style={{ margin: '5px 0 0', fontSize: '22px', fontWeight: 900 }}>8.230</p></div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}><p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Onboarding completo</p><p style={{ margin: '5px 0 0', fontSize: '22px', fontWeight: 900 }}>76<span style={{ fontSize: '14px', color: 'var(--muted)' }}>%</span></p></div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}><p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Assinantes pagos</p><p style={{ margin: '5px 0 0', fontSize: '22px', fontWeight: 900, color: 'var(--brand)' }}>3.910</p></div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}><p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Adesão média</p><p style={{ margin: '5px 0 0', fontSize: '22px', fontWeight: 900 }}>71<span style={{ fontSize: '14px', color: 'var(--muted)' }}>%</span></p></div>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }} title="Exige rastreio de sessão/atividade, que não existe hoje">
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Ativos (30d)</p>
+              <p style={{ margin: '5px 0 0', fontSize: '22px', fontWeight: 900, color: 'var(--muted)' }}>—</p>
+            </div>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Onboarding completo</p>
+              <p style={{ margin: '5px 0 0', fontSize: '22px', fontWeight: 900 }}>{isLoading || usersData.length === 0 ? '—' : Math.round(100 * usersData.filter(u => u.onbDone).length / usersData.length)}{!isLoading && usersData.length > 0 && <span style={{ fontSize: '14px', color: 'var(--muted)' }}>%</span>}</p>
+            </div>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Assinantes pagos</p>
+              <p style={{ margin: '5px 0 0', fontSize: '22px', fontWeight: 900, color: 'var(--brand)' }}>{isLoading ? '—' : usersData.filter(u => u.subKey !== 'free').length}</p>
+            </div>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }} title="Exige rastreio de treino/refeição concluído, que não existe hoje">
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Adesão média</p>
+              <p style={{ margin: '5px 0 0', fontSize: '22px', fontWeight: 900, color: 'var(--muted)' }}>—</p>
+            </div>
           </div>
 
           {/* Filters[cite: 8] */}
@@ -159,14 +198,14 @@ export default function Users() {
                       </td>
                     </tr>
                   )}
-                  {!isLoading && !error && usersData.length === 0 && (
+                  {!isLoading && !error && filtered.length === 0 && (
                     <tr>
                       <td colSpan="8" style={{ textAlign: 'center', padding: '32px', color: 'var(--muted)' }}>
                         <p style={{ margin: 0, fontSize: '13px', fontWeight: 600 }}>Nenhum usuário encontrado.</p>
                       </td>
                     </tr>
                   )}
-                  {!isLoading && !error && usersData.filter(u => u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.id.toLowerCase().includes(searchTerm.toLowerCase())).map((u, index) => (
+                  {!isLoading && !error && paged.map((u) => (
                     <tr key={u.id} style={{ borderTop: '1px solid var(--border)' }}>
                       <td style={{ textAlign: 'center', padding: '12px 16px' }}><input type="checkbox" style={{ width: '15px', height: '15px', accentColor: 'var(--brand)' }} /></td>
                       <td style={{ padding: '12px 16px' }}>
@@ -188,13 +227,8 @@ export default function Users() {
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg> {u.mealPlan}</span>
                         </div>
                       </td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                          <div style={{ width: '64px', height: '7px', borderRadius: '4px', background: 'var(--surface-2)', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${u.adherence}%`, background: u.adColor, borderRadius: '4px' }}></div>
-                          </div>
-                          <span style={{ fontSize: '13px', fontWeight: 800, color: u.adColor }}>{u.adherence}%</span>
-                        </div>
+                      <td style={{ padding: '12px 16px' }} title="Exige rastreio de treino/refeição concluído, que não existe hoje">
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--muted)' }}>Sem dados ainda</span>
                       </td>
                       <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                         {u.onbDone ? (
@@ -214,17 +248,21 @@ export default function Users() {
               </table>
             </div>
 
-            {/* Pagination[cite: 8] */}
-            <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', color: 'var(--muted)', background: 'var(--bg)', flexWrap: 'wrap', gap: '10px' }}>
-              <span>Mostrando <strong style={{ color: 'var(--text)' }}>1–8</strong> de 12.450 usuários</span>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button style={{ padding: '6px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--surface)', color: 'var(--muted)', fontWeight: 700, fontSize: '13px', cursor: 'not-allowed', opacity: .5, fontFamily: 'inherit' }}>Anterior</button>
-                <button style={{ padding: '6px 12px', border: 'none', borderRadius: '8px', background: 'var(--brand)', color: '#fff', fontWeight: 800, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>1</button>
-                <button style={{ padding: '6px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--surface)', color: 'var(--text)', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>2</button>
-                <button style={{ padding: '6px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--surface)', color: 'var(--text)', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>3</button>
-                <button style={{ padding: '6px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--surface)', color: 'var(--text)', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>Próximo</button>
+            {/* Paginacao real -- antes eram controles decorativos (sem
+                onClick) sobre uma tabela que renderizava tudo de uma vez.
+                Mesmo padrao/PAGE_SIZE de Exercises.jsx. */}
+            {!isLoading && !error && filtered.length > 0 && (
+              <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px', color: 'var(--muted)', background: 'var(--bg)', flexWrap: 'wrap', gap: '10px' }}>
+                <span>Mostrando <strong style={{ color: 'var(--text)' }}>{pageStart}–{pageEnd}</strong> de {filtered.length} usuários</span>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe === 1} style={{ padding: '6px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--surface)', color: 'var(--muted)', fontWeight: 700, fontSize: '13px', cursor: pageSafe === 1 ? 'not-allowed' : 'pointer', opacity: pageSafe === 1 ? 0.5 : 1, fontFamily: 'inherit' }}>Anterior</button>
+                  {Array.from({ length: pageCount }, (_, i) => i + 1).slice(Math.max(0, pageSafe - 3), pageSafe + 2).map((p) => (
+                    <button key={p} onClick={() => setPage(p)} style={{ padding: '6px 12px', border: p === pageSafe ? 'none' : '1px solid var(--border)', borderRadius: '8px', background: p === pageSafe ? 'var(--brand)' : 'var(--surface)', color: p === pageSafe ? '#fff' : 'var(--text)', fontWeight: p === pageSafe ? 800 : 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>{p}</button>
+                  ))}
+                  <button onClick={() => setPage((p) => Math.min(pageCount, p + 1))} disabled={pageSafe === pageCount} style={{ padding: '6px 12px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--surface)', color: 'var(--text)', fontWeight: 700, fontSize: '13px', cursor: pageSafe === pageCount ? 'not-allowed' : 'pointer', opacity: pageSafe === pageCount ? 0.5 : 1, fontFamily: 'inherit' }}>Próximo</button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
         </div>

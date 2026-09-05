@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#F8F9FA; --surface:#FFFFFF; --surface-2:#F1F5F9; --border:#E2E8F0; --text:#1A202C; --muted:#718096; --field:#F8F9FA; }
+  :root[data-theme="dark"]{ --bg:#121212; --surface:#1E1E1E; --surface-2:#2A2A2A; --border:#333333; --text:#DBD9D8; --muted:#9C9C9C; --field:#161616; --brand-soft:rgba(245,95,22,.14); }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  @keyframes ybToastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  ::-webkit-scrollbar{width:8px;height:8px;} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;} ::-webkit-scrollbar-track{background:transparent;}
+</style>
+</helmet>
+
+<div style="display:flex;height:100vh;width:100%;overflow:hidden;background:var(--bg);color:var(--text);">
+  <div class="yb-side"><dc-import name="Sidebar" active="conta" hint-size="260px,100%"></dc-import></div>
+  <dc-import name="MobileNav" active="mais" hint-size="0,0"></dc-import>
+
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+    <header style="height:72px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;gap:20px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:600;"><span>Configurações</span><span>/</span><span style="color:var(--text);">Minha conta</span></div>
+        <h2 style="margin:2px 0 0;font-size:18px;font-weight:900;">Minha Conta</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button onClick="{{ toggleTheme }}" title="Alternar tema" style="width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg></sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></sc-if>
+        </button>
+        <button onClick="{{ save }}" style="display:flex;align-items:center;gap:7px;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(245,95,22,.25);" style-hover="background:var(--brand-hover);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8M7 3v5h8"></path></svg> Salvar alterações</button>
+      </div>
+    </header>
+
+    <main style="flex:1;overflow-y:auto;padding:28px;">
+      <div style="max-width:980px;margin:0 auto;">
+
+        <!-- Profile hero -->
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:22px;">
+          <div style="position:relative;flex-shrink:0;">
+            <div style="width:76px;height:76px;border-radius:20px;background:linear-gradient(135deg,#F55F16,#FF7A3D);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;color:#fff;">A</div>
+            <button title="Trocar foto" style="position:absolute;bottom:-4px;right:-4px;width:28px;height:28px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="color:var(--brand);border-color:var(--brand);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"></path><circle cx="12" cy="13" r="3"></circle></svg></button>
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><h1 style="margin:0;font-size:22px;font-weight:900;">Admin Principal</h1><span style="display:inline-flex;padding:3px 10px;border-radius:7px;font-size:11px;font-weight:800;background:rgba(245,95,22,.14);color:#F55F16;text-transform:uppercase;">Super Admin</span></div>
+            <p style="margin:5px 0 0;font-size:13px;color:var(--muted);font-weight:600;">admin Ybytu · Acesso total · Membro desde jan 2025</p>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:22px;overflow-x:auto;">
+          <button onClick="{{ pickPerfil }}" style="{{ tabPerfil }}">Perfil</button>
+          <button onClick="{{ pickSeguranca }}" style="{{ tabSeguranca }}">Segurança</button>
+          <button onClick="{{ pickPref }}" style="{{ tabPref }}">Preferências</button>
+          <button onClick="{{ pickEquipe }}" style="{{ tabEquipe }}">Equipe & permissões</button>
+        </div>
+
+        <!-- ===== PERFIL ===== -->
+        <sc-if value="{{ isPerfil }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;">
+            <h3 style="margin:0 0 18px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Informações Pessoais</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Nome</label><input type="text" value="Admin" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></div>
+              <div><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Sobrenome</label><input type="text" value="Principal" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></div>
+              <div><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">E-mail</label><input type="text" value="admin (Ybytu)" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></div>
+              <div><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Telefone</label><input type="text" value="+55 11 9••••-••••" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></div>
+              <div style="grid-column:1/-1;"><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Cargo / Função</label><input type="text" value="Administrador da plataforma" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></div>
+            </div>
+          </section>
+
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;">
+            <h3 style="margin:0 0 6px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Idioma & Região</h3>
+            <p style="margin:0 0 18px;font-size:13px;color:var(--muted);">Afeta apenas o painel administrativo.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Idioma do painel</label><select style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;"><option>🇧🇷 Português (Brasil)</option><option>🇬🇧 English</option><option>🇫🇷 Français</option></select></div>
+              <div><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Fuso horário</label><select style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;font-weight:600;outline:none;cursor:pointer;"><option>(GMT-3) São Paulo</option><option>(GMT-5) Nova York</option><option>(GMT+1) Paris</option></select></div>
+            </div>
+          </section>
+        </div>
+        </sc-if>
+
+        <!-- ===== SEGURANÇA ===== -->
+        <sc-if value="{{ isSeguranca }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;">
+            <h3 style="margin:0 0 18px;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Alterar Senha</h3>
+            <div style="display:flex;flex-direction:column;gap:16px;max-width:440px;">
+              <div><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Senha atual</label><input type="password" value="********" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></div>
+              <div><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Nova senha</label><input type="password" placeholder="Mínimo 8 caracteres" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></div>
+              <div><label style="display:block;font-size:12px;font-weight:800;margin-bottom:6px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">Confirmar nova senha</label><input type="password" placeholder="Repita a nova senha" style="width:100%;padding:12px 14px;border-radius:11px;background:var(--field);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:inherit;outline:none;" style-focus="border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);"></div>
+              <button onClick="{{ save }}" style="align-self:flex-start;background:var(--brand);color:#fff;border:none;border-radius:11px;padding:11px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;" style-hover="background:var(--brand-hover);">Atualizar senha</button>
+            </div>
+          </section>
+
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:240px;">
+                <h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Autenticação em 2 fatores</h3>
+                <p style="margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.5;">Adicione uma camada extra de segurança exigindo um código além da senha.</p>
+              </div>
+              <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:800;background:rgba(22,163,74,.12);color:#16a34a;"><span style="width:7px;height:7px;border-radius:50%;background:#16a34a;"></span> Ativo</span>
+            </div>
+          </section>
+
+          <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+            <div style="padding:20px 24px;border-bottom:1px solid var(--border);"><h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Sessões Ativas</h3></div>
+            <div>
+              <sc-for list="{{ sessions }}" as="s" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:14px;padding:15px 24px;border-bottom:1px solid var(--border);">
+                <span style="width:38px;height:38px;border-radius:10px;background:var(--surface-2);color:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;">{{ s.icon }}</span>
+                <div style="flex:1;"><p style="margin:0;font-size:14px;font-weight:700;">{{ s.device }} <sc-if value="{{ s.current }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;font-weight:800;color:#16a34a;margin-left:6px;">· esta sessão</span></sc-if></p><p style="margin:2px 0 0;font-size:12px;color:var(--muted);">{{ s.where }}</p></div>
+                <sc-if value="{{ s.canRevoke }}" hint-placeholder-val="{{ false }}"><button style="font-size:12px;font-weight:700;color:#ef4444;background:none;border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;font-family:inherit;" style-hover="border-color:#ef4444;background:rgba(239,68,68,.06);">Encerrar</button></sc-if>
+              </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+        </sc-if>
+
+        <!-- ===== PREFERÊNCIAS ===== -->
+        <sc-if value="{{ isPref }}" hint-placeholder-val="{{ false }}">
+        <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+          <div style="padding:20px 24px;border-bottom:1px solid var(--border);"><h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Notificações por E-mail</h3></div>
+          <div>
+            <sc-for list="{{ prefs }}" as="p" hint-placeholder-count="4">
+            <div onClick="{{ p.toggle }}" style="display:flex;align-items:center;gap:14px;padding:16px 24px;border-bottom:1px solid var(--border);cursor:pointer;" style-hover="background:var(--surface-2);">
+              <div style="flex:1;"><p style="margin:0;font-size:14px;font-weight:700;">{{ p.title }}</p><p style="margin:2px 0 0;font-size:12px;color:var(--muted);">{{ p.desc }}</p></div>
+              <span style="{{ p.toggleTrack }}"><span style="{{ p.toggleThumb }}"></span></span>
+            </div>
+            </sc-for>
+          </div>
+        </section>
+        </sc-if>
+
+        <!-- ===== EQUIPE ===== -->
+        <sc-if value="{{ isEquipe }}" hint-placeholder-val="{{ false }}">
+        <section style="background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;">
+          <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+            <h3 style="margin:0;font-size:14px;font-weight:900;text-transform:uppercase;letter-spacing:.02em;">Membros da Equipe</h3>
+            <button style="display:flex;align-items:center;gap:6px;background:var(--brand-soft);color:var(--brand);border:none;border-radius:9px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg> Convidar membro</button>
+          </div>
+          <div>
+            <sc-for list="{{ team }}" as="m" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:13px;padding:15px 24px;border-bottom:1px solid var(--border);" style-hover="background:var(--surface-2);">
+              <div style="width:40px;height:40px;border-radius:50%;background:{{ m.avatarBg }};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;">{{ m.initials }}</div>
+              <div style="flex:1;min-width:0;"><p style="margin:0;font-size:14px;font-weight:700;">{{ m.name }}</p><p style="margin:2px 0 0;font-size:12px;color:var(--muted);">{{ m.email }}</p></div>
+              <span style="display:inline-flex;padding:4px 11px;border-radius:7px;font-size:12px;font-weight:800;background:{{ m.roleBg }};color:{{ m.roleColor }};">{{ m.role }}</span>
+              <button style="color:var(--muted);background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;" style-hover="color:var(--brand);background:var(--brand-soft);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></button>
+            </div>
+            </sc-for>
+          </div>
+        </section>
+        </sc-if>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Snackbar -->
+  <sc-if value="{{ toastShown }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:80;display:flex;align-items:center;gap:11px;background:var(--text);color:var(--bg);padding:13px 18px;border-radius:13px;box-shadow:0 12px 40px rgba(0,0,0,.28);animation:ybToastIn .25s ease-out both;">
+    <span style="display:inline-flex;width:24px;height:24px;border-radius:50%;background:#16a34a;color:#fff;align-items:center;justify-content:center;flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+    <span style="font-size:14px;font-weight:700;">Alterações salvas com sucesso</span>
+    <button onClick="{{ hideToast }}" style="background:none;border:none;color:var(--bg);opacity:.6;cursor:pointer;display:flex;padding:2px;margin-left:6px;" style-hover="opacity:1;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960}}">
+class Component extends DCLogic {
+  state = { theme: 'dark', tab: 'perfil', toast: false, prefs: [true, true, false, true] };
+  componentDidMount(){ this.applyTheme(); }
+  componentWillUnmount(){ if (this._t) clearTimeout(this._t); }
+  applyTheme(){ try{ document.documentElement.dataset.theme = this.state.theme; }catch(e){} }
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'dark' ? 'light' : 'dark' }), this.applyTheme);
+  pick = (tab) => () => this.setState({ tab });
+  save = () => {
+    this.setState({ toast: true });
+    if (this._t) clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: false }), 3200);
+  };
+  hideToast = () => { if (this._t) clearTimeout(this._t); this.setState({ toast: false }); };
+  togglePref = (i) => () => this.setState(s => { const p = s.prefs.slice(); p[i] = !p[i]; return { prefs: p }; });
+
+  renderVals(){
+    const dark = this.state.theme === 'dark', T = this.state.tab;
+    const tab = (on) => 'border:none;background:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;padding:11px 16px;white-space:nowrap;border-bottom:2px solid ' + (on ? 'var(--brand);color:var(--brand);' : 'transparent;color:var(--muted);');
+    const track = (on) => 'flex-shrink:0;width:42px;height:24px;border-radius:999px;position:relative;transition:background .2s;background:' + (on ? 'var(--brand)' : 'var(--surface-2)') + ';border:1px solid ' + (on ? 'var(--brand)' : 'var(--border)') + ';';
+    const thumb = (on) => 'position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s;transform:translateX(' + (on ? '18px' : '0') + ');box-shadow:0 1px 3px rgba(0,0,0,.25);';
+    const ROLE = {
+      super:{ role:'Super Admin', roleBg:'rgba(245,95,22,.14)', roleColor:'#F55F16' },
+      editor:{ role:'Editor',     roleBg:'rgba(59,130,246,.12)', roleColor:'#3b82f6' },
+      viewer:{ role:'Visualizador', roleBg:'var(--surface-2)',   roleColor:'var(--muted)' },
+    };
+    const avatars = ['#ec4899','#3b82f6','#16a34a','#a855f7','#f59e0b'];
+    const prefDefs = [
+      ['Novos usuários', 'Receba um e-mail quando um novo usuário se cadastrar.'],
+      ['Falhas de pagamento', 'Avisos sobre cobranças recusadas ou estornos.'],
+      ['Resumo semanal', 'Relatório consolidado de métricas toda segunda.'],
+      ['Atualizações do produto', 'Novidades e mudanças na plataforma Ybytu.'],
+    ];
+    return {
+      isDark: dark, isLight: !dark, toggleTheme: this.toggleTheme,
+      save: this.save, hideToast: this.hideToast, toastShown: this.state.toast,
+      pickPerfil: this.pick('perfil'), pickSeguranca: this.pick('seguranca'), pickPref: this.pick('pref'), pickEquipe: this.pick('equipe'),
+      tabPerfil: tab(T==='perfil'), tabSeguranca: tab(T==='seguranca'), tabPref: tab(T==='pref'), tabEquipe: tab(T==='equipe'),
+      isPerfil: T==='perfil', isSeguranca: T==='seguranca', isPref: T==='pref', isEquipe: T==='equipe',
+      sessions: [
+        { icon:'💻', device:'MacBook Pro · Chrome', where:'São Paulo, BR · 192.168.0.1', current:true, canRevoke:false },
+        { icon:'📱', device:'iPhone 15 · App', where:'São Paulo, BR · há 3 horas', current:false, canRevoke:true },
+      ],
+      prefs: prefDefs.map((p, i) => ({ title:p[0], desc:p[1], toggle:this.togglePref(i), toggleTrack:track(this.state.prefs[i]), toggleThumb:thumb(this.state.prefs[i]) })),
+      team: [
+        { initials:'A', name:'Admin Principal', email:'admin · Ybytu', ...ROLE.super, avatarBg:'#F55F16' },
+        { initials:'BC', name:'Bruno Coach', email:'bruno · Ybytu', ...ROLE.editor, avatarBg:avatars[0] },
+        { initials:'NT', name:'Nutri Tatiane', email:'tatiane · Ybytu', ...ROLE.editor, avatarBg:avatars[2] },
+        { initials:'SF', name:'Sofia Finance', email:'sofia · Ybytu', ...ROLE.viewer, avatarBg:avatars[3] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
