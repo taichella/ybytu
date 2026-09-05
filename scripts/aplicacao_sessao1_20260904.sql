@@ -556,3 +556,104 @@ ORDER BY exercicios_sobrando_pior_caso ASC;
 SELECT
   (SELECT count(*) FROM exercise_condition_proposals_backup_20260904 WHERE tipo = 'avoid') AS avoid_antes,
   (SELECT count(*) FROM exercise_condition_proposals WHERE tipo = 'avoid') AS avoid_depois;
+
+-- C-B3. Quem JA TEM, no plano ativo, um exercicio que uma regra promovida
+-- nesta sessao tornou exclusao. A promocao (como a correcao de dedupe) so
+-- vale pra planos gerados DAQUI PRA FRENTE -- nao reescreve
+-- training_plan_exercises que ja existe. Sem esta lista, um aluno com a
+-- condicao declarada continua, sem ninguem saber, com o exercicio que o
+-- personal acabou de classificar como contraindicado.
+--
+-- DECISAO DE PRODUTO (2026-09-05, registrada aqui pra quem rodar depois):
+-- esta secao ENTREGA A LISTA, nao troca nada sozinha. Se o personal
+-- promoveu de aviso pra exclusao, ele considerou o exercicio contraindicado
+-- -- deixar como esta ate o proximo ciclo e conviver com um risco que ele
+-- acabou de classificar como inaceitavel, mas trocar o exercicio
+-- automaticamente seria o mesmo erro do fallback alfabetico do gerador
+-- (docs/ACHADO_DEGRADACAO_SILENCIOSA_20260904.md): decisao clinica tomada
+-- por codigo. Quem decide o que fazer com cada aluno exposto e o personal,
+-- linha por linha -- nunca um script.
+--
+-- Testado 2026-09-05 com dado real (BEGIN...ROLLBACK): confirmado que a
+-- cadeia profile -> onboarding_physical_conditions -> physical_conditions ->
+-- physical_condition_exercise_slugs (mesma do gerador,
+-- ybytu-generate-training-plan/index.ts:762-796) resolve certo, e que o
+-- cruzamento com training_plan_exercises acha o exercicio quando ha overlap
+-- de verdade (controle positivo com condicao simulada) e da zero quando nao
+-- ha (caso real da unica aluna do piloto com condicao declarada -- zero
+-- overlap genuino, confirmado nos dois lados manualmente, nao join quebrado
+-- -- ver caso 7 de docs/PADRAO_SISTEMA_NAO_SABIA_QUE_NAO_SABIA_20260904.md).
+
+CREATE TEMP TABLE regra_label (rule_id text, condition_slug text, label text);
+INSERT INTO regra_label (rule_id, condition_slug, label) VALUES
+  ('R2', 'ankle_pain',            'Regra 1 -- Tornozelo: impacto ao aterrissar'),
+  ('R3', 'ankle_pain',            'Regra 2 -- Tornozelo: plantiflexao repetida'),
+  ('R5', 'elbow_pain',            'Regra 3 -- Cotovelo: flexao/extensao com carga'),
+  ('R9', 'groin_pain',            'Regra 4 -- Virilha: abducao/aducao com carga'),
+  ('R8', 'hamstring_injury',      'Regra 5 -- Posterior de coxa: dobradica de quadril'),
+  ('R10','hip_pain',              'Regra 6 -- Quadril: flexao de quadril com carga'),
+  ('R12','joint_problems_severe', 'Regra 7 -- Problemas articulares graves: impacto/compressao'),
+  ('R1', 'knee_pain',             'Regra 8 -- Joelho: agachamento/avanco com carga'),
+  ('R2', 'knee_pain',             'Regra 9 -- Joelho: impacto ao aterrissar'),
+  ('R4', 'lumbar_pain',           'Regra 10 -- Lombar: carga na coluna com flexao'),
+  ('R7', 'neck_pain',             'Regra 11 -- Pescoco: empurrar peso acima da cabeca'),
+  ('R11','pelvic_floor_issues',   'Regra 12 -- Assoalho pelvico: carga pesada/impacto'),
+  ('R6', 'wrist_pain',            'Regra 13 -- Punho: extensao forcada com peso do corpo');
+
+CREATE TEMP TABLE exposto_avoid AS
+WITH user_condition AS (
+  -- health_conditions: direto, sem bridge
+  SELECT
+    p.id AS user_id, p.full_name, p.current_training_plan_id,
+    hc.health_condition_id AS condition_slug,
+    hc.name_ptbr AS condicao_declarada
+  FROM profiles p
+  JOIN health_conditions hc ON hc.id = ANY(p.health_conditions_ids)
+  WHERE p.current_training_plan_id IS NOT NULL
+    AND hc.health_condition_id NOT IN ('none', 'other')
+
+  UNION ALL
+
+  -- physical_conditions: 3 hops (onboarding -> physical_conditions -> bridge),
+  -- mesmo caminho do gerador. name_ptbr aqui e o rotulo que o ALUNO viu na
+  -- tela de cadastro (onboarding_physical_conditions), nao o slug interno --
+  -- "condicao declarada" precisa ser legivel pro personal, nao pra maquina.
+  SELECT
+    p.id, p.full_name, p.current_training_plan_id,
+    slug, opc.name_ptbr
+  FROM profiles p
+  JOIN onboarding_physical_conditions opc ON opc.id = ANY(p.physical_conditions_ids)
+  JOIN physical_conditions pc ON pc.id::text = opc.main_physical_conditions_ids
+  JOIN physical_condition_exercise_slugs br ON br.physical_condition_id = pc.physical_condition_id
+  CROSS JOIN LATERAL unnest(br.exercise_condition_slugs) AS slug
+  WHERE p.current_training_plan_id IS NOT NULL
+)
+SELECT DISTINCT
+  uc.full_name       AS aluno,
+  uc.condicao_declarada AS condicao,
+  e.name_ptbr         AS exercicio_afetado,
+  tpe.day_number      AS dia_do_plano,
+  rl.label            AS regra_que_mudou
+FROM user_condition uc
+JOIN decisao_cautions d ON d.condition_slug = uc.condition_slug AND d.decisao = 'avoid'
+JOIN regra_label rl ON rl.rule_id = d.rule_id AND rl.condition_slug = d.condition_slug
+JOIN exercise_condition_proposals p ON p.condition_slug = d.condition_slug AND p.rule_id = d.rule_id
+JOIN training_plans tp ON tp.id = uc.current_training_plan_id
+JOIN training_plan_exercises tpe ON tpe.training_plan_id = tp.training_plan_id AND tpe.exercise_id = p.exercise_id
+JOIN exercises e ON e.exercise_id = tpe.exercise_id;
+
+DO $$
+DECLARE n int;
+BEGIN
+  SELECT count(*) INTO n FROM exposto_avoid;
+  IF n > 0 THEN
+    RAISE WARNING 'C-B3: % linha(s) -- ha aluno com plano ativo contendo exercicio que acabou de virar exclusao. AVISE O PERSONAL ANTES DE QUALQUER OUTRA COISA -- nao troque o exercicio automaticamente, a decisao de cada caso e clinica, nao tecnica. Ver lista abaixo.', n;
+  END IF;
+END $$;
+
+SELECT * FROM exposto_avoid ORDER BY aluno, dia_do_plano;
+-- Se esta lista vier vazia: ninguem exposto agora, nada a fazer. Se vier com
+-- linha: PARE antes de seguir pro proximo passo do procedimento -- mande
+-- esta lista pro personal (nome do aluno, condicao, exercicio, dia, regra --
+-- ja pronta pra ele ler sem precisar entender SQL) e espere a decisao dele
+-- caso a caso antes de continuar.
