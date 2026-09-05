@@ -1,10 +1,10 @@
 # Padrão: "o sistema não sabia que não sabia" (referência, não lição de moral)
 
-Cinco casos reais deste projeto, formas diferentes do mesmo bug: o sistema tinha um estado
-inválido, ausente ou incerto e serviu normal mesmo assim, sem sinalizar nada. Nenhum foi achado
-por um mecanismo que o pegasse de graça — todos foram achados por alguém desconfiar e ir olhar.
-Registrado pra decidir, no próximo projeto, onde vale gastar esforço de arquitetura antes do
-primeiro bug em vez de depois do quinto.
+Sete casos reais deste projeto, formas diferentes do mesmo bug: o sistema (ou a ferramenta usada
+pra verificá-lo, caso 7) tinha um estado inválido, ausente ou incerto e serviu normal mesmo
+assim, sem sinalizar nada. Nenhum foi achado por um mecanismo que o pegasse de graça — todos foram
+achados por alguém desconfiar e ir olhar. Registrado pra decidir, no próximo projeto, onde vale
+gastar esforço de arquitetura antes do primeiro bug em vez de depois do sétimo.
 
 ## 1. Refeições com ingrediente errado servidas sem sinal (nutrição)
 
@@ -102,6 +102,33 @@ ser substituído por dado real ou por um estado vazio explícito no mesmo commit
 backend — nunca ficar como está "só até plugar o dado depois", porque depois é quando vira
 invisível.
 
+## 7. Zero linha retornada lida como "sem problema" em vez de "a consulta não rodou" — a versão mais barata do padrão, e a mais fácil de repetir
+
+**O quê:** verificando o plano da Marina contra alergênicos, rodei duas queries manuais fazendo
+`JOIN meal_plan_meals m ON m.meal_id = mpm.meal_id`. `meal_plan_meals.meal_id`, nesse plano gerado
+por IA, guarda o UUID de `meals.id` — não o código texto `meal_XXX` que o nome da coluna sugere
+(landmine já documentada em `buildPlanPayload.ts`, que faz o join certo). As duas queries
+retornaram zero linhas, e eu reportei isso como "Verificação A passa" e "Verificação B
+inconclusiva" — sem notar que o `JOIN` não tinha casado uma linha sequer. Não era "nenhuma
+refeição com soja"; era "a comparação nunca aconteceu".
+
+**Por que é a versão mais barata e mais fácil de repetir:** os outros seis casos exigiam ler
+código de produção, uma view, ou testar um fluxo inteiro. Este acontece em qualquer query ad hoc
+de verificação, a qualquer momento, sem precisar de nenhum bug de sistema por trás — só precisa
+que o `JOIN` esteja errado e que ninguém confira se ele bateu linha nenhuma antes de confiar no
+resultado. É o mesmo padrão dos outros seis, só que na ferramenta de quem está caçando os outros
+seis, não no sistema sendo caçado.
+
+**Custo pra achar:** descoberto por acidente, rodando uma query auxiliar que expôs os IDs crus e
+mostrando que eram UUID, não código — não por suspeitar da query original.
+
+**Regra que teria evitado:** toda verificação que espera "zero linhas = passou" precisa antes
+confirmar que o `JOIN`/filtro tem candidatos pra achar — rodar o `COUNT(*)` sem a condição extra
+primeiro, ou pelo menos olhar 1-2 linhas cruas antes de aplicar o filtro que vai zerar o
+resultado. Um `JOIN` que não bate nada e um `JOIN` que bate tudo e filtra tudo fora produzem a
+mesma saída (zero linhas) — e só um dos dois significa o que a pessoa lendo o resultado vai achar
+que significa.
+
 ## Técnicas de detecção reutilizáveis
 
 Duas técnicas usadas pra achar o caso 6, worth carregar pro próximo projeto:
@@ -118,6 +145,12 @@ ninguém trocou o exemplo do mockup?"** — é a pergunta que separa "implementa
 "implementação que só parece completa". Rodar essa pergunta tela por tela contra os mockups de
 origem é mais confiável que qualquer grep, porque não depende do formato da fabricação — rastreia
 a origem do valor, não a aparência dele.
+
+**3. Antes de confiar num "zero linhas" de verificação, confirmar que o `JOIN`/filtro tinha
+candidato pra achar.** Rodar o `COUNT(*)` sem a condição que está sendo testada, ou olhar 1-2
+linhas cruas do lado bruto do `JOIN`, antes de aplicar o filtro que zera o resultado. Existe
+`JOIN` errado que não bate nenhuma linha (parece "passou", na real não rodou) e `JOIN` certo que
+bate tudo e filtra tudo fora (passou de verdade) — os dois produzem a mesma saída visível.
 
 **Limitação conhecida, registrada pra não confiar demais na primeira técnica:** ela só pega
 fabricação numérica formatada. Não pega fabricação em prosa — nome de revisor de exemplo, data de
