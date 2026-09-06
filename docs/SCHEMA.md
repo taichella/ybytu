@@ -1,3 +1,21 @@
+# ⚠️ OBSOLETO (2026-09-01) — não use como referência
+
+Este documento é de 2026-08-05: sem constraints, sem FKs, sem CHECK, sem índices, e sem
+as tabelas/colunas criadas depois dessa data (ex: `restriction_tokens`,
+`food_restriction_tags`, `foods.allergen_review_status`). Já induziu erro duas vezes na
+mesma semana por causa disso. Não é mantido — cada dia que passa piora a divergência.
+
+**Para as 14 tabelas de nutrição** (`foods`, `meals`, `meal_plans`, `dietary_restrictions`
+e afins), use `docs/export_nutricao_20260901/schema.sql` — DDL real com PK/FK/UNIQUE/CHECK/
+índices, gerado direto de `information_schema`/`pg_catalog`. Para o resto do schema (fora
+do domínio de nutrição), não existe hoje um substituto igualmente completo — trate
+qualquer afirmação abaixo como ponto de partida a confirmar contra o banco
+(`information_schema.columns`/`pg_catalog`), nunca como fonte definitiva.
+
+O conteúdo original segue abaixo, sem alteração, só para não perder o que já existia.
+
+---
+
 # Schema real do banco (referência)
 
 Gerado a partir de `information_schema.columns` no banco Supabase linkado (projeto `jwjfmvkfzelbdvyqetyb`), em 2026-08-05. Não é um pg_dump — é uma reconstrução legível para consulta rápida, sem dados.

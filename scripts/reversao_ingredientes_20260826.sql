@@ -1,4 +1,11 @@
 -- ============================================================
+-- NAO-APLICAVEL, marcado em 2026-09-02. Escrito a partir da lista NAO
+-- validada de docs/APROVACAO_NUTRICIONISTA_REVERSAO.md (superada). A lista
+-- validada contra o banco real esta em
+-- docs/NUTRICIONISTA_SUBSTITUICOES_INGREDIENTES_20260901.csv (21 casos
+-- falsos removidos) -- nao existe script equivalente pra ela ainda. Nao
+-- apagar este arquivo, so nao usar.
+-- ============================================================
 -- SCRIPT DE REVERSAO -- 99 refeicoes com ingrediente errado
 -- NAO EXECUTADO. Gerado para revisao antes de rodar.
 -- Pre-requisito: aprovacao da nutricionista por padrao (ver
