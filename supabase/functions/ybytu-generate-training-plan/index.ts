@@ -505,39 +505,95 @@ function buildSetsDetail(sets: number, reps: number, restSeconds: number) {
   }))
 }
 
-// ─── Etapa 2: IA compõe (Gemini flash, mesma função/retry da nutrição) ───────
-// Camada opcional — qualquer falha aqui é absorvida pela re-validação por slot
-// mais abaixo, que cai no determinístico da Etapa 1. Nunca é dependência dura.
-async function callGemini(prompt: string, apiKey: string, retries = 3): Promise<any> {
-  // 'gemini-flash-latest' é um alias mantido pelo Google que sempre aponta pro
-  // flash recomendado atual — evita escolher um nome versionado (ex.: 2.5-flash)
-  // que a própria API de listagem ainda anuncia mas já responde 404 "no longer
-  // available to new users" em generateContent (visto em teste real com chave nova).
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`
+// ─── Groq (openai/gpt-oss-20b) ────────────────────────────────────────────────
+// Migrado de Gemini 2026-08-27 -- cota gratuita do Gemini (20 req/dia) não
+// sustenta nem um dia de uso normal, esgotou sozinha nos testes desta mesma
+// sessão. Groq free tier: 1.000 req/dia, 30 RPM, ~6-8K TPM (confirmado testando
+// o prompt real, sem alterar nada, contra os 3 modelos disponíveis na conta —
+// nenhum Llama no catálogo atual, só gpt-oss/qwen). openai/gpt-oss-20b
+// escolhido: JSON válido de primeira, respostas <1s, e devolve um campo
+// `reasoning` (cadeia de raciocínio em inglês, cru) que os outros formatos não
+// davam — guardado como log de auditoria (ver GroqResult.reasoning), não
+// mostrado ao profissional ainda.
+// GROQ_TIMEOUT_MS: mantido o mesmo guard de timeout que blindava contra o
+// limite duro de 150s do Edge Functions do Supabase (achado 2026-08-27) --
+// o Groq responde em <1s na prática, mas o guard continua sendo a rede de
+// segurança se a API ficar lenta um dia.
+const GROQ_TIMEOUT_MS = 20_000
+const GROQ_MODEL = 'openai/gpt-oss-20b'
+
+type GroqResult = { data: any; reasoning: string | null }
+
+async function callGroq(prompt: string, apiKey: string, retries = 3): Promise<GroqResult> {
+  const url = 'https://api.groq.com/openai/v1/chat/completions'
 
   for (let attempt = 1; attempt <= retries; attempt++) {
-    const res  = await fetch(url, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents:         [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.2 },
-      }),
-    })
-    const data = await res.json()
+    const controller = new AbortController()
+    const timeoutId  = setTimeout(() => controller.abort(), GROQ_TIMEOUT_MS)
 
-    if (data.error?.code === 503 || data.error?.code === 429) {
-      if (attempt === retries) throw new Error('Gemini overloaded: ' + data.error.message)
-      await new Promise(r => setTimeout(r, attempt * 3000))
+    let data: any
+    let retryAfterSeconds: number | null = null
+    try {
+      const res = await fetch(url, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        signal:  controller.signal,
+        body: JSON.stringify({
+          model:               GROQ_MODEL,
+          messages:            [{ role: 'user', content: prompt }],
+          temperature:         0.2,
+          response_format:     { type: 'json_object' },
+          // reasoning_effort 'low': achado ao vivo 2026-08-27 — o default
+          // ('medium') gera uma cadeia de raciocínio longa o bastante pra
+          // estourar o budget de output ANTES do JSON, devolvendo
+          // json_validate_failed com failed_generation vazio (o modelo foi
+          // cortado no meio do raciocínio, nunca chegou a escrever a
+          // resposta). 'low' + max_completion_tokens generoso resolve.
+          // max_completion_tokens 500 (2026-08-31, era 1200): o Groq conta
+          // prompt_tokens + max_completion_tokens contra o teto de TPM NO
+          // ENVIO, não o uso real depois -- medido ao vivo, completion real
+          // nunca passou de 322 tokens em nenhuma chamada (treino ou
+          // nutrição). Reservar 1200 pagava ~4x o necessário em toda
+          // chamada, essa é a causa raiz do "Used" alto nos 429 observados.
+          // 500 dá ~55% de margem sobre o máximo já visto. Não é o prompt —
+          // não muda nada do que a IA lê nem pode escolher.
+          reasoning_effort:    'low',
+          max_completion_tokens: 500,
+        }),
+      })
+      const retryAfterRaw = res.headers.get('retry-after')
+      retryAfterSeconds = retryAfterRaw ? Number(retryAfterRaw) : null
+      data = await res.json()
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        if (attempt === retries) throw new Error(`Groq timeout after ${GROQ_TIMEOUT_MS}ms (attempt ${attempt})`)
+        continue // tenta de novo, sem esperar backoff — timeout já não é sobrecarga (503/429)
+      }
+      throw err
+    } finally {
+      clearTimeout(timeoutId)
+    }
+
+    if (data?.error?.type === 'rate_limit_exceeded' || data?.error?.code === 'rate_limit_exceeded') {
+      if (attempt === retries) throw new Error('Groq overloaded: ' + JSON.stringify(data.error))
+      // retry-after real do Groq (2026-08-31, era attempt*3000 fixo) --
+      // medido ao vivo variando 2-16s; o fixo (3s/6s) errava pra baixo na
+      // maioria das colisões observadas, gastando a tentativa sem esperar
+      // tempo suficiente pra realmente ter espaço no teto.
+      const waitMs = retryAfterSeconds && !Number.isNaN(retryAfterSeconds) ? Math.ceil(retryAfterSeconds * 1000) : attempt * 3000
+      await new Promise(r => setTimeout(r, waitMs))
       continue
     }
-    if (data.error) throw new Error('Gemini error: ' + JSON.stringify(data.error))
+    if (data.error) throw new Error('Groq error: ' + JSON.stringify(data.error))
 
-    return JSON.parse(
-      data.candidates[0].content.parts[0].text
-        .replace(/```json/gi, '').replace(/```/g, '').trim()
-    )
+    const message = data.choices?.[0]?.message
+    const content = message?.content ?? ''
+    return {
+      data: JSON.parse(content.replace(/```json/gi, '').replace(/```/g, '').trim()),
+      reasoning: message?.reasoning ?? null,
+    }
   }
+  throw new Error('Groq: unreachable')
 }
 
 // ─── Ranking de candidatos por slot (base do determinístico E do que a IA vê) ─
@@ -854,39 +910,64 @@ serve(async (req) => {
       candidates: rankedCandidates(slot.target_muscle_groups, safePool),
     }))
 
-    // Determinístico (Etapa 1): posição 0 do ranking, ou fallback alfabético
-    // do safePool se nenhum candidato cobre o grupo-alvo do slot.
+    // Determinístico (Etapa 1): posição 0 do ranking, ou PULA o slot se nenhum
+    // candidato cobre o grupo-alvo.
+    //
+    // ATÉ 2026-09-04 isto caía num fallback alfabético (qualquer exercício do
+    // safePool, sem relação com o grupo-alvo, ex_id menor primeiro) marcado
+    // `degraded: true` — mas esse flag nunca era persistido, só devolvido na
+    // resposta HTTP síncrona (que ninguém lê, fluxo é fire-and-forget), então
+    // se perdia. Resultado real observado: um slot de antebraço podia receber
+    // um agachamento, indistinguível de escolha certa pra quem valida ou pro
+    // aluno. Corrigido: pular é melhor que preencher errado — ver
+    // docs/ACHADO_DEGRADACAO_SILENCIOSA_20260904.md. Um "estágio 1" de
+    // fallback por categoria ampla de músculo foi avaliado e descartado: não
+    // existe hierarquia de músculo no schema, e o único mapa pronto
+    // (MUSCLE_CATEGORY_MAP, ver docs/ARMADILHAS_SCHEMA.md) é largo demais —
+    // trocaria antebraço por peitoral só por estarem no mesmo balde
+    // "superior".
     //
     // REGRA DE DESIGN (registrada na revisão de arquitetura): reuso do mesmo
     // exercício entre dias é OK e ESPERADO quando o pool de um grupo muscular
     // é raso (ex: costas em beginner+casa) — o próprio tr_204 já repete
     // dia1==dia3 e dia2==dia4. Um bom exercício repetido é melhor que um ruim
     // forçado por "variedade".
-    function deterministicPick(candidates: any[]) {
-      if (candidates.length > 0) return { exercise_id: candidates[0].exercise_id, degraded: false }
-      const fallback = [...safePool].sort((a, b) => a.exercise_id.localeCompare(b.exercise_id))[0]
-      return { exercise_id: fallback.exercise_id, degraded: true }
+    function deterministicPick(candidates: any[]): { exercise_id: string; skipped: false } | { exercise_id: null; skipped: true } {
+      if (candidates.length > 0) return { exercise_id: candidates[0].exercise_id, skipped: false }
+      return { exercise_id: null, skipped: true }
     }
 
     // ── ETAPA 2: IA compõe (opcional) ────────────────────────────────────────
-    // Uma única chamada pro plano inteiro (todos os dias, todos os slots) —
-    // dá pra IA visão do plano completo pra decidir variedade/distribuição
-    // com coerência entre dias, não slot por slot isolado.
-    const geminiKey = Deno.env.get('GEMINI_API_KEY')
+    // 1 chamada POR DIA, sequencial (não Promise.all) -- achado 2026-08-30
+    // testando ao vivo: 1 chamada só pro plano inteiro (24-30 slots) já
+    // sozinha usa ~5.300-6.000 dos 8.000 TPM do free tier do Groq. Qualquer
+    // uso concorrente na mesma janela de 1min (inclusive a chamada da
+    // nutrição, que roda em paralelo no mesmo onboarding) estourava o limite
+    // e o plano inteiro caía 100% pro determinístico -- 0/24 observado em
+    // produção. Cada chamada por dia (6-7 slots) fica bem abaixo do teto
+    // mesmo com concorrência, e sequencial (não paralela) evita a colisão
+    // entre as próprias chamadas do mesmo plano. Efeito colateral aceito:
+    // a IA perde a visão do plano inteiro (só decide variedade DENTRO do
+    // dia, não entre dias) -- ok pela REGRA DE DESIGN já registrada acima
+    // (reuso do mesmo exercício ENTRE DIAS é esperado, só dentro do mesmo
+    // dia é problema de qualidade).
+    // Falha de UM dia (timeout/rate limit) só derruba aquele dia pro
+    // determinístico -- os outros dias que já tiveram sucesso continuam IA
+    // (a re-validação abaixo já opera por slot, então isso é automático:
+    // slots sem key em aiSelections caem no determinístico individualmente).
+    const groqKey = Deno.env.get('GROQ_API_KEY')
+
+    const AI_PROMPT_CANDIDATE_LIMIT = 5
+    const slotsByDayNumber = new Map<number, typeof slotsWithCandidates>()
+    for (const s of slotsWithCandidates) {
+      const list = slotsByDayNumber.get(s.day_number) ?? []
+      list.push(s)
+      slotsByDayNumber.set(s.day_number, list)
+    }
 
     let aiSelections: Record<string, string> = {}
-    if (geminiKey) {
-      const slotsForPrompt = slotsWithCandidates.map(s => ({
-        slot_key: `${s.day_number}_${s.order_within_day}`,
-        day: s.day_number,
-        target_muscle_groups: s.target_muscle_groups,
-        candidates: s.candidates.map((c: any) => ({
-          exercise_id: c.exercise_id,
-          name: c.name_ptbr,
-          muscle_groups: c.muscle_groups_ids,
-        })),
-      }))
-
+    const aiReasoningByDay: string[] = []
+    if (groqKey) {
       // BLOCO 2 (ponto 2): age/activity level só entram na linha quando o
       // usuário preencheu — nunca fabrica um valor pra não enviesar a IA com
       // um sinal que não existe.
@@ -899,30 +980,44 @@ serve(async (req) => {
         activityLevelSlug !== null ? `- activity level: ${activityLevelSlug}` : null,
       ].filter((line): line is string => line !== null).join('\n')
 
-      const aiPrompt = `You are an expert personal trainer composing a ${moldeDaysCount}-day training plan personalized to this user.
+      for (const [dayNumber, daySlots] of [...slotsByDayNumber.entries()].sort((a, b) => a[0] - b[0])) {
+        const slotsForPrompt = daySlots.map(s => ({
+          slot_key: `${s.day_number}_${s.order_within_day}`,
+          target_muscle_groups: s.target_muscle_groups,
+          candidates: s.candidates.slice(0, AI_PROMPT_CANDIDATE_LIMIT).map((c: any) => ({
+            exercise_id: c.exercise_id,
+            name: c.name_ptbr,
+          })),
+        }))
+
+        const aiPrompt = `You are an expert personal trainer composing day ${dayNumber} of a ${moldeDaysCount}-day training plan personalized to this user.
 
 USER PROFILE:
 ${profileLines}
 (safety is already enforced upstream — every candidate below is pre-validated safe for this user; you never need to filter for conditions)
 
-PLAN STRUCTURE (fixed — sets/reps/day layout already defined, you only choose which exercise fills each slot):
+DAY STRUCTURE (fixed — sets/reps/slot layout already defined, you only choose which exercise fills each slot):
 ${JSON.stringify(slotsForPrompt, null, 2)}
 
 Rules:
 1. For each slot, pick exactly one exercise_id from THAT SLOT'S OWN "candidates" list only. Never invent ids, never use a candidate offered to a different slot.
 2. Personalize using ALL profile signals together — level and goals are the primary drivers; age and activity level (when provided) are secondary PREFERENCE signals for choosing AMONG the candidates already offered for each slot. They are never a reason to exclude a candidate or invent one outside the list — every candidate in a slot's list is already safe and level-appropriate. Older and/or sedentary/lightly_active users: prefer the more accessible, lower-complexity candidate in the slot's list. Younger and/or active/very_active users: you may prefer the more challenging candidate that maximizes stimulus for the target muscles. If age/activity level are absent, personalize using level and goals alone.
-3. Consider the plan as a whole: avoid repeating the same exercise across different days when a slot's candidate list offers a good alternative. Repetition is fine and expected when a slot's candidate list is shallow (few or one viable option) — do not sacrifice match quality just to avoid repetition.
+3. Avoid repeating the same exercise across different slots WITHIN THIS DAY when a slot's candidate list offers a good alternative. Repetition is fine and expected when a slot's candidate list is shallow (few or one viable option) — do not sacrifice match quality just to avoid repetition.
 4. You must return one selection per slot listed above.
 
 Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
 
-      try {
-        const aiResult = await callGemini(aiPrompt, geminiKey)
-        aiSelections   = (aiResult?.selections ?? {}) as Record<string, string>
-      } catch (err) {
-        console.error('[ybytu-generate-training-plan] Gemini call failed, falling back to deterministicPick:', err)
+        try {
+          const aiResult = await callGroq(aiPrompt, groqKey)
+          const daySelections = (aiResult.data?.selections ?? {}) as Record<string, string>
+          aiSelections = { ...aiSelections, ...daySelections }
+          if (aiResult.reasoning) aiReasoningByDay.push(`Dia ${dayNumber}: ${aiResult.reasoning}`)
+        } catch (err: any) {
+          console.error(`[ybytu-generate-training-plan] Groq call failed for day ${dayNumber}, falling back to deterministicPick for this day only:`, err)
+        }
       }
     }
+    const aiReasoning: string | null = aiReasoningByDay.length > 0 ? aiReasoningByDay.join('\n\n') : null
 
     // ── RE-VALIDAÇÃO (a cerca): confina a IA aos candidatos do slot certo ────
     // Aceita o pick da IA só se ele está na lista de candidatos DAQUELE slot
@@ -934,14 +1029,135 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
       const validPick  = aiPick ? slot.candidates.find((c: any) => c.exercise_id === aiPick) : null
 
       if (validPick) {
-        return { ...slot, chosen_exercise_id: validPick.exercise_id, degraded: false, filled_by: 'ai' as const }
+        return { ...slot, chosen_exercise_id: validPick.exercise_id, skipped: false, filled_by: 'ai' as const }
       }
 
       const det = deterministicPick(slot.candidates)
-      return { ...slot, chosen_exercise_id: det.exercise_id, degraded: det.degraded, filled_by: 'deterministic' as const }
+      return { ...slot, chosen_exercise_id: det.exercise_id, skipped: det.skipped, filled_by: det.skipped ? 'skipped' as const : 'deterministic' as const }
     })
 
-    const chosenExerciseIds = [...new Set(filledSlots.map(s => s.chosen_exercise_id))]
+    // ── DEDUPE (dentro do dia): dois slots do mesmo dia nunca podem acabar
+    // com o mesmo exercício, mesmo quando o exercise_id é diferente -- achado
+    // 2026-09-04 (Marina Santos: ex_194 e ex_216, ambos "Flexão de braço com
+    // pegada fechada", exercise_id diferente porque o catálogo tem 19 pares
+    // de nome duplicado, não corrigidos ainda). Roda DEPOIS que IA e
+    // determinístico já convergiram em chosen_exercise_id (acima), então uma
+    // checagem só protege os dois caminhos -- inclusive dias 100%
+    // determinísticos (sem GROQ_API_KEY, ou falha da chamada daquele dia),
+    // que não tinham proteção nenhuma antes disso. Comparação por NOME
+    // normalizado (minúsculas, sem acento), não por exercise_id -- os pares
+    // duplicados variam capitalização/acentuação entre si.
+    function normalizeExerciseName(name: string): string {
+      // NFD separa a letra do sinal diacritico (acento/til/cedilha) em dois
+      // code points -- filtra pelo range Unicode de "Combining Diacritical
+      // Marks" (U+0300-U+036F) numericamente, em vez de literal na regex,
+      // pra nao depender de encoding de arquivo pro caractere combinado.
+      const codePoints = Array.from(name.normalize('NFD')).filter((ch) => {
+        const code = ch.codePointAt(0) ?? 0
+        return code < 0x0300 || code > 0x036f
+      })
+      return codePoints.join('').toLowerCase().trim()
+    }
+
+    const slotsByDayForDedupe = new Map<number, typeof filledSlots>()
+    for (const s of filledSlots) {
+      const list = slotsByDayForDedupe.get(s.day_number) ?? []
+      list.push(s)
+      slotsByDayForDedupe.set(s.day_number, list)
+    }
+
+    const dedupedFilledSlots = filledSlots.map(s => ({ ...s }))
+    for (const daySlots of slotsByDayForDedupe.values()) {
+      const usedNames = new Set<string>()
+      const sortedDaySlots = [...daySlots].sort((a, b) => a.order_within_day - b.order_within_day)
+
+      for (const slot of sortedDaySlots) {
+        if (slot.skipped || !slot.chosen_exercise_id) continue
+
+        const chosenCandidate = slot.candidates.find((c: any) => c.exercise_id === slot.chosen_exercise_id)
+        const chosenName = chosenCandidate ? normalizeExerciseName(chosenCandidate.name_ptbr) : null
+        if (!chosenName) continue
+
+        if (!usedNames.has(chosenName)) {
+          usedNames.add(chosenName)
+          continue
+        }
+
+        // duplicata por nome -- procura no PRÓPRIO candidate pool do slot
+        // (mesma ordem de ranking que deterministicPick já assume: overlap
+        // de músculo desc, depois exercise_id) o próximo que não repita
+        // nenhum nome já usado no dia.
+        const alternative = slot.candidates.find((c: any) =>
+          c.exercise_id !== slot.chosen_exercise_id && !usedNames.has(normalizeExerciseName(c.name_ptbr))
+        )
+
+        if (alternative) {
+          const target = dedupedFilledSlots.find(d => d.day_number === slot.day_number && d.order_within_day === slot.order_within_day)
+          if (target) target.chosen_exercise_id = alternative.exercise_id
+          usedNames.add(normalizeExerciseName(alternative.name_ptbr))
+        } else {
+          // pool raso, sem alternativa -- mantém o repetido de propósito
+          // (regra já registrada acima: repetir um bom exercício é melhor
+          // que forçar um ruim só por variedade)
+          usedNames.add(chosenName)
+        }
+      }
+    }
+
+    const filledSlotsKept = dedupedFilledSlots.filter(s => !s.skipped)
+    const skippedSlots    = dedupedFilledSlots.filter(s => s.skipped)
+
+    // ── PISO: dia com menos de 3 exercícios reais não é mais um treino ───────
+    // Mesmo piso que targetSlotsPerDay() já usa pra cortar por duração
+    // (Math.max(3, ...)) — nenhum dia de nenhum plano, molde ou gerado, já
+    // teve menos de 3 (conferido 2026-09-04). Abaixo disso, trata como
+    // no_safe_exercises: recusa a geração inteira em vez de entregar um dia
+    // que não é mais um treino de verdade — cai na mesma fila de
+    // ybytu-admin-failed-plans / retry que a recusa por pool vazio já usa,
+    // não inventa um terceiro estado ("plano parcialmente ruim").
+    const MIN_SLOTS_PER_DAY = 3
+    const realCountByDay = new Map<number, number>()
+    for (const s of filledSlotsKept) realCountByDay.set(s.day_number, (realCountByDay.get(s.day_number) ?? 0) + 1)
+    const starvedDay = [...new Set(filledSlots.map(s => s.day_number))]
+      .find(d => (realCountByDay.get(d) ?? 0) < MIN_SLOTS_PER_DAY)
+
+    if (starvedDay !== undefined) {
+      const failMessage = `day_below_minimum_after_skip: dia ${starvedDay} ficaria com ${realCountByDay.get(starvedDay) ?? 0} exercício(s) (mínimo ${MIN_SLOTS_PER_DAY}) depois de pular slot(s) sem candidato seguro — level=${levelSlug} environment=${environmentSlug} condition_slugs=${userConditionSlugs.join(',') || '-'}`
+      await markPlanGenerationStatus(supabase, userId, 'failed', failMessage)
+      return new Response(JSON.stringify({
+        success: false,
+        status: 'day_below_minimum_after_skip',
+        message: 'Not enough safe exercises to fill at least one day of the plan (environment/level/equipment/conditions too restrictive).',
+        profile_context: { level: levelSlug, environment: environmentSlug, condition_slugs: userConditionSlugs, day: starvedDay },
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    // Nomes de grupo muscular pros avisos de slot pulado (só busca se algo
+    // foi pulado — caminho comum não paga essa query).
+    const skippedMuscleGroupNameBySlug = new Map<string, string>()
+    if (skippedSlots.length > 0) {
+      const slugsNeeded = [...new Set(skippedSlots.flatMap(s => s.target_muscle_groups ?? []))]
+      const { data: mgRows } = await supabase.from('muscle_groups').select('muscle_group_id, name_ptbr').in('muscle_group_id', slugsNeeded)
+      for (const row of (mgRows ?? [])) skippedMuscleGroupNameBySlug.set(row.muscle_group_id, row.name_ptbr)
+    }
+
+    // skipped_slots: um registro por slot pulado, com as DUAS mensagens já
+    // prontas (staff e aluno) -- evita reconstruir texto em buildPlanPayload.ts
+    // toda vez que o plano é lido, e evita divergência de redação entre as
+    // duas telas.
+    const skippedSlotsPayload = skippedSlots.map(s => {
+      const namesPtbr = (s.target_muscle_groups ?? []).map((g: string) => skippedMuscleGroupNameBySlug.get(g) ?? g)
+      const namesJoined = namesPtbr.length > 0 ? namesPtbr.join(', ') : 'um grupo muscular'
+      return {
+        day_number: s.day_number,
+        target_muscle_groups: s.target_muscle_groups ?? [],
+        condition_slugs: userConditionSlugs,
+        mensagem_staff: `Nenhum exercício seguro de ${namesJoined} disponível dadas as condições físicas declaradas. Você pode adicionar um exercício manualmente no construtor se julgar seguro — a decisão é clínica.`,
+        mensagem_aluno: `Este dia tem menos exercícios do que o normal porque as limitações físicas que você declarou restringiram as opções seguras de ${namesJoined}.`,
+      }
+    })
+
+    const chosenExerciseIds = [...new Set(filledSlotsKept.map(s => s.chosen_exercise_id))]
 
     // Equipamento realmente usado — derivado dos exercícios escolhidos, nunca hardcoded.
     const { data: chosenExDetails, error: chosenExError } = await supabase
@@ -982,6 +1198,13 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
     const aiPlanSlug = `tr_ai_${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`
     const planName = `Treino IA – ${goalLabelPtbr(primaryGoal)} – ${moldeDaysCount}x/semana`
 
+    // Observabilidade (2026-08-27) -- antes só ia na resposta HTTP, nunca
+    // persistia. Sem isso, degradação de qualidade (cota estourada, IA fora
+    // do ar) ficava invisível: só se descobria investigando manualmente
+    // (foi exatamente o que aconteceu com o Gemini nesta mesma sessão).
+    const aiFilledCount            = filledSlots.filter(s => s.filled_by === 'ai').length
+    const deterministicFilledCount = filledSlots.filter(s => s.filled_by === 'deterministic').length
+
     const { data: newPlan, error: planErr } = await supabase
       .from('training_plans')
       .insert({
@@ -998,6 +1221,10 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
         is_active: false,
         created_at: new Date().toISOString(),
         caution_warnings: cautionWarnings,
+        skipped_slots: skippedSlotsPayload,
+        ai_filled_slots:              aiFilledCount,
+        deterministic_fallback_slots: deterministicFilledCount,
+        ai_reasoning:                 aiReasoning,
       })
       .select('id')
       .single()
@@ -1009,7 +1236,7 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
     // tr_204 direto. Já user_training_plans.training_plan_id é UUID e guarda
     // training_plans.id. Mesmo nome de coluna, tabelas diferentes, tipos e
     // significados diferentes — não trocar um pelo outro.
-    const tpeRows = filledSlots.map(s => ({
+    const tpeRows = filledSlotsKept.map(s => ({
       training_plan_id: aiPlanSlug,
       exercise_id: s.chosen_exercise_id,
       day_number: s.day_number,
@@ -1038,7 +1265,7 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
 
     return new Response(JSON.stringify({
       success: true,
-      ai_layer: !!geminiKey, // tentou IA; ver ai_filled_slots pra saber quanto dela realmente colou
+      ai_layer: !!groqKey, // tentou IA; ver ai_filled_slots pra saber quanto dela realmente colou
       training_plan: {
         id: newPlan.id,
         training_plan_id: aiPlanSlug,
@@ -1046,20 +1273,19 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
         days_per_week: moldeDaysCount,
         duration_minutes: trainingDuration,
       },
-      composition: filledSlots.map(s => ({
+      composition: filledSlotsKept.map(s => ({
         day_number: s.day_number,
         order_within_day: s.order_within_day,
         exercise_id: s.chosen_exercise_id,
         sets: s.sets,
         reps: s.reps,
         rest_seconds: s.rest_seconds,
-        degraded: s.degraded,
         filled_by: s.filled_by,
       })),
       caution_warnings: cautionWarnings,
-      degraded_slots: filledSlots.some(s => s.degraded),
-      ai_filled_slots: filledSlots.filter(s => s.filled_by === 'ai').length,
-      deterministic_fallback_slots: filledSlots.filter(s => s.filled_by === 'deterministic').length,
+      skipped_slots: skippedSlotsPayload,
+      ai_filled_slots: aiFilledCount,
+      deterministic_fallback_slots: deterministicFilledCount,
       profile_context: {
         level: levelSlug,
         environment: environmentSlug,
