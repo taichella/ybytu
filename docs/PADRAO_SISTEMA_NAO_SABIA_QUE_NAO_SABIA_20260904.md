@@ -1,10 +1,11 @@
 # Padrão: "o sistema não sabia que não sabia" (referência, não lição de moral)
 
-Sete casos reais deste projeto, formas diferentes do mesmo bug: o sistema (ou a ferramenta usada
-pra verificá-lo, caso 7) tinha um estado inválido, ausente ou incerto e serviu normal mesmo
-assim, sem sinalizar nada. Nenhum foi achado por um mecanismo que o pegasse de graça — todos foram
-achados por alguém desconfiar e ir olhar. Registrado pra decidir, no próximo projeto, onde vale
-gastar esforço de arquitetura antes do primeiro bug em vez de depois do sétimo.
+Oito casos reais deste projeto, formas diferentes do mesmo bug: o sistema (ou a ferramenta usada
+pra verificá-lo, caso 7; ou o repositório que deveria descrever o sistema, caso 8) tinha um estado
+inválido, ausente ou incerto e serviu normal mesmo assim, sem sinalizar nada. Nenhum foi achado por
+um mecanismo que o pegasse de graça — todos foram achados por alguém desconfiar e ir olhar.
+Registrado pra decidir, no próximo projeto, onde vale gastar esforço de arquitetura antes do
+primeiro bug em vez de depois do oitavo.
 
 ## 1. Refeições com ingrediente errado servidas sem sinal (nutrição)
 
@@ -128,6 +129,38 @@ primeiro, ou pelo menos olhar 1-2 linhas cruas antes de aplicar o filtro que vai
 resultado. Um `JOIN` que não bate nada e um `JOIN` que bate tudo e filtra tudo fora produzem a
 mesma saída (zero linhas) — e só um dos dois significa o que a pessoa lendo o resultado vai achar
 que significa.
+
+## 8. Código em produção que não existia no git — o repositório não sabia o que estava no ar
+
+**O quê:** os dois geradores de plano (migração Gemini→Groq, mais a correção da degradação
+silenciosa do caso 3) e o webhook do WhatsApp (validação HMAC da assinatura da Meta) estavam
+deployados e rodando havia dias — desde 2026-08-27/08-31 e 2026-09-01 respectivamente — mas nunca
+tinham sido commitados. Um `git clone` limpo seguido de `supabase functions deploy` teria revertido
+os três silenciosamente: de volta pro Gemini (com a cota de 20 req/dia que já tinha esgotado
+sozinha em teste), de volta pro fallback alfabético que preenche slot errado sem avisar (caso 3), e
+de volta pro webhook sem verificação de assinatura. Descoberto numa varredura pedida porque 93
+arquivos não commitados na working tree pareciam demais pra não esconder nada — não por nenhum
+alarme do sistema de deploy.
+
+**Por que é uma forma nova, não repetição de um caso anterior:** nos sete casos anteriores, quem
+não sabia era o sistema em produção (ou a query de quem o investigava, caso 7). Aqui quem não
+sabia era o repositório — a fonte que todo mundo trata como a verdade sobre "o que existe" não
+tinha o código que estava de fato decidindo o plano de cada aluno. É o mesmo mecanismo batendo uma
+camada acima: nada compara os dois lados.
+
+**Custo pra achar:** uma varredura manual arquivo-por-arquivo de toda a working tree, cruzando cada
+diff contra memória de sessões anteriores e contra `supabase functions download` pra confirmar o
+que estava realmente no ar — não uma checagem de rotina, uma investigação dedicada só porque o
+número de arquivos pendentes soou alto demais.
+
+**Regra que teria evitado:** `supabase functions deploy` (e `db push`) agem sobre o disco sem
+nunca perguntar ao git se aquele disco tem alguma relação com o que está versionado — commit é um
+passo separado que ninguém é obrigado a lembrar, exatamente como não existia nada obrigando alguém
+a rodar `detect-silent-revert.sh` antes de mergear. A correção não é lembrar melhor da próxima vez
+— é a mesma dos outros sete: tirar a checagem da memória de alguém e colocar num mecanismo que
+recusa seguir sem ela. `scripts/deploy-functions.sh` faz isso: substitui o comando de deploy em
+si (não um passo extra antes dele) e recusa deployar se a function tiver mudança não commitada ou
+commit não empurrado — a mesma correção estrutural do padrão, aplicada aqui.
 
 ## Técnicas de detecção reutilizáveis
 
