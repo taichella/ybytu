@@ -28,6 +28,10 @@
 -- ############################################################################
 -- SECAO A -- NUTRICIONISTA (docs/SESSAO_1_NUTRICIONISTA_20260902.md)
 -- Roda sozinha, independente da Secao B.
+--
+-- REGISTRO DE PROVENIENCIA: o parecer usado pra preencher esta secao e
+-- PRELIMINAR -- sem validacao de CRN. Aplicado mesmo assim por decisao de
+-- Taina em 06/09/2026.
 -- ############################################################################
 
 BEGIN;
@@ -426,12 +430,30 @@ FROM decisao_muscle_groups d
 WHERE e.exercise_id = d.exercise_id
   AND d.muscle_group_slugs IS NOT NULL;
 
--- ---- B2. 13 regras de caution/avoid -----------------------------------------
+-- ---- B2. 12 das 13 regras de caution/avoid (regra 7 pendente, ver abaixo) ---
 -- decisao: 'caution' (mantem como esta) ou 'avoid' (promove a exclusao).
 -- Casamento por condition_slug + trecho do clinical_reason (nao ha rule_id
 -- exato registrado no documento da sessao) -- a guarda abaixo verifica ANTES
 -- do UPDATE que o numero de linhas afetadas bate com a coluna "Afeta" do
 -- documento; se nao bater, aborta em vez de aplicar errado.
+--
+-- REGRA 7 (joint_problems_severe, R12, afeta 40 exercicios) DE PROPOSITO FORA
+-- da lista abaixo -- registrado aqui, nao deixado como linha com decisao NULL
+-- (a guarda de "pendentes > 0" logo adiante aborta a transacao INTEIRA, B1
+-- incluido, se qualquer linha ficar sem decisao -- nao da pra "deixar em
+-- branco" dentro da tabela sem bloquear as outras 12 regras e o B1 junto).
+--
+-- Resposta do personal (Sessao 1, 2026-09-06): nao promover a exclusao (nao
+-- tirar nenhum exercicio), mas o aviso deveria ir pro STAFF, nao pro aluno.
+-- Isso nao e nenhuma das duas opcoes que o script suporta hoje -- 'caution'
+-- aplicaria o aviso PRO ALUNO tambem (CAUTION_MESSAGES em
+-- ybytu-generate-training-plan/index.ts nao distingue publico, ao contrario
+-- de skipped_slots que ja tem mensagem_staff/mensagem_aluno separadas), o
+-- que contraria exatamente o que ele pediu. Tratado como PENDENTE ate existir
+-- a mesma separacao de publico pra caution_warnings -- ver
+-- docs/DEBITO_AVISO_STAFF_ONLY_CAUTION_20260906.md pro tamanho da correcao.
+-- A regra continua no estado atual (tipo/status inalterados) ate ser decidida
+-- numa proxima rodada deste script.
 
 -- Correcao 2026-09-05: casamento por rule_id + condition_slug, nao mais por
 -- trecho de clinical_reason. Dois motivos: (1) rule_id existe de verdade na
@@ -459,7 +481,7 @@ INSERT INTO decisao_cautions (linha, condition_slug, rule_id, afeta_esperado, de
   (4,  'groin_pain',            'R9',   8, NULL, NULL),
   (5,  'hamstring_injury',      'R8',  22, NULL, NULL),
   (6,  'hip_pain',              'R10', 17, NULL, NULL),
-  (7,  'joint_problems_severe', 'R12', 40, NULL, NULL), -- comece por aqui, ver doc
+  -- (7, 'joint_problems_severe', 'R12', 40, ...) -- PENDENTE, ver comentario acima. Nao incluir aqui ate decidir.
   (8,  'knee_pain',             'R1',  15, NULL, NULL),
   (9,  'knee_pain',             'R2',  15, NULL, NULL),
   (10, 'lumbar_pain',           'R4',  30, NULL, NULL),
