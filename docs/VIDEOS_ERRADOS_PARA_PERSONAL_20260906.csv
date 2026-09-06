@@ -1,4 +1,6 @@
 grupo,exercicio_id,nome_exercicio,situacao,arquivo_original_no_drive,acao_sugerida,aviso_sessao1,decisao_personal
+sabor_3_arquivo_nao_existe_mais,ex_062,Abdução em pé com miniband,arquivo no Drive não existe mais (HTTP 404) -- achado durante varredura pra migração,,precisa de vídeo novo,,
+sabor_3_arquivo_nao_existe_mais,ex_068,Sumô Deadlift com halteres,arquivo no Drive não existe mais (HTTP 404) -- achado durante varredura pra migração,,precisa de vídeo novo,,
 sabor_2_erro_confirmado,ex_235,Superman,vídeo confere (SUPERMAN.MOV),SUPERMAN.MOV,manter,,
 sabor_2_erro_confirmado,ex_236,Bird dog,vídeo é do Superman - não do Bird dog,SUPERMAN.MOV,precisa de vídeo novo,,
 sabor_2_erro_confirmado,ex_283,Box Jump,vídeo confere (BOX JUMP.MOV),BOX JUMP.MOV,manter,,
