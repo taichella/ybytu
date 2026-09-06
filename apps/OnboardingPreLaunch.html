@@ -222,17 +222,13 @@
       {
         id: 'dedicated_days_per_week',
         title: "Quantos dias por semana pretende se dedicar ao plano?",
-        subtitle: "Isso definirá a frequência dos seus treinos e da dieta",
-        type: 'single',
-        dbField: 'dedicated_days_per_week',
-        options: [
-          {id: 2, name_ptbr: '2 dias'},
-          {id: 3, name_ptbr: '3 dias'},
-          {id: 4, name_ptbr: '4 dias'},
-          {id: 5, name_ptbr: '5 dias'},
-          {id: 6, name_ptbr: '6 dias'},
-          {id: 7, name_ptbr: '7 dias (Todos os dias)'}
-        ],
+        // Faixa 3-5 confirmada com personal trainer (2026-09-06): menos de 3
+        // dias não dá estímulo suficiente pra resultado, mais de 5 não deixa
+        // o músculo recuperar entre as sessões -- por isso o limite, não
+        // falha de formulário.
+        subtitle: "Menos de 3 dias não dá estímulo suficiente pra resultado; mais de 5 não deixa o músculo recuperar entre os treinos.",
+        type: 'slider',
+        dbField: 'dedicated_days_per_week', min: 3, max: 5, step: 1, recommended: 4, unit: 'dias',
         condition: (ans) => true
       },
       { 
@@ -277,8 +273,8 @@
         id: 'training_duration_minutes', 
         title: "Quanto tempo tem por treino?", 
         subtitle: "Deslize para definir o tempo", 
-        type: 'slider', 
-        dbField: 'training_duration_minutes', min: 15, max: 90, step: 15, recommended: 45,
+        type: 'slider',
+        dbField: 'training_duration_minutes', min: 15, max: 90, step: 15, recommended: 45, unit: 'min',
         condition: (ans) => true
       },
       { 
@@ -680,7 +676,7 @@
               <div className="bg-surface p-8 rounded-3xl border border-borderColor flex flex-col items-center shadow-sm">
                 <div className="text-brand text-6xl font-black mb-4">
                   {answers[currentData.dbField] || currentData.recommended}
-                  <span className="text-2xl text-textMuted font-bold"> min</span>
+                  <span className="text-2xl text-textMuted font-bold"> {currentData.unit}</span>
                 </div>
                 <input
                   type="range"
