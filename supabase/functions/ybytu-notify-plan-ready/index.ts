@@ -104,6 +104,12 @@ serve(async (req) => {
     // envio duplicado. Achado 2026-08-22. Uma mensagem por telefone único é
     // suficiente pra avisar "tem parecer pendente"; o papel específico é
     // detalhado ao abrir o link /validar/:id.
+    // Toggle temporário STAFF_PHONE_DEDUPE_DISABLED=true pra teste comparativo
+    // (Taina precisa receber 1 msg por papel pra confirmar que os dois fluxos
+    // disparam) -- reversível via secret, sem reaprovação de template. Some
+    // ao entrar a nutri real (número diferente de PHONE_ADMIN_TRAINER), o
+    // dedupe deixa de ter efeito prático e isso pode ser removido.
+    const dedupeDisabled = Deno.env.get('STAFF_PHONE_DEDUPE_DISABLED') === 'true'
     const notifiedPhones = new Set<string>()
 
     for (const role of missingRoles) {
@@ -112,7 +118,7 @@ serve(async (req) => {
         console.error(`Telefone não configurado pro papel ${role} (${ROLE_PHONE_ENV[role]})`)
         continue
       }
-      if (notifiedPhones.has(phone)) {
+      if (!dedupeDisabled && notifiedPhones.has(phone)) {
         notifiedRoles.push(role)
         continue
       }

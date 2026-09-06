@@ -15,7 +15,12 @@ const WRITABLE_FIELDS = [
   'food_type_id', 'brand', 'food_preparation_method_id', 'quantity', 'food_measurement_unit_id',
   'correction_factor', 'cooking_factor', 'calories_per_unit', 'protein_g', 'carbs_g', 'fat_g',
   'fiber_g', 'sugar_g', 'fat_sat_g', 'fat_trans_g', 'cholesterol_mg', 'sodium_mg', 'calcium_mg',
-  'iron_mg', 'potassium_mg', 'magnesium_mg', 'vitamins_ids', 'minerals_ids', 'dietary_restrictions_ids',
+  // dietary_restrictions_ids_deprecated (2026-09-01, era dietary_restrictions_ids):
+  // coluna renomeada quando o alérgeno passou a viver em food_restriction_tags/
+  // allergen_review_status. FoodEditor.jsx nunca populou este campo, então isso
+  // nunca quebrou em runtime -- mas a referência velha ficaria esperando uma
+  // coluna que não existe mais no dia em que alguém populasse.
+  'iron_mg', 'potassium_mg', 'magnesium_mg', 'vitamins_ids', 'minerals_ids', 'dietary_restrictions_ids_deprecated',
   'diet_tags_ids', 'functional_tags_ids', 'tags_ids', 'food_facts_source_id', 'url_image', 'dietary_preference'
 ]
 
