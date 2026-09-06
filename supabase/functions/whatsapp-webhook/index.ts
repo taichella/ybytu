@@ -6,6 +6,37 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 )
 
+// ─── Validação HMAC do POST (2026-09-01) ──────────────────────────────────────
+// A Meta assina todo POST de webhook com HMAC-SHA256 do corpo cru, usando o
+// App Secret (Meta App Dashboard → Configurações → Básico), no header
+// X-Hub-Signature-256 (formato "sha256=<hex>"). Sem isso, qualquer um que
+// descubra a URL forjava delivery_status -- achado na auditoria de 2026-09-01
+// (o GET já validava hub.verify_token, o POST não validava nada).
+//
+// FAIL-CLOSED de propósito: secret ausente = rejeita, nunca passa liberado --
+// mesmo princípio do array vazio de alérgeno (unreviewed bloqueia, não libera).
+// Se a Meta receber 403, ela reentrega com backoff decrescente por até 7 dias
+// (confirmado na documentação oficial) -- não perde o evento por causa disso,
+// só se o secret ficar sem configurar por mais de uma semana.
+async function computeHmacSha256Hex(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  )
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message))
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// Comparação em tempo constante -- não usa === direto pra não vazar por
+// timing quantos bytes iniciais bateram. Confere o tamanho primeiro (padrão
+// aceito, o próprio crypto.timingSafeEqual do Node faz o mesmo).
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  let mismatch = 0
+  for (let i = 0; i < a.length; i++) mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  return mismatch === 0
+}
+
 serve(async (req) => {
   const url = new URL(req.url)
 
@@ -26,7 +57,31 @@ serve(async (req) => {
 
   // 2. RECEBIMENTO DE MENSAGENS (Requisição POST)
   try {
-    const payload = await req.json()
+    // Corpo CRU primeiro -- a assinatura é sobre os bytes exatos que a Meta
+    // mandou, não sobre um JSON.parse+re-stringify (poderia divergir em
+    // espaçamento/ordem de chaves e invalidar a comparação).
+    const rawBody = await req.text()
+
+    const appSecret = Deno.env.get('WHATSAPP_APP_SECRET')
+    if (!appSecret) {
+      console.error("WHATSAPP_APP_SECRET não configurado -- rejeitando POST (fail-closed, não passa liberado)")
+      return new Response("Configuração ausente", { status: 403 })
+    }
+
+    const signatureHeader = req.headers.get('x-hub-signature-256')
+    if (!signatureHeader || !signatureHeader.startsWith('sha256=')) {
+      console.error("X-Hub-Signature-256 ausente ou em formato inesperado")
+      return new Response("Assinatura ausente", { status: 403 })
+    }
+
+    const receivedSignature = signatureHeader.slice('sha256='.length)
+    const expectedSignature = await computeHmacSha256Hex(appSecret, rawBody)
+    if (!timingSafeEqual(receivedSignature, expectedSignature)) {
+      console.error("Assinatura HMAC inválida -- payload rejeitado antes de tocar no banco")
+      return new Response("Assinatura inválida", { status: 403 })
+    }
+
+    const payload = JSON.parse(rawBody)
     console.log("Notificação recebida da Meta:", JSON.stringify(payload))
 
     // Callback de status (sent/delivered/read/failed) do template que a gente
