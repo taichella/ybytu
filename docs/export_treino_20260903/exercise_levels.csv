@@ -1,0 +1,4 @@
+exercise_level_id,id,name_en,name_fr,name_ptbr,sort_order
+beginner,f9fde3d8-5b0e-4275-9256-b6cf28dbdf3d,Beginner,Débutant,Iniciante,0
+advanced,dafd3a6d-d763-4c25-a880-3da0c509a363,Advanced,Avancé,Avançado,1
+intermediate,01feeda0-8834-408b-a6a0-d05febd0c134,Intermediate,Intermédiaire,Intermediário,2

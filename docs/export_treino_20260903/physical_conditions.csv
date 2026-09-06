@@ -1,0 +1,17 @@
+id,name_en,name_fr,name_ptbr,physical_condition_id
+742fc39d-418d-4b4e-8d78-428f80c27ed2,Ankle,Cheville,Tornozelo,ankle
+b1d82977-9bc5-4eca-b2f9-bfee74655eae,Back Pain,Douleur Dorsale,Dor nas Costas,back_pain
+76f03f9b-5bcf-4e17-aa9f-16ec706ac8dd,Cervical Hernia,Hernie Cervicale,Hérnia Cervical,cervical_hernia
+8f0d1c38-c43b-48fc-9357-4a349b5ffb79,Elbow Pain,Douleur au Coude,Dor no Cotovelo,elbow_pain
+d11e1069-44da-4c08-b5f9-07bb14afaca0,Groin Pain,Douleur à l'Aine,Dor na Virilha,groin_pain
+4ce942a0-d8a1-4e18-a050-85ada5d258b8,Hamstring Injury,Blessure aux Ischio-jambiers,Lesão no Isquiotibial,hamstring_injury
+ba2562fe-7ab5-4c24-b159-8e3e0af3160d,Hip Pain,Douleur à la Hanche,Dor no Quadril,hip_pain
+be06cddc-b433-4ca4-b240-ad043d252554,Severe Joint Problems,Problèmes Articulaires Sévères,Problemas Articulares Graves,joint_problems_severe
+f9dc0433-3e47-44c4-9fae-d8d971c87b00,Knee,Genou,Joelho,knee
+079ad15c-c600-4dfb-a246-c149590edd9e,Lumbar,Lombaire,Lombar,lumbar
+8f91a7f0-cc19-4b84-b738-fd83ad47ee67,Neck,Cou,Pescoço,neck
+9887e82a-74c2-40cd-bd41-a8cc35e95c39,None,Aucune,Nenhuma,none
+ae7d383d-d806-4c4a-a232-c162c9a3c9ef,Other,Autre,Outra,other
+258f3a6c-c1e5-46dc-a309-e95e4115b5f4,Pelvic Floor Issues,Problèmes du Plancher Pelvien,Problemas no Assoalho Pélvico,pelvic_floor_issues
+46c886b1-3323-4e6f-8abc-6ad47bc8004e,Shoulder,Épaule,Ombro,shoulder
+f0afb638-8156-45b5-a491-ba9222d350c0,Wrist Pain,Douleur au Poignet,Dor no Pulso,wrist_pain

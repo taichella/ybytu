@@ -1,0 +1,73 @@
+exercise_equipment_id,id,name_en,name_fr,name_ptbr
+ab_wheel,51bd2e86-cf60-4d11-957e-962313d7e084,Ab wheel,Ab wheel,roda abdominal
+abductor_machine,e79009ac-d8da-45cd-8dc2-15fdc51ad71f,Abductor machine,Abductor machine,cadeira abdutora
+adductor_machine,0523288d-4a99-4d31-9cdf-767e25043f00,Adductor machine,Adductor machine,cadeira adutora
+air_bike,399d810a-233f-4659-930c-afcdf97f4a32,Air Bike,Air Bike,Air Bike (Bicicleta de Ar)
+ankle_weights,158ca16c-a3c9-4e04-8ddd-53e0d16efa4a,Ankle weights,Ankle weights,caneleiras
+assisted_pull_up,79d45e27-1327-49d4-b59c-3b88523ac2d7,Assisted pull-up machine,Assisted pull-up machine,Graviton (barra fixa assistida)
+backpack,3afe6d8c-12ee-470f-bfa9-8e42fdbffebf,Backpack,Backpack,mochila
+bar_fixed_bar,a3c8301c-9dd9-4031-a135-cc08306eb08b,Bar/Fixed bar,Bar/Fixed bar,barra/barra fixa
+battle_rope,acc5e228-c1bd-4e22-932c-7216e3bb8232,Battle rope,Battle rope,corda naval
+bed,693e333d-0cbd-4f80-9584-cf5a8c92364a,Bed,Bed,cama
+bench,3cf99327-026f-4f0f-9552-d64d78421f85,Bench,Bench,banco
+biceps_machine,b65f724e-e1f1-46e8-9131-990757bfc7cf,Biceps Machine,Machine à Biceps,Máquina de Bíceps
+bike,b9c55797-8e26-4f59-97ec-75fff9d926ee,Bicycle,Bicycle,bicicleta
+box,a537593b-b4d2-4848-9568-2f50ec9ccb70,Box,Box,caixa
+cable_crossover,f2ac6f30-adbe-405b-86ab-0372ac7e7ead,Cable crossover,Cable crossover,Cross over
+cable_machine,ae6b46de-452b-434f-984e-dc86a9162fcf,Cable Machine,Machine à Câbles,Máquina de Cabos / Polia
+cable_row,271f28fa-c54a-4fa3-a2f6-8bf0a03f8360,Cable row,Cable row,remada baixa
+calf_machine,afe49b37-ac84-4b11-ad3d-487bc362823e,Calf Machine,Machine à Mollets,Máquina de Panturrilha
+calf_raise_machine,fa0f86a4-49b8-45b6-86c3-9ab2b28da35e,Calf raise machine,Calf raise machine,Máquina de panturrilha
+chair,86e31e67-3343-4478-bbca-0b4214de7fcc,Chair,Chair,cadeira
+chest_press,d0cabdc6-4ee5-4c8d-b0b6-402e0efa761b,Chest press,Chest press,supino máquina
+chest_press_machine,aad5e0f0-bc01-49d1-a653-8654423cf93f,Chest Press Machine,Machine de Développé Couché,Máquina de Supino
+crunch_machine,d5c12f9f-f2f4-4ffb-98ac-a75986e77a25,Crunch Machine,Machine à Crunch,Máquina de Abdominal
+decline_bench,54b82a45-fbc7-46ae-ae36-7503d97c2c31,Decline Bench,Banc Décliné,Banco Declinado
+doorway,526791ac-4387-4a30-bc7f-f11ec950fca8,Doorway,Cadre de Porte,Batente de Porta
+dumbbells,243de385-3d32-4626-b75c-ec53b31b0810,Dumbbells,Dumbbells,halteres
+elastic_band_mini_band,eb346647-a0ec-4bcb-b4a6-207d4b012e7f,Elastic band/Mini band,Elastic band/Mini band,faixa elástica/miniband
+elliptical,72fb4505-0228-4042-9c79-3db7deeaaa1c,Elliptical,Elliptical,elíptico
+foam_roller,0b9377cf-2416-4a20-982b-6d9f1a942808,Foam roller,Foam roller,rolo de liberação miofascial
+glute_machine,10cfea61-1843-4fb1-81a5-c618281d4a92,Glute Machine,Machine à Fessiers,Máquina de Glúteos
+hack_squat,0c20d889-36fa-4f5b-8b77-01db94c47e4b,Hack squat,Hack squat,Agachamento hack
+hip_thrust_machine,1c1e9831-c67f-43aa-8d2d-f7dda7208c77,Hip Thrust Machine,Machine de Hip Thrust,Máquina de Elevação Pélvica
+hyperextension_bench,18da9a86-9a55-4917-ace1-9669451f8906,Hyperextension bench,Hyperextension bench,Banco de hiperextensão
+jump_rope,574de37d-d4d5-4b7f-8658-36ac91816637,Jump rope,Jump rope,corda de pular
+kettlebell,99c21404-a5cb-4569-ba80-f7fa88e042a6,Kettlebell,Kettlebell,kettlebell
+lat_pulldown,43ace6f6-0ec3-4c80-bede-ce3c5c8b8429,Lat pulldown,Lat pulldown,puxada alta
+leg_curl,a87ca704-138c-4d02-852c-59a3788758e9,Leg curl,Leg curl,mesa flexora
+leg_extension,a7d3ead0-e0c9-45f8-9684-5e1c40c9eac8,Leg extension,Leg extension,cadeira extensora
+leg_press,0ca317be-f6c3-4f8d-9170-e5db81b626bc,Leg press,Leg press,leg press
+mat_rug,683fc1ef-bc88-4570-a694-06be7ac02c44,Mat/Rug,Mat/Rug,colchonete/tapete
+medicine_ball,4ecf9c45-97ad-446e-bc3e-993c05be3230,Medicine ball,Medicine ball,medicine ball
+none_bodyweight,aabd1228-3014-4016-9d87-261d8dfd6010,None (Bodyweight),None (Bodyweight),nenhum (peso do corpo)
+parallettes,debf91d2-42b0-47b2-a4cd-56eb63118e92,Parallettes,Parallettes,barras paralelas
+pec_deck,c9209e02-54fb-4e0c-a00c-48f498d65ffd,Pec deck,Pec deck,voador/peck deck
+pec_deck_machine,d5fbabad-8b8f-42f2-888b-2ccef6c62bf5,Pec Deck Machine,Machine Pec Deck,Máquina Voador (Pec Deck)
+pool,87bdb453-1cc2-46db-ab39-26e228abef1d,Pool,Pool,piscina
+pulldown_machine,134b3dce-a23e-49a8-bb0a-7f5d780270d6,Pulldown Machine,Machine de Tirage,Máquina de Puxada
+rings,a05915a4-46f5-4740-8000-78ced8821180,Gymnastic rings,Gymnastic rings,argolas
+rowing_machine,458f883c-9c19-496f-8dd1-011f2b4ae37b,Rowing machine,Rowing machine,remo
+sandbag,28423e87-8557-4c1b-9f44-75ecc632974c,Sandbag,Sandbag,saco de areia
+shoulder_press,4ad70b78-df41-40f4-a8ac-74b6ff9575ff,Shoulder press,Shoulder press,desenvolvimento máquina
+shoulder_press_machine,0981e969-5776-4170-95e6-12e5057bc1cd,Shoulder Press Machine,Machine de Développé Épaules,Máquina de Desenvolvimento
+sissy_squat_machine,34b8792a-3353-4ec0-a64d-a92ea29dd8a7,Sissy Squat Machine,Machine Sissy Squat,Máquina Sissy Squat
+sliders,38af11b7-ca4b-4393-8988-aab91a695d70,Sliders,Sliders,discos de deslizamento
+smith_machine,1c535204-21fd-46b3-9005-d1fdc15b7281,Smith machine,Smith machine,barra guiada (smith)
+sofa,1a7ddf9a-05c5-40f2-82ab-34fe9c282ae7,Sofa,Sofa,sofá
+spinning_bike,aee53034-0f09-45f9-854a-651b7a6f031c,Spinning Bike,Vélo de Spinning,Bicicleta de Spinning
+stair_climber,cf95b965-053f-4b2d-881a-76268709d88b,Stair climber,Stair climber,simulador de escada
+stairs,046619a0-af4d-4640-a158-19692a283662,Stairs,Stairs,escada
+stationary_bike,8a966ea4-90f9-4ddb-84b3-bc5e6666ab1f,Stationary bike,Stationary bike,bicicleta ergométrica
+step,dafa16bc-985f-44e1-9043-6ac594553f21,Step,Step,step
+stick,b39916df-8328-4a74-8c1f-c2cf17e6ceb0,Stick,Stick,bastão
+swiss_ball,011b72a8-b769-4c01-8954-7114f8d365aa,Swiss ball,Swiss ball,bola suíça
+torso_rotation_machine,08104019-ba5c-4eb5-bb2d-45c074f1bad6,Torso Rotation Machine,Machine de Rotation du Torse,Máquina de Rotação de Tronco
+towel,7ccbdea0-71ac-41cd-9972-bd79b98f86d0,Towel,Towel,toalha
+treadmill,4e4d7455-fdb2-4cc0-94a6-92343b5896b8,Treadmill,Treadmill,esteira
+triceps_machine,ea4039ee-37ca-4b98-8f46-65a25ea81a0d,Triceps Machine,Machine à Triceps,Máquina de Tríceps
+trx,43e014a3-c41a-414c-9e39-249aa3e563b0,Suspension trainer (TRX),Suspension trainer (TRX),fita de suspensão (trx)
+vest,b9fe6c48-8728-4925-955b-a2a7e4324124,Weighted vest,Weighted vest,colete de peso
+wall,4cbe31dd-c071-4f73-b75f-4923cd0e9d08,Wall,Wall,parede
+water_bottles,242b8a77-c327-436a-84a8-daad3162e41e,Water bottles,Water bottles,garrafas de água
+weight_plate,bdbb0d9b-607a-4171-894f-df6057b01960,Weight Plate,Disque de Poids,Anilha

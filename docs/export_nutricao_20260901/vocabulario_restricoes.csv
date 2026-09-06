@@ -1,0 +1,17 @@
+dietary_restriction_id,name_ptbr,excludes_tokens
+dairy_free,Sem Laticínios,milk
+egg_free,Sem Ovos,egg
+fish_free,Sem Peixe,fish
+gluten_free,Sem Glúten,"gluten,wheat,rye,gluten_free_if_certified"
+low_sugar,Baixo Açúcar,
+lupin_free,Sem Tremoço,lupin
+mustard_free,Sem Mostarda,mustard
+no_pork,Sem Carne Suína,pork
+no_red_meat,Sem Carne Vermelha,red_meat
+none,Nenhuma,
+nut_free,Sem Oleaginosas,"tree_nuts,nuts"
+peanut_free,Sem Amendoim,peanuts
+sesame_free,Sem Gergelim,sesame
+shellfish_free,Sem Frutos do Mar,"shellfish,crustacean,mollusk"
+soy_free,Sem Soja,soy
+sulfites_free,Sem Sulfitos,sulfites

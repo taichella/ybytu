@@ -1,0 +1,31 @@
+food_type_id,name_ptbr,name_en,name_fr,id
+bakery,Padaria,Bakery,Bakery,d90f03c2-9159-4579-aa85-f492e6c29ee0
+beef,Carne Bovina,Beef,Beef,3fa0a018-d425-4be4-8c25-25dc4035f860
+beverage,Bebida,Beverage,Beverage,51d533fc-4a96-4a4c-9df2-4df2ca3ce058
+cereal,Cereal,Cereal,Cereal,be8eef92-37f4-406d-acc8-b1d71a16d57e
+cheese,Queijo,Cheese,Cheese,bd9f04cc-59ed-4905-a236-a051c8c4e3e5
+condiment,Condimento,Condiment,Condiment,98e16db0-4501-4a7f-83b7-8b6018ec7c32
+dairy,Laticínios,Dairy,Dairy,ac4a1aff-aa87-4d37-8da8-312c14c046bd
+eggs,Ovos,Eggs,Eggs,1b800e79-6723-4745-a686-9c386fd59a81
+fish,Peixe,Fish,Fish,9c7cdec4-5e72-42d0-a1c6-206e4e9a0812
+fruit,Fruta,Fruit,Fruit,2bb4cdc0-564c-4d7d-abab-a1f7d1d16697
+fungi,Fungi,Fungi,Fungi,00b966e1-97cd-4040-abab-9ab09e3c2e8c
+game_meat,Caça,Game Meat,Game Meat,d01d919d-781b-4f26-87cc-d61ab8e95d27
+goat,Cabra,Goat,Goat,f9e8967e-3a30-473d-9539-a6a94e3d5e93
+grain,Grãos,Grain,Grain,6e9acf2e-cb10-4581-9145-886b28a09364
+herb_spice,Erva/Especiaria,Herb Spice,Herb Spice,9d040039-d2cd-4ca1-8d8e-ed460ef9bcdb
+insects,Insetos,Insects,Insects,f6b820f8-7325-46ca-8adc-82eb3f278336
+lamb,Cordeiro,Lamb,Lamb,05cf687a-c682-4037-a9ce-c6918ca9cb1e
+legume,Leguminosa,Legume,Legume,a4ea5ff7-91dc-4a47-9f5f-055bf8b0d106
+nut_seed,Nozes/Sementes,Nut Seed,Nut Seed,f8cc5ca1-fe4d-4b11-b428-2a39fd0d7279
+oil_fat,Óleo/Gordura,Oil Fat,Oil Fat,a527fa86-7a06-41cb-aec6-b0757c8fa690
+pork,Porco,Pork,Pork,8fe7f00c-5a43-4158-8aed-831dff0d1bcc
+poultry,Aves,Poultry,Poultry,7c67d664-6729-462c-b90f-9f46b65caa59
+processed,Processado,Processed,Processed,f5d473e8-cff6-4d00-915e-e33702b143d0
+ready_meal,Refeição Pronta,Ready Meal,Ready Meal,52ba7abd-384a-41fc-93e9-7042cf8b6978
+root_vegetable,Raiz,Root Vegetable,Root Vegetable,d12296be-e818-4751-91e6-293173c89128
+shellfish,Frutos do Mar,Shellfish,Shellfish,091b48e8-c329-49ef-a1d4-21971ae9171c
+supplement,Suplemento,Supplement,Supplement,ae20016a-28e4-487a-90fe-9f2660b42536
+sweet_snack,Doce/Snack,Sweet Snack,Sweet Snack,90fb8473-319b-4389-acd4-b0066ae5425a
+tuber_root,Tubérculo/Raiz,Tuber Root,Tuber Root,d4094f69-f7d6-4803-877a-8b8b00d3cdb5
+vegetable,Vegetal,Vegetable,Vegetable,d941621c-f19c-403a-87da-bc7a26358eb5

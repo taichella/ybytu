@@ -1,0 +1,201 @@
+meal_id,name_ptbr,meal_type,is_active,restriction_tags,ingredients
+meal_001,Crepioca de Queijo Minas,breakfast,true,"egg,milk",Ovo cozido: 50g; Queijo minas frescal: 30g; Tapioca (goma preparada): 30g
+meal_002,Mingau de Aveia com Banana,breakfast,true,"gluten_free_if_certified,milk",Aveia em flocos: 40g; Banana: 100g; Leite desnatado: 200ml
+meal_003,Ovos Mexidos com Pão Francês,breakfast,true,"egg,gluten,milk",Manteiga sem sal: 5g; Ovo cozido: 100g; Pão francês: 50g
+meal_004,Pão Integral com Pasta de Amendoim e Geleia,breakfast,true,"gluten,peanuts,wheat",Geleia de morango: 20g; Pão de forma integral: 50g; Pasta de amendoim: 30g
+meal_005,Vitamina de Abacate Tradicional,breakfast,false,,Abacate: 100g; Leite integral: 200ml; Mel de abelha: 10g
+meal_006,Panqueca Fit de Banana e Aveia,breakfast,true,"egg,gluten_free_if_certified",Aveia em flocos: 20g; Banana: 100g; Ovo cozido: 50g
+meal_007,Iogurte com Granola e Morango,breakfast,true,"gluten,milk,nuts",Granola tradicional: 30g; Iogurte natural: 150g; Morango: 100g
+meal_008,Tapioca de Frango com Requeijão Light,breakfast,true,milk,Peito de frango grelhado: 80g; Requeijão light: 30g; Tapioca (goma preparada): 50g
+meal_009,Avocado Toast com Ovo (Pão com Abacate),breakfast,true,"egg,gluten,wheat",Abacate: 50g; Ovo cozido: 50g; Pão de forma integral: 50g
+meal_010,Croissant de Presunto e Queijo,breakfast,true,"egg,gluten,milk,pork,wheat",Croissant: 50g; Presunto cozido: 30g; Queijo prato: 30g
+meal_011,Frango com Batata Doce e Brócolis,lunch,false,gluten,Arroz integral cozido: 100g; Farinha de trigo: 100g; Peito de frango grelhado: 150g
+meal_012,"Prato Feito (Arroz, Feijão e Bife)",lunch,false,"gluten,red_meat",Batata doce cozida: 100g; Contrafilé grelhado: 100g; Macarrão cozido: 100g
+meal_013,Bacalhau com Batata e Ovo,lunch,false,"egg,fish,gluten",Azeite de oliva extravirgem: 10ml; Bacalhau dessalgado cozido: 100g; Ovo cozido: 50g; Pão integral: 100g
+meal_014,Macarrão à Bolonhesa Saudável,lunch,false,red_meat,Carne moída (patinho) cozida: 100g; Molho de tomate caseiro: 100g; Quinoa cozida: 150g
+meal_015,Strogonoff de Frango com Arroz,lunch,false,milk,Batata doce cozida: 100g; Creme de leite: 50g; Molho de tomate caseiro: 50g; Peito de frango grelhado: 100g
+meal_016,Salada de Atum e Grão-de-bico,lunch,true,fish,Atum em lata (natural): 100g; Azeite de oliva extravirgem: 10ml; Grão-de-bico cozido: 100g
+meal_017,Salmão Assado com Quinoa e Cenoura,lunch,false,fish,Cuscuz de milho cozido: 100g; Peixe (salmão): 150g; Polenta cozida: 100g
+meal_018,Hambúrguer Vegetal com Purê de Abóbora,lunch,true,,Hambúrguer vegetal (tipo carne): 100g; Purê de abóbora (preparado): 150g
+meal_019,Omelete de Espinafre e Tomate Seco,lunch,false,"egg,milk",Araruta cozida: 50g; Ovo cozido: 100g; Queijo muçarela: 30g; Tomate seco em óleo: 15g
+meal_020,Tofu Defumado com Arroz Integral,lunch,false,"gluten,soy",Farinha de trigo: 100g; Milho cozido: 100g; Tofu defumado: 100g
+meal_021,Sanduíche de Peru e Cottage,snack,true,"gluten,milk,wheat",Pão de forma integral: 50g; Peito de peru defumado: 30g; Queijo cottage: 30g
+meal_022,Batido de Whey e Banana,snack,true,"milk,soy",Banana: 100g; Leite desnatado: 200ml; Whey Protein Concentrado: 30g
+meal_023,Iogurte com Chia e Maçã,snack,false,milk,Chia hidratada (Pudim de Chia base): 15g; Iogurte natural desnatado: 150g; Laranja: 100g
+meal_024,Muffin de Banana de Microondas,snack,true,"egg,gluten_free_if_certified",Aveia em flocos: 20g; Banana: 50g; Ovo cozido: 50g
+meal_025,"Vitamina de Aveia, Morango e Colágeno",snack,true,gluten_free_if_certified,Colágeno hidrolisado: 10g; Leite de aveia: 200ml; Morango: 100g
+meal_026,Mingau Proteico de Cacau,snack,true,"gluten_free_if_certified,milk,soy",Aveia em flocos: 30g; Cacau em pó (sem açúcar): 5g; Leite desnatado: 150ml; Whey Protein Concentrado: 20g
+meal_027,Torrada com Guacamole Caseiro,snack,false,"gluten,wheat",Abacate: 50g; Alface: 30g; Torrada integral: 30g
+meal_028,Crepioca Doce (Pré-Treino),snack,true,egg,Banana: 50g; Cacau em pó (sem açúcar): 5g; Ovo cozido: 50g; Tapioca (goma preparada): 30g
+meal_029,Sanduíche Natural de Atum,snack,true,"fish,gluten,milk,wheat",Atum em lata (natural): 50g; Creme de ricota: 20g; Pão de forma integral: 50g
+meal_030,Batido Verde (Green Smoothie),snack,false,gluten_free_if_certified,Araruta cozida: 30g; Farinha de linhaça: 10g; Laranja: 100g; Leite de aveia: 200ml
+meal_031,Creme de Abóbora com Frango,dinner,true,,Azeite de oliva extravirgem: 5ml; Peito de frango grelhado: 100g; Purê de abóbora (preparado): 150g
+meal_032,Omelete de Queijo Minas e Tomate,dinner,false,"egg,milk",Alface: 50g; Ovo cozido: 100g; Queijo minas frescal: 30g
+meal_033,Salada Caesar Saudável com Frango,dinner,false,milk,Aipo (Salsão): 100g; Iogurte natural integral: 20g; Peito de frango grelhado: 100g; Queijo parmesão: 20g
+meal_034,Sopa de Legumes e Feijão,dinner,false,gluten,Azeite de oliva extravirgem: 5ml; Macarrão cozido: 100g; Pão integral: 50g; Polenta cozida: 50g
+meal_035,Filé de Pescada com Brócolis,dinner,false,"fish,gluten",Azeite de oliva extravirgem: 10ml; Farinha de trigo: 100g; Pescada cozida: 150g
+meal_036,Salada Refrescante de Quinoa e Atum,dinner,false,fish,Alface: 50g; Atum em lata (natural): 100g; Azeite de oliva extravirgem: 10ml; Cuscuz de milho cozido: 100g
+meal_037,Carne Moída com Purê de Batata Doce,dinner,false,red_meat,Arroz integral cozido: 100g; Carne moída (patinho) cozida: 100g
+meal_038,Espaguete de Abobrinha com Pesto e Frango,dinner,false,"milk,tree_nuts",Arroz parboilizado cozido: 200g; Molho Pesto: 30g; Peito de frango grelhado: 100g
+meal_039,Creme de Espinafre com Tofu Defumado,dinner,false,"gluten_free_if_certified,soy",Araruta cozida: 100g; Leite de aveia: 200ml; Tofu defumado: 100g
+meal_040,Wrap Rápido de Frango,dinner,true,"gluten,soy,wheat",Maionese vegana: 20g; Peito de frango grelhado: 80g; Wrap / Tortilha de trigo: 30g
+meal_041,Bolo de Caneca de Aveia e Cacau,snack,true,"egg,gluten_free_if_certified",Aveia em flocos: 20g; Cacau em pó (sem açúcar): 10g; Mel de abelha: 10g; Ovo cozido: 50g
+meal_042,Pão de Queijo de Frigideira,breakfast,true,"egg,milk",Ovo cozido: 50g; Queijo muçarela: 20g; Tapioca (goma preparada): 20g
+meal_043,Waffle Proteico de Baunilha,breakfast,true,"egg,gluten_free_if_certified,milk,soy",Aveia em flocos: 15g; Extrato de baunilha: 5ml; Ovo cozido: 50g; Whey Protein Concentrado: 30g
+meal_044,Crepioca de Frango Desfiado,breakfast,true,egg,Ovo cozido: 50g; Peito de frango grelhado: 50g; Tapioca (goma preparada): 30g
+meal_045,Patê de Atum com Cenoura,snack,false,"egg,fish",Atum em lata (natural): 50g; Maionese tradicional: 10g; Polenta cozida: 50g
+meal_046,Vitamina de Papaia e Aveia,breakfast,true,"gluten_free_if_certified,milk",Aveia em flocos: 15g; Leite desnatado: 200ml; Mamão: 100g
+meal_047,Mingau de Quinoa com Maçã e Canela,breakfast,false,tree_nuts,Canela em pó: 2g; Cuscuz de milho cozido: 50g; Laranja: 50g; Leite de amêndoas: 150ml
+meal_048,Tofu Mexido com Cúrcuma,breakfast,true,soy,Azeite de oliva extravirgem: 5ml; Cúrcuma (Açafrão-da-terra): 2g; Tofu defumado: 100g
+meal_049,Panqueca de Grão-de-Bico (Vegana),breakfast,true,,Azeite de oliva extravirgem: 5ml; Farinha de grão-de-bico: 50g
+meal_050,Shakshuka (Ovos no Molho de Tomate),breakfast,true,egg,Azeite de oliva extravirgem: 5ml; Molho de tomate caseiro: 100g; Ovo cozido: 100g
+meal_051,Smoothie Bowl de Açaí e Banana,breakfast,true,,Açaí com xarope de guaraná: 100g; Banana: 100g
+meal_052,Torrada com Guacamole e Ovo Quente,breakfast,true,"egg,gluten,wheat",Guacamole: 50g; Ovo cozido: 50g; Pão de forma integral: 50g
+meal_053,Proats (Mingau de Aveia com Whey),breakfast,true,"gluten_free_if_certified,milk,soy",Aveia em flocos: 30g; Whey Protein Concentrado: 30g
+meal_054,Pão de Aveia de Microondas,breakfast,true,"egg,gluten_free_if_certified,milk",Aveia em flocos: 20g; Iogurte natural: 30g; Ovo cozido: 50g
+meal_055,Crepe Verde de Espinafre,breakfast,false,"egg,gluten_free_if_certified",Araruta cozida: 50g; Aveia em flocos: 10g; Ovo cozido: 100g
+meal_056,Tapioca Doce de Amendoim e Morango,snack,true,peanuts,Morango: 50g; Pasta de amendoim: 30g; Tapioca (goma preparada): 50g
+meal_057,Mousse Funcional de Abacate e Cacau,snack,true,,Abacate: 100g; Cacau em pó (sem açúcar): 10g; Mel de abelha: 10g
+meal_058,Bruschetta Saudável de Tomate,snack,false,"gluten,milk",Alface: 50g; Azeite de oliva extravirgem: 5ml; Pão francês: 50g; Queijo minas frescal: 20g
+meal_059,Pudim de Chia com Leite de Coco,snack,true,tree_nuts,Chia hidratada (Pudim de Chia base): 15g; Leite de coco (bebida): 150ml
+meal_060,"Tigela de Grego, Frutas Vermelhas e Mel",snack,true,milk,Iogurte grego natural: 100g; Mel de abelha: 10g; Morango: 50g
+meal_061,Salada Caprese com Frango,lunch,false,"egg,gluten,wheat",Aipo (Salsão): 100g; Maionese tradicional: 10g; Peito de frango grelhado: 100g; Torrada integral: 30g
+meal_062,Bowl de Salmão e Abacate,lunch,false,fish,Abacate: 100g; Milho cozido: 100g; Peixe (salmão): 100g
+meal_063,Cuscuz Marroquino com Grão-de-Bico,lunch,true,"gluten,wheat",Azeite de oliva extravirgem: 5ml; Cuscuz marroquino (cozido): 100g; Grão-de-bico cozido: 100g
+meal_064,Bife de Alcatra com Purê de Batata,lunch,true,"milk,red_meat",Alcatra assada: 100g; Purê de batata (preparado): 150g
+meal_065,Escondidinho de Batata Doce e Carne,lunch,false,"milk,red_meat",Arroz integral cozido: 150g; Carne moída (patinho) cozida: 100g; Queijo muçarela: 20g
+meal_066,Massa Integral com Pesto e Tomate,lunch,false,"milk,tree_nuts",Alface: 100g; Molho Pesto: 30g; Quinoa cozida: 100g
+meal_067,Peito de Frango com Feijão e Quinoa,lunch,false,gluten,Cuscuz de milho cozido: 100g; Macarrão cozido: 100g; Peito de frango grelhado: 100g
+meal_068,Strogonoff Vegano de Grão-de-Bico,lunch,true,soy,Batata doce cozida: 50g; Creme de leite vegetal (Soja/Aveia): 50g; Grão-de-bico cozido: 150g; Molho de tomate caseiro: 50g
+meal_069,Lasanha de Abobrinha com Carne,lunch,false,"milk,red_meat",Arroz parboilizado cozido: 200g; Carne moída (patinho) cozida: 100g; Molho de tomate caseiro: 50g; Queijo muçarela: 20g
+meal_070,Nuggets Vegetais com Purê de Batata,lunch,true,"gluten,milk,soy,wheat",Nuggets vegetais: 100g; Purê de batata (preparado): 150g
+meal_071,Sopa Creme de Mandioca e Frango,dinner,false,gluten_free_if_certified,Azeite de oliva extravirgem: 5ml; Farinha de aveia: 100g; Peito de frango grelhado: 80g
+meal_072,Taco Low-Carb de Alface,dinner,false,"milk,red_meat",Aipo (Salsão): 50g; Carne moída (patinho) cozida: 100g; Queijo muçarela: 10g
+meal_073,Omelete de Cogumelos e Espinafre,dinner,false,egg,"Araruta cozida: 50g; Ovo cozido: 100g; Pipoca (sem óleo, sem sal): 50g"
+meal_074,Sopa de Tomate Rústica,dinner,false,,Alface: 200g; Azeite de oliva extravirgem: 10ml; Orégano seco: 2g
+meal_075,Peixe Assado no Papelote com Cenoura,dinner,false,fish,Azeite de oliva extravirgem: 5ml; Pescada cozida: 120g; Polenta cozida: 100g
+meal_076,Salada Refrescante de Melancia e Feta,dinner,false,milk,Abacaxi: 200g; Queijo feta: 50g
+meal_077,Charuto de Repolho com Carne Moída,dinner,false,red_meat,Carne moída (patinho) cozida: 100g; Trigo sarraceno cozido: 100g
+meal_078,Creme de Brócolis e Queijo,dinner,false,"gluten,milk",Azeite de oliva extravirgem: 5ml; Farinha de trigo: 150g; Queijo minas frescal: 50g
+meal_079,Hambúrguer de Atum Sem Pão,dinner,false,"egg,fish",Aipo (Salsão): 50g; Atum em lata (natural): 100g; Ovo cozido: 30g
+meal_080,Macarrão Konjac (Shirataki) ao Molho Shoyu,dinner,false,"gluten,soy,wheat","Macarrão konjac (Shirataki): 200g; Molho Shoyu (Soja): 15ml; Pipoca (sem óleo, sem sal): 50g"
+meal_081,Pizza de Frigideira com Massa de Aveia,dinner,true,"egg,gluten_free_if_certified,milk",Aveia em flocos: 40g; Molho de tomate caseiro: 30g; Ovo cozido: 50g; Queijo muçarela: 30g
+meal_082,Hambúrguer Caseiro Magro,dinner,true,"gluten,milk,red_meat,sesame,wheat",Carne moída (patinho) cozida: 100g; Ketchup: 10g; Pão de hambúrguer: 50g; Queijo prato: 20g
+meal_083,Coxinha Fit de Batata Doce,snack,false,,Arroz integral cozido: 100g; Farinha de linhaça: 10g; Peito de frango grelhado: 50g
+meal_084,Brigadeiro de Colher (Sem Açúcar),snack,true,milk,Cacau em pó (sem açúcar): 10g; Creme de leite: 30ml; Leite em pó integral: 20g
+meal_085,Sorvete Caseiro de Banana e Morango,snack,true,,Banana: 100g; Morango: 50g
+meal_086,Pizza de Berinjela (Low Carb),snack,false,milk,Batata baroa (mandioquinha) cozida: 100g; Molho de tomate caseiro: 20g; Queijo muçarela: 30g
+meal_087,Bolo de Chocolate de Microondas Fit,snack,true,"egg,gluten_free_if_certified",Aveia em flocos: 20g; Banana: 50g; Cacau em pó (sem açúcar): 10g; Ovo cozido: 50g
+meal_088,Batata Frita Rústica no Forno (Ar Frito),snack,false,gluten,Azeite de oliva extravirgem: 5ml; Orégano seco: 2g; Pão integral: 150g
+meal_089,Pipoca Feita na Água,snack,false,gluten,Pão francês: 30g
+meal_090,Sushi Bowl (Desconstruído),lunch,false,"fish,gluten,soy,wheat",Araruta cozida: 20g; Atum em lata (natural): 50g; Batata doce cozida: 100g; Molho Shoyu (Soja): 10ml
+meal_091,Iogurte com Mel e Linhaça,snack,true,milk,Farinha de linhaça: 10g; Iogurte natural: 150g; Mel de abelha: 10g
+meal_092,Wrap Frio de Atum Rápido,lunch,true,"egg,fish,gluten,wheat",Atum em lata (natural): 50g; Maionese tradicional: 10g; Wrap / Tortilha de trigo: 50g
+meal_093,Salada Caprese Expresso,snack,false,milk,Alface: 100g; Azeite de oliva extravirgem: 5ml; Queijo muçarela: 50g
+meal_094,Queijo Quente (Misto Quente Simples),snack,true,"gluten,milk,wheat",Pão de forma branco: 50g; Queijo prato: 30g
+meal_095,Banana Amassada com Aveia,breakfast,true,gluten_free_if_certified,Aveia em flocos: 20g; Banana: 100g
+meal_096,Leite com Cacau e Canela,breakfast,true,milk,Cacau em pó (sem açúcar): 5g; Canela em pó: 2g; Leite desnatado: 200ml
+meal_097,Sanduíche de Ovo Cozido,lunch,true,"egg,gluten,wheat",Maionese tradicional: 10g; Ovo cozido: 50g; Pão de forma integral: 50g
+meal_098,Wrap Doce de Pasta de Amendoim,snack,false,"gluten,peanuts,wheat",Laranja: 50g; Pasta de amendoim: 20g; Wrap / Tortilha de trigo: 30g
+meal_099,Salada Rápida de Feijão Fradinho,lunch,false,,Alface: 50g; Azeite de oliva extravirgem: 5ml; Lentilha comum cozida: 100g
+meal_100,Batido de Abacate Proteico,snack,true,"milk,soy",Abacate: 50g; Leite desnatado: 200ml; Whey Protein Concentrado: 20g
+meal_101,Bife a Cavalo com Batata Doce,lunch,false,"egg,red_meat",Alcatra assada: 150g; Arroz integral cozido: 150g; Ovo cozido: 50g
+meal_102,Frango ao Curry com Leite de Coco,dinner,false,"gluten,tree_nuts",Cúrcuma (Açafrão-da-terra): 5g; Farinha de trigo: 100g; Leite de coco (bebida): 100ml; Peito de frango grelhado: 150g
+meal_103,Rolo de Carne Moída Recheado,lunch,true,"milk,pork,red_meat",Carne moída (patinho) cozida: 150g; Presunto cozido: 30g; Queijo muçarela: 30g
+meal_104,Picadinho de Carne com Legumes,dinner,false,"gluten,red_meat",Alcatra assada: 150g; Molho de tomate caseiro: 50g; Pão integral: 100g; Polenta cozida: 50g
+meal_105,Espetinho de Frango e Pimentão,lunch,false,gluten,Azeite de oliva extravirgem: 10ml; Cevada em grãos cozida: 100g; Peito de frango grelhado: 150g
+meal_106,Carne de Panela com Mandioca,lunch,false,"gluten_free_if_certified,red_meat",Alface: 50g; Farinha de aveia: 100g; Músculo bovino cozido: 150g
+meal_107,Panqueca de Frango Desfiado,dinner,true,"egg,gluten,milk,wheat",Massa de panqueca (simples): 100g; Molho de tomate caseiro: 50g; Peito de frango grelhado: 80g
+meal_108,Almôndegas Caseiras de Patinho,dinner,true,"gluten,red_meat,wheat",Carne moída (patinho) cozida: 150g; Farinha de rosca: 20g; Molho de tomate caseiro: 100g
+meal_109,Iscas de Mignon com Shoyu e Brócolis,lunch,false,"gluten,red_meat,soy,wheat",Farinha de trigo: 100g; Filé mignon grelhado: 150g; Molho Shoyu (Soja): 15ml
+meal_110,Peito de Peru com Salada Quente de Quinoa,dinner,false,,Cuscuz de milho cozido: 100g; Peito de peru defumado: 150g; Polenta cozida: 50g
+meal_111,Salmão Grelhado com Aspargos,lunch,false,fish,Araruta cozida: 100g; Azeite de oliva extravirgem: 10ml; Peixe (salmão): 150g
+meal_112,Moqueca Leve de Cação e Banana-da-Terra,lunch,false,"fish,tree_nuts",Azeite de dendê (Óleo de palma): 5ml; Cação cozido: 150g; Leite de coco (bebida): 50ml; Maçã: 100g
+meal_113,Macarrão com Camarão e Alho,lunch,false,"crustacean,shellfish",Azeite de oliva extravirgem: 10ml; Camarão grelhado: 150g; Quinoa cozida: 100g
+meal_114,Tilápia Empanada na Aveia,dinner,true,"egg,fish,gluten_free_if_certified",Aveia em flocos: 30g; Ovo cozido: 20g; Tilápia grelhada: 150g
+meal_115,Arroz de Couve-Flor com Polvo,dinner,false,"mollusk,shellfish",Azeite de oliva extravirgem: 5ml; Batata inglesa cozida: 150g; Polvo cozido: 150g
+meal_116,Lentilha Estufada com Cogumelos,lunch,false,,"Azeite de oliva extravirgem: 5ml; Inhame cozido: 150g; Pipoca (sem óleo, sem sal): 100g"
+meal_117,Risoto Falso de Quinoa e Funghi,lunch,false,milk,"Cuscuz de milho cozido: 100g; Pipoca (sem óleo, sem sal): 50g; Queijo minas frescal: 30g"
+meal_118,Escondidinho Vegano de Grão-de-Bico,dinner,true,,Azeite de oliva extravirgem: 10ml; Grão-de-bico cozido: 150g; Purê de abóbora (preparado): 150g
+meal_119,Salada Reforçada de Feijão Preto,lunch,false,gluten,Alface: 50g; Azeite de oliva extravirgem: 10ml; Cevada em grãos cozida: 50g; Feijão preto cozido: 150g
+meal_120,Wrap Integral de Falafel,lunch,true,"gluten,sesame,wheat",Grão-de-bico cozido: 100g; Tahine (Pasta de gergelim): 10g; Wrap / Tortilha de trigo: 50g
+meal_121,Pão de Queijo com Peito de Peru,breakfast,true,"egg,milk",Pão de queijo: 50g; Peito de peru defumado: 30g
+meal_122,Mingau de Aveia com Maçã e Canela,breakfast,false,"gluten_free_if_certified,milk",Aveia em flocos: 40g; Canela em pó: 2g; Laranja: 50g; Leite desnatado: 200ml
+meal_123,Omelete de Claras com Espinafre,breakfast,false,egg,Albumina em pó: 20g; Araruta cozida: 50g; Azeite de oliva extravirgem: 2ml
+meal_124,Panqueca de Batata Doce,breakfast,false,egg,Arroz integral cozido: 100g; Ovo cozido: 50g
+meal_125,Iogurte Natural com Nozes e Mel,snack,false,"milk,tree_nuts",Farinha de amêndoas: 20g; Iogurte natural: 150g; Mel de abelha: 10g
+meal_126,Tosta de Pasta de Amendoim e Banana,snack,true,"gluten,peanuts,wheat",Banana: 50g; Pão de forma integral: 50g; Pasta de amendoim: 20g
+meal_127,Bolo de Caneca Proteico,snack,true,"egg,milk,soy",Cacau em pó (sem açúcar): 5g; Ovo cozido: 50g; Whey Protein Concentrado: 30g
+meal_128,Smoothie Verde Energético,breakfast,false,tree_nuts,Araruta cozida: 50g; Banana: 50g; Laranja: 50g; Leite de coco (bebida): 150ml
+meal_129,Crepioca de Ricota,breakfast,true,"egg,milk",Creme de ricota: 30g; Ovo cozido: 50g; Tapioca (goma preparada): 20g
+meal_130,Ovos Mexidos com Bacon de Peru,breakfast,true,egg,Bacon de peru: 30g; Ovo cozido: 100g
+meal_131,Strogonoff de Carne Saudável,lunch,true,"milk,red_meat",Alcatra assada: 150g; Batata doce cozida: 80g; Iogurte natural: 50g; Molho de tomate caseiro: 50g
+meal_132,Frango Grelhado com Salada de Grão,lunch,false,,Alface: 50g; Azeite de oliva extravirgem: 5ml; Grão-de-bico cozido: 100g; Peito de frango grelhado: 120g
+meal_133,Macarrão com Sardinha e Molho de Tomate,lunch,false,fish,Molho de tomate caseiro: 100g; Quinoa cozida: 100g; Sardinha em lata (óleo): 50g
+meal_134,Bife Acebolado com Mandioca Cozida,lunch,false,"gluten_free_if_certified,red_meat",Azeite de oliva extravirgem: 5ml; Contrafilé grelhado: 120g; Farinha de aveia: 100g
+meal_135,Risoto Falso de Frango e Couve-flor,lunch,false,milk,Batata inglesa cozida: 150g; Creme de ricota: 30g; Peito de frango grelhado: 100g
+meal_136,Escondidinho de Frango com Abóbora,lunch,true,milk,Peito de frango grelhado: 100g; Purê de abóbora (preparado): 150g; Queijo muçarela: 20g
+meal_137,Feijoada Vegana (com Tofu Defumado),lunch,true,soy,Batata doce cozida: 50g; Feijão preto cozido: 150g; Tofu defumado: 80g
+meal_138,Panqueca Integral de Carne Moída,lunch,true,"egg,gluten,milk,red_meat,wheat",Carne moída (patinho) cozida: 100g; Massa de panqueca (simples): 100g; Molho de tomate caseiro: 50g
+meal_139,Salada Caesar com Salmão,lunch,false,"egg,fish,milk",Aipo (Salsão): 100g; Maionese tradicional: 10g; Peixe (salmão): 120g; Queijo parmesão: 15g
+meal_140,Omelete Recheada de Atum,lunch,false,"egg,fish",Alface: 30g; Atum em lata (natural): 80g; Ovo cozido: 100g
+meal_141,Sopa Creme de Ervilha,dinner,true,,Azeite de oliva extravirgem: 2ml; Ervilha em conserva: 150g
+meal_142,Ceviche de Salmão Saudável,dinner,false,fish,Alface: 30g; Limonada sem açúcar: 30ml; Peixe (salmão): 120g
+meal_143,Sopa de Frango com Legumes,dinner,false,gluten,Pão integral: 50g; Peito de frango grelhado: 80g; Polenta cozida: 50g
+meal_144,Frango Desfiado com Purê de Abóbora,dinner,true,,Peito de frango grelhado: 100g; Purê de abóbora (preparado): 150g
+meal_145,Tofu Assado com Brócolis,dinner,false,"gluten,soy,wheat",Farinha de trigo: 100g; Molho Shoyu (Soja): 10ml; Tofu defumado: 100g
+meal_146,Wrap Leve de Queijo Branco,dinner,false,"gluten,milk,wheat",Aipo (Salsão): 20g; Queijo minas frescal: 50g; Wrap / Tortilha de trigo: 50g
+meal_147,Sopa de Tomate com Ovo Escalfado,dinner,true,egg,Molho de tomate caseiro: 150g; Ovo cozido: 50g
+meal_148,Filé Mignon com Salada Verde,dinner,false,red_meat,Aipo (Salsão): 100g; Azeite de oliva extravirgem: 5ml; Filé mignon grelhado: 100g
+meal_149,Sopa Detox de Couve,dinner,false,,Gengibre em pó: 2g; Polenta cozida: 50g; Trigo sarraceno cozido: 150g
+meal_150,Atum com Legumes no Vapor,dinner,false,"fish,gluten",Atum em lata (natural): 100g; Farinha de trigo: 50g; Polenta cozida: 50g
+meal_151,Pizza de Frigideira Low Carb,snack,true,"egg,milk",Molho de tomate caseiro: 20g; Ovo cozido: 100g; Queijo muçarela: 30g
+meal_152,Bowl Proteico Vegano (Quinoa e Tofu),lunch,false,soy,Cuscuz de milho cozido: 100g; Grão-de-bico cozido: 50g; Tofu defumado: 100g
+meal_153,Strogonoff de Cogumelos,lunch,false,milk,"Batata doce cozida: 80g; Creme de leite: 50g; Molho de tomate caseiro: 50g; Pipoca (sem óleo, sem sal): 150g"
+meal_154,Sanduíche de Pasta de Amendoim Quente,snack,true,"gluten,peanuts,wheat",Pão de forma integral: 50g; Pasta de amendoim: 20g
+meal_155,Salada de Batata e Ovo (Maionese Fit),lunch,false,"egg,gluten,milk",Iogurte natural: 30g; Ovo cozido: 100g; Pão integral: 150g
+meal_156,Pudim de Chia de Cacau,snack,true,tree_nuts,Cacau em pó (sem açúcar): 5g; Chia hidratada (Pudim de Chia base): 15g; Leite de amêndoas: 150ml
+meal_157,Frango Grelhado com Abobrinha,dinner,false,,Arroz parboilizado cozido: 100g; Azeite de oliva extravirgem: 2ml; Peito de frango grelhado: 100g
+meal_158,Bife de Patinho com Arroz Integral,lunch,false,red_meat,Alface: 50g; Carne moída (patinho) cozida: 100g; Milho cozido: 100g
+meal_159,Burrito Bowl (Sem Massa),lunch,false,gluten,Batata doce cozida: 100g; Guacamole: 30g; Macarrão cozido: 50g; Peito de frango grelhado: 80g
+meal_160,Sopa de Ervilha com Bacon de Peru,dinner,true,,Bacon de peru: 20g; Ervilha em conserva: 150g
+meal_161,Omelete de Presunto e Queijo,breakfast,true,"egg,milk,pork",Ovo cozido: 100g; Presunto cozido: 30g; Queijo prato: 30g
+meal_162,Panqueca de Tapioca Doce,breakfast,true,egg,Mel de abelha: 5g; Ovo cozido: 50g; Tapioca (goma preparada): 40g
+meal_163,Salada de Frango Rápida,lunch,true,,Aipo (Salsão): 100g; Alface: 50g; Azeite de oliva extravirgem: 10ml; Peito de frango grelhado: 100g
+meal_164,Wrap Quente de Peito de Peru,snack,true,"gluten,milk,wheat",Peito de peru defumado: 40g; Queijo minas frescal: 30g; Wrap / Tortilha de trigo: 50g
+meal_165,Batido de Morango e Pasta de Amendoim,snack,true,"milk,peanuts",Leite desnatado: 200ml; Morango: 100g; Pasta de amendoim: 20g
+meal_166,Torrada Integral com Requeijão e Orégano,snack,true,"gluten,milk,wheat",Orégano seco: 2g; Pão de forma integral: 50g; Requeijão light: 20g
+meal_167,Ovo Cozido com Batata Doce Amassada,breakfast,false,egg,Arroz integral cozido: 150g; Ovo cozido: 50g
+meal_168,Abacate com Limão e Chia,snack,true,,Abacate: 100g; Chia hidratada (Pudim de Chia base): 10g; Limonada sem açúcar: 10ml
+meal_169,Salada Rápida de Cenoura e Ovo,lunch,false,egg,Ovo cozido: 100g; Polenta cozida: 100g
+meal_170,Iogurte com Cacau e Banana,snack,true,milk,Banana: 50g; Cacau em pó (sem açúcar): 10g; Iogurte natural: 150g
+meal_171,Suco Verde Detox Intenso,snack,false,,Araruta cozida: 50g; Laranja: 50g; Limonada sem açúcar: 10ml; Trigo sarraceno cozido: 50g
+meal_172,Kombucha de Morango Caseira,snack,true,,Kombucha (tradicional): 200ml; Morango: 50g
+meal_173,Chá Verde Gelado com Limão e Gengibre,snack,true,,Chá verde sem açúcar: 250ml; Gengibre em pó: 1g; Limonada sem açúcar: 10ml
+meal_174,Smoothie de Leite de Coco e Frutas Vermelhas,snack,true,tree_nuts,Leite de coco (bebida): 200ml; Morango: 50g
+meal_175,Vitamina de Aveia e Maçã,breakfast,false,"gluten_free_if_certified,milk",Aveia em flocos: 15g; Laranja: 100g; Leite desnatado: 200ml
+meal_176,Batido Hipercalórico (Mass Gainer Caseiro),snack,true,"milk,peanuts,soy",Banana: 100g; Leite integral: 250ml; Pasta de amendoim: 20g; Whey Protein Concentrado: 30g
+meal_177,Café Termogênico com Canela,breakfast,true,,Café sem açúcar: 200ml; Canela em pó: 2g
+meal_178,Água de Coco com Spirulina,snack,true,,Água de coco: 200ml; Spirulina em pó: 3g
+meal_179,Milkshake de Cacau e Aveia (Vegan),snack,true,gluten_free_if_certified,Banana: 50g; Cacau em pó (sem açúcar): 10g; Leite de aveia: 200ml
+meal_180,Suco de Abacaxi com Hortelã e Gengibre,snack,false,,Gengibre em pó: 2g; Suco de abacaxi natural: 200ml
+meal_181,Frango Desfiado com Purê de Mandioca,lunch,false,gluten_free_if_certified,Farinha de aveia: 150g; Peito de frango grelhado: 100g
+meal_182,Sopa Clara de Cenoura e Batata,dinner,false,gluten,Azeite de oliva extravirgem: 2ml; Pão integral: 100g; Polenta cozida: 100g
+meal_183,Arroz Branco com Ovos Cozidos,lunch,false,egg,Batata doce cozida: 150g; Ovo cozido: 100g
+meal_184,Mingau de Maizena (Amido de Milho),breakfast,false,milk,Arroz branco cozido: 30g; Leite desnatado: 200ml
+meal_185,Peixe Branco Cozido no Caldo,dinner,false,fish,Pescada cozida: 150g; Polenta cozida: 20g
+meal_186,Biscoito de Arroz com Requeijão,snack,true,milk,Biscoito de arroz: 20g; Requeijão light: 20g
+meal_187,Purê de Abóbora Simples,dinner,true,,Purê de abóbora (preparado): 200g
+meal_188,Frango Desfiado com Tapioca,lunch,true,,Peito de frango grelhado: 80g; Tapioca (goma preparada): 50g
+meal_189,Salada Morna de Quinoa,dinner,false,,Azeite de oliva extravirgem: 5ml; Cuscuz de milho cozido: 150g
+meal_190,Ovos Escalfados com Batata,lunch,false,"egg,gluten",Ovo cozido: 100g; Pão integral: 150g
+meal_191,Macarrão com Queijo Clássico (Mac & Cheese),lunch,true,"gluten,milk,wheat",Macarrão com queijo (Mac and Cheese): 150g; Queijo prato: 30g
+meal_192,Hambúrguer Caseiro com Bacon,dinner,true,"gluten,milk,red_meat,sesame,wheat",Bacon de peru: 20g; Carne moída (patinho) cozida: 100g; Pão de hambúrguer: 50g; Queijo prato: 20g
+meal_193,Pizza de Calabresa em Casa,dinner,true,"gluten,milk,wheat",Pizza de calabresa (fatia): 200g
+meal_194,Cachorro-Quente Especial,lunch,true,"egg,gluten,wheat",Cachorro-quente (com pão e salsicha): 100g; Ketchup: 20g; Maionese tradicional: 10g
+meal_195,Espaguete à Bolonhesa com Parmesão,lunch,false,"milk,red_meat",Carne moída (patinho) cozida: 100g; Molho de tomate caseiro: 100g; Queijo parmesão: 20g; Quinoa cozida: 150g
+meal_196,Taco Mexicano Completo,dinner,true,"gluten,milk,wheat",Taco Mexicano (Carne e Queijo): 200g
+meal_197,Prato Feito Turbinado (Ovo e Fritas),lunch,false,"egg,gluten,red_meat",Batata doce cozida: 100g; Batata frita Fast-Food: 100g; Contrafilé grelhado: 100g; Macarrão cozido: 100g; Ovo cozido: 50g
+meal_198,Wrap de Kebab de Carne,dinner,true,"egg,gluten,wheat",Kebab / Shawarma de carne: 100g; Maionese tradicional: 10g; Wrap / Tortilha de trigo: 50g
+meal_199,Batata Frita com Queijo e Bacon,snack,true,milk,Bacon de peru: 20g; Batata frita Fast-Food: 150g; Queijo muçarela: 30g
+meal_200,Nachos com Carne e Guacamole,snack,true,"milk,red_meat",Carne moída (patinho) cozida: 100g; Guacamole: 30g; Queijo muçarela: 20g; Salgadinho de pacote (tipo chips de milho): 50g

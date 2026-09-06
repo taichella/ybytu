@@ -1,0 +1,17 @@
+dietary_restriction_id,name_ptbr,name_en,name_fr,id,category,excludes_tokens,is_active,sort_order
+dairy_free,Sem Laticínios,Dairy Free,Dairy Free,3029b634-2da2-4b10-a3b5-ef4c9d57064e,allergen,[milk],true,0
+egg_free,Sem Ovos,Egg Free,Egg Free,7eea9192-6ed1-4537-a6e8-283136a4f504,allergen,[egg],true,4
+fish_free,Sem Peixe,Fish Free,Sans Poisson,e0c20b60-f05a-44e6-a4e6-17a843ff3fe3,allergen,[fish],true,9
+gluten_free,Sem Glúten,Gluten Free,Gluten Free,38678463-5d72-417f-8ac9-20987f9481c7,allergen,[gluten wheat rye gluten_free_if_certified],true,1
+low_sugar,Baixo Açúcar,Low Sugar,Low Sugar,221031a8-9106-4fb3-96bc-b8c784ed5eff,,[],false,8
+lupin_free,Sem Tremoço,Lupin Free,Sans Lupin,b4ae94cf-2093-4f1c-8e54-74c96f4758af,allergen,[lupin],true,13
+mustard_free,Sem Mostarda,Mustard Free,Sans Moutarde,2a3d3c32-ebca-41b4-a1ae-708868734796,allergen,[mustard],true,12
+no_pork,Sem Carne Suína,Pork Free,Sans Porc,4e5b4351-6789-4a91-a386-5436650d6b4b,ethical_exclusion,[pork],true,14
+no_red_meat,Sem Carne Vermelha,Red Meat Free,Sans Viande Rouge,b0928408-b398-4ebb-9707-3f9d9b52b7af,ethical_exclusion,[red_meat],true,15
+none,Nenhuma,None,None,b1b8af2c-d163-436c-a207-0204a3e8067b,ui_option,[],true,7
+nut_free,Sem Oleaginosas,Nut Free,Nut Free,374af081-3d85-41fe-beb9-18384de1f537,allergen,[tree_nuts nuts],true,2
+peanut_free,Sem Amendoim,Peanut Free,Peanut Free,5e74fa98-5f01-4952-b6db-654bc8f37d56,allergen,[peanuts],true,3
+sesame_free,Sem Gergelim,Sesame Free,Sans Sésame,a2e19359-e54c-468c-9aa5-ec2b494e585a,allergen,[sesame],true,10
+shellfish_free,Sem Frutos do Mar,Shellfish Free,Shellfish Free,4f62d8f2-650d-468c-9911-dab18e9a8c50,allergen,[shellfish crustacean mollusk],true,6
+soy_free,Sem Soja,Soy Free,Soy Free,bdc7444c-e15e-4411-8a43-f6198de49cdf,allergen,[soy],true,5
+sulfites_free,Sem Sulfitos,Sulfites Free,Sans Sulfites,cc286230-3d57-42fd-93a0-36ebe134a412,allergen,[sulfites],true,11

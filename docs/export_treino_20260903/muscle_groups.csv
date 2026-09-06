@@ -1,0 +1,50 @@
+id,muscle_group_id,name_en,name_fr,name_ptbr
+59ea91a2-0957-4547-aed9-a618a1998fac,abductors,Abductors,Abducteurs,Abdutores
+18067ad0-2afb-4072-adbc-b87479037ddd,adductors,Adductors,Adducteurs,Adutores
+13ea75a5-48af-4e98-bfda-b3241b9896ff,anterior_chain,Anterior Chain,Chaîne Antérieure,Cadeia Anterior
+7872a072-609b-4b69-b8e1-d27dd3072bb8,arms,Arms (General),Bras (Généraux),Braços (Geral)
+f22e67b7-a638-4fe5-9b35-ee824889a8b7,back,Back (General),Dos (Général),Costas (Geral)
+9846ee38-67a9-4b2b-af3a-0c98df2bfe2e,balance_coordination,Balance/Coordination,Équilibre/Coordination,Equilíbrio/Coordenação
+fb5cf50e-bf2b-466b-989c-b17a1b087e5b,biceps_brachii,Biceps Brachii,Biceps Brachial,Bíceps Braquial
+ce08f3a5-1a07-4011-91fd-f6f17da7c3ff,calves,Calves,Mollets,Panturrilhas
+0413add2-743f-431f-89a8-24ba411e6187,cardio_system,Cardiovascular System,Système Cardiovasculaire,Sistema Cardiovascular
+fad6064b-0da7-4a89-9c2d-e167b1c977e8,chest,Chest (General),Poitrine (Générale),Peito (Geral)
+5a8d1ea0-aa48-4e86-8bab-d24fb7e17f18,core,Core (General),Core (Général),Core (Geral)
+35ba0c53-0ed2-4ab1-a594-5c28db97c1a3,deltoids,Deltoids,Deltoïdes,Deltóides
+2ff16e4e-dbbf-40e5-85ed-ac2840736b2e,endurance,Endurance,Endurance,Resistência
+5f53099c-03e1-4b6c-9542-324047c67876,erector_spinae,Erector Spinae,Érecteurs du Rachis,Eretores da Espinha
+e1f76e36-6803-47e4-aef7-66e7db8e037e,feet,Feet/Ankles,Pieds/Chevilles,Pés/Tornozelos
+6daa123a-3969-4ac9-8805-b2f9ba2d42ab,flexibility_mobility,Flexibility/Mobility,Flexibilité/Mobilité,Flexibilidade/Mobilidade
+e658b617-6f81-4287-bce0-e7f65ff75c4d,forearms,Forearms,Avant-bras,Antebraços
+d6d6ea2d-0d3c-4928-95da-4ebeaf6b5512,full_body,Full Body,Corps Entier,Corpo Inteiro
+2892642e-4c5c-43f4-b222-cb2dade50492,functional_movement,Functional Movement,Mouvement Fonctionnel,Movimento Funcional
+c74f7490-d84b-497a-a46e-8e580c323cdc,gastrocnemius,Gastrocnemius,Gastrocnémien,Gastrocnêmio
+06b04efe-ce07-4d1d-adde-3f79d1ce19d9,glutes,Glutes (General),Fessiers (Généraux),Glúteos (Geral)
+d0d0d1ad-0c28-4e02-ae27-7ff59d95fb6e,gluteus_maximus,Gluteus Maximus,Grand Fessier,Glúteo Máximo
+659c9b99-5a0a-425e-9955-7dc94004ee87,gluteus_medius,Gluteus Medius,Moyen Fessier,Glúteo Médio
+e5ea40b9-8fd2-4b68-a9db-7793568588ab,hamstrings,Hamstrings,Ischio-jambiers,Isquiotibiais
+c708168f-c63d-4dc5-a44d-041c670d15e7,hands,Hands/Wrists,Mains/Poignets,Mãos/Punhos
+588897e3-53ce-4667-91da-0a00f69c2343,hip_flexors,Hip Flexors,Fléchisseurs de la Hanche,Flexores do Quadril
+d2b53d10-da88-4dfd-920b-e6e122d2a2f2,latissimus_dorsi,Latissimus Dorsi,Grand Dorsal,Latíssimo do Dorso
+1dc7c29e-5a40-4706-a07b-86d7a3dd80b7,legs,Legs (General),Jambes (Générales),Pernas (Geral)
+68576ae7-c332-466c-9f07-4a795006e185,lower_body,Lower Body,Bas du Corps,Parte Inferior do Corpo
+7f97d582-4652-49ab-a487-b8eb87a32c4b,neck,Neck,Cou,Pescoço
+90cd16df-e527-48e6-adcd-f34a0c0866af,obliques,Obliques,Obliques,Oblíquos
+433a80b2-b6fb-496f-b09d-8981063cf7ef,pectoralis_major,Pectoralis Major,Grand Pectoral,Peitoral Maior
+4425ea29-7aee-4979-9572-123808f132ca,pectoralis_minor,Pectoralis Minor,Petit Pectoral,Peitoral Menor
+f2282e07-53ad-4c03-8335-b9ac53dea934,posterior_chain,Posterior Chain,Chaîne Postérieure,Cadeia Posterior
+0296b8f4-17fb-4761-94bc-3e1f5a2cf21d,power_explosiveness,Power/Explosiveness,Puissance/Explosivité,Potência/Explosão
+c6828abd-e832-41a4-9362-614ff82dfe93,pull_muscles,Pull Muscles,Muscles de Traction,Músculos de Puxar
+564acaeb-e812-47d3-820f-6cbf2032bb87,push_muscles,Push Muscles,Muscles de Poussée,Músculos de Empurrar
+f47c38be-60ac-4d66-8653-fa68bee4fd82,quadriceps,Quadriceps,Quadriceps,Quadríceps
+0ea43195-7185-4074-912e-888a2100c379,rectus_abdominis,Rectus Abdominis,Grand Droit de l'Abdomen,Reto Abdominal
+96975a4a-d9c7-4a55-b822-05d36228c65d,rhomboids,Rhomboids,Rhomboïdes,Rombóides
+6747c508-404c-4e05-9d74-eb75c9e097b5,rotator_cuff,Rotator Cuff,Coiffe des Rotateurs,Manguito Rotador
+17d1fc05-bc3b-479b-91d5-ed5f687d2c8c,serratus_anterior,Serratus Anterior,Grand Dentelé,Serrátil Anterior
+ae123df2-66f8-4cd7-a6ea-b3dfa9a5957d,shoulders,Shoulders (General),Épaules (Générales),Ombros (Geral)
+2da47d3a-8096-4870-9376-8242e09cb446,soleus,Soleus,Soléaire,Sóleo
+63b997f2-8382-40e4-90ba-6b3e1eaf445c,stabilizers,Stabilizer Muscles,Muscles Stabilisateurs,Músculos Estabilizadores
+2d901dcf-0c11-4005-8ff4-21b7006db860,transverse_abdominis,Transverse Abdominis,Transverse de l'Abdomen,Transverso Abdominal
+907266ef-db83-443c-a763-f0cfc0a4cd35,trapezius,Trapezius,Trapèze,Trapézio
+66fb48cd-fe36-43ce-a06f-d9bf88fbd635,triceps_brachii,Triceps Brachii,Triceps Brachial,Tríceps Braquial
+f6f7d9f6-f636-4af9-a0ff-18ace273e711,upper_body,Upper Body,Haut du Corps,Parte Superior do Corpo
