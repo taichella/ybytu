@@ -23,13 +23,23 @@ serve(async (req) => {
 
     const cutoff = new Date(Date.now() - REMINDER_THRESHOLD_HOURS * 60 * 60 * 1000).toISOString()
 
+    // .lt('plan_ready_notified_at', cutoff) sozinho NUNCA pega linhas onde
+    // plan_ready_notified_at é NULL (comparação com NULL em Postgres é
+    // sempre falsa) -- ou seja, planos cuja notificação inicial nem chegou a
+    // disparar (ex: gate client-side que abortou por engano, ver
+    // OnboardingPreLaunch.html) ficavam invisíveis pro cron pra sempre,
+    // apesar do comentário dizer que isso cobre o caso. Achado 2026-08-29
+    // (Rayan Road 08-27 e Camila Ozene 08-26, plan_generation_status='ok'
+    // mas 0 notificação e reminder também nunca disparou). Agora cobre os
+    // dois casos: nunca notificado (usa created_at como base do prazo) OU
+    // notificado mas sem lembrete ainda.
     const { data: overdueProfiles, error } = await supabase
       .from('profiles')
       .select('id')
       .eq('plan_generation_status', 'ok')
-      .lt('plan_ready_notified_at', cutoff)
       .is('user_notified_ready_at', null)
       .is('plan_review_reminder_sent_at', null)
+      .or(`plan_ready_notified_at.lt.${cutoff},and(plan_ready_notified_at.is.null,created_at.lt.${cutoff})`)
 
     if (error) throw new Error(`Lookup de profiles pendentes falhou: ${error.message}`)
 

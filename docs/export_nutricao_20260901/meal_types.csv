@@ -1,0 +1,6 @@
+meal_type_id,name_ptbr,name_en,name_fr,id
+breakfast,Café da manhã,Breakfast,Petit-déjeuner,e1f9db35-061c-4acd-8b6a-ce9089630706
+dessert,Sobremesa,Dessert,Dessert,eff15d46-57ed-45c5-bac8-b231b8e32c05
+dinner,Janta,Dinner,Dîner,2fe0bd5f-7145-4c14-a68f-cd21d5798130
+lunch,Almoço,Lunch,Déjeuner,0de78ee7-a727-4b84-a8e6-f914ebb3d611
+snack,Lanche,Snack,Goûter,e178e38f-8a83-4ced-a569-18c247fc591a

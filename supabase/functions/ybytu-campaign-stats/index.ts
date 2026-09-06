@@ -27,9 +27,15 @@ serve(async (req) => {
       })
     }
 
+    // Degradação IA->determinístico (2026-08-27, achado ao vivo: cota do
+    // Gemini estourou silenciosamente numa sessão de testes, sem nenhum
+    // registro até alguém investigar manualmente). "Hoje" = desde 00:00 UTC.
+    const todayStartIso = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00.000Z').toISOString()
+
     const [
       totalRes, okRes, failedRes, deliveredRes, okProfilesRes, mealsCompletedRes,
       activeSubsRes, foodsRes, profilesForGrowthRes, subscriptionTypesRes, profilesForDistributionRes,
+      fullyDeterministicTrainingRes, fullyDeterministicMealRes,
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('plan_generation_status', 'ok'),
@@ -52,6 +58,12 @@ serve(async (req) => {
       supabase.from('profiles').select('created_at'),
       supabase.from('subscription_types').select('id, name_ptbr'),
       supabase.from('profiles').select('subscription_type_id'),
+      supabase.from('training_plans').select('id', { count: 'exact', head: true })
+        .eq('created_by_ai', true).eq('ai_filled_slots', 0).gt('deterministic_fallback_slots', 0)
+        .gte('created_at', todayStartIso),
+      supabase.from('meal_plans').select('id', { count: 'exact', head: true })
+        .eq('created_by_ai', true).eq('ai_filled_slots', 0).gt('deterministic_fallback_slots', 0)
+        .gte('created_at', todayStartIso),
     ])
 
     if (totalRes.error) throw new Error(`total: ${totalRes.error.message}`)
@@ -65,6 +77,8 @@ serve(async (req) => {
     if (profilesForGrowthRes.error) throw new Error(`growth: ${profilesForGrowthRes.error.message}`)
     if (subscriptionTypesRes.error) throw new Error(`subscription_types: ${subscriptionTypesRes.error.message}`)
     if (profilesForDistributionRes.error) throw new Error(`distribution: ${profilesForDistributionRes.error.message}`)
+    if (fullyDeterministicTrainingRes.error) throw new Error(`fully_deterministic_training: ${fullyDeterministicTrainingRes.error.message}`)
+    if (fullyDeterministicMealRes.error) throw new Error(`fully_deterministic_meal: ${fullyDeterministicMealRes.error.message}`)
 
     // Growth chart -- últimos 6 meses (inclusive o atual), contagem de
     // profiles.created_at por mês.
@@ -125,6 +139,10 @@ serve(async (req) => {
       plans_generated_failed: failedRes.count ?? 0,
       pending_validation: pendingCount,
       plans_delivered: deliveredRes.count ?? 0,
+      // Planos gerados 100% no fallback determinístico hoje (a IA não
+      // colou em NENHUM slot) -- sinal de degradação (cota estourada, IA
+      // fora do ar). Antes disso era invisível, ver comentário acima.
+      fully_deterministic_plans_today: (fullyDeterministicTrainingRes.count ?? 0) + (fullyDeterministicMealRes.count ?? 0),
       meals_completed: mealsCompletedRes.count ?? 0,
       total_users: totalRes.count ?? 0,
       active_subscriptions: activeSubsRes.count ?? 0,

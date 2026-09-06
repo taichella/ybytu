@@ -40,7 +40,7 @@ serve(async (req) => {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, full_name, whatsapp_phone, onboarding_notified_at')
+      .select('id, full_name, whatsapp_phone, onboarding_notified_at, physical_conditions_ids')
       .eq('id', userId)
       .maybeSingle()
 
@@ -61,6 +61,22 @@ serve(async (req) => {
     const salesPhone = Deno.env.get('PHONE_ADMIN_SALE') ?? ''
     const fullName = profile.full_name ?? 'aluno(a)'
 
+    // "Outra limitação" não tem slug em physical_condition_exercise_slugs --
+    // nenhum filtro de avoid/caution roda pra quem marcou só essa opção (ver
+    // docs/DEBITO_ALERTA_STAFF_VIA_PARAMETRO_NOME_20260904.md). CONTORNO
+    // CONSCIENTE, não padrão a replicar: sem template Meta próprio pra esse
+    // alerta (aprovação leva dias), reaproveita o parâmetro fullName -- que
+    // o template ybytu_staff_new_onboarding já manda -- pra carregar nome +
+    // aviso. Se alguém reformular esse template na Meta sem saber disso, o
+    // aviso some silenciosamente. Trocar por template dedicado quando houver
+    // folga pra passar pela aprovação.
+    const { data: physicalConditionRows } = await supabase
+      .from('onboarding_physical_conditions')
+      .select('id, physical_condition_id')
+      .in('id', profile.physical_conditions_ids ?? [])
+    const hasUnclassifiedCondition = (physicalConditionRows ?? []).some((r: any) => r.physical_condition_id === 'other')
+    const salesFullName = hasUnclassifiedCondition ? `${fullName} — ⚠️ limitação física não listada, contatar` : fullName
+
     const results: Record<string, unknown> = {}
 
     if (profile.whatsapp_phone) {
@@ -72,7 +88,7 @@ serve(async (req) => {
     }
 
     if (salesPhone) {
-      const result = await sendWhatsAppTemplate(supabase, userId, salesPhone, salesTemplateId, [fullName], userId)
+      const result = await sendWhatsAppTemplate(supabase, userId, salesPhone, salesTemplateId, [salesFullName], userId)
       results.sales = result.ok ? 'sent' : `failed: ${result.error}`
       if (!result.ok) console.error('Falha ao notificar sales (new_onboarding):', result.error)
     } else {

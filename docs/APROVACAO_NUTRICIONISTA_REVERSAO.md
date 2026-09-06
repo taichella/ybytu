@@ -1,5 +1,13 @@
 # Aprovação — Reversão de Ingredientes Errados (99 refeições)
 
+> ⚠️ **SUPERADO em 2026-09-02.** Este documento e seus mapeamentos foram escritos sobre uma
+> lista não validada contra o banco. A versão boa é
+> `docs/NUTRICIONISTA_SUBSTITUICOES_INGREDIENTES_20260901.csv` (01/09), que passou por
+> validação linha a linha contra o banco real e teve 21 casos falsos removidos. Use aquele
+> CSV, não este documento. O script `scripts/reversao_ingredientes_20260826.sql` associado a
+> este documento também é **não-aplicável** pelo mesmo motivo — foi escrito a partir da lista
+> não validada. Nada aqui foi apagado, só marcado como superado.
+
 Este documento é pra você aprovar, refeição por refeição e padrão por padrão, a
 correção do problema descrito em `REVISAO_NUTRICIONISTA.md`. Nada foi alterado no
 sistema ainda — só depois da sua aprovação aqui é que a equipe técnica aplica.

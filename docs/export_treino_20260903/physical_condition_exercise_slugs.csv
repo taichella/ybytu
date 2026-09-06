@@ -1,0 +1,17 @@
+exercise_condition_slugs,pending_slugs,physical_condition_id
+ankle_pain,,ankle
+back_pain,,back_pain
+cervical_hernia,,cervical_hernia
+elbow_pain,,elbow_pain
+groin_pain,,groin_pain
+hamstring_injury,,hamstring_injury
+hip_pain,,hip_pain
+joint_problems_severe,,joint_problems_severe
+knee_pain,,knee
+lumbar_hernia; lumbar_pain,,lumbar
+cervical_hernia; neck_pain,,neck
+,,none
+,,other
+pelvic_floor_issues,,pelvic_floor_issues
+shoulder_pain,,shoulder
+wrist_pain,,wrist_pain

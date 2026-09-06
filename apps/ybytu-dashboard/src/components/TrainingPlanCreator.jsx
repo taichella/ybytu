@@ -58,9 +58,13 @@ export default function TrainingPlanCreator() {
           (slots ?? []).forEach((s) => {
             const d = s.day_number ?? 1;
             if (!grouped[d]) grouped[d] = [];
+            // load_kg: lido do 1º set de sets_detail -- o construtor edita um
+            // valor único por exercício (replicado em todas as séries ao
+            // salvar), não série a série. Ver comentário em handleSave.
             grouped[d].push({
               uniqueId: `s${nextUid.current++}`, exercise_id: s.exercise_id, exercise: s.exercise,
               sets: s.sets, reps: s.reps, rest_seconds: s.rest_seconds, order_within_day: s.order_within_day,
+              load_kg: s.sets_detail?.[0]?.load_kg ?? '',
             });
           });
           setSlotsByDay(grouped);
@@ -110,7 +114,7 @@ export default function TrainingPlanCreator() {
       const list = prev[day] ?? [];
       return {
         ...prev,
-        [day]: [...list, { uniqueId: `s${nextUid.current++}`, exercise_id: ex.exercise_id, exercise: ex, sets: 3, reps: 10, rest_seconds: 60, order_within_day: list.length + 1 }],
+        [day]: [...list, { uniqueId: `s${nextUid.current++}`, exercise_id: ex.exercise_id, exercise: ex, sets: 3, reps: 10, rest_seconds: 60, load_kg: '', order_within_day: list.length + 1 }],
       };
     });
   };
@@ -134,11 +138,27 @@ export default function TrainingPlanCreator() {
       const isActive = isMolde ? true : (publish ?? plan.is_active);
       const payload = { ...plan, is_active: isActive, days_per_week: Number(plan.days_per_week) || null, duration_minutes: plan.duration_minutes === '' ? null : Number(plan.duration_minutes) };
       const allSlots = Object.entries(slotsByDay).flatMap(([dayNumber, slots]) =>
-        slots.map((s, i) => ({
-          exercise_id: s.exercise_id, exercise_order: i + 1, sets: Number(s.sets) || 0, reps: Number(s.reps) || 0,
-          rest_seconds: s.rest_seconds === '' ? null : Number(s.rest_seconds),
-          day_number: Number(dayNumber), order_within_day: i + 1,
-        }))
+        slots.map((s, i) => {
+          const sets = Number(s.sets) || 0;
+          const reps = Number(s.reps) || 0;
+          const restSeconds = s.rest_seconds === '' ? null : Number(s.rest_seconds);
+          // sets_detail: mesma carga replicada em todas as séries -- o
+          // construtor edita um valor único por exercício, não série a
+          // série (ver [[project_plan_creators_schema_debt]]). Manda
+          // sempre (nunca undefined): sem carga preenchida, zera o detalhe
+          // em vez de deixar o backend preservar um valor antigo que não
+          // aparece mais na tela — o que está na tela é a fonte da verdade
+          // depois de um save por aqui.
+          const loadKg = s.load_kg === '' || s.load_kg === null || s.load_kg === undefined ? null : Number(s.load_kg);
+          const setsDetail = loadKg === null ? null : Array.from({ length: sets }, (_, setIdx) => ({
+            set_number: setIdx + 1, reps, load_kg: loadKg, rest_seconds: restSeconds, set_type: 'normal',
+          }));
+          return {
+            exercise_id: s.exercise_id, exercise_order: i + 1, sets, reps,
+            rest_seconds: restSeconds, day_number: Number(dayNumber), order_within_day: i + 1,
+            sets_detail: setsDetail,
+          };
+        })
       );
       if (isNew) {
         const created = await trainingService.create(payload, allSlots);
@@ -292,10 +312,11 @@ export default function TrainingPlanCreator() {
                     <div style={{ flex: 1, minWidth: 0 }}><p style={{ margin: 0, fontWeight: 800, fontSize: '15px' }}>{s.exercise?.name_ptbr ?? s.exercise_id}</p></div>
                     <button onClick={() => removeSlot(s.uniqueId)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', padding: '14px 16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', padding: '14px 16px' }}>
                     <div><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase' }}>Séries</label><input type="number" value={s.sets} onChange={(e) => updateSlot(s.uniqueId, 'sets', e.target.value)} style={inputStyle} /></div>
                     <div><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase' }}>Reps</label><input type="number" value={s.reps} onChange={(e) => updateSlot(s.uniqueId, 'reps', e.target.value)} style={inputStyle} /></div>
                     <div><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase' }}>Descanso (s)</label><input type="number" value={s.rest_seconds ?? ''} onChange={(e) => updateSlot(s.uniqueId, 'rest_seconds', e.target.value)} style={inputStyle} /></div>
+                    <div><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase' }}>Carga (kg)</label><input type="number" value={s.load_kg ?? ''} onChange={(e) => updateSlot(s.uniqueId, 'load_kg', e.target.value)} placeholder="opcional" style={inputStyle} /></div>
                   </div>
                 </div>
               ))}

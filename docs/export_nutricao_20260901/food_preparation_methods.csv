@@ -1,0 +1,14 @@
+food_preparation_method_id,name_ptbr,name_en,name_fr,id
+airfried,Frito na Airfryer,Airfried,Frit à l'Airfryer,e83ee33f-46e5-40af-bdd4-936e301e0a09
+baked,Assado,Baked,Cuit au four,c1a15054-b54d-4fba-a571-c2756ac8de03
+barbecued,Churrasco / Na Brasa,Barbecued / BBQ,Au Barbecue,470208e9-cd20-4132-ab65-8716b27ff7b9
+boiled,Cozido,Boiled,Bouilli,7b1ca034-34e9-44a8-97f9-df581a80aab7
+dried,Seco,Dried,Séché,7e65cedb-4cbb-40c7-8f36-ecad49135a1b
+fermented,Fermentado,Fermented,Fermenté,7ef43d6f-fb26-41ca-bd31-2365f7801b68
+fried,Frito,Fried,Frit,012f5b40-0106-40b5-b29b-bcb9262523fd
+grilled,Grelhado,Grilled,Grillé,29d361c3-1c01-44d5-a320-7ebe1bf97984
+mashed,Purê,Mashed,En purée,b3771576-e534-43c8-8fad-b31ca947a3d2
+raw,Cru,Raw,Cru,398720ab-7d77-4095-9f9a-4b5cbf4b26e8
+roasted,Assado (Forno),Roasted,Rôti,ce3483d2-8f01-4dc6-be22-aa04e397f94f
+sautéed,Refogado,Sautéed,Sauté,802f711c-5c39-4227-9305-0ec91e804987
+steamed,No Vapor,Steamed,Cuit à la vapeur,a155c44f-78c1-4a34-b54d-ac650e9e09d4

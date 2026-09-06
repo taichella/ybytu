@@ -1,0 +1,8 @@
+food_group_id,name_ptbr,name_en,name_fr,id
+carbohydrates,Carboidratos,Carbohydrates,Carbohydrates,89595ea8-ff0f-4d0a-9a40-73b4f19d940a
+dairy,Laticínios,Dairy,Dairy,b4f9063f-c6d8-447c-b38e-fd81b558b2a5
+fats,Gorduras,Fats,Fats,c51b8ea1-89d4-42a6-be23-a5bf7e0d8a0e
+fruits,Frutas,Fruits,Fruits,14390468-e052-4817-92dc-e42f43c68ad8
+legumes,Leguminosas,Legumes,Legumes,2620dc9f-9187-4734-a1c3-3dba9c81c5fc
+proteins,Proteínas,Proteins,Proteins,055b02e3-de39-4ebd-9166-b9332b408b07
+vegetables,Vegetais,Vegetables,Vegetables,2513d0cf-e84c-4751-8516-311dc7fd88a4

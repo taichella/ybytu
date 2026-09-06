@@ -1,0 +1,18 @@
+food_measurement_unit_id,name_ptbr,name_en,name_fr,id
+bottle,Garrafa,Bottle,Bouteille,d1acdcc8-ce61-4a45-9c3a-d150259a9ea0
+can,Lata,Can,Canette,c0b8f831-78b2-4277-9fcb-051a08fbb133
+cup,Xícara,Cup,Tasse,bee0aab4-00a9-484e-b2ac-adacd1f31bcc
+g,Grama,Gram,Gramme,a56f403d-6fef-4a1d-9989-4363378f4086
+glass,Copo,Glass,Verre,9b39e217-7ca0-46df-9bf6-7bd3ba5e1c14
+kg,Quilograma,Kilogram,Kilogramme,3a48ccd7-f510-4000-8d1a-0f31dd434476
+l,Litro,Liter,Litre,e521a282-5886-46d5-a722-071a6b666e8f
+ml,Mililitro,Milliliter,Millilitre,a80d4317-15e3-47b0-b71f-c76059405ac3
+package,Pacote/Embalagem,Package,Paquet,fb261bd2-2e15-4525-96b3-a5b914639f88
+piece,Pedaço,Piece,Morceau,6d8404cf-4e01-4ece-a0d3-6dcc76513a8a
+pinch,Pitada,Pinch,Pincée,40339982-9e80-44ad-8db5-7cfe86c02486
+portion,Porção,Portion,Portion,48d4a7c5-72a0-42f7-a9ab-f39574855638
+scoop,Scoop/Medidor,Scoop,Cuillère Doseuse,5ad45838-3026-4920-a50f-8303a238f337
+slice,Fatia,Slice,Tranche,b4a97d43-21d6-4b0a-851e-29aa15075c83
+tbsp,Colher de Sopa,Tablespoon,Cuillère à Soupe,bbb7516a-cfc1-4a29-a9db-3cd2d4384583
+tsp,Colher de Chá,Teaspoon,Cuillère à Café,7b2fe66a-ed24-48bc-9f43-3645dcf44433
+un,Unidade,Unit,Unité,db46acf3-723d-494d-a71b-9963d9df3075

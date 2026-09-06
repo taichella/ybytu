@@ -1,0 +1,5 @@
+exercise_environment_id,id,name_en,name_fr,name_ptbr,sort_order
+home_no_equipment,e57777b2-88f6-4d34-a1a1-1cdce4809530,Home No Equipment,Maison (sans équipement),Casa (sem equipamento),0
+home_with_equipment,489a636e-53fd-48b7-81ee-d546c8d0cd3a,Home With Equipment,Maison (avec équipement),Casa (com equipamento),1
+gym,32e599c5-ee17-4e4c-b31d-a4acfe377c48,Gym,Salle de Sport,Academia,2
+outdoors,3542a8e3-9e23-47e9-bfc0-e7d84a6a4a39,Outdoors,Extérieur,Ar Livre,3

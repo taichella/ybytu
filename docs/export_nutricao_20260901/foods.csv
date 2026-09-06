@@ -1,0 +1,487 @@
+food_id,name_ptbr,food_group,food_type,calories_per_unit,protein_g,carbs_g,fat_g,fiber_g,sugar_g,sodium_mg,allergen_review_status,restriction_tokens,food_group_id,food_group_nome,food_type_id,food_type_nome,food_source_id,food_source_nome,food_preparation_method_id,food_preparation_method_nome,food_measurement_unit_id,food_measurement_unit_nome
+food_001,Arroz integral cozido,Carboidratos,Grãos,124.00,2.60,25.60,0.90,1.60,0.00,1.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_002,Batata doce cozida,Carboidratos,Raiz,76.00,1.60,18.40,0.10,2.50,5.70,36.00,unreviewed,,carbohydrates,Carboidratos,root_vegetable,Raiz,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_003,Macarrão cozido,Carboidratos,Grãos,131.00,5.80,29.70,1.00,1.80,0.00,1.00,reviewed_has_allergens,gluten,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_004,Aveia em flocos,Carboidratos,Cereal,389.00,16.90,66.30,6.90,8.00,0.00,2.00,reviewed_has_allergens,gluten_free_if_certified,carbohydrates,Carboidratos,cereal,Cereal,vegetable,Vegetal,dry,,g,Grama
+food_005,Pão integral,Carboidratos,Grãos,247.00,13.00,41.00,3.40,6.00,4.30,400.00,reviewed_has_allergens,gluten,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,baked,Assado,g,Grama
+food_006,Mandioca cozida,Carboidratos,Raiz,125.00,1.40,38.10,0.30,1.80,1.70,14.00,unreviewed,,carbohydrates,Carboidratos,root_vegetable,Raiz,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_007,Milho cozido,Carboidratos,Grãos,96.00,3.40,21.00,1.50,2.70,4.50,15.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_008,Quinoa cozida,Carboidratos,Grãos,120.00,4.40,21.30,1.90,2.80,0.90,7.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_009,Cuscuz de milho cozido,Carboidratos,Grãos,112.00,3.80,25.30,0.20,1.50,0.00,1.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_010,Tapioca (massa pronta),Carboidratos,Processado,331,0.00,80.00,0.00,0.90,0.00,1.00,unreviewed,,carbohydrates,Carboidratos,processed,Processado,vegetable,Vegetal,processed,,g,Grama
+food_011,Inhame cozido,Carboidratos,Raiz,98.00,1.50,27.90,0.20,1.70,0.50,9.00,unreviewed,,carbohydrates,Carboidratos,root_vegetable,Raiz,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_012,Farinha de aveia,Carboidratos,Grãos,404.00,13.50,66.70,8.00,9.10,0.80,3.00,reviewed_has_allergens,gluten_free_if_certified,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,dry,,g,Grama
+food_013,Granola tradicional,Carboidratos,Cereal,421.00,10.00,65.00,15.00,7.50,20.00,150.00,reviewed_has_allergens,"gluten,nuts",carbohydrates,Carboidratos,cereal,Cereal,vegetable,Vegetal,dry,,g,Grama
+food_014,Arroz branco cozido,Carboidratos,Grãos,129.00,2.70,28.20,0.30,0.40,0.10,1.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,me ,,g,Grama
+food_015,Pão francês,Carboidratos,Grãos,145.00,4.00,29.00,1.20,1.10,1.00,300.00,reviewed_has_allergens,gluten,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,baked,Assado,un,Unidade
+food_016,Biscoito de água e sal,Carboidratos,Processado,434.00,10.00,74.00,9.00,1.20,1.00,800.00,reviewed_has_allergens,gluten,carbohydrates,Carboidratos,processed,Processado,vegetable,Vegetal,baked,Assado,g,Grama
+food_017,Farinha de trigo,Carboidratos,Grãos,364.00,10.30,76.30,1.00,2.70,0.30,2.00,reviewed_has_allergens,gluten,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,dry,,g,Grama
+food_018,Polenta cozida,Carboidratos,Grãos,70.00,1.00,14.30,0.30,1.30,0.00,40.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_019,Fubá de milho,Carboidratos,Grãos,365.00,7.20,79.10,1.50,3.90,0.60,5.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,dry,,g,Grama
+food_020,Arroz parboilizado cozido,Carboidratos,Grãos,125.00,2.60,27.50,0.20,1.60,0.00,1.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_021,Batata inglesa cozida,Carboidratos,Raiz,86.00,2.00,20.00,0.10,1.50,0.80,5.00,unreviewed,,carbohydrates,Carboidratos,root_vegetable,Raiz,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_022,Cevada em grãos cozida,Carboidratos,Grãos,123.00,2.30,28.20,0.40,3.80,0.80,3.00,reviewed_has_allergens,gluten,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_023,Trigo sarraceno cozido,Carboidratos,Grãos,92.00,3.40,19.90,0.60,2.70,0.00,4.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_024,Araruta cozida,Carboidratos,Raiz,65.00,4.20,13.40,0.20,1.30,0.00,26.00,unreviewed,,carbohydrates,Carboidratos,root_vegetable,Raiz,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_025,"Pipoca (sem óleo, sem sal)",Carboidratos,Grãos,387.00,13.00,78.00,4.50,14.50,0.90,8.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,processed,,g,Grama
+food_026,Batata baroa (mandioquinha) cozida,Carboidratos,Raiz,80.00,0.90,18.90,0.20,1.70,0.00,2.00,unreviewed,,carbohydrates,Carboidratos,root_vegetable,Raiz,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_027,Nhoque de batata,Carboidratos,Processado,148.00,3.50,32.50,0.50,1.20,1.50,300.00,reviewed_has_allergens,gluten,carbohydrates,Carboidratos,processed,Processado,vegetable,Vegetal,processed,,g,Grama
+food_028,Abacate,Vegetais,Fruta,160,2.00,8.50,13.10,6.70,0.70,7.00,unreviewed,,vegetables,Vegetais,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_029,Abóbora Cabotiá,Vegetais,Vegetal,40.00,1.40,12.50,0.10,2.50,3.30,1.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_030,Abóbora Moranga,Vegetais,Vegetal,26.00,1.00,6.50,0.10,0.50,2.80,1.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_031,Abóbora Paulista,Vegetais,Vegetal,19.00,0.60,3.80,0.10,1.10,2.00,1.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_032,Abobrinha,Vegetais,Vegetal,17.00,1.20,3.10,0.30,1.10,2.50,8.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_033,Acelga,Vegetais,,19.00,1.80,3.70,0.20,1.60,1.10,213.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_034,Agrião,Vegetais,,11.00,2.60,1.30,0.10,0.50,0.20,41.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_035,Aipo (Salsão),Vegetais,Vegetal,16.00,0.70,3.00,0.20,1.60,1.30,80.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_036,Alcachofra,Vegetais,Vegetal,60.00,3.30,10.50,0.20,5.40,1.00,94.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_037,Alface,Vegetais,,15.00,1.40,2.90,0.20,1.30,0.80,28.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_038,Alho,Vegetais,Raiz,149.00,6.40,33.10,0.50,2.10,1.00,17.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,raw,Cru,g,Grama
+food_039,Alho-poró,Vegetais,Vegetal,61.00,1.50,14.20,0.30,1.80,3.90,20.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_040,Aspargos,Vegetais,Vegetal,20.00,2.20,3.90,0.10,2.10,1.20,14.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_041,Beringela,Vegetais,Vegetal,35.00,1.00,5.90,0.20,3.00,3.50,2.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_042,Bertalha,Vegetais,,19.00,1.80,3.40,0.30,2.10,0.50,24.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_043,Beterraba,Vegetais,Raiz,44.00,1.60,9.60,0.20,2.00,6.80,78.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_044,Brócolis,Vegetais,Vegetal,34.00,2.80,6.60,0.40,2.60,1.70,33.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_045,Broto de bambu,Vegetais,Vegetal,20.00,2.60,5.20,0.30,2.20,3.00,4.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_046,Cebola,Vegetais,Raiz,40.00,1.10,9.30,0.10,1.70,4.20,4.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,raw,Cru,g,Grama
+food_047,Cebola roxa,Vegetais,Raiz,42.00,1.20,9.90,0.10,1.60,4.20,4.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,raw,Cru,g,Grama
+food_048,Cebolinha,Vegetais,Vegetal,32.00,1.80,4.40,0.70,2.50,1.90,3.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_049,Cenoura,Vegetais,Raiz,41.00,0.90,9.60,0.20,2.80,4.70,69.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,raw,Cru,g,Grama
+food_050,Chuchu,Vegetais,Vegetal,19.00,0.80,3.60,0.10,1.00,1.70,2.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_051,Cogumelo Paris,Vegetais,Vegetal,22.00,3.10,3.30,0.30,1.00,2.00,5.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,fungi,Fungi,raw,Cru,g,Grama
+food_052,Cogumelo Shitake,Vegetais,Vegetal,34.00,2.20,6.80,0.50,2.50,2.40,9.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,fungi,Fungi,raw,Cru,g,Grama
+food_053,Cogumelo Shimeji,Vegetais,Vegetal,28.00,2.70,5.00,0.40,2.30,2.00,5.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,fungi,Fungi,raw,Cru,g,Grama
+food_054,Couve,Vegetais,,27.00,4.30,8.90,0.90,3.10,0.50,17.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_055,Couve-flor,Vegetais,Vegetal,25.00,1.90,5.00,0.30,2.00,1.90,30.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_056,Endívia,Vegetais,,17.00,1.10,4.00,0.10,3.10,0.20,22.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_057,Escarola,Vegetais,,17.00,1.70,3.10,0.20,3.10,0.50,22.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_058,Espinafre,Vegetais,,23.00,2.90,3.60,0.40,2.20,0.40,79.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_059,Funcho (erva-doce),Vegetais,Vegetal,31.00,1.20,7.30,0.20,3.10,3.90,52.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_060,Gengibre,Vegetais,Raiz,80.00,1.80,17.80,0.80,2.00,1.70,13.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,raw,Cru,g,Grama
+food_061,Jiló,Vegetais,Vegetal,27.00,1.40,7.90,0.20,4.80,2.00,2.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_062,Maxixe,Vegetais,Vegetal,14.00,1.40,3.80,0.10,2.20,1.00,1.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_063,Mostarda (folha),Vegetais,,27.00,2.70,4.70,0.40,3.20,1.30,20.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_064,Nabo,Vegetais,Raiz,22.00,0.90,6.40,0.10,1.80,3.80,67.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_065,Palmito,Vegetais,Vegetal,28.00,2.50,4.60,0.40,2.40,1.50,426.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_066,Pepino,Vegetais,Vegetal,15.00,0.70,3.60,0.10,0.50,1.70,2.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_067,Pepino Japonês,Vegetais,Vegetal,12.00,0.70,2.20,0.10,0.70,1.70,2.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_068,Pimenta Dedo-de-Moça,Vegetais,Vegetal,40.00,1.90,8.80,0.40,1.50,5.30,9.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_069,Pimentão Amarelo,Vegetais,Vegetal,27.00,1.00,6.30,0.20,1.50,2.40,2.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,raw,Cru,g,Grama
+food_070,Quiabo,Vegetais,Vegetal,33.00,1.90,7.50,0.20,3.20,1.50,7.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_071,Rabanete,Vegetais,Raiz,16.00,0.70,3.40,0.10,1.60,1.90,39.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,raw,Cru,g,Grama
+food_072,Rabanete Branco (Daikon),Vegetais,Raiz,18.00,0.60,4.10,0.10,1.60,2.50,21.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,raw,Cru,g,Grama
+food_073,Raiz de Bardana,Vegetais,Raiz,72.00,1.50,17.30,0.20,3.30,2.90,5.00,unreviewed,,vegetables,Vegetais,root_vegetable,Raiz,vegetable,Vegetal,raw,Cru,g,Grama
+food_074,Repolho,Vegetais,,25.00,1.30,5.80,0.10,2.00,3.20,18.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_075,Rúcula,Vegetais,,25.00,2.60,3.70,0.70,1.60,2.10,27.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,raw,Cru,g,Grama
+food_076,Taioba,Vegetais,,31.00,2.90,6.70,0.90,3.70,0.00,1.00,unreviewed,,vegetables,Vegetais,leafy_green,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_077,Tomate,Vegetais,Fruta,18.00,0.90,3.90,0.20,1.20,2.60,5.00,unreviewed,,vegetables,Vegetais,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_078,Tomate-cereja,Vegetais,Fruta,21.00,0.90,4.20,0.20,1.50,2.60,5.00,unreviewed,,vegetables,Vegetais,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_079,Banana,Frutas,Fruta,89.00,1.10,22.80,0.30,2.60,12.20,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_080,Maçã,Frutas,Fruta,52.00,0.30,13.80,0.20,2.40,10.40,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_081,Mamão,Frutas,Fruta,43.00,0.50,10.80,0.30,1.70,7.80,8.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_082,Abacaxi,Frutas,Fruta,50.00,0.50,13.10,0.10,1.40,9.90,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_083,Melancia,Frutas,Fruta,30.00,0.60,7.60,0.20,0.40,6.20,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_084,Uva,Frutas,Fruta,69.00,0.70,18.10,0.20,0.90,15.50,2.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_085,Laranja,Frutas,Fruta,47.00,0.90,11.80,0.10,2.20,9.40,0.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_086,Pera,Frutas,Fruta,57.00,0.40,15.20,0.10,3.10,9.80,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_087,Manga,Frutas,Fruta,60.00,0.80,15.00,0.40,1.60,13.70,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_088,Morango,Frutas,Fruta,32.00,0.70,7.70,0.30,2.00,4.90,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_089,Kiwi,Frutas,Fruta,61.00,1.10,14.70,0.50,3.00,9.00,3.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_090,Ameixa,Frutas,Fruta,46.00,0.70,11.40,0.30,1.40,9.90,0.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_091,Framboesa,Frutas,Fruta,52.00,1.20,11.90,0.70,6.50,4.40,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_092,Blueberry (mirtilo),Frutas,Fruta,57.00,0.70,14.50,0.30,2.40,9.90,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_093,Caju,Frutas,Fruta,43.00,0.20,10.20,0.30,1.60,9.10,2.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_094,Graviola,Frutas,Fruta,66.00,1.00,16.80,0.30,3.30,13.50,14.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_095,Goiaba,Frutas,Fruta,68.00,2.60,14.30,1.00,5.40,8.90,2.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_096,Açaí (polpa sem açúcar),Frutas,Fruta,70.00,0.80,6.20,5.00,2.60,0.00,15.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_097,Tamarindo,Frutas,Fruta,239.00,2.80,62.50,0.60,5.10,38.80,28.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_098,Figo,Frutas,Fruta,74.00,0.80,19.20,0.30,2.90,16.30,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_099,Jabuticaba,Frutas,Fruta,58.00,0.60,15.30,0.10,2.30,11.00,0.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_100,Pitaya,Frutas,Fruta,50.00,1.20,12.90,0.40,3.00,7.60,0.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_102,Acerola,Frutas,Fruta,32.00,0.40,7.70,0.30,1.10,4.00,7.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_103,Amora,Frutas,Fruta,43.00,1.40,9.60,0.50,5.30,4.90,1.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_104,Cereja,Frutas,Fruta,63.00,1.00,16.00,0.20,2.10,12.80,0.00,unreviewed,,fruits,Frutas,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_105,Feijão carioca,Leguminosas,Leguminosa,76.00,5.50,13.60,0.50,8.50,0.30,1.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_106,Feijão preto,Leguminosas,Leguminosa,77.00,4.50,14.00,0.50,8.40,0.30,1.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_107,Lentilha,Leguminosas,Leguminosa,116.00,9.00,20.10,0.40,7.90,1.80,2.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_108,Grão-de-bico,Leguminosas,Leguminosa,164.00,8.90,27.40,2.60,7.60,4.80,7.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_109,Ervilha seca,Leguminosas,Leguminosa,118.00,8.30,21.10,0.40,8.30,2.90,2.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_110,Soja,Leguminosas,,147.00,13.00,11.10,6.80,6.00,3.00,1.00,reviewed_has_allergens,soy,legumes,Leguminosas,soy_protein,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_111,Tofu,Leguminosas,,76.00,8.10,1.90,4.80,0.30,0.40,7.00,reviewed_has_allergens,soy,legumes,Leguminosas,soy_protein,,vegetable,Vegetal,raw,Cru,g,Grama
+food_112,Castanha-do-pará,Gorduras,,656.00,14.30,12.30,66.40,7.50,2.30,3.00,reviewed_has_allergens,tree_nuts,fats,Gorduras,nut,,vegetable,Vegetal,raw,Cru,g,Grama
+food_113,Castanha de caju,Gorduras,,553.00,18.20,30.20,43.90,3.30,5.90,12.00,reviewed_has_allergens,tree_nuts,fats,Gorduras,nut,,vegetable,Vegetal,raw,Cru,g,Grama
+food_114,Nozes,Gorduras,,654.00,15.20,13.70,65.20,6.70,2.60,2.00,reviewed_has_allergens,tree_nuts,fats,Gorduras,nut,,vegetable,Vegetal,raw,Cru,g,Grama
+food_115,Amendoim,Gorduras,Leguminosa,567.00,25.80,16.10,49.20,8.50,4.70,18.00,reviewed_has_allergens,peanuts,fats,Gorduras,legume,Leguminosa,vegetable,Vegetal,raw,Cru,g,Grama
+food_116,Semente de girassol,Gorduras,,584.00,20.80,20.00,51.50,8.60,2.60,9.00,unreviewed,,fats,Gorduras,seed,,vegetable,Vegetal,raw,Cru,g,Grama
+food_117,Semente de abóbora,Gorduras,,559.00,30.20,10.70,49.10,6.00,1.30,7.00,unreviewed,,fats,Gorduras,seed,,vegetable,Vegetal,raw,Cru,g,Grama
+food_118,Feijão branco,Leguminosas,Leguminosa,141.00,9.50,25.10,0.90,6.30,0.40,6.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_119,Feijão fradinho,Leguminosas,Leguminosa,128.00,8.80,23.30,0.50,7.90,3.30,4.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_120,Feijão roxinho,Leguminosas,Leguminosa,128.00,9.10,24.10,0.50,6.90,0.30,1.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_121,Tremoço,Leguminosas,Leguminosa,119.00,15.60,10.00,2.90,4.90,0.00,4.00,reviewed_has_allergens,lupin,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_122,Fava,Leguminosas,Leguminosa,88.00,7.60,19.70,0.40,6.20,1.80,5.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_123,Miso (pasta de soja),Leguminosas,,199.00,11.70,20.50,6.00,5.40,6.20,3728.00,reviewed_has_allergens,soy,legumes,Leguminosas,soy_protein,,vegetable,Vegetal,processed,,g,Grama
+food_124,Farinha de soja,Leguminosas,,398.00,49.20,30.10,1.10,13.00,7.40,13.00,reviewed_has_allergens,soy,legumes,Leguminosas,soy_protein,,vegetable,Vegetal,processed,,g,Grama
+food_125,Edamame,Leguminosas,,121.00,11.90,9.90,5.20,5.00,2.20,6.00,reviewed_has_allergens,soy,legumes,Leguminosas,soy_protein,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_126,Grão-de-bico torrado,Leguminosas,Leguminosa,365.00,15.00,61.00,6.00,10.00,5.20,280.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,roasted,Assado (Forno),g,Grama
+food_127,Semente de linhaça,Gorduras,,534.00,18.30,28.90,42.20,27.30,1.60,30.00,unreviewed,,fats,Gorduras,seed,,vegetable,Vegetal,raw,Cru,g,Grama
+food_128,Semente de chia,Gorduras,,486.00,16.50,42.10,30.70,34.40,0.00,16.00,unreviewed,,fats,Gorduras,seed,,vegetable,Vegetal,raw,Cru,g,Grama
+food_129,Noz pecã,Gorduras,,691.00,9.20,13.90,72.00,9.60,4.00,0.00,reviewed_has_allergens,tree_nuts,fats,Gorduras,nut,,vegetable,Vegetal,raw,Cru,g,Grama
+food_130,Noz de macadâmia,Gorduras,,718.00,7.90,13.80,75.80,8.60,4.60,5.00,reviewed_has_allergens,tree_nuts,fats,Gorduras,nut,,vegetable,Vegetal,raw,Cru,g,Grama
+food_131,Coco seco,Gorduras,Fruta,660.00,6.90,23.70,64.50,9.00,7.40,37.00,reviewed_has_allergens,tree_nuts,fats,Gorduras,fruit,Fruta,vegetable,Vegetal,raw,Cru,g,Grama
+food_132,Coco ralado,Gorduras,Fruta,660.00,6.90,23.70,64.50,9.00,7.40,37.00,reviewed_has_allergens,tree_nuts,fats,Gorduras,fruit,Fruta,vegetable,Vegetal,processed,,g,Grama
+food_137,Amêndoas,Proteínas,,579.00,21.20,21.60,49.90,12.50,4.40,1.00,reviewed_has_allergens,tree_nuts,proteins,Proteínas,nut,,vegetable,Vegetal,raw,Cru,g,Grama
+food_138,Pistache,Proteínas,,562.00,20.20,27.20,45.30,10.30,7.70,1.00,reviewed_has_allergens,tree_nuts,proteins,Proteínas,nut,,vegetable,Vegetal,raw,Cru,g,Grama
+food_139,Macadâmia,Proteínas,,718.00,7.90,13.80,75.80,8.60,4.60,5.00,reviewed_has_allergens,tree_nuts,proteins,Proteínas,nut,,vegetable,Vegetal,raw,Cru,g,Grama
+food_140,Avelã,Proteínas,,628.00,15.00,16.70,60.80,9.70,4.30,0.00,reviewed_has_allergens,tree_nuts,proteins,Proteínas,nut,,vegetable,Vegetal,raw,Cru,g,Grama
+food_141,Farinha de amêndoas,Proteínas,,590.00,21.40,18.70,54.00,10.40,4.40,1.00,reviewed_has_allergens,tree_nuts,proteins,Proteínas,nut,,vegetable,Vegetal,processed,,g,Grama
+food_142,Pasta de amendoim,Proteínas,Leguminosa,588.00,25.00,20.00,50.00,6.00,9.20,17.00,reviewed_has_allergens,peanuts,proteins,Proteínas,legume,Leguminosa,vegetable,Vegetal,processed,,g,Grama
+food_146,Semente de gergelim,Proteínas,,573.00,18.00,23.40,49.70,11.80,0.30,11.00,reviewed_has_allergens,sesame,proteins,Proteínas,seed,,vegetable,Vegetal,raw,Cru,g,Grama
+food_148,Tempeh,Proteínas,,193.00,19.00,9.40,10.80,0.00,0.00,9.00,reviewed_has_allergens,soy,proteins,Proteínas,soy_protein,,vegetable,Vegetal,raw,Cru,g,Grama
+food_149,Edamame cozido,Proteínas,,122.00,11.00,10.00,5.20,5.20,2.20,6.00,reviewed_has_allergens,soy,proteins,Proteínas,soy_protein,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_150,Leite de soja,Proteínas,,54.00,3.30,6.00,1.80,0.60,4.00,47.00,reviewed_has_allergens,soy,proteins,Proteínas,vegan_dairy_alternative,,vegetable,Vegetal,processed,,ml,Mililitro
+food_151,Proteína de soja texturizada,Proteínas,,327.00,52.00,33.90,1.20,17.50,30.00,2.00,reviewed_has_allergens,soy,proteins,Proteínas,soy_protein,,vegetable,Vegetal,dry,,g,Grama
+food_152,Carne de jaca desfiada,Proteínas,,95.00,1.70,23.20,0.60,1.50,19.00,2.00,unreviewed,,proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_153,Couve cozida,Proteínas,,36.00,2.90,7.10,0.50,2.50,1.30,14.00,unreviewed,,proteins,Proteínas,leafy_green,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_154,Brócolis cozido,Proteínas,Vegetal,55.00,3.70,7.20,0.40,3.30,1.70,33.00,unreviewed,,proteins,Proteínas,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_155,Espinafre cozido,Proteínas,,41.00,3.50,3.80,0.30,2.40,0.40,70.00,unreviewed,,proteins,Proteínas,leafy_green,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_156,Ervilha-torta cozida,Proteínas,Leguminosa,42.00,3.10,7.60,0.20,2.60,4.00,4.00,unreviewed,,proteins,Proteínas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_157,Jaca verde cozida,Proteínas,,95.00,2.50,25.00,0.30,1.90,0.00,2.00,unreviewed,,proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_158,Batata-doce cozida (proteína vegetal modesta),Proteínas,Raiz,86.00,1.60,20.10,0.10,3.00,5.70,36.00,unreviewed,,proteins,Proteínas,root_vegetable,Raiz,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_159,Feijão preto cozido,Proteínas,Leguminosa,132.00,8.90,23.70,0.50,8.40,0.30,1.00,unreviewed,,proteins,Proteínas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_160,Lentilha comum cozida,Proteínas,Leguminosa,116.00,9.00,20.10,0.40,7.90,1.80,2.00,unreviewed,,proteins,Proteínas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_161,Grão-de-bico cozido,Proteínas,Leguminosa,164.00,8.90,27.40,2.60,7.60,4.80,7.00,unreviewed,,proteins,Proteínas,legume,Leguminosa,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_162,Soja cozida,Proteínas,,173.00,17.00,9.90,9.00,6.00,3.00,1.00,reviewed_has_allergens,soy,proteins,Proteínas,soy_protein,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_163,Peito de frango grelhado,Proteínas,Aves,165.00,31.00,0.00,3.60,0.00,0.00,74.00,unreviewed,,proteins,Proteínas,poultry,Aves,animal,Animal,grilled,Grelhado,g,Grama
+food_164,Carne bovina magra grelhada,Proteínas,Carne Bovina,250.00,26.00,0.00,18.00,0.00,0.00,60.00,reviewed_has_allergens,red_meat,proteins,Proteínas,beef,Carne Bovina,animal,Animal,grilled,Grelhado,g,Grama
+food_165,Ovo cozido,Proteínas,,155.00,13.00,0.00,11.00,0.00,1.10,124.00,reviewed_has_allergens,egg,proteins,Proteínas,egg,,animal,Animal,boiled,Cozido,g,Grama
+food_166,Peixe (salmão),Proteínas,Peixe,208.00,20.00,0.00,13.00,0.00,0.00,59.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,baked,Assado,g,Grama
+food_167,Carne suína magra cozida,Proteínas,Porco,196.00,29.00,0.00,7.00,0.00,0.00,55.00,reviewed_has_allergens,pork,proteins,Proteínas,pork,Porco,animal,Animal,boiled,Cozido,g,Grama
+food_168,Atum em lata (natural),Proteínas,Peixe,116.00,26.00,0.00,1.00,0.00,0.00,250.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,processed,,g,Grama
+food_169,Sardinha em lata (óleo),Proteínas,Peixe,208.00,25.00,0.00,11.00,0.00,0.00,300.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,processed,,g,Grama
+food_170,Queijo minas frescal,Proteínas,Queijo,264.00,17.40,0.00,15.00,0.00,1.50,350.00,reviewed_has_allergens,milk,proteins,Proteínas,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_171,Leite integral,Proteínas,,61.00,3.20,4.8,3.50,0.00,5.00,43.00,reviewed_has_allergens,milk,proteins,Proteínas,milk,,animal,Animal,processed,,ml,Mililitro
+food_172,Iogurte natural,Proteínas,,61.00,10.00,0.00,3.30,0.00,4.70,46.00,reviewed_has_allergens,milk,proteins,Proteínas,yogurt,,animal,Animal,processed,,g,Grama
+food_173,Costela de porco assada,Proteínas,Porco,297.00,25.00,0.00,21.00,0.00,0.00,75.00,reviewed_has_allergens,pork,proteins,Proteínas,pork,Porco,animal,Animal,baked,Assado,g,Grama
+food_174,Pernil suíno assado,Proteínas,Porco,262.00,27.00,0.00,18.00,0.00,0.00,65.00,reviewed_has_allergens,pork,proteins,Proteínas,pork,Porco,animal,Animal,baked,Assado,g,Grama
+food_175,Barriga de porco (torresmo),Proteínas,Porco,574.00,17.00,0.00,50.00,0.00,0.00,600.00,reviewed_has_allergens,pork,proteins,Proteínas,pork,Porco,animal,Animal,fried,Frito,g,Grama
+food_176,Carne seca cozida,Proteínas,Carne Bovina,248.00,33.00,0.00,10.00,0.00,0.00,1500.00,reviewed_has_allergens,red_meat,proteins,Proteínas,beef,Carne Bovina,animal,Animal,boiled,Cozido,g,Grama
+food_177,Charque dessalgado cozido,Proteínas,Carne Bovina,270.00,30.00,0.00,15.00,0.00,0.00,1600.00,reviewed_has_allergens,red_meat,proteins,Proteínas,beef,Carne Bovina,animal,Animal,boiled,Cozido,g,Grama
+food_178,Miolo de alcatra grelhado,Proteínas,Carne Bovina,210.00,26.00,0.00,12.00,0.00,0.00,65.00,reviewed_has_allergens,red_meat,proteins,Proteínas,beef,Carne Bovina,animal,Animal,grilled,Grelhado,g,Grama
+food_179,Miolo de acém grelhado,Proteínas,Carne Bovina,225.00,25.00,0.00,13.00,0.00,0.00,70.00,reviewed_has_allergens,red_meat,proteins,Proteínas,beef,Carne Bovina,animal,Animal,grilled,Grelhado,g,Grama
+food_180,Músculo bovino cozido,Proteínas,Carne Bovina,215.00,28.00,0.00,10.00,0.00,0.00,60.00,reviewed_has_allergens,red_meat,proteins,Proteínas,beef,Carne Bovina,animal,Animal,boiled,Cozido,g,Grama
+food_181,Camarão grelhado,Proteínas,Frutos do Mar,99.00,24.00,0.00,1.00,0.00,0.00,111.00,reviewed_has_allergens,"crustacean,shellfish",proteins,Proteínas,shellfish,Frutos do Mar,animal,Animal,grilled,Grelhado,g,Grama
+food_182,Polvo cozido,Proteínas,Frutos do Mar,82.00,15.00,0.00,1.00,0.00,0.00,230.00,reviewed_has_allergens,"mollusk,shellfish",proteins,Proteínas,shellfish,Frutos do Mar,animal,Animal,boiled,Cozido,g,Grama
+food_183,Lula grelhada,Proteínas,Frutos do Mar,92.00,16.00,0.00,1.40,0.00,0.00,44.00,reviewed_has_allergens,"mollusk,shellfish",proteins,Proteínas,shellfish,Frutos do Mar,animal,Animal,grilled,Grelhado,g,Grama
+food_184,Mexilhão cozido,Proteínas,Frutos do Mar,172.00,24.00,0.00,4.50,0.00,0.00,286.00,reviewed_has_allergens,"mollusk,shellfish",proteins,Proteínas,shellfish,Frutos do Mar,animal,Animal,boiled,Cozido,g,Grama
+food_186,Leite desnatado,Laticínios,,36.00,3.40,5.00,0.10,0.00,5.10,42.00,reviewed_has_allergens,milk,dairy,Laticínios,milk,,animal,Animal,processed,,ml,Mililitro
+food_187,Leite semidesnatado,Laticínios,,45.00,3.30,4.80,1.60,0.00,5.00,42.00,reviewed_has_allergens,milk,dairy,Laticínios,milk,,animal,Animal,processed,,ml,Mililitro
+food_188,Leite em pó integral,Laticínios,,496.00,26.30,38.40,26.90,0.00,38.00,371.00,reviewed_has_allergens,milk,dairy,Laticínios,milk,,animal,Animal,processed,,g,Grama
+food_189,Leite condensado,Laticínios,,321.00,7.00,55.00,8.00,0.00,54.40,127.00,reviewed_has_allergens,milk,dairy,Laticínios,milk,,animal,Animal,processed,,g,Grama
+food_190,Leite fermentado,Laticínios,,60.00,2.10,10.00,1.40,0.00,11.00,35.00,reviewed_has_allergens,milk,dairy,Laticínios,yogurt,,animal,Animal,processed,,ml,Mililitro
+food_191,Leite de cabra,Laticínios,,69.00,3.60,4.50,4.10,0.00,4.50,50.00,reviewed_has_allergens,milk,dairy,Laticínios,milk,,animal,Animal,processed,,ml,Mililitro
+food_192,Leite sem lactose,Laticínios,,42.00,3.30,4.70,1.00,0.00,4.80,43.00,reviewed_has_allergens,milk,dairy,Laticínios,milk,,animal,Animal,processed,,ml,Mililitro
+food_193,Iogurte natural integral,Laticínios,,63.00,3.50,4.70,3.10,0.00,4.70,46.00,reviewed_has_allergens,milk,dairy,Laticínios,yogurt,,animal,Animal,processed,,g,Grama
+food_194,Iogurte natural desnatado,Laticínios,,56.00,4.50,5.90,0.40,0.00,7.30,70.00,reviewed_has_allergens,milk,dairy,Laticínios,yogurt,,animal,Animal,processed,,g,Grama
+food_195,Iogurte grego natural,Laticínios,,97.00,10.00,3.60,5.00,0.00,3.20,36.00,reviewed_has_allergens,milk,dairy,Laticínios,yogurt,,animal,Animal,processed,,g,Grama
+food_197,Queijo cottage,Laticínios,Queijo,98.00,11.00,3.40,4.30,0.00,2.70,364.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_198,Queijo muçarela,Laticínios,Queijo,280.00,22.00,2.20,20.00,0.00,1.20,627.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_199,Queijo prato,Laticínios,Queijo,355.00,23.00,1.30,28.00,0.00,1.00,650.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_200,Queijo parmesão,Laticínios,Queijo,431.00,38.00,4.10,29.00,0.00,0.90,1529.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_201,Queijo provolone,Laticínios,Queijo,351.00,26.00,2.10,27.00,0.00,0.60,876.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_202,Queijo brie,Laticínios,Queijo,334.00,21.00,0.50,28.00,0.00,0.50,629.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_203,Queijo gorgonzola,Laticínios,Queijo,356.00,21.00,2.30,30.00,0.00,0.50,1395.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_204,Queijo roquefort,Laticínios,Queijo,369.00,22.00,2.00,31.00,0.00,0.00,1809.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_205,Queijo cheddar,Laticínios,Queijo,404.00,25.00,1.30,33.00,0.00,0.50,621.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_206,Queijo feta,Laticínios,Queijo,264.00,14.00,4.10,21.00,0.00,4.10,1116.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_207,Queijo de ovelha,Laticínios,Queijo,364.00,21.00,1.60,30.00,0.00,0.00,1000.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_208,Queijo coalho,Laticínios,Queijo,330.00,22.00,2.20,26.00,0.00,1.50,1150.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_209,Queijo prato lanche,Laticínios,Queijo,357.00,23.30,1.40,30.00,0.00,1.00,650.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_210,Queijo tipo suíço,Laticínios,Queijo,380.00,27.00,5.40,31.00,0.00,1.40,192.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_211,Queijo de cabra,Laticínios,Queijo,364.00,22.00,1.00,21.00,0.00,1.00,365.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_212,Queijo camembert,Laticínios,Queijo,300.00,19.80,0.50,24.30,0.00,0.50,842.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_213,Queijo fontina,Laticínios,Queijo,389.00,25.60,1.60,31.00,0.00,1.60,800.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_214,Queijo gruyère,Laticínios,Queijo,413.00,29.80,0.40,32.00,0.00,0.40,336.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_215,Queijo sem lactose,Laticínios,Queijo,311.00,25.00,2.00,22.00,0.00,0.00,600.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_216,Requeijão tradicional,Laticínios,Queijo,257.00,6.30,2.10,24.50,0.00,2.00,600.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_217,Requeijão light,Laticínios,Queijo,190.00,7.50,4.00,12.00,0.00,2.50,650.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_218,Creme de leite,Laticínios,Laticínios,221.00,2.00,3.00,20.00,0.00,3.00,40.00,reviewed_has_allergens,milk,dairy,Laticínios,dairy,Laticínios,animal,Animal,processed,,g,Grama
+food_219,Manteiga com sal,Laticínios,Laticínios,717.00,0.90,0.10,81.00,0.00,0.10,643.00,reviewed_has_allergens,milk,dairy,Laticínios,dairy,Laticínios,animal,Animal,processed,,g,Grama
+food_220,Presunto cozido,Proteínas,,145.00,16.00,1.50,8.00,0.00,1.50,1000.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_221,Peito de peru defumado,Proteínas,,104.00,20.00,2.00,1.50,0.00,2.00,1100.00,unreviewed,,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_222,Salame italiano,Proteínas,,336.00,22.00,1.00,27.00,0.00,1.00,1700.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_223,Mortadela,Proteínas,,311.00,14.00,3.00,27.00,0.00,0.00,1200.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_224,Presunto cru (Parma / Jamón),Proteínas,,268.00,26.00,0.00,18.00,0.00,0.00,1900.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_225,Bacon,Gorduras,,541.00,14.00,1.00,53.00,0.00,0.00,1700.00,reviewed_has_allergens,pork,fats,Gorduras,processed_meat,,animal,Animal,fried,Frito,g,Grama
+food_226,Linguiça toscana,Proteínas,,278.00,14.00,2.00,23.00,0.00,1.00,1000.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,grilled,Grelhado,g,Grama
+food_227,Linguiça calabresa,Proteínas,,300.00,16.00,2.00,25.00,0.00,1.00,1200.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,grilled,Grelhado,g,Grama
+food_228,Salsicha (tipo Viena),Proteínas,,247.00,12.00,4.00,20.00,0.00,2.00,1100.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,boiled,Cozido,g,Grama
+food_229,Chouriço / Chorizo,Proteínas,,455.00,24.00,2.00,38.00,0.00,1.00,1200.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_230,Peito de frango defumado,Proteínas,,117.00,23.00,1.00,2.00,0.00,1.00,1000.00,unreviewed,,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_231,Lombinho defumado,Proteínas,,150.00,21.00,1.00,6.00,0.00,1.00,1100.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_232,Copa,Proteínas,,400.00,24.00,1.00,33.00,0.00,0.00,1600.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_233,Paio,Proteínas,,320.00,17.00,2.00,27.00,0.00,1.00,1400.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,boiled,Cozido,g,Grama
+food_234,Salsichão (Bratwurst),Proteínas,,297.00,12.00,2.00,26.00,0.00,1.00,850.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,grilled,Grelhado,g,Grama
+food_235,Linguiça de frango,Proteínas,,180.00,15.00,2.00,12.00,0.00,1.00,800.00,unreviewed,,proteins,Proteínas,processed_meat,,animal,Animal,grilled,Grelhado,g,Grama
+food_236,Pastrami,Proteínas,,147.00,22.00,0.00,6.00,0.00,0.00,1000.00,reviewed_has_allergens,red_meat,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_237,Pepperoni,Proteínas,,494.00,19.00,1.00,46.00,0.00,0.00,1600.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_238,Bacon de peru,Proteínas,,382.00,30.00,3.00,28.00,0.00,2.00,1900.00,unreviewed,,proteins,Proteínas,processed_meat,,animal,Animal,fried,Frito,g,Grama
+food_239,Linguiça portuguesa,Proteínas,,330.00,16.00,2.00,28.00,0.00,1.00,1300.00,reviewed_has_allergens,pork,proteins,Proteínas,processed_meat,,animal,Animal,processed,,g,Grama
+food_241,Pão de forma integral,Carboidratos,,250.00,12.00,43.00,4.00,7.00,4.00,400.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_242,Pão de forma branco,Carboidratos,,265.00,9.00,49.00,3.00,2.50,5.00,490.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_243,Croissant,Carboidratos,,406.00,8.20,45.80,21.00,2.60,11.00,467.00,reviewed_has_allergens,"egg,gluten,milk,wheat",carbohydrates,Carboidratos,baked_good,,mixed,,baked,Assado,g,Grama
+food_244,Baguete,Carboidratos,,274.00,10.00,50.00,2.00,2.50,2.50,600.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_245,Pão de queijo,Carboidratos,,342.00,5.50,38.00,18.00,0.50,1.00,550.00,reviewed_has_allergens,"egg,milk",carbohydrates,Carboidratos,baked_good,,mixed,,baked,Assado,g,Grama
+food_246,Pão de centeio,Carboidratos,,259.00,8.50,48.00,3.30,5.80,3.80,600.00,reviewed_has_allergens,"gluten,rye,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_247,Pão sírio (Pita),Carboidratos,,275.00,9.00,55.00,1.20,2.20,1.00,530.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_248,Brioche,Carboidratos,,346.00,9.50,48.00,12.00,2.00,10.00,380.00,reviewed_has_allergens,"egg,gluten,milk,wheat",carbohydrates,Carboidratos,baked_good,,mixed,,baked,Assado,g,Grama
+food_249,Pão de alho,Carboidratos,,350.00,8.00,42.00,17.00,2.00,2.00,650.00,reviewed_has_allergens,"gluten,milk,soy,wheat",carbohydrates,Carboidratos,baked_good,,mixed,,baked,Assado,g,Grama
+food_250,Pão australiano,Carboidratos,,290.00,9.00,52.00,5.00,4.50,11.00,450.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_251,Pão de hambúrguer,Carboidratos,,277.00,10.00,50.00,4.00,2.50,6.00,480.00,reviewed_has_allergens,"gluten,sesame,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_252,Pão de hot dog,Carboidratos,,277.00,10.00,50.00,4.00,2.50,6.00,480.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_253,Ciabatta,Carboidratos,,270.00,9.00,51.00,3.50,2.00,1.50,550.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_254,Pão de batata,Carboidratos,,265.00,7.50,50.00,3.50,2.50,6.50,400.00,reviewed_has_allergens,"gluten,milk,wheat",carbohydrates,Carboidratos,baked_good,,mixed,,baked,Assado,g,Grama
+food_255,Torrada integral,Carboidratos,,390.00,14.00,65.00,6.00,10.00,5.00,500.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_256,Torrada tradicional,Carboidratos,,400.00,11.00,72.00,6.00,3.50,6.00,550.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_257,Biscoito de arroz,Carboidratos,,387.00,8.00,81.00,2.80,4.00,0.50,250.00,unreviewed,,carbohydrates,Carboidratos,snack,,vegetable,Vegetal,processed,,g,Grama
+food_258,Pão de milho (Broa),Carboidratos,,305.00,7.00,55.00,6.00,4.00,8.00,450.00,reviewed_has_allergens,"egg,gluten,milk,wheat",carbohydrates,Carboidratos,baked_good,,mixed,,baked,Assado,g,Grama
+food_259,Wrap / Tortilha de trigo,Carboidratos,,297.00,8.00,49.00,7.50,2.50,2.00,580.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_260,Tapioca (goma preparada),Carboidratos,Processado,336.00,0.00,83.00,0.00,0.00,0.00,2.00,unreviewed,,carbohydrates,Carboidratos,processed,Processado,vegetable,Vegetal,roasted,Assado (Forno),g,Grama
+food_261,Cuscuz de milho (nordestino),Carboidratos,Grãos,112.00,2.30,24.50,0.40,1.80,0.30,5.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_262,Cuscuz marroquino (cozido),Carboidratos,Grãos,112.00,3.80,23.20,0.20,1.40,0.10,5.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_263,Gnocchi de batata (Nhoque),Carboidratos,,133.00,3.30,28.60,0.20,1.60,1.00,290.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,pasta,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_265,Macarrão de arroz (Bifum) cozido,Carboidratos,,109.00,0.90,24.90,0.20,1.00,0.00,2.00,unreviewed,,carbohydrates,Carboidratos,pasta,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_266,Macarrão soba cozido,Carboidratos,,99.00,5.10,21.40,0.10,1.50,0.00,60.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,pasta,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_267,Macarrão udon cozido,Carboidratos,,131.00,3.30,27.40,0.60,1.20,0.50,280.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,pasta,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_268,Noodle instantâneo (Miojo),Carboidratos,,379.00,8.50,57.00,14.50,2.50,1.00,1160.00,reviewed_has_allergens,"gluten,soy,wheat",carbohydrates,Carboidratos,pasta,,mixed,,boiled,Cozido,g,Grama
+food_269,Purê de batata (preparado),Carboidratos,Vegetal,113.00,2.00,15.00,4.80,1.50,1.20,300.00,reviewed_has_allergens,milk,carbohydrates,Carboidratos,vegetable,Vegetal,mixed,,boiled,Cozido,g,Grama
+food_270,Purê de abóbora (preparado),Carboidratos,Vegetal,40.00,1.20,9.00,0.20,3.00,4.00,250.00,unreviewed,,carbohydrates,Carboidratos,vegetable,Vegetal,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_271,Farofa de mandioca simples,Carboidratos,Processado,406.00,2.50,75.00,9.50,4.50,1.50,450.00,unreviewed,,carbohydrates,Carboidratos,processed,Processado,mixed,,roasted,Assado (Forno),g,Grama
+food_272,Macarrão konjac (Shirataki),Carboidratos,,9.00,0.00,3.00,0.00,3.00,0.00,2.00,unreviewed,,carbohydrates,Carboidratos,pasta,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_273,Massa folhada (assada),Carboidratos,,558.00,6.00,46.00,38.00,1.50,0.50,250.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,mixed,,baked,Assado,g,Grama
+food_274,Massa de pastel (frita),Carboidratos,,388.00,7.50,44.00,20.00,1.50,1.00,450.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,fried,Frito,g,Grama
+food_275,Massa de pizza (assada),Carboidratos,,289.00,8.50,50.00,5.50,2.00,3.50,450.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,baked_good,,vegetable,Vegetal,baked,Assado,g,Grama
+food_276,Ravioli de carne (cozido),,,242.00,11.50,30.00,8.00,2.00,1.50,380.00,reviewed_has_allergens,"egg,gluten,wheat",mixed,,pasta,,animal,Animal,boiled,Cozido,g,Grama
+food_277,Tortellini de queijo (cozido),,,260.00,11.00,35.00,7.50,2.00,2.00,400.00,reviewed_has_allergens,"egg,gluten,milk,wheat",mixed,,pasta,,animal,Animal,boiled,Cozido,g,Grama
+food_278,Pamonha doce (cozida),Carboidratos,Processado,180.00,3.50,32.00,4.50,2.50,12.00,50.00,reviewed_has_allergens,milk,carbohydrates,Carboidratos,processed,Processado,mixed,,boiled,Cozido,g,Grama
+food_279,Massa de panqueca (simples),Carboidratos,,227.00,7.00,28.00,9.50,1.00,4.00,430.00,reviewed_has_allergens,"egg,gluten,milk,wheat",carbohydrates,Carboidratos,baked_good,,mixed,,fried,Frito,g,Grama
+food_280,Bacalhau salgado cru,Proteínas,Peixe,290.00,62.80,0.00,2.40,0.00,0.00,7027.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,raw,Cru,g,Grama
+food_281,Bacalhau dessalgado cozido,Proteínas,Peixe,105.00,22.80,0.00,0.90,0.00,0.00,274.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,boiled,Cozido,g,Grama
+food_282,Sardinha fresca grelhada,Proteínas,Peixe,208.00,24.60,0.00,11.50,0.00,0.00,505.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,grilled,Grelhado,g,Grama
+food_283,Dourado assado,Proteínas,Peixe,109.00,24.00,0.00,0.90,0.00,0.00,113.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,baked,Assado,g,Grama
+food_284,Robalo grelhado,Proteínas,Peixe,124.00,23.60,0.00,2.60,0.00,0.00,88.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,grilled,Grelhado,g,Grama
+food_285,Tilápia grelhada,Proteínas,Peixe,128.00,26.20,0.00,2.70,0.00,0.00,56.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,grilled,Grelhado,g,Grama
+food_286,Pescada cozida,Proteínas,Peixe,96.00,19.30,0.00,1.60,0.00,0.00,316.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,boiled,Cozido,g,Grama
+food_287,Linguado grelhado,Proteínas,Peixe,117.00,24.20,0.00,1.50,0.00,0.00,105.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,grilled,Grelhado,g,Grama
+food_288,Truta assada,Proteínas,Peixe,190.00,26.60,0.00,8.40,0.00,0.00,66.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,baked,Assado,g,Grama
+food_289,Atum fresco grelhado,Proteínas,Peixe,132.00,28.30,0.00,1.30,0.00,0.00,50.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,grilled,Grelhado,g,Grama
+food_290,Cação cozido,Proteínas,Peixe,130.00,21.00,0.00,4.50,0.00,0.00,90.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,boiled,Cozido,g,Grama
+food_291,Corvina assada,Proteínas,Peixe,104.00,20.00,0.00,2.10,0.00,0.00,58.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,baked,Assado,g,Grama
+food_292,Namorado grelhado,Proteínas,Peixe,102.00,20.50,0.00,1.60,0.00,0.00,60.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,grilled,Grelhado,g,Grama
+food_293,Pintado assado,Proteínas,Peixe,152.00,18.50,0.00,8.00,0.00,0.00,55.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,baked,Assado,g,Grama
+food_294,Tambaqui assado,Proteínas,Peixe,280.00,18.00,0.00,22.00,0.00,0.00,65.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,baked,Assado,g,Grama
+food_295,Ostra crua,Proteínas,Frutos do Mar,81.00,9.50,4.90,2.30,0.00,0.00,106.00,reviewed_has_allergens,"mollusk,shellfish",proteins,Proteínas,shellfish,Frutos do Mar,animal,Animal,raw,Cru,g,Grama
+food_296,Caranguejo cozido,Proteínas,Frutos do Mar,97.00,19.00,0.00,1.50,0.00,0.00,395.00,reviewed_has_allergens,"crustacean,shellfish",proteins,Proteínas,shellfish,Frutos do Mar,animal,Animal,boiled,Cozido,g,Grama
+food_297,Lagosta cozida,Proteínas,Frutos do Mar,89.00,19.00,0.00,0.90,0.00,0.00,380.00,reviewed_has_allergens,"crustacean,shellfish",proteins,Proteínas,shellfish,Frutos do Mar,animal,Animal,boiled,Cozido,g,Grama
+food_298,Vieiras grelhadas,Proteínas,Frutos do Mar,111.00,20.50,5.40,0.80,0.00,0.00,265.00,reviewed_has_allergens,"mollusk,shellfish",proteins,Proteínas,shellfish,Frutos do Mar,animal,Animal,grilled,Grelhado,g,Grama
+food_299,Siri cozido,Proteínas,Frutos do Mar,83.00,18.10,0.00,0.80,0.00,0.00,278.00,reviewed_has_allergens,"crustacean,shellfish",proteins,Proteínas,shellfish,Frutos do Mar,animal,Animal,boiled,Cozido,g,Grama
+food_300,Carne de sol (crua),Proteínas,,214.00,29.50,0.00,9.80,0.00,0.00,1200.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,raw,Cru,g,Grama
+food_301,Picanha grelhada,Proteínas,,288.00,26.00,0.00,19.50,0.00,0.00,65.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,grilled,Grelhado,g,Grama
+food_302,Costela bovina assada,Proteínas,,360.00,22.00,0.00,30.00,0.00,0.00,75.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,baked,Assado,g,Grama
+food_303,Pato assado (sem pele),Proteínas,Aves,201.00,23.50,0.00,11.20,0.00,0.00,65.00,unreviewed,,proteins,Proteínas,poultry,Aves,animal,Animal,baked,Assado,g,Grama
+food_304,Cordeiro assado,Proteínas,,258.00,25.60,0.00,16.50,0.00,0.00,72.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,baked,Assado,g,Grama
+food_305,Alcatra assada,Proteínas,,215.00,27.00,0.00,11.00,0.00,0.00,60.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,baked,Assado,g,Grama
+food_306,Maminha assada,Proteínas,,230.00,26.50,0.00,13.00,0.00,0.00,62.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,baked,Assado,g,Grama
+food_307,Fraldinha grelhada,Proteínas,,225.00,27.50,0.00,12.00,0.00,0.00,65.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,grilled,Grelhado,g,Grama
+food_308,Filé mignon grelhado,Proteínas,,210.00,28.00,0.00,10.00,0.00,0.00,60.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,grilled,Grelhado,g,Grama
+food_309,Contrafilé grelhado,Proteínas,,245.00,26.00,0.00,15.00,0.00,0.00,65.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,grilled,Grelhado,g,Grama
+food_310,Cupim assado,Proteínas,,330.00,20.00,0.00,27.00,0.00,0.00,70.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,baked,Assado,g,Grama
+food_311,Lombo de porco assado,Proteínas,,196.00,29.00,0.00,7.00,0.00,0.00,55.00,reviewed_has_allergens,pork,proteins,Proteínas,meat,,animal,Animal,baked,Assado,g,Grama
+food_312,Costelinha de porco assada,Proteínas,,297.00,25.00,0.00,21.00,0.00,0.00,75.00,reviewed_has_allergens,pork,proteins,Proteínas,meat,,animal,Animal,baked,Assado,g,Grama
+food_313,Picanha suína assada,Proteínas,,240.00,26.00,0.00,14.50,0.00,0.00,65.00,reviewed_has_allergens,pork,proteins,Proteínas,meat,,animal,Animal,baked,Assado,g,Grama
+food_314,Coxa de frango assada (com pele),Proteínas,Aves,232.00,23.50,0.00,14.80,0.00,0.00,85.00,unreviewed,,proteins,Proteínas,poultry,Aves,animal,Animal,baked,Assado,g,Grama
+food_315,Asa de frango assada (com pele),Proteínas,Aves,254.00,23.80,0.00,16.90,0.00,0.00,82.00,unreviewed,,proteins,Proteínas,poultry,Aves,animal,Animal,baked,Assado,g,Grama
+food_316,Coração de frango grelhado,Proteínas,Aves,207.00,26.00,0.00,10.50,0.00,0.00,65.00,unreviewed,,proteins,Proteínas,poultry,Aves,animal,Animal,grilled,Grelhado,g,Grama
+food_317,Fígado bovino grelhado,Proteínas,,190.00,29.00,3.80,5.30,0.00,0.00,79.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,grilled,Grelhado,g,Grama
+food_318,Moela de frango cozida,Proteínas,Aves,154.00,27.00,0.00,3.60,0.00,0.00,69.00,unreviewed,,proteins,Proteínas,poultry,Aves,animal,Animal,boiled,Cozido,g,Grama
+food_319,Carne moída (patinho) cozida,Proteínas,,212.00,28.00,0.00,10.50,0.00,0.00,70.00,reviewed_has_allergens,red_meat,proteins,Proteínas,meat,,animal,Animal,boiled,Cozido,g,Grama
+food_320,Azeite de oliva extravirgem,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,2.00,unreviewed,,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_321,Azeite de oliva virgem,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,2.00,unreviewed,,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_322,Óleo de coco,Gorduras,,862.00,0.00,0.00,100.00,0.00,0.00,0.00,reviewed_has_allergens,tree_nuts,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_323,Óleo de girassol,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,unreviewed,,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_324,Óleo de soja,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,reviewed_has_allergens,soy,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_325,Óleo de milho,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,unreviewed,,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_326,Óleo de canola,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,unreviewed,,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_327,Óleo de abacate,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,unreviewed,,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_328,Óleo de amendoim,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,reviewed_has_allergens,peanuts,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_329,Óleo de gergelim (sésamo),Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,reviewed_has_allergens,sesame,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_330,Manteiga Ghee (Clarificada),Gorduras,,900.00,0.30,0.00,99.50,0.00,0.00,2.00,reviewed_has_allergens,milk,fats,Gorduras,dairy_fat,,animal,Animal,processed,,g,Grama
+food_331,Banha de porco,Gorduras,,902.00,0.00,0.00,100.00,0.00,0.00,0.00,reviewed_has_allergens,pork,fats,Gorduras,animal_fat,,animal,Animal,processed,,g,Grama
+food_332,Sebo bovino,Gorduras,,902.00,0.00,0.00,100.00,0.00,0.00,0.00,reviewed_has_allergens,red_meat,fats,Gorduras,animal_fat,,animal,Animal,processed,,g,Grama
+food_333,Óleo de linhaça,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,unreviewed,,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_334,Óleo de noz,Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,reviewed_has_allergens,tree_nuts,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_335,Margarina com sal,Gorduras,,717.00,0.20,0.80,80.50,0.00,0.00,700.00,unreviewed,,fats,Gorduras,processed_fat,,vegetable,Vegetal,processed,,g,Grama
+food_336,Margarina sem sal,Gorduras,,717.00,0.20,0.80,80.50,0.00,0.00,10.00,unreviewed,,fats,Gorduras,processed_fat,,vegetable,Vegetal,processed,,g,Grama
+food_337,Manteiga sem sal,Gorduras,,717.00,0.90,0.10,81.10,0.00,0.10,11.00,reviewed_has_allergens,milk,fats,Gorduras,dairy_fat,,animal,Animal,processed,,g,Grama
+food_338,Banha de pato,Gorduras,,900.00,0.00,0.00,99.80,0.00,0.00,0.00,unreviewed,,fats,Gorduras,animal_fat,,animal,Animal,processed,,g,Grama
+food_339,Azeite de dendê (Óleo de palma),Gorduras,,884.00,0.00,0.00,100.00,0.00,0.00,0.00,unreviewed,,fats,Gorduras,oil,,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_340,Farinha de mandioca crua,Carboidratos,,361.00,1.60,87.00,0.30,6.50,3.50,2.00,unreviewed,,carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_341,Farinha de mandioca torrada,Carboidratos,,365.00,1.20,88.00,0.40,6.00,3.50,2.00,unreviewed,,carbohydrates,Carboidratos,flour,,vegetable,Vegetal,roasted,Assado (Forno),g,Grama
+food_342,Polvilho doce,Carboidratos,,351.00,0.40,86.00,0.00,0.20,0.00,2.00,unreviewed,,carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_343,Polvilho azedo,Carboidratos,,351.00,0.40,86.00,0.00,0.20,0.00,2.00,unreviewed,,carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_344,Farinha de milho flocada,Carboidratos,,363.00,7.50,79.00,1.50,5.00,0.60,5.00,unreviewed,,carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_345,Farinha de rosca,Carboidratos,,395.00,13.00,71.00,5.00,4.00,6.00,732.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_346,Farinha de linhaça,Gorduras,,534.00,18.00,29.00,42.00,27.00,1.60,30.00,unreviewed,,fats,Gorduras,flour,,vegetable,Vegetal,dry,,g,Grama
+food_347,Farinha de coco,Carboidratos,,400.00,19.00,58.00,15.00,38.00,9.00,60.00,reviewed_has_allergens,tree_nuts,carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_348,Farinha de arroz,Carboidratos,,366.00,6.00,80.00,1.40,2.40,0.10,0.00,unreviewed,,carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_349,Sagu,Carboidratos,Processado,358.00,0.20,88.00,0.20,0.50,0.00,3.00,unreviewed,,carbohydrates,Carboidratos,processed,Processado,vegetable,Vegetal,dry,,g,Grama
+food_350,Farinha de grão-de-bico,Carboidratos,,387.00,22.00,58.00,6.70,10.00,10.00,64.00,unreviewed,,carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_351,Amaranto em grão,Carboidratos,Grãos,371.00,13.50,65.00,7.00,6.70,1.70,4.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,raw,Cru,g,Grama
+food_352,Painço descascado,Carboidratos,Grãos,378.00,11.00,72.00,4.20,8.50,0.00,5.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,raw,Cru,g,Grama
+food_353,Sorgo em grão,Carboidratos,Grãos,329.00,10.60,71.00,3.50,6.70,0.00,6.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,raw,Cru,g,Grama
+food_354,Teff em grão,Carboidratos,Grãos,367.00,13.30,73.00,2.40,8.00,1.80,12.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,raw,Cru,g,Grama
+food_355,Farelo de aveia,Carboidratos,Grãos,246.00,17.30,66.00,7.00,15.40,1.50,4.00,reviewed_has_allergens,gluten_free_if_certified,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,dry,,g,Grama
+food_356,Farinha de centeio,Carboidratos,,338.00,9.00,74.00,1.50,14.00,3.00,2.00,reviewed_has_allergens,"gluten,rye,wheat",carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_357,Trigo em grão,Carboidratos,Grãos,342.00,13.00,71.00,2.50,12.00,0.40,2.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,raw,Cru,g,Grama
+food_358,Cevadinha (em grão),Carboidratos,Grãos,352.00,9.90,77.00,1.10,15.60,0.80,9.00,reviewed_has_allergens,gluten,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,raw,Cru,g,Grama
+food_359,Farinha de maca peruana,Carboidratos,,325.00,14.00,71.00,3.60,7.00,32.00,18.00,unreviewed,,carbohydrates,Carboidratos,flour,,vegetable,Vegetal,dry,,g,Grama
+food_360,Açúcar branco refinado,Carboidratos,,387.00,0.00,99.80,0.00,0.00,99.80,1.00,unreviewed,,carbohydrates,Carboidratos,sugar,,vegetable,Vegetal,processed,,g,Grama
+food_361,Açúcar mascavo,Carboidratos,,380.00,0.10,98.00,0.00,0.00,97.00,28.00,unreviewed,,carbohydrates,Carboidratos,sugar,,vegetable,Vegetal,processed,,g,Grama
+food_362,Açúcar de coco,Carboidratos,,375.00,0.00,95.00,0.00,0.00,93.00,12.00,reviewed_has_allergens,tree_nuts,carbohydrates,Carboidratos,sugar,,vegetable,Vegetal,processed,,g,Grama
+food_363,Mel de abelha,Carboidratos,,304.00,0.30,82.40,0.00,0.20,82.10,4.00,unreviewed,,carbohydrates,Carboidratos,sugar,,animal,Animal,raw,Cru,g,Grama
+food_364,Xarope de bordo (Maple Syrup),Carboidratos,,260.00,0.00,67.00,0.00,0.00,60.00,12.00,unreviewed,,carbohydrates,Carboidratos,sugar,,vegetable,Vegetal,processed,,g,Grama
+food_365,Chocolate amargo 70%,Gorduras,,598.00,7.80,45.90,42.60,10.90,24.00,20.00,unreviewed,,fats,Gorduras,sweet,,vegetable,Vegetal,processed,,g,Grama
+food_366,Chocolate ao leite,Carboidratos,,535.00,7.70,59.40,29.70,3.40,51.50,79.00,reviewed_has_allergens,milk,carbohydrates,Carboidratos,sweet,,mixed,,processed,,g,Grama
+food_367,Cacau em pó (sem açúcar),Gorduras,,228.00,19.60,57.90,13.70,37.00,1.80,21.00,unreviewed,,fats,Gorduras,powder,,vegetable,Vegetal,processed,,g,Grama
+food_368,Doce de leite,Carboidratos,,315.00,6.80,55.00,7.30,0.00,50.00,129.00,reviewed_has_allergens,milk,carbohydrates,Carboidratos,sweet,,mixed,,processed,,g,Grama
+food_369,Geleia de morango,Carboidratos,,278.00,0.40,68.90,0.00,1.10,48.00,12.00,unreviewed,,carbohydrates,Carboidratos,sweet,,vegetable,Vegetal,processed,,g,Grama
+food_370,Goiabada,Carboidratos,,312.00,0.40,80.00,0.00,4.00,70.00,10.00,unreviewed,,carbohydrates,Carboidratos,sweet,,vegetable,Vegetal,processed,,g,Grama
+food_371,Paçoca de amendoim,Gorduras,,499.00,15.00,52.00,26.00,4.50,40.00,250.00,reviewed_has_allergens,peanuts,fats,Gorduras,sweet,,vegetable,Vegetal,processed,,g,Grama
+food_372,Sorvete de baunilha (massa),Carboidratos,,207.00,3.50,23.60,11.00,0.70,21.20,80.00,reviewed_has_allergens,"egg,milk",carbohydrates,Carboidratos,sweet,,mixed,,processed,,g,Grama
+food_373,Biscoito recheado (chocolate),Carboidratos,,483.00,4.50,70.00,20.00,3.00,35.00,350.00,reviewed_has_allergens,"gluten,milk,soy,wheat",carbohydrates,Carboidratos,sweet,,mixed,,processed,,g,Grama
+food_374,Biscoito tipo Maria / Maizena,Carboidratos,,400.00,7.00,76.00,8.00,2.00,22.00,380.00,reviewed_has_allergens,"gluten,milk,wheat",carbohydrates,Carboidratos,sweet,,mixed,,baked,Assado,g,Grama
+food_375,Bolo de chocolate (simples),Carboidratos,,389.00,5.30,53.40,18.80,2.50,38.00,315.00,reviewed_has_allergens,"egg,gluten,milk,wheat",carbohydrates,Carboidratos,sweet,,mixed,,baked,Assado,g,Grama
+food_376,Gelatina sem açúcar (pronta),Proteínas,,10.00,1.50,1.00,0.00,0.00,0.00,55.00,unreviewed,,proteins,Proteínas,sweet,,animal,Animal,processed,,g,Grama
+food_377,Chocolate branco,Carboidratos,,539.00,5.90,59.20,32.10,0.20,59.00,90.00,reviewed_has_allergens,milk,carbohydrates,Carboidratos,sweet,,mixed,,processed,,g,Grama
+food_378,Açaí com xarope de guaraná,Carboidratos,,110.00,1.00,22.00,2.00,2.50,18.00,15.00,unreviewed,,carbohydrates,Carboidratos,sweet,,vegetable,Vegetal,processed,,g,Grama
+food_379,Açúcar demerara,Carboidratos,,383.00,0.00,99.00,0.00,0.00,98.00,2.00,unreviewed,,carbohydrates,Carboidratos,sugar,,vegetable,Vegetal,processed,,g,Grama
+food_380,Molho de tomate caseiro,Vegetais,,29.00,1.30,5.30,0.20,1.50,3.40,15.00,unreviewed,,vegetables,Vegetais,sauce,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_381,Molho de tomate industrializado,Vegetais,,53.00,1.50,8.50,1.60,1.50,5.50,390.00,unreviewed,,vegetables,Vegetais,sauce,,mixed,,processed,,g,Grama
+food_382,Mostarda amarela,Vegetais,,60.00,3.70,5.80,3.30,2.00,0.90,1100.00,reviewed_has_allergens,mustard,vegetables,Vegetais,sauce,,vegetable,Vegetal,processed,,g,Grama
+food_383,Ketchup,Vegetais,,97.00,1.30,25.50,0.20,0.30,21.00,907.00,unreviewed,,vegetables,Vegetais,sauce,,vegetable,Vegetal,processed,,g,Grama
+food_384,Maionese tradicional,Gorduras,,680.00,1.00,0.60,74.90,0.00,0.30,635.00,reviewed_has_allergens,egg,fats,Gorduras,sauce,,mixed,,processed,,g,Grama
+food_385,Molho Shoyu (Soja),Leguminosas,,53.00,5.10,7.80,0.60,0.80,0.40,5493.00,reviewed_has_allergens,"gluten,soy,wheat",legumes,Leguminosas,sauce,,vegetable,Vegetal,processed,,ml,Mililitro
+food_386,Vinagre balsâmico,Vegetais,Condimento,88.00,0.50,17.00,0.00,0.00,15.00,23.00,unreviewed,,vegetables,Vegetais,condiment,Condimento,vegetable,Vegetal,processed,,ml,Mililitro
+food_387,Vinagre de maçã,Frutas,Condimento,21.00,0.00,0.90,0.00,0.00,0.40,5.00,unreviewed,,fruits,Frutas,condiment,Condimento,vegetable,Vegetal,processed,,ml,Mililitro
+food_388,Molho Pesto,Gorduras,,472.00,5.50,4.40,48.00,2.50,0.50,1050.00,reviewed_has_allergens,"milk,tree_nuts",fats,Gorduras,sauce,,mixed,,processed,,g,Grama
+food_389,Molho Branco (Bechamel),Laticínios,,153.00,4.20,9.50,10.80,0.20,4.50,380.00,reviewed_has_allergens,"gluten,milk,wheat",dairy,Laticínios,sauce,,mixed,,boiled,Cozido,g,Grama
+food_390,Molho Barbecue (BBQ),Carboidratos,,183.00,1.00,42.00,0.50,1.00,33.00,1020.00,unreviewed,,carbohydrates,Carboidratos,sauce,,vegetable,Vegetal,processed,,g,Grama
+food_391,Extrato de tomate,Vegetais,,82.00,4.30,18.90,0.50,4.10,10.50,59.00,unreviewed,,vegetables,Vegetais,sauce,,vegetable,Vegetal,processed,,g,Grama
+food_392,Molho de pimenta (Tabasco),Vegetais,,11.00,1.00,1.80,0.10,0.60,0.00,2140.00,unreviewed,,vegetables,Vegetais,sauce,,vegetable,Vegetal,processed,,ml,Mililitro
+food_393,Creme de ricota,Laticínios,Queijo,155.00,9.50,3.50,11.50,0.00,3.00,300.00,reviewed_has_allergens,milk,dairy,Laticínios,cheese,Queijo,animal,Animal,processed,,g,Grama
+food_394,Hummus (Pasta de grão-de-bico),Leguminosas,,166.00,7.90,14.30,9.60,6.00,0.30,379.00,reviewed_has_allergens,sesame,legumes,Leguminosas,sauce,,vegetable,Vegetal,processed,,g,Grama
+food_395,Guacamole,Frutas,,157.00,2.00,8.50,14.70,6.70,0.70,350.00,unreviewed,,fruits,Frutas,sauce,,vegetable,Vegetal,raw,Cru,g,Grama
+food_396,Geleia de pimenta,Carboidratos,,260.00,0.50,65.00,0.00,1.00,50.00,15.00,unreviewed,,carbohydrates,Carboidratos,sweet,,vegetable,Vegetal,processed,,g,Grama
+food_397,Tahine (Pasta de gergelim),Gorduras,,595.00,17.00,21.20,53.80,9.30,0.50,115.00,reviewed_has_allergens,sesame,fats,Gorduras,paste,,vegetable,Vegetal,processed,,g,Grama
+food_398,Molho Tarê,Carboidratos,,180.00,4.00,40.00,0.00,0.50,30.00,3500.00,reviewed_has_allergens,"gluten,soy,wheat",carbohydrates,Carboidratos,sauce,,vegetable,Vegetal,processed,,ml,Mililitro
+food_399,Molho de iogurte e hortelã,Laticínios,,65.00,4.00,4.50,3.00,0.50,3.50,150.00,reviewed_has_allergens,milk,dairy,Laticínios,sauce,,mixed,,raw,Cru,g,Grama
+food_400,Café sem açúcar,,Bebida,1.00,0.10,0.00,0.00,0.00,0.00,2.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,boiled,Cozido,ml,Mililitro
+food_401,Chá verde sem açúcar,,Bebida,1.00,0.20,0.00,0.00,0.00,0.00,1.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,boiled,Cozido,ml,Mililitro
+food_402,Água de coco,,Bebida,19.00,0.70,3.70,0.20,1.10,2.60,105.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_403,Suco de laranja natural,,Bebida,45.00,0.70,10.40,0.20,0.20,8.40,1.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_404,Suco de uva integral,,Bebida,60.00,0.40,14.80,0.10,0.20,14.20,5.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,processed,,ml,Mililitro
+food_405,Limonada sem açúcar,,Bebida,5.00,0.10,1.50,0.00,0.00,0.50,1.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_406,Suco de maçã integral,,Bebida,46.00,0.10,11.30,0.10,0.20,9.60,4.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,processed,,ml,Mililitro
+food_407,Suco de abacaxi natural,,Bebida,53.00,0.40,12.80,0.10,0.20,10.00,2.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,raw,Cru,ml,Mililitro
+food_408,Refrigerante de Cola (tradicional),,Bebida,42.00,0.00,10.60,0.00,0.00,10.60,4.00,unreviewed,,beverages,,beverage,Bebida,mixed,,processed,,ml,Mililitro
+food_409,Refrigerante de Cola (Zero),,Bebida,0.00,0.00,0.00,0.00,0.00,0.00,10.00,unreviewed,,beverages,,beverage,Bebida,mixed,,processed,,ml,Mililitro
+food_410,Cerveja Pilsen,,Bebida,43.00,0.50,3.60,0.00,0.00,0.00,4.00,reviewed_has_allergens,gluten,beverages,,beverage,Bebida,vegetable,Vegetal,processed,,ml,Mililitro
+food_411,Vinho tinto,,Bebida,85.00,0.10,2.60,0.00,0.00,0.60,4.00,reviewed_has_allergens,sulfites,beverages,,beverage,Bebida,vegetable,Vegetal,processed,,ml,Mililitro
+food_412,Vinho branco,,Bebida,82.00,0.10,2.60,0.00,0.00,1.00,5.00,reviewed_has_allergens,sulfites,beverages,,beverage,Bebida,vegetable,Vegetal,processed,,ml,Mililitro
+food_413,Espumante / Champagne,,Bebida,75.00,0.10,2.50,0.00,0.00,1.50,5.00,reviewed_has_allergens,sulfites,beverages,,beverage,Bebida,vegetable,Vegetal,processed,,ml,Mililitro
+food_414,Vodka (Destilado),,Bebida,231.00,0.00,0.00,0.00,0.00,0.00,1.00,unreviewed,,beverages,,beverage,Bebida,mixed,,processed,,ml,Mililitro
+food_415,Bebida isotônica (Esportiva),,Bebida,24.00,0.00,6.00,0.00,0.00,5.00,39.00,unreviewed,,beverages,,beverage,Bebida,mixed,,processed,,ml,Mililitro
+food_416,Bebida energética,,Bebida,45.00,0.30,11.30,0.00,0.00,11.00,30.00,unreviewed,,beverages,,beverage,Bebida,mixed,,processed,,ml,Mililitro
+food_417,Chá preto sem açúcar,,Bebida,1.00,0.00,0.30,0.00,0.00,0.00,3.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,boiled,Cozido,ml,Mililitro
+food_418,Kombucha (tradicional),,Bebida,15.00,0.10,3.50,0.00,0.00,3.00,5.00,unreviewed,,beverages,,beverage,Bebida,vegetable,Vegetal,processed,,ml,Mililitro
+food_419,Achocolatado pronto para beber,,Bebida,83.00,3.20,10.50,3.10,0.50,9.80,65.00,reviewed_has_allergens,milk,beverages,,beverage,Bebida,animal,Animal,processed,,ml,Mililitro
+food_420,Whey Protein Concentrado,,,380.00,75.00,10.00,6.00,0.00,5.00,150.00,reviewed_has_allergens,"milk,soy",supplements,,powder,,animal,Animal,processed,,g,Grama
+food_421,Whey Protein Isolado,,,370.00,90.00,2.00,1.00,0.00,1.00,100.00,reviewed_has_allergens,"milk,soy",supplements,,powder,,animal,Animal,processed,,g,Grama
+food_422,Creatina Monohidratada,,,0.00,0.00,0.00,0.00,0.00,0.00,0.00,unreviewed,,supplements,,powder,,mixed,,processed,,g,Grama
+food_423,BCAA em pó,,,400.00,100.00,0.00,0.00,0.00,0.00,0.00,unreviewed,,supplements,,powder,,mixed,,processed,,g,Grama
+food_424,Glutamina,,,400.00,100.00,0.00,0.00,0.00,0.00,0.00,unreviewed,,supplements,,powder,,mixed,,processed,,g,Grama
+food_425,Pré-treino em pó,,,50.00,10.00,2.00,0.00,0.00,0.00,50.00,unreviewed,,supplements,,powder,,mixed,,processed,,g,Grama
+food_426,Maltodextrina,,,380.00,0.00,95.00,0.00,0.00,5.00,40.00,unreviewed,,supplements,,powder,,vegetable,Vegetal,processed,,g,Grama
+food_427,Hipercalórico (Mass Gainer),,,380.00,15.00,75.00,2.00,1.00,15.00,150.00,reviewed_has_allergens,"gluten,milk,soy,wheat",supplements,,powder,,mixed,,processed,,g,Grama
+food_428,Barra de proteína (tradicional),,,350.00,30.00,35.00,12.00,10.00,5.00,200.00,reviewed_has_allergens,"milk,soy,tree_nuts",supplements,,snack,,mixed,,processed,,g,Grama
+food_429,Proteína vegana em pó (Ervilha/Arroz),,,380.00,75.00,8.00,7.00,4.00,0.00,300.00,unreviewed,,supplements,,powder,,vegetable,Vegetal,processed,,g,Grama
+food_430,Colágeno hidrolisado,,,360.00,90.00,0.00,0.00,0.00,0.00,50.00,unreviewed,,supplements,,powder,,animal,Animal,processed,,g,Grama
+food_431,Pasta de amendoim com whey,,,550.00,35.00,20.00,40.00,6.00,5.00,100.00,reviewed_has_allergens,"milk,peanuts,soy",supplements,,paste,,mixed,,processed,,g,Grama
+food_432,Bebida proteica pronta (RTD),,Bebida,60.00,6.00,5.00,1.50,0.50,4.00,80.00,reviewed_has_allergens,milk,beverages,,beverage,Bebida,mixed,,processed,,ml,Mililitro
+food_433,Waxy Maize,,,350.00,0.00,88.00,0.00,0.00,0.00,10.00,unreviewed,,supplements,,powder,,vegetable,Vegetal,processed,,g,Grama
+food_434,Palatinose (Isomaltulose),,,380.00,0.00,95.00,0.00,95.00,0.00,0.00,unreviewed,,supplements,,powder,,vegetable,Vegetal,processed,,g,Grama
+food_435,Albumina em pó,,,360.00,80.00,5.00,0.00,0.00,0.00,1200.00,reviewed_has_allergens,egg,supplements,,powder,,animal,Animal,processed,,g,Grama
+food_436,Caseína em pó,,,360.00,80.00,6.00,1.50,0.00,2.00,150.00,reviewed_has_allergens,"milk,soy",supplements,,powder,,animal,Animal,processed,,g,Grama
+food_437,Gel de carboidrato (Energy Gel),,Processado,280.00,0.00,70.00,0.00,0.00,25.00,150.00,unreviewed,,supplements,,processed,Processado,vegetable,Vegetal,processed,,g,Grama
+food_438,Barra de cereal com proteína,,,400.00,20.00,50.00,12.00,5.00,15.00,180.00,reviewed_has_allergens,"gluten,milk,peanuts,soy,wheat",supplements,,snack,,mixed,,processed,,g,Grama
+food_439,Óleo de peixe em cápsula (Ômega 3),,,900.00,0.00,0.00,100.00,0.00,0.00,0.00,reviewed_has_allergens,fish,supplements,,oil,,animal,Animal,processed,,g,Grama
+food_440,Leite de amêndoas,,,15.00,0.50,0.30,1.20,0.00,0.00,73.00,reviewed_has_allergens,tree_nuts,beverages,,vegan_dairy_alternative,,vegetable,Vegetal,processed,,ml,Mililitro
+food_441,Leite de aveia,,,48.00,0.30,8.00,1.50,0.80,3.00,40.00,reviewed_has_allergens,gluten_free_if_certified,beverages,,vegan_dairy_alternative,,vegetable,Vegetal,processed,,ml,Mililitro
+food_442,Leite de coco (bebida),,,20.00,0.20,1.00,2.00,0.00,0.50,15.00,reviewed_has_allergens,tree_nuts,beverages,,vegan_dairy_alternative,,vegetable,Vegetal,processed,,ml,Mililitro
+food_443,Hambúrguer vegetal (tipo carne),Proteínas,,250.00,15.00,9.00,18.00,3.00,0.00,380.00,unreviewed,,proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_444,Hambúrguer vegetal (tipo frango),Proteínas,,220.00,14.00,15.00,12.00,4.00,1.00,400.00,reviewed_has_allergens,soy,proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_445,Salsicha vegetal,Proteínas,,230.00,16.00,5.00,16.00,3.00,1.00,500.00,reviewed_has_allergens,soy,proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_446,Nuggets vegetais,Proteínas,,260.00,13.00,20.00,14.00,4.00,1.00,450.00,reviewed_has_allergens,"gluten,soy,wheat",proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,fried,Frito,g,Grama
+food_447,Carne moída vegetal,Proteínas,,240.00,18.00,8.00,15.00,5.00,0.00,350.00,reviewed_has_allergens,soy,proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_448,Iogurte de coco,Laticínios,,110.00,1.00,9.00,8.00,1.00,5.00,15.00,reviewed_has_allergens,tree_nuts,dairy,Laticínios,vegan_dairy_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_449,Iogurte de soja,Laticínios,,94.00,3.50,14.00,2.50,1.00,9.00,45.00,reviewed_has_allergens,soy,dairy,Laticínios,vegan_dairy_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_450,Queijo vegetal (tipo muçarela),Laticínios,,280.00,1.00,22.00,21.00,0.00,0.00,750.00,unreviewed,,dairy,Laticínios,vegan_dairy_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_451,Requeijão vegetal,Laticínios,,250.00,2.00,8.00,24.00,1.00,1.00,350.00,reviewed_has_allergens,"soy,tree_nuts",dairy,Laticínios,vegan_dairy_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_452,Levedura nutricional,,Suplemento,328.00,50.00,38.00,4.00,22.00,0.00,30.00,unreviewed,,supplements,,supplement,Suplemento,fungi,Fungi,dry,,g,Grama
+food_453,Seitan (Carne de glúten),Proteínas,,107.00,24.00,2.00,0.50,0.00,0.00,200.00,reviewed_has_allergens,"gluten,wheat",proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,boiled,Cozido,g,Grama
+food_454,Tofu defumado,Proteínas,,160.00,16.00,3.00,9.00,2.00,0.50,300.00,reviewed_has_allergens,soy,proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_455,Creme de leite vegetal (Soja/Aveia),Laticínios,,140.00,1.50,4.00,13.00,0.50,1.00,50.00,reviewed_has_allergens,soy,dairy,Laticínios,vegan_dairy_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_456,Leite condensado vegetal (Aveia/Soja),Laticínios,,330.00,2.00,60.00,9.00,1.00,50.00,100.00,reviewed_has_allergens,gluten_free_if_certified,dairy,Laticínios,vegan_dairy_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_457,Manteiga vegetal (Vegan Butter),Gorduras,,710.00,0.00,0.00,79.00,0.00,0.00,400.00,unreviewed,,fats,Gorduras,vegan_dairy_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_458,Maionese vegana,Gorduras,,600.00,0.50,4.00,65.00,0.00,1.50,500.00,reviewed_has_allergens,soy,fats,Gorduras,vegan_dairy_alternative,,vegetable,Vegetal,processed,,g,Grama
+food_459,Proteína de ervilha texturizada,Proteínas,,350.00,70.00,15.00,3.00,6.00,0.00,800.00,unreviewed,,proteins,Proteínas,vegan_meat_alternative,,vegetable,Vegetal,dry,,g,Grama
+food_460,Pizza de muçarela (fatia),Carboidratos,,266.00,11.40,33.30,9.80,2.30,3.60,598.00,reviewed_has_allergens,"gluten,milk,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,baked,Assado,g,Grama
+food_461,Pizza de calabresa (fatia),Carboidratos,,298.00,12.20,33.30,12.10,2.30,3.60,683.00,reviewed_has_allergens,"gluten,milk,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,baked,Assado,g,Grama
+food_462,Hambúrguer Fast-Food (com pão e carne),Carboidratos,,264.00,12.80,30.30,10.10,1.30,5.10,414.00,reviewed_has_allergens,"gluten,sesame,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,baked,Assado,g,Grama
+food_463,Cheeseburger Fast-Food,Carboidratos,,298.00,15.30,30.60,13.80,1.40,5.70,594.00,reviewed_has_allergens,"gluten,milk,sesame,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,baked,Assado,g,Grama
+food_464,Batata frita Fast-Food,Carboidratos,,312.00,3.40,41.40,14.70,3.80,0.30,210.00,unreviewed,,carbohydrates,Carboidratos,fast_food,,vegetable,Vegetal,fried,Frito,g,Grama
+food_465,Cachorro-quente (com pão e salsicha),Carboidratos,,290.00,10.60,28.00,14.80,1.20,4.20,680.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,baked,Assado,g,Grama
+food_466,Pastel de carne (frito),Carboidratos,,310.00,10.50,32.00,15.50,1.50,1.00,450.00,reviewed_has_allergens,"gluten,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,fried,Frito,g,Grama
+food_467,Pastel de queijo (frito),Carboidratos,,325.00,9.50,30.00,18.00,1.20,1.50,520.00,reviewed_has_allergens,"gluten,milk,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,fried,Frito,g,Grama
+food_468,Coxinha de frango (frita),Carboidratos,,280.00,12.00,28.50,13.00,2.00,1.50,550.00,reviewed_has_allergens,"gluten,milk,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,fried,Frito,g,Grama
+food_469,Pão de queijo (fast-food/congelado),Carboidratos,,342.00,5.50,38.00,18.00,0.50,1.00,550.00,reviewed_has_allergens,"egg,milk",carbohydrates,Carboidratos,fast_food,,mixed,,baked,Assado,g,Grama
+food_470,Salgadinho de pacote (tipo chips de milho),Carboidratos,,536.00,6.50,60.10,31.80,4.50,1.50,574.00,unreviewed,,carbohydrates,Carboidratos,snack,,vegetable,Vegetal,processed,,g,Grama
+food_471,Batata chips (pacote),Carboidratos,,536.00,7.00,52.90,34.60,3.20,0.30,471.00,unreviewed,,carbohydrates,Carboidratos,snack,,vegetable,Vegetal,processed,,g,Grama
+food_472,Macarrão com queijo (Mac and Cheese),Carboidratos,,164.00,5.60,18.70,7.30,0.80,2.60,303.00,reviewed_has_allergens,"gluten,milk,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,boiled,Cozido,g,Grama
+food_473,Kebab / Shawarma de carne,Proteínas,,215.00,14.50,15.00,10.50,2.00,1.50,450.00,reviewed_has_allergens,"gluten,wheat",proteins,Proteínas,fast_food,,mixed,,roasted,Assado (Forno),g,Grama
+food_474,Nuggets de frango Fast-Food,Proteínas,,296.00,15.40,14.20,19.50,1.00,0.30,545.00,reviewed_has_allergens,"gluten,wheat",proteins,Proteínas,fast_food,,mixed,,fried,Frito,g,Grama
+food_475,Sushi (Salmão e Arroz),Carboidratos,,143.00,6.00,26.50,1.20,0.50,2.50,280.00,reviewed_has_allergens,fish,carbohydrates,Carboidratos,fast_food,,mixed,,raw,Cru,g,Grama
+food_476,Taco Mexicano (Carne e Queijo),,,226.00,12.00,20.00,11.50,3.00,1.50,450.00,reviewed_has_allergens,"gluten,milk,wheat",mixed,,fast_food,,mixed,,baked,Assado,g,Grama
+food_477,Burrito de frango e arroz,Carboidratos,,190.00,9.50,25.00,6.00,2.50,1.80,400.00,reviewed_has_allergens,"gluten,milk,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,baked,Assado,g,Grama
+food_478,Croissant recheado (chocolate),Carboidratos,,414.00,6.50,48.50,22.00,2.80,16.00,350.00,reviewed_has_allergens,"egg,gluten,milk,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,baked,Assado,g,Grama
+food_479,Donut / Sonho (com cobertura),Carboidratos,,426.00,4.50,48.00,24.50,1.50,22.50,310.00,reviewed_has_allergens,"egg,gluten,milk,wheat",carbohydrates,Carboidratos,fast_food,,mixed,,fried,Frito,g,Grama
+food_480,Azeitona verde em conserva,Gorduras,Fruta,145.00,1.00,3.80,15.30,3.30,0.50,1556.00,unreviewed,,fats,Gorduras,fruit,Fruta,vegetable,Vegetal,processed,,g,Grama
+food_481,Azeitona preta em conserva,Gorduras,Fruta,116.00,0.80,6.00,10.90,1.60,0.00,735.00,unreviewed,,fats,Gorduras,fruit,Fruta,vegetable,Vegetal,processed,,g,Grama
+food_482,Palmito em conserva,Vegetais,Vegetal,28.00,2.50,4.60,0.40,2.40,1.50,426.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,processed,,g,Grama
+food_483,Alcaparras em conserva,Vegetais,Condimento,23.00,2.40,4.90,0.90,3.20,0.40,2348.00,unreviewed,,vegetables,Vegetais,condiment,Condimento,vegetable,Vegetal,processed,,g,Grama
+food_484,Picles de pepino (Cornichon),Vegetais,Vegetal,11.00,0.30,2.30,0.20,1.20,1.10,1208.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,processed,,g,Grama
+food_485,Atum em lata (óleo),Proteínas,Peixe,198.00,29.00,0.00,8.20,0.00,0.00,400.00,reviewed_has_allergens,fish,proteins,Proteínas,fish,Peixe,animal,Animal,processed,,g,Grama
+food_486,Milho verde em conserva,Carboidratos,Grãos,67.00,2.30,14.30,1.20,2.00,4.50,253.00,unreviewed,,carbohydrates,Carboidratos,grain,Grãos,vegetable,Vegetal,processed,,g,Grama
+food_487,Ervilha em conserva,Carboidratos,Leguminosa,69.00,4.10,12.50,0.40,4.10,3.80,281.00,unreviewed,,carbohydrates,Carboidratos,legume,Leguminosa,vegetable,Vegetal,processed,,g,Grama
+food_488,Grão-de-bico em conserva,Leguminosas,Leguminosa,139.00,7.00,22.50,2.60,5.80,0.00,236.00,unreviewed,,legumes,Leguminosas,legume,Leguminosa,vegetable,Vegetal,processed,,g,Grama
+food_489,Canela em pó,,,247.00,4.00,80.60,1.20,53.10,2.20,10.00,unreviewed,,spices,,spice,,vegetable,Vegetal,dry,,g,Grama
+food_490,Cúrcuma (Açafrão-da-terra),,,312.00,9.70,67.10,3.30,22.70,3.20,27.00,unreviewed,,spices,,spice,,vegetable,Vegetal,dry,,g,Grama
+food_491,Pimenta-do-reino preta,,,251.00,10.40,64.00,3.30,25.30,0.60,20.00,unreviewed,,spices,,spice,,vegetable,Vegetal,dry,,g,Grama
+food_492,Orégano seco,,,265.00,9.00,68.90,4.30,42.50,4.10,25.00,unreviewed,,spices,,spice,,vegetable,Vegetal,dry,,g,Grama
+food_493,Gengibre em pó,,,335.00,9.00,71.60,4.20,14.10,3.40,27.00,unreviewed,,spices,,spice,,vegetable,Vegetal,dry,,g,Grama
+food_494,Extrato de baunilha,,,288.00,0.10,12.60,0.10,0.00,12.60,9.00,unreviewed,,spices,,flavoring,,vegetable,Vegetal,processed,,ml,Mililitro
+food_495,Cacau em pó (Alcalinizado/Holandês),,,300.00,22.00,49.00,11.00,30.00,1.00,750.00,unreviewed,,spices,,powder,,vegetable,Vegetal,processed,,g,Grama
+food_496,Tomate seco em óleo,Vegetais,Vegetal,213.00,5.00,23.50,14.10,6.60,17.10,266.00,unreviewed,,vegetables,Vegetais,vegetable,Vegetal,vegetable,Vegetal,processed,,g,Grama
+food_497,Chia hidratada (Pudim de Chia base),Gorduras,,60.00,2.00,5.00,4.00,4.50,0.00,20.00,unreviewed,,fats,Gorduras,seed,,mixed,,processed,,g,Grama
+food_498,Spirulina em pó,,Suplemento,290.00,57.50,23.90,7.70,3.60,3.10,1048.00,unreviewed,,supplements,,supplement,Suplemento,vegetable,Vegetal,dry,,g,Grama
+food_499,Sal rosa do Himalaia,,Condimento,0.00,0.00,0.00,0.00,0.00,0.00,38000.00,unreviewed,,spices,,condiment,Condimento,mineral,,dry,,g,Grama

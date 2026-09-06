@@ -575,26 +575,26 @@
           const isTraining = [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
           const isMeal = [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
 
-          const aiCalls = [];
-          if (isTraining) aiCalls.push(supabase.functions.invoke('ybytu-generate-training-plan'));
-          if (isMeal) aiCalls.push(supabase.functions.invoke('ybytu-generate-meal-plan'));
-
           // plan_generation_status agora é escrito pela PRÓPRIA edge function
           // (ybytu-generate-training-plan / ybytu-generate-meal-plan) no fim da
           // execução real, não mais inferido daqui de o fetch ter resolvido
           // antes de um timeout do client — Gemini pode levar 3+min e o client
           // desistir enquanto o gerador termina certinho no servidor (ver
-          // memória project_plan_generation_status_false_positive). `results`
-          // aqui só reflete se O CLIENT recebeu erro/timeout, usado abaixo só
-          // pra decidir se dispara a notificação AGORA (o cron de lembrete
-          // cobre o caso mesmo se isto não disparar).
-          let generationFailed = false;
-          if (aiCalls.length > 0) {
-            const results = await Promise.all(
-              aiCalls.map(call => call.catch(e => ({ error: e })))
-            );
-            generationFailed = results.some(r => r.error);
-          }
+          // memória project_plan_generation_status_false_positive). Erro de
+          // uma chamada não trava o redirect (fail-soft), só loga.
+          //
+          // SEQUENCIAL, não Promise.all (2026-08-31, achado investigando o
+          // rate limit de TPM do Groq): as duas functions competem pelo MESMO
+          // orçamento de tokens/min da organização. Nutrição primeiro (1
+          // chamada, rápida) porque o treino é quem tem múltiplas chamadas
+          // (1 por dia) e mais chance de colidir — deixar o treino disparar
+          // só depois da nutrição já ter liberado o teto elimina a maior
+          // fonte de disputa simultânea (a chamada de nutrição sozinha
+          // reservava >50% do teto de uma vez). Não elimina 100% (planos de
+          // treino de 5+ dias ainda podem colidir entre si), mas reduz
+          // bastante — ver docs/TESTE_GERADOR_TREINO_SPLIT_POR_DIA_20260831.md.
+          if (isMeal) await supabase.functions.invoke('ybytu-generate-meal-plan').catch((e) => console.error(e));
+          if (isTraining) await supabase.functions.invoke('ybytu-generate-training-plan').catch((e) => console.error(e));
 
           // 4b. Avisa personal/nutri que tem plano novo pra validar —
           // fail-soft igual ao resto: se falhar, o cron de lembrete (12h)
@@ -602,10 +602,17 @@
           // 4c. Gera o link compartilhável (/plano/<token>) na hora, em vez
           // de alguém ter que criar a linha em plan_share_tokens na mão pra
           // conseguir revisar/testar o plano depois — mesmo fail-soft.
-          if (!generationFailed) {
-            supabase.functions.invoke('ybytu-notify-plan-ready').catch((e) => console.error(e));
-            supabase.functions.invoke('ybytu-create-plan-share-token').catch((e) => console.error(e));
-          }
+          // Sempre dispara os dois: ambas as functions já checam
+          // plan_generation_status='ok' no servidor antes de fazer qualquer
+          // coisa, então um erro/timeout do LADO DO CLIENTE aqui (Gemini
+          // pode levar 3+min) não deve impedir o disparo -- geração pode ter
+          // terminado certinha no servidor mesmo com o client tendo dado erro
+          // (ver memória project_plan_generation_status_false_positive). Gate
+          // client-side aqui já causou 0 notificações pro staff em 2
+          // onboardings reais (2026-08-26 e 2026-08-27) apesar do plano ter
+          // sido gerado com sucesso.
+          supabase.functions.invoke('ybytu-notify-plan-ready').catch((e) => console.error(e));
+          supabase.functions.invoke('ybytu-create-plan-share-token').catch((e) => console.error(e));
 
           // 5. WhatsApp sempre — mesmo se o gerador falhou (fail-soft).
           redirectToWhatsApp();

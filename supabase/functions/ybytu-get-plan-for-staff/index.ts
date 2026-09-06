@@ -37,7 +37,7 @@ serve(async (req) => {
       )
     }
 
-    const payload = await buildPlanPayload(supabase, userId)
+    const payload = await buildPlanPayload(supabase, userId, 'staff')
 
     return new Response(JSON.stringify(payload), {
       status: 200,

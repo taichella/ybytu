@@ -73,37 +73,95 @@ const MEAL_SUBSCRIPTION_IDS = new Set([
   '7b5502f1-eeed-4640-8c4f-0ebc0502481e', // COMPLETE
 ])
 
-// ─── Gemini flash ─────────────────────────────────────────────────────────────
-async function callGemini(prompt: string, apiKey: string): Promise<any> {
-  // 'gemini-flash-latest' é um alias mantido pelo Google que sempre aponta pro
-  // flash recomendado atual — evita escolher um nome versionado (ex.: 2.5-flash)
-  // que a própria API de listagem ainda anuncia mas já responde 404 "no longer
-  // available to new users" em generateContent (visto em teste real com chave nova).
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`
+// ─── Groq (openai/gpt-oss-20b) ────────────────────────────────────────────────
+// Migrado de Gemini 2026-08-27 -- cota gratuita do Gemini (20 req/dia) não
+// sustenta nem um dia de uso normal, esgotou sozinha nos testes desta mesma
+// sessão. Groq free tier: 1.000 req/dia, 30 RPM, ~6-8K TPM (confirmado testando
+// o prompt real, sem alterar nada, contra os 3 modelos disponíveis na conta —
+// nenhum Llama no catálogo atual, só gpt-oss/qwen). openai/gpt-oss-20b
+// escolhido: JSON válido de primeira, respostas <1s, e devolve um campo
+// `reasoning` (cadeia de raciocínio em inglês, cru) que os outros formatos não
+// davam — guardado como log de auditoria (ver GroqResult.reasoning), não
+// mostrado ao profissional ainda.
+// GROQ_TIMEOUT_MS: mantido o mesmo guard de timeout que blindava contra o
+// limite duro de 150s do Edge Functions do Supabase (achado 2026-08-27) --
+// o Groq responde em <1s na prática, mas o guard continua sendo a rede de
+// segurança se a API ficar lenta um dia.
+const GROQ_TIMEOUT_MS = 20_000
+const GROQ_MODEL = 'openai/gpt-oss-20b'
+
+type GroqResult = { data: any; reasoning: string | null }
+
+async function callGroq(prompt: string, apiKey: string): Promise<GroqResult> {
+  const url = 'https://api.groq.com/openai/v1/chat/completions'
 
   for (let attempt = 1; attempt <= 3; attempt++) {
-    const res  = await fetch(url, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents:         [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json', temperature: 0.1 },
-      }),
-    })
-    const data = await res.json()
+    const controller = new AbortController()
+    const timeoutId  = setTimeout(() => controller.abort(), GROQ_TIMEOUT_MS)
 
-    if (data.error?.code === 503 || data.error?.code === 429) {
-      if (attempt === 3) throw new Error('Gemini overloaded: ' + data.error.message)
-      await new Promise(r => setTimeout(r, attempt * 3000))
+    let data: any
+    let retryAfterSeconds: number | null = null
+    try {
+      const res = await fetch(url, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        signal:  controller.signal,
+        body: JSON.stringify({
+          model:               GROQ_MODEL,
+          messages:            [{ role: 'user', content: prompt }],
+          temperature:         0.1,
+          response_format:     { type: 'json_object' },
+          // reasoning_effort 'low': achado ao vivo 2026-08-27 (no gerador de
+          // treino) — o default ('medium') gera uma cadeia de raciocínio
+          // longa o bastante pra estourar o budget de output ANTES do JSON,
+          // devolvendo json_validate_failed com failed_generation vazio.
+          // 'low' + max_completion_tokens generoso resolve.
+          // max_completion_tokens 500 (2026-08-31, era 1200): mesmo achado
+          // do gerador de treino — o Groq reserva prompt_tokens +
+          // max_completion_tokens contra o teto de TPM no envio, não o uso
+          // real. Completion medido ao vivo nunca passou de 295 tokens
+          // nesta function. 500 dá margem sem tocar no prompt.
+          reasoning_effort:    'low',
+          max_completion_tokens: 500,
+        }),
+      })
+      const retryAfterRaw = res.headers.get('retry-after')
+      retryAfterSeconds = retryAfterRaw ? Number(retryAfterRaw) : null
+      data = await res.json()
+    } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        if (attempt === 3) throw new Error(`Groq timeout after ${GROQ_TIMEOUT_MS}ms (attempt ${attempt})`)
+        continue // tenta de novo, sem esperar backoff — timeout já não é sobrecarga (503/429)
+      }
+      throw err
+    } finally {
+      clearTimeout(timeoutId)
+    }
+
+    if (data.error?.code === '503' || data.error?.code === '429' || res_status_is_rate_limited(data)) {
+      if (attempt === 3) throw new Error('Groq overloaded: ' + JSON.stringify(data.error))
+      // retry-after real (2026-08-31, era attempt*3000 fixo) -- mesmo achado
+      // do gerador de treino.
+      const waitMs = retryAfterSeconds && !Number.isNaN(retryAfterSeconds) ? Math.ceil(retryAfterSeconds * 1000) : attempt * 3000
+      await new Promise(r => setTimeout(r, waitMs))
       continue
     }
-    if (data.error) throw new Error('Gemini error: ' + JSON.stringify(data.error))
+    if (data.error) throw new Error('Groq error: ' + JSON.stringify(data.error))
 
-    return JSON.parse(
-      data.candidates[0].content.parts[0].text
-        .replace(/```json/gi, '').replace(/```/g, '').trim()
-    )
+    const message = data.choices?.[0]?.message
+    const content = message?.content ?? ''
+    return {
+      data: JSON.parse(content.replace(/```json/gi, '').replace(/```/g, '').trim()),
+      reasoning: message?.reasoning ?? null,
+    }
   }
+  throw new Error('Groq: unreachable')
+}
+
+// data.error?.code do Groq vem como string ('rate_limit_exceeded'), diferente
+// do Gemini (número). Checagem separada pra não confundir os dois formatos.
+function res_status_is_rate_limited(data: any): boolean {
+  return data?.error?.type === 'rate_limit_exceeded' || data?.error?.code === 'rate_limit_exceeded'
 }
 
 // ─── Dietary hierarchy helpers ────────────────────────────────────────────────
@@ -494,7 +552,7 @@ serve(async (req) => {
     }))
 
     // ── 5. IA: UMA chamada pedindo 2-3 opções intercambiáveis POR TIPO ───────
-    const geminiKey = Deno.env.get('GEMINI_API_KEY')
+    const groqKey = Deno.env.get('GROQ_API_KEY')
 
     const optionsSchema = requiredTypes.map(t => `"${t}": ["meal_id_1", "meal_id_2", "meal_id_3"]`).join(', ')
     const aiPrompt = `You are a clinical nutrition composer. Build a rotating weekly menu for ${mealsPerDay} meals/day targeting ${targetCalories} kcal total and approximately ${targetProteinG}g of protein (secondary goal — see rule 3).
@@ -512,16 +570,18 @@ Rules:
 
 Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
 
-    // Any Gemini failure (parse error, empty candidates, 503 exhausted, network)
+    // Any Groq failure (parse error, empty candidates, rate limit, network)
     // leaves aiOptions={} → re-validation fills every type with top-N from pool.
-    // User always receives a plan; Gemini is best-effort, not a hard dependency.
+    // User always receives a plan; Groq is best-effort, not a hard dependency.
     let aiOptions: Record<string, string[]> = {}
-    if (geminiKey) {
+    let aiReasoning: string | null = null
+    if (groqKey) {
       try {
-        const aiResult = await callGemini(aiPrompt, geminiKey)
-        aiOptions      = (aiResult?.options ?? {}) as Record<string, string[]>
-      } catch (err) {
-        console.error('[ybytu-generate-meal-plan] Gemini call failed, falling back to deterministic top-N:', err)
+        const aiResult = await callGroq(aiPrompt, groqKey)
+        aiOptions      = (aiResult.data?.options ?? {}) as Record<string, string[]>
+        aiReasoning    = aiResult.reasoning
+      } catch (err: any) {
+        console.error('[ybytu-generate-meal-plan] Groq call failed, falling back to deterministic top-N:', err)
       }
     }
 
@@ -614,6 +674,13 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
     const aiPlanSlug = `mp_ai_${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`
     const planName   = `Plano IA – ${goalLabelPtbr(primaryGoal)} – ${targetCalories} kcal`
 
+    // Observabilidade (2026-08-27) -- antes só ia na resposta HTTP, nunca
+    // persistia. Sem isso, degradação de qualidade (cota estourada, IA fora
+    // do ar) ficava invisível: só se descobria investigando manualmente
+    // (foi exatamente o que aconteceu com o Gemini nesta mesma sessão).
+    const aiFilledCount            = rotationRows.filter(r => sourceByType[r.type] === 'ai').length
+    const deterministicFilledCount = rotationRows.filter(r => sourceByType[r.type] === 'deterministic').length
+
     const { data: newPlan, error: planErr } = await supabase
       .from('meal_plans')
       .insert({
@@ -629,6 +696,9 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
         created_by_ai:      true,
         is_active:          false,
         created_at:         new Date().toISOString(),
+        ai_filled_slots:              aiFilledCount,
+        deterministic_fallback_slots: deterministicFilledCount,
+        ai_reasoning:                 aiReasoning,
       })
       .select('id')
       .single()
@@ -680,7 +750,7 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
 
     return new Response(JSON.stringify({
       success:   true,
-      ai_layer:  !!geminiKey,
+      ai_layer:  !!groqKey,
       layer:     'compose',
       meal_plan: {
         id:                 newPlan.id,
@@ -701,8 +771,8 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
         filled_by:  sourceByType[r.type],
       })),
       preference_conflicts: preferenceConflicts,
-      ai_filled_slots:              rotationRows.filter(r => sourceByType[r.type] === 'ai').length,
-      deterministic_fallback_slots: rotationRows.filter(r => sourceByType[r.type] === 'deterministic').length,
+      ai_filled_slots:              aiFilledCount,
+      deterministic_fallback_slots: deterministicFilledCount,
       catalog_fallback_slots: 0,
       profile_context: profileContext,
     }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })

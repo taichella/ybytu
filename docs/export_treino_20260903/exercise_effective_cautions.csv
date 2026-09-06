@@ -1,0 +1,2107 @@
+exercise_id,exercise_nome,condition_slug,condition_nome_ptbr,tipo,source
+ex_001,Agachamento livre,asthma,Asma ,caution,confirmed
+ex_001,Agachamento livre,diabetes,Diabetes,caution,confirmed
+ex_001,Agachamento livre,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_001,Agachamento livre,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_001,Agachamento livre,knee_pain,Joelho,caution,confirmed
+ex_001,Agachamento livre,lumbar_hernia,Lombar,caution,confirmed
+ex_001,Agachamento livre,obesity,Obesidade ,caution,confirmed
+ex_001,Agachamento livre,pregnancy,Gravidez,avoid,confirmed
+ex_001,Agachamento livre,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_002,Avanço (afundo) com peso corporal,asthma,Asma ,caution,confirmed
+ex_002,Avanço (afundo) com peso corporal,diabetes,Diabetes,caution,confirmed
+ex_002,Avanço (afundo) com peso corporal,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_002,Avanço (afundo) com peso corporal,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_002,Avanço (afundo) com peso corporal,knee_pain,Joelho,caution,confirmed
+ex_002,Avanço (afundo) com peso corporal,lumbar_hernia,Lombar,caution,confirmed
+ex_002,Avanço (afundo) com peso corporal,obesity,Obesidade ,caution,confirmed
+ex_002,Avanço (afundo) com peso corporal,pregnancy,Gravidez,avoid,confirmed
+ex_002,Avanço (afundo) com peso corporal,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_003,Agachamento sumô isométrico,asthma,Asma ,caution,confirmed
+ex_003,Agachamento sumô isométrico,diabetes,Diabetes,caution,confirmed
+ex_003,Agachamento sumô isométrico,groin_pain,Dor na Virilha,caution,ai_suggested
+ex_003,Agachamento sumô isométrico,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_003,Agachamento sumô isométrico,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_003,Agachamento sumô isométrico,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_003,Agachamento sumô isométrico,knee_pain,Joelho,caution,confirmed
+ex_003,Agachamento sumô isométrico,lumbar_hernia,Lombar,caution,confirmed
+ex_003,Agachamento sumô isométrico,obesity,Obesidade ,caution,confirmed
+ex_003,Agachamento sumô isométrico,pregnancy,Gravidez,avoid,confirmed
+ex_003,Agachamento sumô isométrico,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_004,Agachamento com halteres,asthma,Asma ,caution,confirmed
+ex_004,Agachamento com halteres,diabetes,Diabetes,caution,confirmed
+ex_004,Agachamento com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_004,Agachamento com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_004,Agachamento com halteres,knee_pain,Joelho,caution,confirmed
+ex_004,Agachamento com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_004,Agachamento com halteres,obesity,Obesidade ,caution,confirmed
+ex_004,Agachamento com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_004,Agachamento com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_005,lunge Passada com halteres,asthma,Asma ,caution,confirmed
+ex_005,lunge Passada com halteres,diabetes,Diabetes,caution,confirmed
+ex_005,lunge Passada com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_005,lunge Passada com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_005,lunge Passada com halteres,knee_pain,Joelho,caution,confirmed
+ex_005,lunge Passada com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_005,lunge Passada com halteres,obesity,Obesidade ,caution,confirmed
+ex_005,lunge Passada com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_005,lunge Passada com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_006,Agachamento frontal com kettlebell,asthma,Asma ,caution,confirmed
+ex_006,Agachamento frontal com kettlebell,diabetes,Diabetes,caution,confirmed
+ex_006,Agachamento frontal com kettlebell,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_006,Agachamento frontal com kettlebell,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_006,Agachamento frontal com kettlebell,knee_pain,Joelho,caution,confirmed
+ex_006,Agachamento frontal com kettlebell,lumbar_hernia,Lombar,caution,confirmed
+ex_006,Agachamento frontal com kettlebell,obesity,Obesidade ,caution,confirmed
+ex_006,Agachamento frontal com kettlebell,pregnancy,Gravidez,avoid,confirmed
+ex_006,Agachamento frontal com kettlebell,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_009,Agachamento no smith,asthma,Asma ,caution,confirmed
+ex_009,Agachamento no smith,diabetes,Diabetes,caution,confirmed
+ex_009,Agachamento no smith,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_009,Agachamento no smith,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_009,Agachamento no smith,knee_pain,Joelho,caution,confirmed
+ex_009,Agachamento no smith,lumbar_hernia,Lombar,caution,confirmed
+ex_009,Agachamento no smith,obesity,Obesidade ,caution,confirmed
+ex_009,Agachamento no smith,pregnancy,Gravidez,avoid,confirmed
+ex_009,Agachamento no smith,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_010,Agachamento frontal com barra,asthma,Asma ,caution,confirmed
+ex_010,Agachamento frontal com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_010,Agachamento frontal com barra,diabetes,Diabetes,caution,confirmed
+ex_010,Agachamento frontal com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_010,Agachamento frontal com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_010,Agachamento frontal com barra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_010,Agachamento frontal com barra,knee_pain,Joelho,caution,confirmed
+ex_010,Agachamento frontal com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_010,Agachamento frontal com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_010,Agachamento frontal com barra,obesity,Obesidade ,caution,confirmed
+ex_010,Agachamento frontal com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_010,Agachamento frontal com barra,pregnancy,Gravidez,avoid,confirmed
+ex_010,Agachamento frontal com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_011,Avanço com barra,asthma,Asma ,caution,confirmed
+ex_011,Avanço com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_011,Avanço com barra,diabetes,Diabetes,caution,confirmed
+ex_011,Avanço com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_011,Avanço com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_011,Avanço com barra,knee_pain,Joelho,caution,confirmed
+ex_011,Avanço com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_011,Avanço com barra,obesity,Obesidade ,caution,confirmed
+ex_011,Avanço com barra,pregnancy,Gravidez,avoid,confirmed
+ex_011,Avanço com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_012,Thruster (agachamento com push press),asthma,Asma ,caution,confirmed
+ex_012,Thruster (agachamento com push press),diabetes,Diabetes,caution,confirmed
+ex_012,Thruster (agachamento com push press),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_012,Thruster (agachamento com push press),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_012,Thruster (agachamento com push press),joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_012,Thruster (agachamento com push press),knee_pain,Joelho,caution,confirmed
+ex_012,Thruster (agachamento com push press),lumbar_hernia,Lombar,caution,confirmed
+ex_012,Thruster (agachamento com push press),lumbar_pain,Lombar,caution,ai_suggested
+ex_012,Thruster (agachamento com push press),neck_pain,Pescoço,caution,ai_suggested
+ex_012,Thruster (agachamento com push press),obesity,Obesidade ,caution,confirmed
+ex_012,Thruster (agachamento com push press),pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_012,Thruster (agachamento com push press),pregnancy,Gravidez,avoid,confirmed
+ex_012,Thruster (agachamento com push press),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_014,Front squat com barra olímpica,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_014,Front squat com barra olímpica,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_014,Front squat com barra olímpica,knee_pain,Joelho,caution,ai_suggested
+ex_014,Front squat com barra olímpica,lumbar_pain,Lombar,caution,ai_suggested
+ex_014,Front squat com barra olímpica,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_015,Box step-up com peso,ankle_pain,Tornozelo,caution,ai_suggested
+ex_016,Agachamento búlgaro com halteres,asthma,Asma ,caution,confirmed
+ex_016,Agachamento búlgaro com halteres,diabetes,Diabetes,caution,confirmed
+ex_016,Agachamento búlgaro com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_016,Agachamento búlgaro com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_016,Agachamento búlgaro com halteres,knee_pain,Joelho,caution,confirmed
+ex_016,Agachamento búlgaro com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_016,Agachamento búlgaro com halteres,obesity,Obesidade ,caution,confirmed
+ex_016,Agachamento búlgaro com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_016,Agachamento búlgaro com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_017,Agachamento búlgaro com barra,asthma,Asma ,caution,confirmed
+ex_017,Agachamento búlgaro com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_017,Agachamento búlgaro com barra,diabetes,Diabetes,caution,confirmed
+ex_017,Agachamento búlgaro com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_017,Agachamento búlgaro com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_017,Agachamento búlgaro com barra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_017,Agachamento búlgaro com barra,knee_pain,Joelho,caution,confirmed
+ex_017,Agachamento búlgaro com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_017,Agachamento búlgaro com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_017,Agachamento búlgaro com barra,obesity,Obesidade ,caution,confirmed
+ex_017,Agachamento búlgaro com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_017,Agachamento búlgaro com barra,pregnancy,Gravidez,avoid,confirmed
+ex_017,Agachamento búlgaro com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_018,Agachamento isométrico (cadeirinha),asthma,Asma ,caution,confirmed
+ex_018,Agachamento isométrico (cadeirinha),diabetes,Diabetes,caution,confirmed
+ex_018,Agachamento isométrico (cadeirinha),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_018,Agachamento isométrico (cadeirinha),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_018,Agachamento isométrico (cadeirinha),knee_pain,Joelho,caution,confirmed
+ex_018,Agachamento isométrico (cadeirinha),lumbar_hernia,Lombar,caution,confirmed
+ex_018,Agachamento isométrico (cadeirinha),obesity,Obesidade ,caution,confirmed
+ex_018,Agachamento isométrico (cadeirinha),pregnancy,Gravidez,avoid,confirmed
+ex_018,Agachamento isométrico (cadeirinha),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_019,Cossack squat,groin_pain,Dor na Virilha,caution,ai_suggested
+ex_019,Cossack squat,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_019,Cossack squat,knee_pain,Joelho,caution,ai_suggested
+ex_020,Agachamento búlgaro,asthma,Asma ,caution,confirmed
+ex_020,Agachamento búlgaro,diabetes,Diabetes,caution,confirmed
+ex_020,Agachamento búlgaro,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_020,Agachamento búlgaro,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_020,Agachamento búlgaro,knee_pain,Joelho,caution,confirmed
+ex_020,Agachamento búlgaro,lumbar_hernia,Lombar,caution,confirmed
+ex_020,Agachamento búlgaro,obesity,Obesidade ,caution,confirmed
+ex_020,Agachamento búlgaro,pregnancy,Gravidez,avoid,confirmed
+ex_020,Agachamento búlgaro,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_021,Agachamento com salto (Jump Squat),ankle_pain,Tornozelo,caution,ai_suggested
+ex_021,Agachamento com salto (Jump Squat),asthma,Asma ,caution,confirmed
+ex_021,Agachamento com salto (Jump Squat),diabetes,Diabetes,caution,confirmed
+ex_021,Agachamento com salto (Jump Squat),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_021,Agachamento com salto (Jump Squat),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_021,Agachamento com salto (Jump Squat),joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_021,Agachamento com salto (Jump Squat),knee_pain,Joelho,caution,confirmed
+ex_021,Agachamento com salto (Jump Squat),lumbar_hernia,Lombar,caution,confirmed
+ex_021,Agachamento com salto (Jump Squat),obesity,Obesidade ,caution,confirmed
+ex_021,Agachamento com salto (Jump Squat),pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_021,Agachamento com salto (Jump Squat),pregnancy,Gravidez,avoid,confirmed
+ex_021,Agachamento com salto (Jump Squat),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_022,Wall Sit (agachamento isométrico na parede),asthma,Asma ,caution,confirmed
+ex_022,Wall Sit (agachamento isométrico na parede),diabetes,Diabetes,caution,confirmed
+ex_022,Wall Sit (agachamento isométrico na parede),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_022,Wall Sit (agachamento isométrico na parede),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_022,Wall Sit (agachamento isométrico na parede),knee_pain,Joelho,caution,confirmed
+ex_022,Wall Sit (agachamento isométrico na parede),lumbar_hernia,Lombar,caution,confirmed
+ex_022,Wall Sit (agachamento isométrico na parede),obesity,Obesidade ,caution,confirmed
+ex_022,Wall Sit (agachamento isométrico na parede),pregnancy,Gravidez,avoid,confirmed
+ex_022,Wall Sit (agachamento isométrico na parede),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_023,Step-up no degrau,ankle_pain,Tornozelo,caution,ai_suggested
+ex_024,lunge Passada,asthma,Asma ,caution,confirmed
+ex_024,lunge Passada,diabetes,Diabetes,caution,confirmed
+ex_024,lunge Passada,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_024,lunge Passada,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_024,lunge Passada,knee_pain,Joelho,caution,confirmed
+ex_024,lunge Passada,lumbar_hernia,Lombar,caution,confirmed
+ex_024,lunge Passada,obesity,Obesidade ,caution,confirmed
+ex_024,lunge Passada,pregnancy,Gravidez,avoid,confirmed
+ex_024,lunge Passada,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_025,Agachamento com elástico (miniband),asthma,Asma ,caution,confirmed
+ex_025,Agachamento com elástico (miniband),diabetes,Diabetes,caution,confirmed
+ex_025,Agachamento com elástico (miniband),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_025,Agachamento com elástico (miniband),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_025,Agachamento com elástico (miniband),knee_pain,Joelho,caution,confirmed
+ex_025,Agachamento com elástico (miniband),lumbar_hernia,Lombar,caution,confirmed
+ex_025,Agachamento com elástico (miniband),obesity,Obesidade ,caution,confirmed
+ex_025,Agachamento com elástico (miniband),pregnancy,Gravidez,avoid,confirmed
+ex_025,Agachamento com elástico (miniband),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_026,Avanço com halteres,asthma,Asma ,caution,confirmed
+ex_026,Avanço com halteres,diabetes,Diabetes,caution,confirmed
+ex_026,Avanço com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_026,Avanço com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_026,Avanço com halteres,knee_pain,Joelho,caution,confirmed
+ex_026,Avanço com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_026,Avanço com halteres,obesity,Obesidade ,caution,confirmed
+ex_026,Avanço com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_026,Avanço com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_029,Hack Squat,knee_pain,Joelho,caution,ai_suggested
+ex_030,Agachamento frontal com halteres,asthma,Asma ,caution,confirmed
+ex_030,Agachamento frontal com halteres,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_030,Agachamento frontal com halteres,diabetes,Diabetes,caution,confirmed
+ex_030,Agachamento frontal com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_030,Agachamento frontal com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_030,Agachamento frontal com halteres,knee_pain,Joelho,caution,confirmed
+ex_030,Agachamento frontal com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_030,Agachamento frontal com halteres,obesity,Obesidade ,caution,confirmed
+ex_030,Agachamento frontal com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_030,Agachamento frontal com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_031,Avanço com step  no Smith Machine,asthma,Asma ,caution,confirmed
+ex_031,Avanço com step  no Smith Machine,diabetes,Diabetes,caution,confirmed
+ex_031,Avanço com step  no Smith Machine,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_031,Avanço com step  no Smith Machine,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_031,Avanço com step  no Smith Machine,knee_pain,Joelho,caution,confirmed
+ex_031,Avanço com step  no Smith Machine,lumbar_hernia,Lombar,caution,confirmed
+ex_031,Avanço com step  no Smith Machine,obesity,Obesidade ,caution,confirmed
+ex_031,Avanço com step  no Smith Machine,pregnancy,Gravidez,avoid,confirmed
+ex_031,Avanço com step  no Smith Machine,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_032,Passada lateral em posição de agachamento,asthma,Asma ,caution,confirmed
+ex_032,Passada lateral em posição de agachamento,diabetes,Diabetes,caution,confirmed
+ex_032,Passada lateral em posição de agachamento,groin_pain,Dor na Virilha,caution,ai_suggested
+ex_032,Passada lateral em posição de agachamento,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_032,Passada lateral em posição de agachamento,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_032,Passada lateral em posição de agachamento,knee_pain,Joelho,caution,confirmed
+ex_032,Passada lateral em posição de agachamento,lumbar_hernia,Lombar,caution,confirmed
+ex_032,Passada lateral em posição de agachamento,obesity,Obesidade ,caution,confirmed
+ex_032,Passada lateral em posição de agachamento,pregnancy,Gravidez,avoid,confirmed
+ex_032,Passada lateral em posição de agachamento,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_033,Back Squat,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_033,Back Squat,knee_pain,Joelho,caution,ai_suggested
+ex_033,Back Squat,lumbar_pain,Lombar,caution,ai_suggested
+ex_033,Back Squat,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_034,Box Squat (peso corporal),knee_pain,Joelho,caution,ai_suggested
+ex_035,Box Squat com halteres,knee_pain,Joelho,caution,ai_suggested
+ex_036,Box Squat com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_036,Box Squat com barra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_036,Box Squat com barra,knee_pain,Joelho,caution,ai_suggested
+ex_036,Box Squat com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_036,Box Squat com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_037,Box Squat com elástico,knee_pain,Joelho,caution,ai_suggested
+ex_038,Box Squat Unilateral (peso corporal),knee_pain,Joelho,caution,ai_suggested
+ex_039,Box Squat Unilateral com halteres,knee_pain,Joelho,caution,ai_suggested
+ex_040,Passada lateral em posição de agachamento com mini band,asthma,Asma ,caution,confirmed
+ex_040,Passada lateral em posição de agachamento com mini band,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_040,Passada lateral em posição de agachamento com mini band,diabetes,Diabetes,caution,confirmed
+ex_040,Passada lateral em posição de agachamento com mini band,groin_pain,Dor na Virilha,caution,ai_suggested
+ex_040,Passada lateral em posição de agachamento com mini band,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_040,Passada lateral em posição de agachamento com mini band,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_040,Passada lateral em posição de agachamento com mini band,knee_pain,Joelho,caution,confirmed
+ex_040,Passada lateral em posição de agachamento com mini band,lumbar_hernia,Lombar,caution,confirmed
+ex_040,Passada lateral em posição de agachamento com mini band,obesity,Obesidade ,caution,confirmed
+ex_040,Passada lateral em posição de agachamento com mini band,pregnancy,Gravidez,avoid,confirmed
+ex_040,Passada lateral em posição de agachamento com mini band,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_041,Thruster com barra,asthma,Asma ,caution,confirmed
+ex_041,Thruster com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_041,Thruster com barra,diabetes,Diabetes,caution,confirmed
+ex_041,Thruster com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_041,Thruster com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_041,Thruster com barra,knee_pain,Joelho,caution,confirmed
+ex_041,Thruster com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_041,Thruster com barra,neck_pain,Pescoço,caution,ai_suggested
+ex_041,Thruster com barra,obesity,Obesidade ,caution,confirmed
+ex_041,Thruster com barra,pregnancy,Gravidez,avoid,confirmed
+ex_041,Thruster com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_042,Agachamento unilateral,asthma,Asma ,caution,confirmed
+ex_042,Agachamento unilateral,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_042,Agachamento unilateral,diabetes,Diabetes,caution,confirmed
+ex_042,Agachamento unilateral,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_042,Agachamento unilateral,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_042,Agachamento unilateral,knee_pain,Joelho,caution,confirmed
+ex_042,Agachamento unilateral,lumbar_hernia,Lombar,caution,confirmed
+ex_042,Agachamento unilateral,obesity,Obesidade ,caution,confirmed
+ex_042,Agachamento unilateral,pregnancy,Gravidez,avoid,confirmed
+ex_042,Agachamento unilateral,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_043,Jump Lunge,ankle_pain,Tornozelo,caution,ai_suggested
+ex_043,Jump Lunge,asthma,Asma ,caution,confirmed
+ex_043,Jump Lunge,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_043,Jump Lunge,diabetes,Diabetes,caution,confirmed
+ex_043,Jump Lunge,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_043,Jump Lunge,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_043,Jump Lunge,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_043,Jump Lunge,knee_pain,Joelho,caution,confirmed
+ex_043,Jump Lunge,lumbar_hernia,Lombar,caution,confirmed
+ex_043,Jump Lunge,obesity,Obesidade ,caution,confirmed
+ex_043,Jump Lunge,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_043,Jump Lunge,pregnancy,Gravidez,avoid,confirmed
+ex_043,Jump Lunge,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_044,Ponte de glúteos,asthma,Asma ,caution,confirmed
+ex_044,Ponte de glúteos,diabetes,Diabetes,caution,confirmed
+ex_044,Ponte de glúteos,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_044,Ponte de glúteos,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_044,Ponte de glúteos,knee_pain,Joelho,caution,confirmed
+ex_044,Ponte de glúteos,lumbar_hernia,Lombar,caution,confirmed
+ex_044,Ponte de glúteos,obesity,Obesidade ,caution,confirmed
+ex_044,Ponte de glúteos,pregnancy,Gravidez,avoid,confirmed
+ex_044,Ponte de glúteos,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_045,Agachamento livre,asthma,Asma ,caution,confirmed
+ex_045,Agachamento livre,diabetes,Diabetes,caution,confirmed
+ex_045,Agachamento livre,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_045,Agachamento livre,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_045,Agachamento livre,knee_pain,Joelho,caution,confirmed
+ex_045,Agachamento livre,lumbar_hernia,Lombar,caution,confirmed
+ex_045,Agachamento livre,obesity,Obesidade ,caution,confirmed
+ex_045,Agachamento livre,pregnancy,Gravidez,avoid,confirmed
+ex_045,Agachamento livre,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_046,Avanço (afundo),asthma,Asma ,caution,confirmed
+ex_046,Avanço (afundo),diabetes,Diabetes,caution,confirmed
+ex_046,Avanço (afundo),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_046,Avanço (afundo),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_046,Avanço (afundo),knee_pain,Joelho,caution,confirmed
+ex_046,Avanço (afundo),lumbar_hernia,Lombar,caution,confirmed
+ex_046,Avanço (afundo),obesity,Obesidade ,caution,confirmed
+ex_046,Avanço (afundo),pregnancy,Gravidez,avoid,confirmed
+ex_046,Avanço (afundo),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_047,Abdução de quadril deitada com mini band,groin_pain,Dor na Virilha,caution,ai_suggested
+ex_048,Avanço com halteres,asthma,Asma ,caution,confirmed
+ex_048,Avanço com halteres,diabetes,Diabetes,caution,confirmed
+ex_048,Avanço com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_048,Avanço com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_048,Avanço com halteres,knee_pain,Joelho,caution,confirmed
+ex_048,Avanço com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_048,Avanço com halteres,obesity,Obesidade ,caution,confirmed
+ex_048,Avanço com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_048,Avanço com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_051,Agachamento com barra,asthma,Asma ,caution,confirmed
+ex_051,Agachamento com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_051,Agachamento com barra,diabetes,Diabetes,caution,confirmed
+ex_051,Agachamento com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_051,Agachamento com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_051,Agachamento com barra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_051,Agachamento com barra,knee_pain,Joelho,caution,confirmed
+ex_051,Agachamento com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_051,Agachamento com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_051,Agachamento com barra,obesity,Obesidade ,caution,confirmed
+ex_051,Agachamento com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_051,Agachamento com barra,pregnancy,Gravidez,avoid,confirmed
+ex_051,Agachamento com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_052,Levantamento terra,asthma,Asma ,caution,confirmed
+ex_052,Levantamento terra,diabetes,Diabetes,caution,confirmed
+ex_052,Levantamento terra,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_052,Levantamento terra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_052,Levantamento terra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_052,Levantamento terra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_052,Levantamento terra,knee_pain,Joelho,caution,confirmed
+ex_052,Levantamento terra,lumbar_hernia,Lombar,caution,confirmed
+ex_052,Levantamento terra,lumbar_pain,Lombar,caution,ai_suggested
+ex_052,Levantamento terra,obesity,Obesidade ,caution,confirmed
+ex_052,Levantamento terra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_052,Levantamento terra,pregnancy,Gravidez,avoid,confirmed
+ex_052,Levantamento terra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_053,Avanço unilateral Smith,asthma,Asma ,caution,confirmed
+ex_053,Avanço unilateral Smith,diabetes,Diabetes,caution,confirmed
+ex_053,Avanço unilateral Smith,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_053,Avanço unilateral Smith,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_053,Avanço unilateral Smith,knee_pain,Joelho,caution,confirmed
+ex_053,Avanço unilateral Smith,lumbar_hernia,Lombar,caution,confirmed
+ex_053,Avanço unilateral Smith,obesity,Obesidade ,caution,confirmed
+ex_053,Avanço unilateral Smith,pregnancy,Gravidez,avoid,confirmed
+ex_053,Avanço unilateral Smith,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_055,Deadlift com barra olímpica,asthma,Asma ,caution,confirmed
+ex_055,Deadlift com barra olímpica,diabetes,Diabetes,caution,confirmed
+ex_055,Deadlift com barra olímpica,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_055,Deadlift com barra olímpica,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_055,Deadlift com barra olímpica,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_055,Deadlift com barra olímpica,knee_pain,Joelho,caution,confirmed
+ex_055,Deadlift com barra olímpica,lumbar_hernia,Lombar,caution,confirmed
+ex_055,Deadlift com barra olímpica,lumbar_pain,Lombar,caution,ai_suggested
+ex_055,Deadlift com barra olímpica,obesity,Obesidade ,caution,confirmed
+ex_055,Deadlift com barra olímpica,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_055,Deadlift com barra olímpica,pregnancy,Gravidez,avoid,confirmed
+ex_055,Deadlift com barra olímpica,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_056,Step-up no box com peso,asthma,Asma ,caution,confirmed
+ex_056,Step-up no box com peso,diabetes,Diabetes,caution,confirmed
+ex_056,Step-up no box com peso,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_056,Step-up no box com peso,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_056,Step-up no box com peso,knee_pain,Joelho,caution,confirmed
+ex_056,Step-up no box com peso,lumbar_hernia,Lombar,caution,confirmed
+ex_056,Step-up no box com peso,obesity,Obesidade ,caution,confirmed
+ex_056,Step-up no box com peso,pregnancy,Gravidez,avoid,confirmed
+ex_056,Step-up no box com peso,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_057,Agachamento búlgaro com o tronco projetado à frente com halteres,asthma,Asma ,caution,confirmed
+ex_057,Agachamento búlgaro com o tronco projetado à frente com halteres,diabetes,Diabetes,caution,confirmed
+ex_057,Agachamento búlgaro com o tronco projetado à frente com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_057,Agachamento búlgaro com o tronco projetado à frente com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_057,Agachamento búlgaro com o tronco projetado à frente com halteres,knee_pain,Joelho,caution,confirmed
+ex_057,Agachamento búlgaro com o tronco projetado à frente com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_057,Agachamento búlgaro com o tronco projetado à frente com halteres,obesity,Obesidade ,caution,confirmed
+ex_057,Agachamento búlgaro com o tronco projetado à frente com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_057,Agachamento búlgaro com o tronco projetado à frente com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_058,Agachamento isométrico (cadeirinha),asthma,Asma ,caution,confirmed
+ex_058,Agachamento isométrico (cadeirinha),diabetes,Diabetes,caution,confirmed
+ex_058,Agachamento isométrico (cadeirinha),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_058,Agachamento isométrico (cadeirinha),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_058,Agachamento isométrico (cadeirinha),knee_pain,Joelho,caution,confirmed
+ex_058,Agachamento isométrico (cadeirinha),lumbar_hernia,Lombar,caution,confirmed
+ex_058,Agachamento isométrico (cadeirinha),obesity,Obesidade ,caution,confirmed
+ex_058,Agachamento isométrico (cadeirinha),pregnancy,Gravidez,avoid,confirmed
+ex_058,Agachamento isométrico (cadeirinha),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_059,Agachamento búlgaro com o tronco projetado à frente,asthma,Asma ,caution,confirmed
+ex_059,Agachamento búlgaro com o tronco projetado à frente,diabetes,Diabetes,caution,confirmed
+ex_059,Agachamento búlgaro com o tronco projetado à frente,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_059,Agachamento búlgaro com o tronco projetado à frente,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_059,Agachamento búlgaro com o tronco projetado à frente,knee_pain,Joelho,caution,confirmed
+ex_059,Agachamento búlgaro com o tronco projetado à frente,lumbar_hernia,Lombar,caution,confirmed
+ex_059,Agachamento búlgaro com o tronco projetado à frente,obesity,Obesidade ,caution,confirmed
+ex_059,Agachamento búlgaro com o tronco projetado à frente,pregnancy,Gravidez,avoid,confirmed
+ex_059,Agachamento búlgaro com o tronco projetado à frente,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_060,Avanço reverso,asthma,Asma ,caution,confirmed
+ex_060,Avanço reverso,diabetes,Diabetes,caution,confirmed
+ex_060,Avanço reverso,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_060,Avanço reverso,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_060,Avanço reverso,knee_pain,Joelho,caution,confirmed
+ex_060,Avanço reverso,lumbar_hernia,Lombar,caution,confirmed
+ex_060,Avanço reverso,obesity,Obesidade ,caution,confirmed
+ex_060,Avanço reverso,pregnancy,Gravidez,avoid,confirmed
+ex_060,Avanço reverso,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_062,Abdução em pé com miniband,asthma,Asma ,caution,confirmed
+ex_062,Abdução em pé com miniband,diabetes,Diabetes,caution,confirmed
+ex_062,Abdução em pé com miniband,groin_pain,Dor na Virilha,caution,ai_suggested
+ex_062,Abdução em pé com miniband,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_062,Abdução em pé com miniband,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_062,Abdução em pé com miniband,knee_pain,Joelho,caution,confirmed
+ex_062,Abdução em pé com miniband,lumbar_hernia,Lombar,caution,confirmed
+ex_062,Abdução em pé com miniband,obesity,Obesidade ,caution,confirmed
+ex_062,Abdução em pé com miniband,pregnancy,Gravidez,avoid,confirmed
+ex_062,Abdução em pé com miniband,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_063,Agachamento com miniband nos joelhos,knee_pain,Joelho,caution,ai_suggested
+ex_064,Extensão de quadril no cross,asthma,Asma ,caution,confirmed
+ex_064,Extensão de quadril no cross,diabetes,Diabetes,caution,confirmed
+ex_064,Extensão de quadril no cross,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_064,Extensão de quadril no cross,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_064,Extensão de quadril no cross,knee_pain,Joelho,caution,confirmed
+ex_064,Extensão de quadril no cross,lumbar_hernia,Lombar,caution,confirmed
+ex_064,Extensão de quadril no cross,obesity,Obesidade ,caution,confirmed
+ex_064,Extensão de quadril no cross,pregnancy,Gravidez,avoid,confirmed
+ex_064,Extensão de quadril no cross,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_065,Romanian Deadlift com halteres,asthma,Asma ,caution,confirmed
+ex_065,Romanian Deadlift com halteres,diabetes,Diabetes,caution,confirmed
+ex_065,Romanian Deadlift com halteres,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_065,Romanian Deadlift com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_065,Romanian Deadlift com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_065,Romanian Deadlift com halteres,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_065,Romanian Deadlift com halteres,knee_pain,Joelho,caution,confirmed
+ex_065,Romanian Deadlift com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_065,Romanian Deadlift com halteres,lumbar_pain,Lombar,caution,ai_suggested
+ex_065,Romanian Deadlift com halteres,obesity,Obesidade ,caution,confirmed
+ex_065,Romanian Deadlift com halteres,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_065,Romanian Deadlift com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_065,Romanian Deadlift com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_066,Stiff com halteres,asthma,Asma ,caution,confirmed
+ex_066,Stiff com halteres,diabetes,Diabetes,caution,confirmed
+ex_066,Stiff com halteres,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_066,Stiff com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_066,Stiff com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_066,Stiff com halteres,knee_pain,Joelho,caution,confirmed
+ex_066,Stiff com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_066,Stiff com halteres,lumbar_pain,Lombar,caution,ai_suggested
+ex_066,Stiff com halteres,obesity,Obesidade ,caution,confirmed
+ex_066,Stiff com halteres,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_066,Stiff com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_066,Stiff com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_067,Deadlift unilateral com halter,asthma,Asma ,caution,confirmed
+ex_067,Deadlift unilateral com halter,diabetes,Diabetes,caution,confirmed
+ex_067,Deadlift unilateral com halter,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_067,Deadlift unilateral com halter,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_067,Deadlift unilateral com halter,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_067,Deadlift unilateral com halter,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_067,Deadlift unilateral com halter,knee_pain,Joelho,caution,confirmed
+ex_067,Deadlift unilateral com halter,lumbar_hernia,Lombar,caution,confirmed
+ex_067,Deadlift unilateral com halter,lumbar_pain,Lombar,caution,ai_suggested
+ex_067,Deadlift unilateral com halter,obesity,Obesidade ,caution,confirmed
+ex_067,Deadlift unilateral com halter,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_067,Deadlift unilateral com halter,pregnancy,Gravidez,avoid,confirmed
+ex_067,Deadlift unilateral com halter,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_068,Sumô Deadlift com halteres,asthma,Asma ,caution,confirmed
+ex_068,Sumô Deadlift com halteres,diabetes,Diabetes,caution,confirmed
+ex_068,Sumô Deadlift com halteres,groin_pain,Dor na Virilha,caution,ai_suggested
+ex_068,Sumô Deadlift com halteres,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_068,Sumô Deadlift com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_068,Sumô Deadlift com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_068,Sumô Deadlift com halteres,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_068,Sumô Deadlift com halteres,knee_pain,Joelho,caution,confirmed
+ex_068,Sumô Deadlift com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_068,Sumô Deadlift com halteres,lumbar_pain,Lombar,caution,ai_suggested
+ex_068,Sumô Deadlift com halteres,obesity,Obesidade ,caution,confirmed
+ex_068,Sumô Deadlift com halteres,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_068,Sumô Deadlift com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_068,Sumô Deadlift com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_069,Deadlift tradicional com barra,asthma,Asma ,caution,confirmed
+ex_069,Deadlift tradicional com barra,diabetes,Diabetes,caution,confirmed
+ex_069,Deadlift tradicional com barra,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_069,Deadlift tradicional com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_069,Deadlift tradicional com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_069,Deadlift tradicional com barra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_069,Deadlift tradicional com barra,knee_pain,Joelho,caution,confirmed
+ex_069,Deadlift tradicional com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_069,Deadlift tradicional com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_069,Deadlift tradicional com barra,obesity,Obesidade ,caution,confirmed
+ex_069,Deadlift tradicional com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_069,Deadlift tradicional com barra,pregnancy,Gravidez,avoid,confirmed
+ex_069,Deadlift tradicional com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_070,Romanian Deadlift com barra,asthma,Asma ,caution,confirmed
+ex_070,Romanian Deadlift com barra,diabetes,Diabetes,caution,confirmed
+ex_070,Romanian Deadlift com barra,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_070,Romanian Deadlift com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_070,Romanian Deadlift com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_070,Romanian Deadlift com barra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_070,Romanian Deadlift com barra,knee_pain,Joelho,caution,confirmed
+ex_070,Romanian Deadlift com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_070,Romanian Deadlift com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_070,Romanian Deadlift com barra,obesity,Obesidade ,caution,confirmed
+ex_070,Romanian Deadlift com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_070,Romanian Deadlift com barra,pregnancy,Gravidez,avoid,confirmed
+ex_070,Romanian Deadlift com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_071,Stiff com barra,asthma,Asma ,caution,confirmed
+ex_071,Stiff com barra,diabetes,Diabetes,caution,confirmed
+ex_071,Stiff com barra,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_071,Stiff com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_071,Stiff com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_071,Stiff com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_071,Stiff com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_071,Stiff com barra,obesity,Obesidade ,caution,confirmed
+ex_071,Stiff com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_071,Stiff com barra,pregnancy,Gravidez,avoid,confirmed
+ex_071,Stiff com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_072,Sumô Deadlift com barra,asthma,Asma ,caution,confirmed
+ex_072,Sumô Deadlift com barra,diabetes,Diabetes,caution,confirmed
+ex_072,Sumô Deadlift com barra,groin_pain,Dor na Virilha,caution,ai_suggested
+ex_072,Sumô Deadlift com barra,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_072,Sumô Deadlift com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_072,Sumô Deadlift com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_072,Sumô Deadlift com barra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_072,Sumô Deadlift com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_072,Sumô Deadlift com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_072,Sumô Deadlift com barra,obesity,Obesidade ,caution,confirmed
+ex_072,Sumô Deadlift com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_072,Sumô Deadlift com barra,pregnancy,Gravidez,avoid,confirmed
+ex_072,Sumô Deadlift com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_073,Ponte de glúteos unilateral,asthma,Asma ,caution,confirmed
+ex_073,Ponte de glúteos unilateral,diabetes,Diabetes,caution,confirmed
+ex_073,Ponte de glúteos unilateral,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_073,Ponte de glúteos unilateral,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_073,Ponte de glúteos unilateral,lumbar_hernia,Lombar,caution,confirmed
+ex_073,Ponte de glúteos unilateral,obesity,Obesidade ,caution,confirmed
+ex_073,Ponte de glúteos unilateral,pregnancy,Gravidez,avoid,confirmed
+ex_073,Ponte de glúteos unilateral,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_074,Good morning com peso corporal,asthma,Asma ,caution,confirmed
+ex_074,Good morning com peso corporal,diabetes,Diabetes,caution,confirmed
+ex_074,Good morning com peso corporal,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_074,Good morning com peso corporal,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_074,Good morning com peso corporal,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_074,Good morning com peso corporal,lumbar_hernia,Lombar,caution,confirmed
+ex_074,Good morning com peso corporal,lumbar_pain,Lombar,caution,ai_suggested
+ex_074,Good morning com peso corporal,obesity,Obesidade ,caution,confirmed
+ex_074,Good morning com peso corporal,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_074,Good morning com peso corporal,pregnancy,Gravidez,avoid,confirmed
+ex_074,Good morning com peso corporal,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_075,Stiff com halteres,asthma,Asma ,caution,confirmed
+ex_075,Stiff com halteres,diabetes,Diabetes,caution,confirmed
+ex_075,Stiff com halteres,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_075,Stiff com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_075,Stiff com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_075,Stiff com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_075,Stiff com halteres,lumbar_pain,Lombar,caution,ai_suggested
+ex_075,Stiff com halteres,obesity,Obesidade ,caution,confirmed
+ex_075,Stiff com halteres,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_075,Stiff com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_075,Stiff com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_076,Leg curl com bola suíça,asthma,Asma ,caution,confirmed
+ex_076,Leg curl com bola suíça,diabetes,Diabetes,caution,confirmed
+ex_076,Leg curl com bola suíça,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_076,Leg curl com bola suíça,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_076,Leg curl com bola suíça,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_076,Leg curl com bola suíça,lumbar_hernia,Lombar,caution,confirmed
+ex_076,Leg curl com bola suíça,obesity,Obesidade ,caution,confirmed
+ex_076,Leg curl com bola suíça,pregnancy,Gravidez,avoid,confirmed
+ex_076,Leg curl com bola suíça,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_077,Good morning com elastico,asthma,Asma ,caution,confirmed
+ex_077,Good morning com elastico,diabetes,Diabetes,caution,confirmed
+ex_077,Good morning com elastico,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_077,Good morning com elastico,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_077,Good morning com elastico,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_077,Good morning com elastico,lumbar_hernia,Lombar,caution,confirmed
+ex_077,Good morning com elastico,lumbar_pain,Lombar,caution,ai_suggested
+ex_077,Good morning com elastico,obesity,Obesidade ,caution,confirmed
+ex_077,Good morning com elastico,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_077,Good morning com elastico,pregnancy,Gravidez,avoid,confirmed
+ex_077,Good morning com elastico,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_079,Stiff com barra,asthma,Asma ,caution,confirmed
+ex_079,Stiff com barra,diabetes,Diabetes,caution,confirmed
+ex_079,Stiff com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_079,Stiff com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_079,Stiff com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_079,Stiff com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_079,Stiff com barra,obesity,Obesidade ,caution,confirmed
+ex_079,Stiff com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_079,Stiff com barra,pregnancy,Gravidez,avoid,confirmed
+ex_079,Stiff com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_080,Levantamento terra romeno,asthma,Asma ,caution,confirmed
+ex_080,Levantamento terra romeno,diabetes,Diabetes,caution,confirmed
+ex_080,Levantamento terra romeno,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_080,Levantamento terra romeno,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_080,Levantamento terra romeno,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_080,Levantamento terra romeno,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_080,Levantamento terra romeno,lumbar_hernia,Lombar,caution,confirmed
+ex_080,Levantamento terra romeno,lumbar_pain,Lombar,caution,ai_suggested
+ex_080,Levantamento terra romeno,obesity,Obesidade ,caution,confirmed
+ex_080,Levantamento terra romeno,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_080,Levantamento terra romeno,pregnancy,Gravidez,avoid,confirmed
+ex_080,Levantamento terra romeno,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_081,Cadeira flexora,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_083,Deadlift com barra olímpica,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_083,Deadlift com barra olímpica,lumbar_pain,Lombar,caution,ai_suggested
+ex_083,Deadlift com barra olímpica,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_084,Avanço reverso (peso corporal),knee_pain,Joelho,caution,ai_suggested
+ex_085,Avanço reverso com halteres,knee_pain,Joelho,caution,ai_suggested
+ex_086,Deadlift unilateral com halteres,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_086,Deadlift unilateral com halteres,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_086,Deadlift unilateral com halteres,lumbar_pain,Lombar,caution,ai_suggested
+ex_086,Deadlift unilateral com halteres,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_088,Cadeira flexora unilateral,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_089,Good morning com barra,asthma,Asma ,caution,confirmed
+ex_089,Good morning com barra,diabetes,Diabetes,caution,confirmed
+ex_089,Good morning com barra,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_089,Good morning com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_089,Good morning com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_089,Good morning com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_089,Good morning com barra,lumbar_pain,Lombar,caution,ai_suggested
+ex_089,Good morning com barra,obesity,Obesidade ,caution,confirmed
+ex_089,Good morning com barra,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_089,Good morning com barra,pregnancy,Gravidez,avoid,confirmed
+ex_089,Good morning com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_090,Peso morto romeno com halteres,asthma,Asma ,caution,confirmed
+ex_090,Peso morto romeno com halteres,diabetes,Diabetes,caution,confirmed
+ex_090,Peso morto romeno com halteres,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_090,Peso morto romeno com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_090,Peso morto romeno com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_090,Peso morto romeno com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_090,Peso morto romeno com halteres,lumbar_pain,Lombar,caution,ai_suggested
+ex_090,Peso morto romeno com halteres,obesity,Obesidade ,caution,confirmed
+ex_090,Peso morto romeno com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_090,Peso morto romeno com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_091,Stiff unilateral com peso corporal,asthma,Asma ,caution,confirmed
+ex_091,Stiff unilateral com peso corporal,diabetes,Diabetes,caution,confirmed
+ex_091,Stiff unilateral com peso corporal,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_091,Stiff unilateral com peso corporal,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_091,Stiff unilateral com peso corporal,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_091,Stiff unilateral com peso corporal,lumbar_hernia,Lombar,caution,confirmed
+ex_091,Stiff unilateral com peso corporal,lumbar_pain,Lombar,caution,ai_suggested
+ex_091,Stiff unilateral com peso corporal,obesity,Obesidade ,caution,confirmed
+ex_091,Stiff unilateral com peso corporal,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_091,Stiff unilateral com peso corporal,pregnancy,Gravidez,avoid,confirmed
+ex_091,Stiff unilateral com peso corporal,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_092,Stiff unilateral com halteres,asthma,Asma ,caution,confirmed
+ex_092,Stiff unilateral com halteres,diabetes,Diabetes,caution,confirmed
+ex_092,Stiff unilateral com halteres,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_092,Stiff unilateral com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_092,Stiff unilateral com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_092,Stiff unilateral com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_092,Stiff unilateral com halteres,lumbar_pain,Lombar,caution,ai_suggested
+ex_092,Stiff unilateral com halteres,obesity,Obesidade ,caution,confirmed
+ex_092,Stiff unilateral com halteres,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_092,Stiff unilateral com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_092,Stiff unilateral com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_093,Elevação de panturrilha no chão,ankle_pain,Tornozelo,caution,ai_suggested
+ex_093,Elevação de panturrilha no chão,asthma,Asma ,caution,confirmed
+ex_093,Elevação de panturrilha no chão,diabetes,Diabetes,caution,confirmed
+ex_093,Elevação de panturrilha no chão,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_093,Elevação de panturrilha no chão,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_093,Elevação de panturrilha no chão,obesity,Obesidade ,caution,confirmed
+ex_094,Elevação unilateral de panturrilha,ankle_pain,Tornozelo,caution,ai_suggested
+ex_094,Elevação unilateral de panturrilha,asthma,Asma ,caution,confirmed
+ex_094,Elevação unilateral de panturrilha,diabetes,Diabetes,caution,confirmed
+ex_094,Elevação unilateral de panturrilha,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_094,Elevação unilateral de panturrilha,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_094,Elevação unilateral de panturrilha,obesity,Obesidade ,caution,confirmed
+ex_095,Elevação de panturrilha com halteres,ankle_pain,Tornozelo,caution,ai_suggested
+ex_095,Elevação de panturrilha com halteres,asthma,Asma ,caution,confirmed
+ex_095,Elevação de panturrilha com halteres,diabetes,Diabetes,caution,confirmed
+ex_095,Elevação de panturrilha com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_095,Elevação de panturrilha com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_095,Elevação de panturrilha com halteres,obesity,Obesidade ,caution,confirmed
+ex_096,Elevação de panturrilha em pé na máquina,ankle_pain,Tornozelo,caution,ai_suggested
+ex_096,Elevação de panturrilha em pé na máquina,asthma,Asma ,caution,confirmed
+ex_096,Elevação de panturrilha em pé na máquina,diabetes,Diabetes,caution,confirmed
+ex_096,Elevação de panturrilha em pé na máquina,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_096,Elevação de panturrilha em pé na máquina,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_096,Elevação de panturrilha em pé na máquina,obesity,Obesidade ,caution,confirmed
+ex_097,Panturrilha sentado na máquina,ankle_pain,Tornozelo,caution,ai_suggested
+ex_097,Panturrilha sentado na máquina,asthma,Asma ,caution,confirmed
+ex_097,Panturrilha sentado na máquina,diabetes,Diabetes,caution,confirmed
+ex_097,Panturrilha sentado na máquina,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_097,Panturrilha sentado na máquina,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_097,Panturrilha sentado na máquina,obesity,Obesidade ,caution,confirmed
+ex_098,Panturrilha no leg press 45,ankle_pain,Tornozelo,caution,ai_suggested
+ex_098,Panturrilha no leg press 45,asthma,Asma ,caution,confirmed
+ex_098,Panturrilha no leg press 45,diabetes,Diabetes,caution,confirmed
+ex_098,Panturrilha no leg press 45,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_098,Panturrilha no leg press 45,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_098,Panturrilha no leg press 45,obesity,Obesidade ,caution,confirmed
+ex_098,Panturrilha no leg press 45,shoulder_pain,Ombro,caution,confirmed
+ex_099,Corrida no lugar em ponta dos pés,ankle_pain,Tornozelo,caution,ai_suggested
+ex_100,Panturrilha no step com pausa isométrica,ankle_pain,Tornozelo,caution,ai_suggested
+ex_100,Panturrilha no step com pausa isométrica,asthma,Asma ,caution,confirmed
+ex_100,Panturrilha no step com pausa isométrica,diabetes,Diabetes,caution,confirmed
+ex_100,Panturrilha no step com pausa isométrica,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_100,Panturrilha no step com pausa isométrica,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_100,Panturrilha no step com pausa isométrica,obesity,Obesidade ,caution,confirmed
+ex_101,Panturrilha no Leg Press,ankle_pain,Tornozelo,caution,ai_suggested
+ex_101,Panturrilha no Leg Press,asthma,Asma ,caution,confirmed
+ex_101,Panturrilha no Leg Press,diabetes,Diabetes,caution,confirmed
+ex_101,Panturrilha no Leg Press,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_101,Panturrilha no Leg Press,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_101,Panturrilha no Leg Press,obesity,Obesidade ,caution,confirmed
+ex_101,Panturrilha no Leg Press,shoulder_pain,Ombro,caution,confirmed
+ex_102,Elevação de panturrilha no Smith,ankle_pain,Tornozelo,caution,ai_suggested
+ex_102,Elevação de panturrilha no Smith,asthma,Asma ,caution,confirmed
+ex_102,Elevação de panturrilha no Smith,diabetes,Diabetes,caution,confirmed
+ex_102,Elevação de panturrilha no Smith,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_102,Elevação de panturrilha no Smith,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_102,Elevação de panturrilha no Smith,obesity,Obesidade ,caution,confirmed
+ex_103,Pular corda,ankle_pain,Tornozelo,caution,ai_suggested
+ex_103,Pular corda,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_103,Pular corda,knee_pain,Joelho,caution,ai_suggested
+ex_103,Pular corda,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_104,Corrida em inclinação (esteira inclinada),ankle_pain,Tornozelo,caution,ai_suggested
+ex_105,Abdominal tradicional,asthma,Asma ,caution,confirmed
+ex_105,Abdominal tradicional,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_105,Abdominal tradicional,diabetes,Diabetes,caution,confirmed
+ex_105,Abdominal tradicional,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_105,Abdominal tradicional,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_105,Abdominal tradicional,obesity,Obesidade ,caution,confirmed
+ex_105,Abdominal tradicional,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_105,Abdominal tradicional,pregnancy,Gravidez,avoid,confirmed
+ex_105,Abdominal tradicional,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_106,Abdominal bicicleta,asthma,Asma ,caution,confirmed
+ex_106,Abdominal bicicleta,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_106,Abdominal bicicleta,diabetes,Diabetes,caution,confirmed
+ex_106,Abdominal bicicleta,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_106,Abdominal bicicleta,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_106,Abdominal bicicleta,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_106,Abdominal bicicleta,obesity,Obesidade ,caution,confirmed
+ex_106,Abdominal bicicleta,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_106,Abdominal bicicleta,pregnancy,Gravidez,avoid,confirmed
+ex_106,Abdominal bicicleta,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_107,Prancha frontal,asthma,Asma ,caution,confirmed
+ex_107,Prancha frontal,diabetes,Diabetes,caution,confirmed
+ex_107,Prancha frontal,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_107,Prancha frontal,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_107,Prancha frontal,obesity,Obesidade ,caution,confirmed
+ex_107,Prancha frontal,pregnancy,Gravidez,avoid,confirmed
+ex_107,Prancha frontal,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_107,Prancha frontal,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_108,Prancha lateral,asthma,Asma ,caution,confirmed
+ex_108,Prancha lateral,diabetes,Diabetes,caution,confirmed
+ex_108,Prancha lateral,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_108,Prancha lateral,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_108,Prancha lateral,obesity,Obesidade ,caution,confirmed
+ex_108,Prancha lateral,pregnancy,Gravidez,avoid,confirmed
+ex_108,Prancha lateral,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_108,Prancha lateral,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_109,Elevação de pernas deitado,asthma,Asma ,caution,confirmed
+ex_109,Elevação de pernas deitado,diabetes,Diabetes,caution,confirmed
+ex_109,Elevação de pernas deitado,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_109,Elevação de pernas deitado,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_109,Elevação de pernas deitado,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_109,Elevação de pernas deitado,lumbar_hernia,Lombar,caution,confirmed
+ex_109,Elevação de pernas deitado,obesity,Obesidade ,caution,confirmed
+ex_109,Elevação de pernas deitado,pregnancy,Gravidez,avoid,confirmed
+ex_109,Elevação de pernas deitado,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_110,Prancha com miniband,asthma,Asma ,caution,confirmed
+ex_110,Prancha com miniband,diabetes,Diabetes,caution,confirmed
+ex_110,Prancha com miniband,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_110,Prancha com miniband,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_110,Prancha com miniband,obesity,Obesidade ,caution,confirmed
+ex_110,Prancha com miniband,pregnancy,Gravidez,avoid,confirmed
+ex_110,Prancha com miniband,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_110,Prancha com miniband,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_111,Abdominal com peso (halter ou kettlebell),asthma,Asma ,caution,confirmed
+ex_111,Abdominal com peso (halter ou kettlebell),cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_111,Abdominal com peso (halter ou kettlebell),diabetes,Diabetes,caution,confirmed
+ex_111,Abdominal com peso (halter ou kettlebell),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_111,Abdominal com peso (halter ou kettlebell),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_111,Abdominal com peso (halter ou kettlebell),obesity,Obesidade ,caution,confirmed
+ex_111,Abdominal com peso (halter ou kettlebell),pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_111,Abdominal com peso (halter ou kettlebell),pregnancy,Gravidez,avoid,confirmed
+ex_111,Abdominal com peso (halter ou kettlebell),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_113,Abdominal na máquina,asthma,Asma ,caution,confirmed
+ex_113,Abdominal na máquina,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_113,Abdominal na máquina,diabetes,Diabetes,caution,confirmed
+ex_113,Abdominal na máquina,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_113,Abdominal na máquina,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_113,Abdominal na máquina,obesity,Obesidade ,caution,confirmed
+ex_113,Abdominal na máquina,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_113,Abdominal na máquina,pregnancy,Gravidez,avoid,confirmed
+ex_113,Abdominal na máquina,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_114,V-up,asthma,Asma ,caution,confirmed
+ex_114,V-up,diabetes,Diabetes,caution,confirmed
+ex_114,V-up,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_114,V-up,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_114,V-up,lumbar_hernia,Lombar,caution,confirmed
+ex_114,V-up,obesity,Obesidade ,caution,confirmed
+ex_114,V-up,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_114,V-up,pregnancy,Gravidez,avoid,confirmed
+ex_114,V-up,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_115,Sit-up com bola medicinal,asthma,Asma ,caution,confirmed
+ex_115,Sit-up com bola medicinal,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_115,Sit-up com bola medicinal,diabetes,Diabetes,caution,confirmed
+ex_115,Sit-up com bola medicinal,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_115,Sit-up com bola medicinal,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_115,Sit-up com bola medicinal,obesity,Obesidade ,caution,confirmed
+ex_115,Sit-up com bola medicinal,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_115,Sit-up com bola medicinal,pregnancy,Gravidez,avoid,confirmed
+ex_115,Sit-up com bola medicinal,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_116,V-up unilateral,asthma,Asma ,caution,confirmed
+ex_116,V-up unilateral,diabetes,Diabetes,caution,confirmed
+ex_116,V-up unilateral,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_116,V-up unilateral,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_116,V-up unilateral,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_116,V-up unilateral,lumbar_hernia,Lombar,caution,confirmed
+ex_116,V-up unilateral,obesity,Obesidade ,caution,confirmed
+ex_116,V-up unilateral,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_116,V-up unilateral,pregnancy,Gravidez,avoid,confirmed
+ex_116,V-up unilateral,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_117,Mountain climber crossbody,asthma,Asma ,caution,confirmed
+ex_117,Mountain climber crossbody,diabetes,Diabetes,caution,confirmed
+ex_117,Mountain climber crossbody,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_117,Mountain climber crossbody,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_117,Mountain climber crossbody,obesity,Obesidade ,caution,confirmed
+ex_117,Mountain climber crossbody,pregnancy,Gravidez,avoid,confirmed
+ex_117,Mountain climber crossbody,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_118,Prancha com toque no ombro,asthma,Asma ,caution,confirmed
+ex_118,Prancha com toque no ombro,diabetes,Diabetes,caution,confirmed
+ex_118,Prancha com toque no ombro,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_118,Prancha com toque no ombro,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_118,Prancha com toque no ombro,obesity,Obesidade ,caution,confirmed
+ex_118,Prancha com toque no ombro,pregnancy,Gravidez,avoid,confirmed
+ex_118,Prancha com toque no ombro,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_118,Prancha com toque no ombro,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_119,Abdominal remador,asthma,Asma ,caution,confirmed
+ex_119,Abdominal remador,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_119,Abdominal remador,diabetes,Diabetes,caution,confirmed
+ex_119,Abdominal remador,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_119,Abdominal remador,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_119,Abdominal remador,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_119,Abdominal remador,obesity,Obesidade ,caution,confirmed
+ex_119,Abdominal remador,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_119,Abdominal remador,pregnancy,Gravidez,avoid,confirmed
+ex_119,Abdominal remador,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_120,Prancha com elevação de perna,asthma,Asma ,caution,confirmed
+ex_120,Prancha com elevação de perna,diabetes,Diabetes,caution,confirmed
+ex_120,Prancha com elevação de perna,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_120,Prancha com elevação de perna,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_120,Prancha com elevação de perna,obesity,Obesidade ,caution,confirmed
+ex_120,Prancha com elevação de perna,pregnancy,Gravidez,avoid,confirmed
+ex_120,Prancha com elevação de perna,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_120,Prancha com elevação de perna,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_121,Hollow hold (posição de barco),asthma,Asma ,caution,confirmed
+ex_121,Hollow hold (posição de barco),diabetes,Diabetes,caution,confirmed
+ex_121,Hollow hold (posição de barco),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_121,Hollow hold (posição de barco),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_121,Hollow hold (posição de barco),obesity,Obesidade ,caution,confirmed
+ex_121,Hollow hold (posição de barco),pregnancy,Gravidez,avoid,confirmed
+ex_121,Hollow hold (posição de barco),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_122,Abdomina biciletal com miniband nos pés,asthma,Asma ,caution,confirmed
+ex_122,Abdomina biciletal com miniband nos pés,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_122,Abdomina biciletal com miniband nos pés,diabetes,Diabetes,caution,confirmed
+ex_122,Abdomina biciletal com miniband nos pés,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_122,Abdomina biciletal com miniband nos pés,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_122,Abdomina biciletal com miniband nos pés,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_122,Abdomina biciletal com miniband nos pés,obesity,Obesidade ,caution,confirmed
+ex_122,Abdomina biciletal com miniband nos pés,pregnancy,Gravidez,avoid,confirmed
+ex_122,Abdomina biciletal com miniband nos pés,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_123,Abdominal L-sit,asthma,Asma ,caution,confirmed
+ex_123,Abdominal L-sit,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_123,Abdominal L-sit,diabetes,Diabetes,caution,confirmed
+ex_123,Abdominal L-sit,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_123,Abdominal L-sit,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_123,Abdominal L-sit,obesity,Obesidade ,caution,confirmed
+ex_123,Abdominal L-sit,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_123,Abdominal L-sit,pregnancy,Gravidez,avoid,confirmed
+ex_123,Abdominal L-sit,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_124,Prancha com elástico,asthma,Asma ,caution,confirmed
+ex_124,Prancha com elástico,diabetes,Diabetes,caution,confirmed
+ex_124,Prancha com elástico,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_124,Prancha com elástico,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_124,Prancha com elástico,obesity,Obesidade ,caution,confirmed
+ex_124,Prancha com elástico,pregnancy,Gravidez,avoid,confirmed
+ex_124,Prancha com elástico,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_124,Prancha com elástico,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_125,Sit-up com as pernas elevadas,asthma,Asma ,caution,confirmed
+ex_125,Sit-up com as pernas elevadas,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_125,Sit-up com as pernas elevadas,diabetes,Diabetes,caution,confirmed
+ex_125,Sit-up com as pernas elevadas,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_125,Sit-up com as pernas elevadas,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_125,Sit-up com as pernas elevadas,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_125,Sit-up com as pernas elevadas,obesity,Obesidade ,caution,confirmed
+ex_125,Sit-up com as pernas elevadas,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_125,Sit-up com as pernas elevadas,pregnancy,Gravidez,avoid,confirmed
+ex_125,Sit-up com as pernas elevadas,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_126,Sit-up com as pernas elevadas com peso,asthma,Asma ,caution,confirmed
+ex_126,Sit-up com as pernas elevadas com peso,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_126,Sit-up com as pernas elevadas com peso,diabetes,Diabetes,caution,confirmed
+ex_126,Sit-up com as pernas elevadas com peso,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_126,Sit-up com as pernas elevadas com peso,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_126,Sit-up com as pernas elevadas com peso,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_126,Sit-up com as pernas elevadas com peso,obesity,Obesidade ,caution,confirmed
+ex_126,Sit-up com as pernas elevadas com peso,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_126,Sit-up com as pernas elevadas com peso,pregnancy,Gravidez,avoid,confirmed
+ex_126,Sit-up com as pernas elevadas com peso,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_127,Remador,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_128,Joelho no peito na barra,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_129,Joelho no peito na máquina,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_130,GHD Sit-up,asthma,Asma ,caution,confirmed
+ex_130,GHD Sit-up,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_130,GHD Sit-up,diabetes,Diabetes,caution,confirmed
+ex_130,GHD Sit-up,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_130,GHD Sit-up,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_130,GHD Sit-up,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_130,GHD Sit-up,obesity,Obesidade ,caution,confirmed
+ex_130,GHD Sit-up,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_130,GHD Sit-up,pregnancy,Gravidez,avoid,confirmed
+ex_130,GHD Sit-up,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_131,Abdominal declinado no banco,asthma,Asma ,caution,confirmed
+ex_131,Abdominal declinado no banco,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_131,Abdominal declinado no banco,diabetes,Diabetes,caution,confirmed
+ex_131,Abdominal declinado no banco,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_131,Abdominal declinado no banco,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_131,Abdominal declinado no banco,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_131,Abdominal declinado no banco,obesity,Obesidade ,caution,confirmed
+ex_131,Abdominal declinado no banco,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_131,Abdominal declinado no banco,pregnancy,Gravidez,avoid,confirmed
+ex_131,Abdominal declinado no banco,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_132,Abdominal declinado no banco com peso,asthma,Asma ,caution,confirmed
+ex_132,Abdominal declinado no banco com peso,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_132,Abdominal declinado no banco com peso,diabetes,Diabetes,caution,confirmed
+ex_132,Abdominal declinado no banco com peso,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_132,Abdominal declinado no banco com peso,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_132,Abdominal declinado no banco com peso,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_132,Abdominal declinado no banco com peso,obesity,Obesidade ,caution,confirmed
+ex_132,Abdominal declinado no banco com peso,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_132,Abdominal declinado no banco com peso,pregnancy,Gravidez,avoid,confirmed
+ex_132,Abdominal declinado no banco com peso,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_133,Abdominal Reloginho,asthma,Asma ,caution,confirmed
+ex_133,Abdominal Reloginho,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_133,Abdominal Reloginho,diabetes,Diabetes,caution,confirmed
+ex_133,Abdominal Reloginho,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_133,Abdominal Reloginho,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_133,Abdominal Reloginho,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_133,Abdominal Reloginho,obesity,Obesidade ,caution,confirmed
+ex_133,Abdominal Reloginho,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_133,Abdominal Reloginho,pregnancy,Gravidez,avoid,confirmed
+ex_133,Abdominal Reloginho,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_134,Toes to Kettlebell,back_pain,Dor nas Costas,avoid,confirmed
+ex_134,Toes to Kettlebell,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_134,Toes to Kettlebell,lumbar_hernia,Lombar,avoid,confirmed
+ex_134,Toes to Kettlebell,pregnancy,Gravidez,avoid,confirmed
+ex_135,Prancha frontal,asthma,Asma ,caution,confirmed
+ex_135,Prancha frontal,diabetes,Diabetes,caution,confirmed
+ex_135,Prancha frontal,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_135,Prancha frontal,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_135,Prancha frontal,obesity,Obesidade ,caution,confirmed
+ex_135,Prancha frontal,pregnancy,Gravidez,avoid,confirmed
+ex_135,Prancha frontal,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_135,Prancha frontal,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_136,Prancha lateral,asthma,Asma ,caution,confirmed
+ex_136,Prancha lateral,diabetes,Diabetes,caution,confirmed
+ex_136,Prancha lateral,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_136,Prancha lateral,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_136,Prancha lateral,obesity,Obesidade ,caution,confirmed
+ex_136,Prancha lateral,pregnancy,Gravidez,avoid,confirmed
+ex_136,Prancha lateral,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_136,Prancha lateral,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_137,Bird dog,asthma,Asma ,caution,confirmed
+ex_137,Bird dog,diabetes,Diabetes,caution,confirmed
+ex_137,Bird dog,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_137,Bird dog,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_137,Bird dog,obesity,Obesidade ,caution,confirmed
+ex_137,Bird dog,pregnancy,Gravidez,avoid,confirmed
+ex_137,Bird dog,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_138,Dead bug,asthma,Asma ,caution,confirmed
+ex_138,Dead bug,diabetes,Diabetes,caution,confirmed
+ex_138,Dead bug,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_138,Dead bug,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_138,Dead bug,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_138,Dead bug,obesity,Obesidade ,caution,confirmed
+ex_138,Dead bug,pregnancy,Gravidez,avoid,confirmed
+ex_138,Dead bug,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_139,Hollow hold,asthma,Asma ,caution,confirmed
+ex_139,Hollow hold,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_139,Hollow hold,diabetes,Diabetes,caution,confirmed
+ex_139,Hollow hold,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_139,Hollow hold,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_139,Hollow hold,obesity,Obesidade ,caution,confirmed
+ex_139,Hollow hold,pregnancy,Gravidez,avoid,confirmed
+ex_139,Hollow hold,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_140,Prancha com miniband,asthma,Asma ,caution,confirmed
+ex_140,Prancha com miniband,diabetes,Diabetes,caution,confirmed
+ex_140,Prancha com miniband,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_140,Prancha com miniband,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_140,Prancha com miniband,obesity,Obesidade ,caution,confirmed
+ex_140,Prancha com miniband,pregnancy,Gravidez,avoid,confirmed
+ex_140,Prancha com miniband,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_140,Prancha com miniband,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_141,Rollout com roda abdominal,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_141,Rollout com roda abdominal,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_147,Prancha com elevação alternada de pernas,asthma,Asma ,caution,confirmed
+ex_147,Prancha com elevação alternada de pernas,diabetes,Diabetes,caution,confirmed
+ex_147,Prancha com elevação alternada de pernas,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_147,Prancha com elevação alternada de pernas,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_147,Prancha com elevação alternada de pernas,obesity,Obesidade ,caution,confirmed
+ex_147,Prancha com elevação alternada de pernas,pregnancy,Gravidez,avoid,confirmed
+ex_147,Prancha com elevação alternada de pernas,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_147,Prancha com elevação alternada de pernas,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_148,Prancha com toque nos ombros,asthma,Asma ,caution,confirmed
+ex_148,Prancha com toque nos ombros,diabetes,Diabetes,caution,confirmed
+ex_148,Prancha com toque nos ombros,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_148,Prancha com toque nos ombros,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_148,Prancha com toque nos ombros,obesity,Obesidade ,caution,confirmed
+ex_148,Prancha com toque nos ombros,pregnancy,Gravidez,avoid,confirmed
+ex_148,Prancha com toque nos ombros,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_148,Prancha com toque nos ombros,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_149,Dead bug com miniband,asthma,Asma ,caution,confirmed
+ex_149,Dead bug com miniband,diabetes,Diabetes,caution,confirmed
+ex_149,Dead bug com miniband,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_149,Dead bug com miniband,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_149,Dead bug com miniband,hip_pain,Dor no Quadril,caution,ai_suggested
+ex_149,Dead bug com miniband,obesity,Obesidade ,caution,confirmed
+ex_149,Dead bug com miniband,pregnancy,Gravidez,avoid,confirmed
+ex_149,Dead bug com miniband,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_151,Pike push-up,asthma,Asma ,caution,confirmed
+ex_151,Pike push-up,diabetes,Diabetes,caution,confirmed
+ex_151,Pike push-up,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_151,Pike push-up,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_151,Pike push-up,obesity,Obesidade ,caution,confirmed
+ex_151,Pike push-up,pregnancy,Gravidez,avoid,confirmed
+ex_151,Pike push-up,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_151,Pike push-up,shoulder_pain,Ombro,caution,confirmed
+ex_151,Pike push-up,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_152,Prancha com toque de ombro,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_153,Elevação lateral com halteres,asthma,Asma ,caution,confirmed
+ex_153,Elevação lateral com halteres,diabetes,Diabetes,caution,confirmed
+ex_153,Elevação lateral com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_153,Elevação lateral com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_153,Elevação lateral com halteres,obesity,Obesidade ,caution,confirmed
+ex_153,Elevação lateral com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_153,Elevação lateral com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_153,Elevação lateral com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_154,Desenvolvimento com halteres,asthma,Asma ,caution,confirmed
+ex_154,Desenvolvimento com halteres,diabetes,Diabetes,caution,confirmed
+ex_154,Desenvolvimento com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_154,Desenvolvimento com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_154,Desenvolvimento com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_154,Desenvolvimento com halteres,neck_pain,Pescoço,caution,ai_suggested
+ex_154,Desenvolvimento com halteres,obesity,Obesidade ,caution,confirmed
+ex_154,Desenvolvimento com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_154,Desenvolvimento com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_154,Desenvolvimento com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_156,Desenvolvimento com barra,asthma,Asma ,caution,confirmed
+ex_156,Desenvolvimento com barra,diabetes,Diabetes,caution,confirmed
+ex_156,Desenvolvimento com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_156,Desenvolvimento com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_156,Desenvolvimento com barra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_156,Desenvolvimento com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_156,Desenvolvimento com barra,neck_pain,Pescoço,caution,ai_suggested
+ex_156,Desenvolvimento com barra,obesity,Obesidade ,caution,confirmed
+ex_156,Desenvolvimento com barra,pregnancy,Gravidez,avoid,confirmed
+ex_156,Desenvolvimento com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_156,Desenvolvimento com barra,shoulder_pain,Ombro,caution,confirmed
+ex_159,Arnold press,asthma,Asma ,caution,confirmed
+ex_159,Arnold press,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_159,Arnold press,diabetes,Diabetes,caution,confirmed
+ex_159,Arnold press,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_159,Arnold press,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_159,Arnold press,lumbar_hernia,Lombar,caution,confirmed
+ex_159,Arnold press,neck_pain,Pescoço,caution,ai_suggested
+ex_159,Arnold press,obesity,Obesidade ,caution,confirmed
+ex_159,Arnold press,pregnancy,Gravidez,avoid,confirmed
+ex_159,Arnold press,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_159,Arnold press,shoulder_pain,Ombro,caution,confirmed
+ex_160,Push press com barra,asthma,Asma ,caution,confirmed
+ex_160,Push press com barra,diabetes,Diabetes,caution,confirmed
+ex_160,Push press com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_160,Push press com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_160,Push press com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_160,Push press com barra,neck_pain,Pescoço,caution,ai_suggested
+ex_160,Push press com barra,obesity,Obesidade ,caution,confirmed
+ex_160,Push press com barra,pregnancy,Gravidez,avoid,confirmed
+ex_160,Push press com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_160,Push press com barra,shoulder_pain,Ombro,caution,confirmed
+ex_161,Prancha pike walk,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_162,Prancha com giro de tronco,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_163,Toque alternado em parede na prancha,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_164,Desenvolvimento com elástico,asthma,Asma ,caution,confirmed
+ex_164,Desenvolvimento com elástico,diabetes,Diabetes,caution,confirmed
+ex_164,Desenvolvimento com elástico,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_164,Desenvolvimento com elástico,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_164,Desenvolvimento com elástico,lumbar_hernia,Lombar,caution,confirmed
+ex_164,Desenvolvimento com elástico,neck_pain,Pescoço,caution,ai_suggested
+ex_164,Desenvolvimento com elástico,obesity,Obesidade ,caution,confirmed
+ex_164,Desenvolvimento com elástico,pregnancy,Gravidez,avoid,confirmed
+ex_164,Desenvolvimento com elástico,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_164,Desenvolvimento com elástico,shoulder_pain,Ombro,caution,confirmed
+ex_165,Elevação lateral com miniband,asthma,Asma ,caution,confirmed
+ex_165,Elevação lateral com miniband,diabetes,Diabetes,caution,confirmed
+ex_165,Elevação lateral com miniband,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_165,Elevação lateral com miniband,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_165,Elevação lateral com miniband,obesity,Obesidade ,caution,confirmed
+ex_165,Elevação lateral com miniband,pregnancy,Gravidez,avoid,confirmed
+ex_165,Elevação lateral com miniband,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_165,Elevação lateral com miniband,shoulder_pain,Ombro,caution,confirmed
+ex_167,Desenvolvimento no Smith,asthma,Asma ,caution,confirmed
+ex_167,Desenvolvimento no Smith,diabetes,Diabetes,caution,confirmed
+ex_167,Desenvolvimento no Smith,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_167,Desenvolvimento no Smith,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_167,Desenvolvimento no Smith,lumbar_hernia,Lombar,caution,confirmed
+ex_167,Desenvolvimento no Smith,neck_pain,Pescoço,caution,ai_suggested
+ex_167,Desenvolvimento no Smith,obesity,Obesidade ,caution,confirmed
+ex_167,Desenvolvimento no Smith,pregnancy,Gravidez,avoid,confirmed
+ex_167,Desenvolvimento no Smith,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_167,Desenvolvimento no Smith,shoulder_pain,Ombro,caution,confirmed
+ex_168,Elevação lateral na polia,asthma,Asma ,caution,confirmed
+ex_168,Elevação lateral na polia,diabetes,Diabetes,caution,confirmed
+ex_168,Elevação lateral na polia,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_168,Elevação lateral na polia,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_168,Elevação lateral na polia,obesity,Obesidade ,caution,confirmed
+ex_168,Elevação lateral na polia,pregnancy,Gravidez,avoid,confirmed
+ex_168,Elevação lateral na polia,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_168,Elevação lateral na polia,shoulder_pain,Ombro,caution,confirmed
+ex_172,Press militar com barra,asthma,Asma ,caution,confirmed
+ex_172,Press militar com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_172,Press militar com barra,diabetes,Diabetes,caution,confirmed
+ex_172,Press militar com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_172,Press militar com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_172,Press militar com barra,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_172,Press militar com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_172,Press militar com barra,neck_pain,Pescoço,caution,ai_suggested
+ex_172,Press militar com barra,obesity,Obesidade ,caution,confirmed
+ex_172,Press militar com barra,pregnancy,Gravidez,avoid,confirmed
+ex_172,Press militar com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_172,Press militar com barra,shoulder_pain,Ombro,caution,confirmed
+ex_174,Flexão de braço tradicional,asthma,Asma ,caution,confirmed
+ex_174,Flexão de braço tradicional,diabetes,Diabetes,caution,confirmed
+ex_174,Flexão de braço tradicional,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_174,Flexão de braço tradicional,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_174,Flexão de braço tradicional,obesity,Obesidade ,caution,confirmed
+ex_174,Flexão de braço tradicional,pregnancy,Gravidez,avoid,confirmed
+ex_174,Flexão de braço tradicional,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_174,Flexão de braço tradicional,shoulder_pain,Ombro,caution,confirmed
+ex_174,Flexão de braço tradicional,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_175,Flexão de braço com pegada aberta,asthma,Asma ,caution,confirmed
+ex_175,Flexão de braço com pegada aberta,diabetes,Diabetes,caution,confirmed
+ex_175,Flexão de braço com pegada aberta,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_175,Flexão de braço com pegada aberta,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_175,Flexão de braço com pegada aberta,obesity,Obesidade ,caution,confirmed
+ex_175,Flexão de braço com pegada aberta,pregnancy,Gravidez,avoid,confirmed
+ex_175,Flexão de braço com pegada aberta,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_175,Flexão de braço com pegada aberta,shoulder_pain,Ombro,caution,confirmed
+ex_175,Flexão de braço com pegada aberta,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_176,Flexão declinada (pés elevados),asthma,Asma ,caution,confirmed
+ex_176,Flexão declinada (pés elevados),diabetes,Diabetes,caution,confirmed
+ex_176,Flexão declinada (pés elevados),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_176,Flexão declinada (pés elevados),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_176,Flexão declinada (pés elevados),lumbar_hernia,Lombar,caution,confirmed
+ex_176,Flexão declinada (pés elevados),obesity,Obesidade ,caution,confirmed
+ex_176,Flexão declinada (pés elevados),pregnancy,Gravidez,avoid,confirmed
+ex_176,Flexão declinada (pés elevados),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_176,Flexão declinada (pés elevados),shoulder_pain,Ombro,caution,confirmed
+ex_176,Flexão declinada (pés elevados),wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_177,Supino com halteres no chão,asthma,Asma ,caution,confirmed
+ex_177,Supino com halteres no chão,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_177,Supino com halteres no chão,diabetes,Diabetes,caution,confirmed
+ex_177,Supino com halteres no chão,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_177,Supino com halteres no chão,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_177,Supino com halteres no chão,obesity,Obesidade ,caution,confirmed
+ex_177,Supino com halteres no chão,pregnancy,Gravidez,avoid,confirmed
+ex_177,Supino com halteres no chão,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_177,Supino com halteres no chão,shoulder_pain,Ombro,caution,confirmed
+ex_178,Flexão com elástico de resistência,asthma,Asma ,caution,confirmed
+ex_178,Flexão com elástico de resistência,diabetes,Diabetes,caution,confirmed
+ex_178,Flexão com elástico de resistência,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_178,Flexão com elástico de resistência,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_178,Flexão com elástico de resistência,obesity,Obesidade ,caution,confirmed
+ex_178,Flexão com elástico de resistência,pregnancy,Gravidez,avoid,confirmed
+ex_178,Flexão com elástico de resistência,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_178,Flexão com elástico de resistência,shoulder_pain,Ombro,caution,confirmed
+ex_178,Flexão com elástico de resistência,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_179,Crucifixo com halteres deitado,asthma,Asma ,caution,confirmed
+ex_179,Crucifixo com halteres deitado,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_179,Crucifixo com halteres deitado,diabetes,Diabetes,caution,confirmed
+ex_179,Crucifixo com halteres deitado,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_179,Crucifixo com halteres deitado,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_179,Crucifixo com halteres deitado,obesity,Obesidade ,caution,confirmed
+ex_179,Crucifixo com halteres deitado,pregnancy,Gravidez,avoid,confirmed
+ex_179,Crucifixo com halteres deitado,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_179,Crucifixo com halteres deitado,shoulder_pain,Ombro,caution,confirmed
+ex_180,Supino reto com barra,asthma,Asma ,caution,confirmed
+ex_180,Supino reto com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_180,Supino reto com barra,diabetes,Diabetes,caution,confirmed
+ex_180,Supino reto com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_180,Supino reto com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_180,Supino reto com barra,obesity,Obesidade ,caution,confirmed
+ex_180,Supino reto com barra,pregnancy,Gravidez,avoid,confirmed
+ex_180,Supino reto com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_180,Supino reto com barra,shoulder_pain,Ombro,caution,confirmed
+ex_181,Supino inclinado com barra,asthma,Asma ,caution,confirmed
+ex_181,Supino inclinado com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_181,Supino inclinado com barra,diabetes,Diabetes,caution,confirmed
+ex_181,Supino inclinado com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_181,Supino inclinado com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_181,Supino inclinado com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_181,Supino inclinado com barra,obesity,Obesidade ,caution,confirmed
+ex_181,Supino inclinado com barra,pregnancy,Gravidez,avoid,confirmed
+ex_181,Supino inclinado com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_181,Supino inclinado com barra,shoulder_pain,Ombro,caution,confirmed
+ex_183,Crucifixo no peck deck,asthma,Asma ,caution,confirmed
+ex_183,Crucifixo no peck deck,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_183,Crucifixo no peck deck,diabetes,Diabetes,caution,confirmed
+ex_183,Crucifixo no peck deck,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_183,Crucifixo no peck deck,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_183,Crucifixo no peck deck,obesity,Obesidade ,caution,confirmed
+ex_183,Crucifixo no peck deck,pregnancy,Gravidez,avoid,confirmed
+ex_183,Crucifixo no peck deck,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_183,Crucifixo no peck deck,shoulder_pain,Ombro,caution,confirmed
+ex_184,Supino declinado com barra,asthma,Asma ,caution,confirmed
+ex_184,Supino declinado com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_184,Supino declinado com barra,diabetes,Diabetes,caution,confirmed
+ex_184,Supino declinado com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_184,Supino declinado com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_184,Supino declinado com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_184,Supino declinado com barra,obesity,Obesidade ,caution,confirmed
+ex_184,Supino declinado com barra,pregnancy,Gravidez,avoid,confirmed
+ex_184,Supino declinado com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_184,Supino declinado com barra,shoulder_pain,Ombro,caution,confirmed
+ex_185,Push-up explosivo com palmas,asthma,Asma ,caution,confirmed
+ex_185,Push-up explosivo com palmas,diabetes,Diabetes,caution,confirmed
+ex_185,Push-up explosivo com palmas,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_185,Push-up explosivo com palmas,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_185,Push-up explosivo com palmas,obesity,Obesidade ,caution,confirmed
+ex_185,Push-up explosivo com palmas,pregnancy,Gravidez,avoid,confirmed
+ex_185,Push-up explosivo com palmas,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_185,Push-up explosivo com palmas,shoulder_pain,Ombro,caution,confirmed
+ex_185,Push-up explosivo com palmas,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_186,Burpee com push-up,ankle_pain,Tornozelo,caution,ai_suggested
+ex_186,Burpee com push-up,asthma,Asma ,caution,confirmed
+ex_186,Burpee com push-up,diabetes,Diabetes,caution,confirmed
+ex_186,Burpee com push-up,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_186,Burpee com push-up,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_186,Burpee com push-up,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_186,Burpee com push-up,knee_pain,Joelho,caution,ai_suggested
+ex_186,Burpee com push-up,obesity,Obesidade ,caution,confirmed
+ex_186,Burpee com push-up,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_186,Burpee com push-up,pregnancy,Gravidez,avoid,confirmed
+ex_186,Burpee com push-up,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_186,Burpee com push-up,shoulder_pain,Ombro,caution,confirmed
+ex_186,Burpee com push-up,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_187,Flexão diamante,asthma,Asma ,caution,confirmed
+ex_187,Flexão diamante,diabetes,Diabetes,caution,confirmed
+ex_187,Flexão diamante,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_187,Flexão diamante,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_187,Flexão diamante,obesity,Obesidade ,caution,confirmed
+ex_187,Flexão diamante,pregnancy,Gravidez,avoid,confirmed
+ex_187,Flexão diamante,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_187,Flexão diamante,shoulder_pain,Ombro,caution,confirmed
+ex_187,Flexão diamante,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_188,Flexão isométrica (segurando embaixo),asthma,Asma ,caution,confirmed
+ex_188,Flexão isométrica (segurando embaixo),diabetes,Diabetes,caution,confirmed
+ex_188,Flexão isométrica (segurando embaixo),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_188,Flexão isométrica (segurando embaixo),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_188,Flexão isométrica (segurando embaixo),obesity,Obesidade ,caution,confirmed
+ex_188,Flexão isométrica (segurando embaixo),pregnancy,Gravidez,avoid,confirmed
+ex_188,Flexão isométrica (segurando embaixo),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_188,Flexão isométrica (segurando embaixo),shoulder_pain,Ombro,caution,confirmed
+ex_188,Flexão isométrica (segurando embaixo),wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_189,Flexão com apoio de halteres,asthma,Asma ,caution,confirmed
+ex_189,Flexão com apoio de halteres,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_189,Flexão com apoio de halteres,diabetes,Diabetes,caution,confirmed
+ex_189,Flexão com apoio de halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_189,Flexão com apoio de halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_189,Flexão com apoio de halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_189,Flexão com apoio de halteres,obesity,Obesidade ,caution,confirmed
+ex_189,Flexão com apoio de halteres,pregnancy,Gravidez,avoid,confirmed
+ex_189,Flexão com apoio de halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_189,Flexão com apoio de halteres,shoulder_pain,Ombro,caution,confirmed
+ex_189,Flexão com apoio de halteres,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_190,Supino inclinado com halteres,asthma,Asma ,caution,confirmed
+ex_190,Supino inclinado com halteres,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_190,Supino inclinado com halteres,diabetes,Diabetes,caution,confirmed
+ex_190,Supino inclinado com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_190,Supino inclinado com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_190,Supino inclinado com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_190,Supino inclinado com halteres,obesity,Obesidade ,caution,confirmed
+ex_190,Supino inclinado com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_190,Supino inclinado com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_190,Supino inclinado com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_192,Cross over na polia alta,asthma,Asma ,caution,confirmed
+ex_192,Cross over na polia alta,diabetes,Diabetes,caution,confirmed
+ex_192,Cross over na polia alta,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_192,Cross over na polia alta,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_192,Cross over na polia alta,obesity,Obesidade ,caution,confirmed
+ex_192,Cross over na polia alta,pregnancy,Gravidez,avoid,confirmed
+ex_192,Cross over na polia alta,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_192,Cross over na polia alta,shoulder_pain,Ombro,caution,confirmed
+ex_193,Flexão com pés elevados e mãos sobre halteres,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_194,Flexão de braço com pegada fechada,asthma,Asma ,caution,confirmed
+ex_194,Flexão de braço com pegada fechada,diabetes,Diabetes,caution,confirmed
+ex_194,Flexão de braço com pegada fechada,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_194,Flexão de braço com pegada fechada,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_194,Flexão de braço com pegada fechada,obesity,Obesidade ,caution,confirmed
+ex_194,Flexão de braço com pegada fechada,pregnancy,Gravidez,avoid,confirmed
+ex_194,Flexão de braço com pegada fechada,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_194,Flexão de braço com pegada fechada,shoulder_pain,Ombro,caution,confirmed
+ex_194,Flexão de braço com pegada fechada,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_195,Rosca direta com halteres,asthma,Asma ,caution,confirmed
+ex_195,Rosca direta com halteres,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_195,Rosca direta com halteres,diabetes,Diabetes,caution,confirmed
+ex_195,Rosca direta com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_195,Rosca direta com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_195,Rosca direta com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_195,Rosca direta com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_195,Rosca direta com halteres,obesity,Obesidade ,caution,confirmed
+ex_195,Rosca direta com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_195,Rosca direta com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_195,Rosca direta com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_196,Rosca alternada com halteres,asthma,Asma ,caution,confirmed
+ex_196,Rosca alternada com halteres,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_196,Rosca alternada com halteres,diabetes,Diabetes,caution,confirmed
+ex_196,Rosca alternada com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_196,Rosca alternada com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_196,Rosca alternada com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_196,Rosca alternada com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_196,Rosca alternada com halteres,obesity,Obesidade ,caution,confirmed
+ex_196,Rosca alternada com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_196,Rosca alternada com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_196,Rosca alternada com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_197,Rosca martelo com halteres,asthma,Asma ,caution,confirmed
+ex_197,Rosca martelo com halteres,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_197,Rosca martelo com halteres,diabetes,Diabetes,caution,confirmed
+ex_197,Rosca martelo com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_197,Rosca martelo com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_197,Rosca martelo com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_197,Rosca martelo com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_197,Rosca martelo com halteres,obesity,Obesidade ,caution,confirmed
+ex_197,Rosca martelo com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_197,Rosca martelo com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_197,Rosca martelo com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_198,Rosca com elástico,asthma,Asma ,caution,confirmed
+ex_198,Rosca com elástico,diabetes,Diabetes,caution,confirmed
+ex_198,Rosca com elástico,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_198,Rosca com elástico,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_198,Rosca com elástico,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_198,Rosca com elástico,obesity,Obesidade ,caution,confirmed
+ex_198,Rosca com elástico,pregnancy,Gravidez,avoid,confirmed
+ex_198,Rosca com elástico,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_198,Rosca com elástico,shoulder_pain,Ombro,caution,confirmed
+ex_199,Rosca direta com barra,asthma,Asma ,caution,confirmed
+ex_199,Rosca direta com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_199,Rosca direta com barra,diabetes,Diabetes,caution,confirmed
+ex_199,Rosca direta com barra,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_199,Rosca direta com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_199,Rosca direta com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_199,Rosca direta com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_199,Rosca direta com barra,obesity,Obesidade ,caution,confirmed
+ex_199,Rosca direta com barra,pregnancy,Gravidez,avoid,confirmed
+ex_199,Rosca direta com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_199,Rosca direta com barra,shoulder_pain,Ombro,caution,confirmed
+ex_200,ROSCA SCOTT COM BARRA W,asthma,Asma ,caution,confirmed
+ex_200,ROSCA SCOTT COM BARRA W,diabetes,Diabetes,caution,confirmed
+ex_200,ROSCA SCOTT COM BARRA W,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_200,ROSCA SCOTT COM BARRA W,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_200,ROSCA SCOTT COM BARRA W,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_200,ROSCA SCOTT COM BARRA W,obesity,Obesidade ,caution,confirmed
+ex_200,ROSCA SCOTT COM BARRA W,pregnancy,Gravidez,avoid,confirmed
+ex_200,ROSCA SCOTT COM BARRA W,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_200,ROSCA SCOTT COM BARRA W,shoulder_pain,Ombro,caution,confirmed
+ex_201,Rosca concentrada,asthma,Asma ,caution,confirmed
+ex_201,Rosca concentrada,diabetes,Diabetes,caution,confirmed
+ex_201,Rosca concentrada,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_201,Rosca concentrada,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_201,Rosca concentrada,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_201,Rosca concentrada,obesity,Obesidade ,caution,confirmed
+ex_201,Rosca concentrada,pregnancy,Gravidez,avoid,confirmed
+ex_201,Rosca concentrada,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_201,Rosca concentrada,shoulder_pain,Ombro,caution,confirmed
+ex_202,Rosca inversa,asthma,Asma ,caution,confirmed
+ex_202,Rosca inversa,diabetes,Diabetes,caution,confirmed
+ex_202,Rosca inversa,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_202,Rosca inversa,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_202,Rosca inversa,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_202,Rosca inversa,obesity,Obesidade ,caution,confirmed
+ex_202,Rosca inversa,pregnancy,Gravidez,avoid,confirmed
+ex_202,Rosca inversa,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_202,Rosca inversa,shoulder_pain,Ombro,caution,confirmed
+ex_206,Rosca 21 com halteres,asthma,Asma ,caution,confirmed
+ex_206,Rosca 21 com halteres,diabetes,Diabetes,caution,confirmed
+ex_206,Rosca 21 com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_206,Rosca 21 com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_206,Rosca 21 com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_206,Rosca 21 com halteres,obesity,Obesidade ,caution,confirmed
+ex_206,Rosca 21 com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_206,Rosca 21 com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_206,Rosca 21 com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_207,Rosca martelo alternada com halteres,asthma,Asma ,caution,confirmed
+ex_207,Rosca martelo alternada com halteres,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_207,Rosca martelo alternada com halteres,diabetes,Diabetes,caution,confirmed
+ex_207,Rosca martelo alternada com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_207,Rosca martelo alternada com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_207,Rosca martelo alternada com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_207,Rosca martelo alternada com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_207,Rosca martelo alternada com halteres,obesity,Obesidade ,caution,confirmed
+ex_207,Rosca martelo alternada com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_207,Rosca martelo alternada com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_207,Rosca martelo alternada com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_208,Rosca unilateral na polia baixa,asthma,Asma ,caution,confirmed
+ex_208,Rosca unilateral na polia baixa,diabetes,Diabetes,caution,confirmed
+ex_208,Rosca unilateral na polia baixa,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_208,Rosca unilateral na polia baixa,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_208,Rosca unilateral na polia baixa,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_208,Rosca unilateral na polia baixa,obesity,Obesidade ,caution,confirmed
+ex_208,Rosca unilateral na polia baixa,pregnancy,Gravidez,avoid,confirmed
+ex_208,Rosca unilateral na polia baixa,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_208,Rosca unilateral na polia baixa,shoulder_pain,Ombro,caution,confirmed
+ex_209,Rosca corda na polia baixa,asthma,Asma ,caution,confirmed
+ex_209,Rosca corda na polia baixa,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_209,Rosca corda na polia baixa,diabetes,Diabetes,caution,confirmed
+ex_209,Rosca corda na polia baixa,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_209,Rosca corda na polia baixa,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_209,Rosca corda na polia baixa,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_209,Rosca corda na polia baixa,lumbar_hernia,Lombar,caution,confirmed
+ex_209,Rosca corda na polia baixa,obesity,Obesidade ,caution,confirmed
+ex_209,Rosca corda na polia baixa,pregnancy,Gravidez,avoid,confirmed
+ex_209,Rosca corda na polia baixa,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_209,Rosca corda na polia baixa,shoulder_pain,Ombro,caution,confirmed
+ex_210,Rosca martelo na polia com corda,asthma,Asma ,caution,confirmed
+ex_210,Rosca martelo na polia com corda,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_210,Rosca martelo na polia com corda,diabetes,Diabetes,caution,confirmed
+ex_210,Rosca martelo na polia com corda,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_210,Rosca martelo na polia com corda,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_210,Rosca martelo na polia com corda,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_210,Rosca martelo na polia com corda,lumbar_hernia,Lombar,caution,confirmed
+ex_210,Rosca martelo na polia com corda,obesity,Obesidade ,caution,confirmed
+ex_210,Rosca martelo na polia com corda,pregnancy,Gravidez,avoid,confirmed
+ex_210,Rosca martelo na polia com corda,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_210,Rosca martelo na polia com corda,shoulder_pain,Ombro,caution,confirmed
+ex_211,Rosca martelo alternada com isometria,asthma,Asma ,caution,confirmed
+ex_211,Rosca martelo alternada com isometria,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_211,Rosca martelo alternada com isometria,diabetes,Diabetes,caution,confirmed
+ex_211,Rosca martelo alternada com isometria,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_211,Rosca martelo alternada com isometria,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_211,Rosca martelo alternada com isometria,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_211,Rosca martelo alternada com isometria,lumbar_hernia,Lombar,caution,confirmed
+ex_211,Rosca martelo alternada com isometria,obesity,Obesidade ,caution,confirmed
+ex_211,Rosca martelo alternada com isometria,pregnancy,Gravidez,avoid,confirmed
+ex_211,Rosca martelo alternada com isometria,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_211,Rosca martelo alternada com isometria,shoulder_pain,Ombro,caution,confirmed
+ex_212,Rosca Zottman com halteres,asthma,Asma ,caution,confirmed
+ex_212,Rosca Zottman com halteres,diabetes,Diabetes,caution,confirmed
+ex_212,Rosca Zottman com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_212,Rosca Zottman com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_212,Rosca Zottman com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_212,Rosca Zottman com halteres,obesity,Obesidade ,caution,confirmed
+ex_212,Rosca Zottman com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_212,Rosca Zottman com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_212,Rosca Zottman com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_213,Rosca 21 na barra W,asthma,Asma ,caution,confirmed
+ex_213,Rosca 21 na barra W,diabetes,Diabetes,caution,confirmed
+ex_213,Rosca 21 na barra W,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_213,Rosca 21 na barra W,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_213,Rosca 21 na barra W,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_213,Rosca 21 na barra W,obesity,Obesidade ,caution,confirmed
+ex_213,Rosca 21 na barra W,pregnancy,Gravidez,avoid,confirmed
+ex_213,Rosca 21 na barra W,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_213,Rosca 21 na barra W,shoulder_pain,Ombro,caution,confirmed
+ex_214,Rosca spider com halteres,asthma,Asma ,caution,confirmed
+ex_214,Rosca spider com halteres,diabetes,Diabetes,caution,confirmed
+ex_214,Rosca spider com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_214,Rosca spider com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_214,Rosca spider com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_214,Rosca spider com halteres,obesity,Obesidade ,caution,confirmed
+ex_214,Rosca spider com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_214,Rosca spider com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_214,Rosca spider com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_215,Rosca na polia com barra reta (pegada supinada),asthma,Asma ,caution,confirmed
+ex_215,Rosca na polia com barra reta (pegada supinada),diabetes,Diabetes,caution,confirmed
+ex_215,Rosca na polia com barra reta (pegada supinada),elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_215,Rosca na polia com barra reta (pegada supinada),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_215,Rosca na polia com barra reta (pegada supinada),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_215,Rosca na polia com barra reta (pegada supinada),obesity,Obesidade ,caution,confirmed
+ex_215,Rosca na polia com barra reta (pegada supinada),pregnancy,Gravidez,avoid,confirmed
+ex_215,Rosca na polia com barra reta (pegada supinada),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_215,Rosca na polia com barra reta (pegada supinada),shoulder_pain,Ombro,caution,confirmed
+ex_216,Flexão de braço com pegada fechada,asthma,Asma ,caution,confirmed
+ex_216,Flexão de braço com pegada fechada,diabetes,Diabetes,caution,confirmed
+ex_216,Flexão de braço com pegada fechada,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_216,Flexão de braço com pegada fechada,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_216,Flexão de braço com pegada fechada,obesity,Obesidade ,caution,confirmed
+ex_216,Flexão de braço com pegada fechada,pregnancy,Gravidez,avoid,confirmed
+ex_216,Flexão de braço com pegada fechada,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_216,Flexão de braço com pegada fechada,shoulder_pain,Ombro,caution,confirmed
+ex_216,Flexão de braço com pegada fechada,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_217,Tríceps testa com halteres,asthma,Asma ,caution,confirmed
+ex_217,Tríceps testa com halteres,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_217,Tríceps testa com halteres,diabetes,Diabetes,caution,confirmed
+ex_217,Tríceps testa com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_217,Tríceps testa com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_217,Tríceps testa com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_217,Tríceps testa com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_217,Tríceps testa com halteres,obesity,Obesidade ,caution,confirmed
+ex_217,Tríceps testa com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_217,Tríceps testa com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_217,Tríceps testa com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_218,Tríceps francês com halteres,asthma,Asma ,caution,confirmed
+ex_218,Tríceps francês com halteres,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_218,Tríceps francês com halteres,diabetes,Diabetes,caution,confirmed
+ex_218,Tríceps francês com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_218,Tríceps francês com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_218,Tríceps francês com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_218,Tríceps francês com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_218,Tríceps francês com halteres,obesity,Obesidade ,caution,confirmed
+ex_218,Tríceps francês com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_218,Tríceps francês com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_218,Tríceps francês com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_219,Extensão de tríceps com elástico,asthma,Asma ,caution,confirmed
+ex_219,Extensão de tríceps com elástico,diabetes,Diabetes,caution,confirmed
+ex_219,Extensão de tríceps com elástico,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_219,Extensão de tríceps com elástico,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_219,Extensão de tríceps com elástico,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_219,Extensão de tríceps com elástico,obesity,Obesidade ,caution,confirmed
+ex_219,Extensão de tríceps com elástico,pregnancy,Gravidez,avoid,confirmed
+ex_219,Extensão de tríceps com elástico,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_219,Extensão de tríceps com elástico,shoulder_pain,Ombro,caution,confirmed
+ex_220,Tríceps corda na polia,asthma,Asma ,caution,confirmed
+ex_220,Tríceps corda na polia,diabetes,Diabetes,caution,confirmed
+ex_220,Tríceps corda na polia,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_220,Tríceps corda na polia,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_220,Tríceps corda na polia,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_220,Tríceps corda na polia,obesity,Obesidade ,caution,confirmed
+ex_220,Tríceps corda na polia,pregnancy,Gravidez,avoid,confirmed
+ex_220,Tríceps corda na polia,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_220,Tríceps corda na polia,shoulder_pain,Ombro,caution,confirmed
+ex_221,Tríceps testa com barra,asthma,Asma ,caution,confirmed
+ex_221,Tríceps testa com barra,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_221,Tríceps testa com barra,diabetes,Diabetes,caution,confirmed
+ex_221,Tríceps testa com barra,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_221,Tríceps testa com barra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_221,Tríceps testa com barra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_221,Tríceps testa com barra,lumbar_hernia,Lombar,caution,confirmed
+ex_221,Tríceps testa com barra,obesity,Obesidade ,caution,confirmed
+ex_221,Tríceps testa com barra,pregnancy,Gravidez,avoid,confirmed
+ex_221,Tríceps testa com barra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_221,Tríceps testa com barra,shoulder_pain,Ombro,caution,confirmed
+ex_222,Tríceps coice com halteres,asthma,Asma ,caution,confirmed
+ex_222,Tríceps coice com halteres,diabetes,Diabetes,caution,confirmed
+ex_222,Tríceps coice com halteres,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_222,Tríceps coice com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_222,Tríceps coice com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_222,Tríceps coice com halteres,obesity,Obesidade ,caution,confirmed
+ex_222,Tríceps coice com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_222,Tríceps coice com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_222,Tríceps coice com halteres,shoulder_pain,Ombro,caution,confirmed
+ex_223,Tríceps na barra paralela (Graviton),asthma,Asma ,caution,confirmed
+ex_223,Tríceps na barra paralela (Graviton),diabetes,Diabetes,caution,confirmed
+ex_223,Tríceps na barra paralela (Graviton),elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_223,Tríceps na barra paralela (Graviton),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_223,Tríceps na barra paralela (Graviton),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_223,Tríceps na barra paralela (Graviton),obesity,Obesidade ,caution,confirmed
+ex_223,Tríceps na barra paralela (Graviton),pregnancy,Gravidez,avoid,confirmed
+ex_223,Tríceps na barra paralela (Graviton),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_223,Tríceps na barra paralela (Graviton),shoulder_pain,Ombro,caution,confirmed
+ex_224,Flexão declinada com pegada estreita,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_225,Extensão de tríceps apoiado na parede,asthma,Asma ,caution,confirmed
+ex_225,Extensão de tríceps apoiado na parede,diabetes,Diabetes,caution,confirmed
+ex_225,Extensão de tríceps apoiado na parede,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_225,Extensão de tríceps apoiado na parede,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_225,Extensão de tríceps apoiado na parede,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_225,Extensão de tríceps apoiado na parede,obesity,Obesidade ,caution,confirmed
+ex_225,Extensão de tríceps apoiado na parede,pregnancy,Gravidez,avoid,confirmed
+ex_225,Extensão de tríceps apoiado na parede,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_225,Extensão de tríceps apoiado na parede,shoulder_pain,Ombro,caution,confirmed
+ex_226,Extensão de tríceps com elástico (acima da cabeça),asthma,Asma ,caution,confirmed
+ex_226,Extensão de tríceps com elástico (acima da cabeça),diabetes,Diabetes,caution,confirmed
+ex_226,Extensão de tríceps com elástico (acima da cabeça),elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_226,Extensão de tríceps com elástico (acima da cabeça),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_226,Extensão de tríceps com elástico (acima da cabeça),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_226,Extensão de tríceps com elástico (acima da cabeça),obesity,Obesidade ,caution,confirmed
+ex_226,Extensão de tríceps com elástico (acima da cabeça),pregnancy,Gravidez,avoid,confirmed
+ex_226,Extensão de tríceps com elástico (acima da cabeça),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_226,Extensão de tríceps com elástico (acima da cabeça),shoulder_pain,Ombro,caution,confirmed
+ex_227,Tríceps corda WRISTS,asthma,Asma ,caution,confirmed
+ex_227,Tríceps corda WRISTS,diabetes,Diabetes,caution,confirmed
+ex_227,Tríceps corda WRISTS,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_227,Tríceps corda WRISTS,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_227,Tríceps corda WRISTS,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_227,Tríceps corda WRISTS,obesity,Obesidade ,caution,confirmed
+ex_227,Tríceps corda WRISTS,pregnancy,Gravidez,avoid,confirmed
+ex_227,Tríceps corda WRISTS,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_227,Tríceps corda WRISTS,shoulder_pain,Ombro,caution,confirmed
+ex_228,Tríceps testa com barra W,asthma,Asma ,caution,confirmed
+ex_228,Tríceps testa com barra W,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_228,Tríceps testa com barra W,diabetes,Diabetes,caution,confirmed
+ex_228,Tríceps testa com barra W,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_228,Tríceps testa com barra W,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_228,Tríceps testa com barra W,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_228,Tríceps testa com barra W,lumbar_hernia,Lombar,caution,confirmed
+ex_228,Tríceps testa com barra W,obesity,Obesidade ,caution,confirmed
+ex_228,Tríceps testa com barra W,pregnancy,Gravidez,avoid,confirmed
+ex_228,Tríceps testa com barra W,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_228,Tríceps testa com barra W,shoulder_pain,Ombro,caution,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,asthma,Asma ,caution,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,diabetes,Diabetes,caution,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_229,Tríceps francês unilateral com halteres sentado,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,lumbar_hernia,Lombar,caution,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,obesity,Obesidade ,caution,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,pregnancy,Gravidez,avoid,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_229,Tríceps francês unilateral com halteres sentado,shoulder_pain,Ombro,caution,confirmed
+ex_230,Tríceps banco,asthma,Asma ,caution,confirmed
+ex_230,Tríceps banco,diabetes,Diabetes,caution,confirmed
+ex_230,Tríceps banco,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_230,Tríceps banco,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_230,Tríceps banco,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_230,Tríceps banco,obesity,Obesidade ,caution,confirmed
+ex_230,Tríceps banco,pregnancy,Gravidez,avoid,confirmed
+ex_230,Tríceps banco,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_230,Tríceps banco,shoulder_pain,Ombro,caution,confirmed
+ex_231,Kickback com elástico,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_232,Tríceps coice com elástico unilateral,asthma,Asma ,caution,confirmed
+ex_232,Tríceps coice com elástico unilateral,diabetes,Diabetes,caution,confirmed
+ex_232,Tríceps coice com elástico unilateral,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_232,Tríceps coice com elástico unilateral,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_232,Tríceps coice com elástico unilateral,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_232,Tríceps coice com elástico unilateral,obesity,Obesidade ,caution,confirmed
+ex_232,Tríceps coice com elástico unilateral,pregnancy,Gravidez,avoid,confirmed
+ex_232,Tríceps coice com elástico unilateral,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_232,Tríceps coice com elástico unilateral,shoulder_pain,Ombro,caution,confirmed
+ex_233,Tríceps testa com halteres alternado,asthma,Asma ,caution,confirmed
+ex_233,Tríceps testa com halteres alternado,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_233,Tríceps testa com halteres alternado,diabetes,Diabetes,caution,confirmed
+ex_233,Tríceps testa com halteres alternado,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_233,Tríceps testa com halteres alternado,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_233,Tríceps testa com halteres alternado,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_233,Tríceps testa com halteres alternado,lumbar_hernia,Lombar,caution,confirmed
+ex_233,Tríceps testa com halteres alternado,obesity,Obesidade ,caution,confirmed
+ex_233,Tríceps testa com halteres alternado,pregnancy,Gravidez,avoid,confirmed
+ex_233,Tríceps testa com halteres alternado,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_233,Tríceps testa com halteres alternado,shoulder_pain,Ombro,caution,confirmed
+ex_234,Extensão de tríceps na polia alta com barra reta,asthma,Asma ,caution,confirmed
+ex_234,Extensão de tríceps na polia alta com barra reta,diabetes,Diabetes,caution,confirmed
+ex_234,Extensão de tríceps na polia alta com barra reta,elbow_pain,Dor no Cotovelo,caution,ai_suggested
+ex_234,Extensão de tríceps na polia alta com barra reta,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_234,Extensão de tríceps na polia alta com barra reta,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_234,Extensão de tríceps na polia alta com barra reta,obesity,Obesidade ,caution,confirmed
+ex_234,Extensão de tríceps na polia alta com barra reta,pregnancy,Gravidez,avoid,confirmed
+ex_234,Extensão de tríceps na polia alta com barra reta,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_234,Extensão de tríceps na polia alta com barra reta,shoulder_pain,Ombro,caution,confirmed
+ex_235,Superman,asthma,Asma ,caution,confirmed
+ex_235,Superman,diabetes,Diabetes,caution,confirmed
+ex_235,Superman,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_235,Superman,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_235,Superman,lumbar_hernia,Lombar,caution,confirmed
+ex_235,Superman,obesity,Obesidade ,caution,confirmed
+ex_235,Superman,pregnancy,Gravidez,avoid,confirmed
+ex_235,Superman,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_237,Good morning com peso corporal,asthma,Asma ,caution,confirmed
+ex_237,Good morning com peso corporal,diabetes,Diabetes,caution,confirmed
+ex_237,Good morning com peso corporal,hamstring_injury,Lesão no Isquiotibial,caution,ai_suggested
+ex_237,Good morning com peso corporal,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_237,Good morning com peso corporal,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_237,Good morning com peso corporal,lumbar_hernia,Lombar,caution,confirmed
+ex_237,Good morning com peso corporal,lumbar_pain,Lombar,caution,ai_suggested
+ex_237,Good morning com peso corporal,obesity,Obesidade ,caution,confirmed
+ex_237,Good morning com peso corporal,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_237,Good morning com peso corporal,pregnancy,Gravidez,avoid,confirmed
+ex_237,Good morning com peso corporal,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_238,Remada curvada com halteres,asthma,Asma ,caution,confirmed
+ex_238,Remada curvada com halteres,diabetes,Diabetes,caution,confirmed
+ex_238,Remada curvada com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_238,Remada curvada com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_238,Remada curvada com halteres,lumbar_hernia,Lombar,caution,confirmed
+ex_238,Remada curvada com halteres,obesity,Obesidade ,caution,confirmed
+ex_238,Remada curvada com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_238,Remada curvada com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_239,Remada unilateral com halteres,asthma,Asma ,caution,confirmed
+ex_239,Remada unilateral com halteres,diabetes,Diabetes,caution,confirmed
+ex_239,Remada unilateral com halteres,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_239,Remada unilateral com halteres,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_239,Remada unilateral com halteres,obesity,Obesidade ,caution,confirmed
+ex_239,Remada unilateral com halteres,pregnancy,Gravidez,avoid,confirmed
+ex_239,Remada unilateral com halteres,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_241,Puxada frontal aberta,asthma,Asma ,caution,confirmed
+ex_241,Puxada frontal aberta,diabetes,Diabetes,caution,confirmed
+ex_241,Puxada frontal aberta,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_241,Puxada frontal aberta,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_241,Puxada frontal aberta,obesity,Obesidade ,caution,confirmed
+ex_241,Puxada frontal aberta,pregnancy,Gravidez,avoid,confirmed
+ex_241,Puxada frontal aberta,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_242,Remada baixa na máquina,asthma,Asma ,caution,confirmed
+ex_242,Remada baixa na máquina,diabetes,Diabetes,caution,confirmed
+ex_242,Remada baixa na máquina,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_242,Remada baixa na máquina,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_242,Remada baixa na máquina,obesity,Obesidade ,caution,confirmed
+ex_242,Remada baixa na máquina,pregnancy,Gravidez,avoid,confirmed
+ex_242,Remada baixa na máquina,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_243,Pulldown com triângulo,asthma,Asma ,caution,confirmed
+ex_243,Pulldown com triângulo,diabetes,Diabetes,caution,confirmed
+ex_243,Pulldown com triângulo,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_243,Pulldown com triângulo,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_243,Pulldown com triângulo,obesity,Obesidade ,caution,confirmed
+ex_243,Pulldown com triângulo,pregnancy,Gravidez,avoid,confirmed
+ex_243,Pulldown com triângulo,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_244,Remada cavalinho na maquina pegada aberta,asthma,Asma ,caution,confirmed
+ex_244,Remada cavalinho na maquina pegada aberta,diabetes,Diabetes,caution,confirmed
+ex_244,Remada cavalinho na maquina pegada aberta,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_244,Remada cavalinho na maquina pegada aberta,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_244,Remada cavalinho na maquina pegada aberta,obesity,Obesidade ,caution,confirmed
+ex_244,Remada cavalinho na maquina pegada aberta,pregnancy,Gravidez,avoid,confirmed
+ex_244,Remada cavalinho na maquina pegada aberta,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_245,Deadlift (levantamento terra),asthma,Asma ,caution,confirmed
+ex_245,Deadlift (levantamento terra),diabetes,Diabetes,caution,confirmed
+ex_245,Deadlift (levantamento terra),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_245,Deadlift (levantamento terra),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_245,Deadlift (levantamento terra),joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_245,Deadlift (levantamento terra),lumbar_hernia,Lombar,caution,confirmed
+ex_245,Deadlift (levantamento terra),lumbar_pain,Lombar,caution,ai_suggested
+ex_245,Deadlift (levantamento terra),obesity,Obesidade ,caution,confirmed
+ex_245,Deadlift (levantamento terra),pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_245,Deadlift (levantamento terra),pregnancy,Gravidez,avoid,confirmed
+ex_245,Deadlift (levantamento terra),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_246,Barra fixa pronada (pull-up),asthma,Asma ,caution,confirmed
+ex_246,Barra fixa pronada (pull-up),cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_246,Barra fixa pronada (pull-up),diabetes,Diabetes,caution,confirmed
+ex_246,Barra fixa pronada (pull-up),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_246,Barra fixa pronada (pull-up),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_246,Barra fixa pronada (pull-up),obesity,Obesidade ,caution,confirmed
+ex_246,Barra fixa pronada (pull-up),pregnancy,Gravidez,avoid,confirmed
+ex_246,Barra fixa pronada (pull-up),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_249,Prancha com puxada unilateral com elastcio,asthma,Asma ,caution,confirmed
+ex_249,Prancha com puxada unilateral com elastcio,diabetes,Diabetes,caution,confirmed
+ex_249,Prancha com puxada unilateral com elastcio,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_249,Prancha com puxada unilateral com elastcio,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_249,Prancha com puxada unilateral com elastcio,obesity,Obesidade ,caution,confirmed
+ex_249,Prancha com puxada unilateral com elastcio,pregnancy,Gravidez,avoid,confirmed
+ex_249,Prancha com puxada unilateral com elastcio,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_249,Prancha com puxada unilateral com elastcio,wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_251,Remada com elástico (pegada fechada),asthma,Asma ,caution,confirmed
+ex_251,Remada com elástico (pegada fechada),diabetes,Diabetes,caution,confirmed
+ex_251,Remada com elástico (pegada fechada),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_251,Remada com elástico (pegada fechada),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_251,Remada com elástico (pegada fechada),obesity,Obesidade ,caution,confirmed
+ex_251,Remada com elástico (pegada fechada),pregnancy,Gravidez,avoid,confirmed
+ex_251,Remada com elástico (pegada fechada),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_252,Pulldown com elástico fixado em cima,asthma,Asma ,caution,confirmed
+ex_252,Pulldown com elástico fixado em cima,diabetes,Diabetes,caution,confirmed
+ex_252,Pulldown com elástico fixado em cima,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_252,Pulldown com elástico fixado em cima,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_252,Pulldown com elástico fixado em cima,obesity,Obesidade ,caution,confirmed
+ex_252,Pulldown com elástico fixado em cima,pregnancy,Gravidez,avoid,confirmed
+ex_252,Pulldown com elástico fixado em cima,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_253,Remada unilateral na maquina,asthma,Asma ,caution,confirmed
+ex_253,Remada unilateral na maquina,diabetes,Diabetes,caution,confirmed
+ex_253,Remada unilateral na maquina,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_253,Remada unilateral na maquina,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_253,Remada unilateral na maquina,obesity,Obesidade ,caution,confirmed
+ex_253,Remada unilateral na maquina,pregnancy,Gravidez,avoid,confirmed
+ex_253,Remada unilateral na maquina,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_258,Remada cavalinho (T-Bar Row),asthma,Asma ,caution,confirmed
+ex_258,Remada cavalinho (T-Bar Row),diabetes,Diabetes,caution,confirmed
+ex_258,Remada cavalinho (T-Bar Row),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_258,Remada cavalinho (T-Bar Row),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_258,Remada cavalinho (T-Bar Row),obesity,Obesidade ,caution,confirmed
+ex_258,Remada cavalinho (T-Bar Row),pregnancy,Gravidez,avoid,confirmed
+ex_258,Remada cavalinho (T-Bar Row),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_259,Back Extension 45° (Roman Chair),cervical_hernia,Hérnia Cervical,avoid,confirmed
+ex_259,Back Extension 45° (Roman Chair),lumbar_hernia,Lombar,avoid,confirmed
+ex_259,Back Extension 45° (Roman Chair),pregnancy,Gravidez,avoid,confirmed
+ex_260,Remada cavalinho na maquina pegada neutra,asthma,Asma ,caution,confirmed
+ex_260,Remada cavalinho na maquina pegada neutra,diabetes,Diabetes,caution,confirmed
+ex_260,Remada cavalinho na maquina pegada neutra,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_260,Remada cavalinho na maquina pegada neutra,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_260,Remada cavalinho na maquina pegada neutra,obesity,Obesidade ,caution,confirmed
+ex_260,Remada cavalinho na maquina pegada neutra,pregnancy,Gravidez,avoid,confirmed
+ex_260,Remada cavalinho na maquina pegada neutra,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_261,Pull Up (Graviton),asthma,Asma ,caution,confirmed
+ex_261,Pull Up (Graviton),cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_261,Pull Up (Graviton),diabetes,Diabetes,caution,confirmed
+ex_261,Pull Up (Graviton),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_261,Pull Up (Graviton),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_261,Pull Up (Graviton),obesity,Obesidade ,caution,confirmed
+ex_261,Pull Up (Graviton),pregnancy,Gravidez,avoid,confirmed
+ex_261,Pull Up (Graviton),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_262,Remada baixa aberta pronada,asthma,Asma ,caution,confirmed
+ex_262,Remada baixa aberta pronada,diabetes,Diabetes,caution,confirmed
+ex_262,Remada baixa aberta pronada,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_262,Remada baixa aberta pronada,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_262,Remada baixa aberta pronada,obesity,Obesidade ,caution,confirmed
+ex_262,Remada baixa aberta pronada,pregnancy,Gravidez,avoid,confirmed
+ex_262,Remada baixa aberta pronada,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_263,Remada no TRX,asthma,Asma ,caution,confirmed
+ex_263,Remada no TRX,diabetes,Diabetes,caution,confirmed
+ex_263,Remada no TRX,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_263,Remada no TRX,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_263,Remada no TRX,obesity,Obesidade ,caution,confirmed
+ex_263,Remada no TRX,pregnancy,Gravidez,avoid,confirmed
+ex_263,Remada no TRX,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_264,Polichinelo,ankle_pain,Tornozelo,caution,ai_suggested
+ex_264,Polichinelo,asthma,Asma ,caution,confirmed
+ex_264,Polichinelo,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_264,Polichinelo,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_264,Polichinelo,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_264,Polichinelo,knee_pain,Joelho,caution,ai_suggested
+ex_264,Polichinelo,obesity,Obesidade ,caution,confirmed
+ex_264,Polichinelo,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_264,Polichinelo,pregnancy,Gravidez,avoid,confirmed
+ex_264,Polichinelo,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_265,Burpee,ankle_pain,Tornozelo,caution,ai_suggested
+ex_265,Burpee,asthma,Asma ,caution,confirmed
+ex_265,Burpee,diabetes,Diabetes,caution,confirmed
+ex_265,Burpee,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_265,Burpee,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_265,Burpee,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_265,Burpee,knee_pain,Joelho,caution,ai_suggested
+ex_265,Burpee,lumbar_hernia,Lombar,caution,confirmed
+ex_265,Burpee,obesity,Obesidade ,caution,confirmed
+ex_265,Burpee,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_265,Burpee,pregnancy,Gravidez,avoid,confirmed
+ex_265,Burpee,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_266,Mountain climber,diabetes,Diabetes,caution,confirmed
+ex_266,Mountain climber,lumbar_hernia,Lombar,caution,confirmed
+ex_267,Pular corda,ankle_pain,Tornozelo,caution,ai_suggested
+ex_267,Pular corda,asthma,Asma ,caution,confirmed
+ex_267,Pular corda,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_267,Pular corda,diabetes,Diabetes,caution,confirmed
+ex_267,Pular corda,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_267,Pular corda,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_267,Pular corda,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_267,Pular corda,knee_pain,Joelho,caution,ai_suggested
+ex_267,Pular corda,lumbar_hernia,Lombar,caution,confirmed
+ex_267,Pular corda,obesity,Obesidade ,caution,confirmed
+ex_267,Pular corda,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_267,Pular corda,pregnancy,Gravidez,avoid,confirmed
+ex_267,Pular corda,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_268,Esteira (corrida),asthma,Asma ,caution,confirmed
+ex_268,Esteira (corrida),cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_268,Esteira (corrida),diabetes,Diabetes,caution,confirmed
+ex_268,Esteira (corrida),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_268,Esteira (corrida),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_268,Esteira (corrida),lumbar_hernia,Lombar,caution,confirmed
+ex_268,Esteira (corrida),obesity,Obesidade ,caution,confirmed
+ex_268,Esteira (corrida),pregnancy,Gravidez,avoid,confirmed
+ex_268,Esteira (corrida),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_269,Bicicleta ergométrica,asthma,Asma ,caution,confirmed
+ex_269,Bicicleta ergométrica,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_269,Bicicleta ergométrica,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_269,Bicicleta ergométrica,obesity,Obesidade ,caution,confirmed
+ex_269,Bicicleta ergométrica,pregnancy,Gravidez,avoid,confirmed
+ex_269,Bicicleta ergométrica,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_270,Elíptico,asthma,Asma ,caution,confirmed
+ex_270,Elíptico,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_270,Elíptico,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_270,Elíptico,obesity,Obesidade ,caution,confirmed
+ex_270,Elíptico,pregnancy,Gravidez,avoid,confirmed
+ex_270,Elíptico,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_271,Treino intervalado na escada,asthma,Asma ,caution,confirmed
+ex_271,Treino intervalado na escada,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_271,Treino intervalado na escada,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_271,Treino intervalado na escada,obesity,Obesidade ,caution,confirmed
+ex_271,Treino intervalado na escada,pregnancy,Gravidez,avoid,confirmed
+ex_271,Treino intervalado na escada,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_272,Battle rope,asthma,Asma ,caution,confirmed
+ex_272,Battle rope,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_272,Battle rope,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_272,Battle rope,obesity,Obesidade ,caution,confirmed
+ex_272,Battle rope,pregnancy,Gravidez,avoid,confirmed
+ex_272,Battle rope,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_273,Bike ergométrica de alta intensidade (assault bike),asthma,Asma ,caution,confirmed
+ex_273,Bike ergométrica de alta intensidade (assault bike),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_273,Bike ergométrica de alta intensidade (assault bike),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_273,Bike ergométrica de alta intensidade (assault bike),obesity,Obesidade ,caution,confirmed
+ex_273,Bike ergométrica de alta intensidade (assault bike),pregnancy,Gravidez,avoid,confirmed
+ex_273,Bike ergométrica de alta intensidade (assault bike),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_274,Half Burpee,ankle_pain,Tornozelo,caution,ai_suggested
+ex_274,Half Burpee,asthma,Asma ,caution,confirmed
+ex_274,Half Burpee,diabetes,Diabetes,caution,confirmed
+ex_274,Half Burpee,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_274,Half Burpee,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_274,Half Burpee,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_274,Half Burpee,knee_pain,Joelho,caution,ai_suggested
+ex_274,Half Burpee,lumbar_hernia,Lombar,caution,confirmed
+ex_274,Half Burpee,obesity,Obesidade ,caution,confirmed
+ex_274,Half Burpee,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_274,Half Burpee,pregnancy,Gravidez,avoid,confirmed
+ex_274,Half Burpee,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_275,Half Burpee com Step,ankle_pain,Tornozelo,caution,ai_suggested
+ex_275,Half Burpee com Step,asthma,Asma ,caution,confirmed
+ex_275,Half Burpee com Step,diabetes,Diabetes,caution,confirmed
+ex_275,Half Burpee com Step,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_275,Half Burpee com Step,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_275,Half Burpee com Step,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_275,Half Burpee com Step,knee_pain,Joelho,caution,ai_suggested
+ex_275,Half Burpee com Step,lumbar_hernia,Lombar,caution,confirmed
+ex_275,Half Burpee com Step,obesity,Obesidade ,caution,confirmed
+ex_275,Half Burpee com Step,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_275,Half Burpee com Step,pregnancy,Gravidez,avoid,confirmed
+ex_275,Half Burpee com Step,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_276,Corrida estacionária com calcanhar no glúteo,ankle_pain,Tornozelo,caution,ai_suggested
+ex_276,Corrida estacionária com calcanhar no glúteo,asthma,Asma ,caution,confirmed
+ex_276,Corrida estacionária com calcanhar no glúteo,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_276,Corrida estacionária com calcanhar no glúteo,diabetes,Diabetes,caution,confirmed
+ex_276,Corrida estacionária com calcanhar no glúteo,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_276,Corrida estacionária com calcanhar no glúteo,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_276,Corrida estacionária com calcanhar no glúteo,lumbar_hernia,Lombar,caution,confirmed
+ex_276,Corrida estacionária com calcanhar no glúteo,obesity,Obesidade ,caution,confirmed
+ex_276,Corrida estacionária com calcanhar no glúteo,pregnancy,Gravidez,avoid,confirmed
+ex_276,Corrida estacionária com calcanhar no glúteo,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_277,Salto de corda simples,ankle_pain,Tornozelo,caution,ai_suggested
+ex_277,Salto de corda simples,asthma,Asma ,caution,confirmed
+ex_277,Salto de corda simples,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_277,Salto de corda simples,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_277,Salto de corda simples,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_277,Salto de corda simples,knee_pain,Joelho,caution,ai_suggested
+ex_277,Salto de corda simples,obesity,Obesidade ,caution,confirmed
+ex_277,Salto de corda simples,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_277,Salto de corda simples,pregnancy,Gravidez,avoid,confirmed
+ex_277,Salto de corda simples,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_279,Skaters (saltos laterais),ankle_pain,Tornozelo,caution,ai_suggested
+ex_279,Skaters (saltos laterais),asthma,Asma ,caution,confirmed
+ex_279,Skaters (saltos laterais),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_279,Skaters (saltos laterais),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_279,Skaters (saltos laterais),joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_279,Skaters (saltos laterais),knee_pain,Joelho,caution,ai_suggested
+ex_279,Skaters (saltos laterais),obesity,Obesidade ,caution,confirmed
+ex_279,Skaters (saltos laterais),pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_279,Skaters (saltos laterais),pregnancy,Gravidez,avoid,confirmed
+ex_279,Skaters (saltos laterais),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_280,Jumping lunge (afundo com salto),ankle_pain,Tornozelo,caution,ai_suggested
+ex_280,Jumping lunge (afundo com salto),asthma,Asma ,caution,confirmed
+ex_280,Jumping lunge (afundo com salto),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_280,Jumping lunge (afundo com salto),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_280,Jumping lunge (afundo com salto),joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_280,Jumping lunge (afundo com salto),knee_pain,Joelho,caution,ai_suggested
+ex_280,Jumping lunge (afundo com salto),obesity,Obesidade ,caution,confirmed
+ex_280,Jumping lunge (afundo com salto),pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_280,Jumping lunge (afundo com salto),pregnancy,Gravidez,avoid,confirmed
+ex_280,Jumping lunge (afundo com salto),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_281,Sprints na esteira,asthma,Asma ,caution,confirmed
+ex_281,Sprints na esteira,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_281,Sprints na esteira,diabetes,Diabetes,caution,confirmed
+ex_281,Sprints na esteira,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_281,Sprints na esteira,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_281,Sprints na esteira,lumbar_hernia,Lombar,caution,confirmed
+ex_281,Sprints na esteira,obesity,Obesidade ,caution,confirmed
+ex_281,Sprints na esteira,pregnancy,Gravidez,avoid,confirmed
+ex_281,Sprints na esteira,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_282,Subida e descida no step rápido,asthma,Asma ,caution,confirmed
+ex_282,Subida e descida no step rápido,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_282,Subida e descida no step rápido,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_282,Subida e descida no step rápido,obesity,Obesidade ,caution,confirmed
+ex_282,Subida e descida no step rápido,pregnancy,Gravidez,avoid,confirmed
+ex_282,Subida e descida no step rápido,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_283,Box Jump,ankle_pain,Tornozelo,caution,ai_suggested
+ex_283,Box Jump,asthma,Asma ,caution,confirmed
+ex_283,Box Jump,cervical_hernia,Hérnia Cervical,avoid,confirmed
+ex_283,Box Jump,diabetes,Diabetes,caution,confirmed
+ex_283,Box Jump,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_283,Box Jump,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_283,Box Jump,joint_problems_severe,Problemas Articulares Graves,avoid,confirmed
+ex_283,Box Jump,knee_pain,Joelho,caution,ai_suggested
+ex_283,Box Jump,lumbar_hernia,Lombar,avoid,confirmed
+ex_283,Box Jump,obesity,Obesidade ,caution,confirmed
+ex_283,Box Jump,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_283,Box Jump,pregnancy,Gravidez,avoid,confirmed
+ex_283,Box Jump,pregnancy_postpartum,Pós-parto,avoid,confirmed
+ex_284,Box Jump Over,ankle_pain,Tornozelo,caution,ai_suggested
+ex_284,Box Jump Over,asthma,Asma ,caution,confirmed
+ex_284,Box Jump Over,cervical_hernia,Hérnia Cervical,avoid,confirmed
+ex_284,Box Jump Over,diabetes,Diabetes,caution,confirmed
+ex_284,Box Jump Over,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_284,Box Jump Over,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_284,Box Jump Over,joint_problems_severe,Problemas Articulares Graves,avoid,confirmed
+ex_284,Box Jump Over,knee_pain,Joelho,caution,ai_suggested
+ex_284,Box Jump Over,lumbar_hernia,Lombar,avoid,confirmed
+ex_284,Box Jump Over,obesity,Obesidade ,caution,confirmed
+ex_284,Box Jump Over,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_284,Box Jump Over,pregnancy,Gravidez,avoid,confirmed
+ex_284,Box Jump Over,pregnancy_postpartum,Pós-parto,avoid,confirmed
+ex_285,Wall Ball,asthma,Asma ,caution,confirmed
+ex_285,Wall Ball,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_285,Wall Ball,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_285,Wall Ball,obesity,Obesidade ,caution,confirmed
+ex_285,Wall Ball,pregnancy,Gravidez,avoid,confirmed
+ex_285,Wall Ball,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_286,Corrida lateral com toques no chão,ankle_pain,Tornozelo,caution,ai_suggested
+ex_286,Corrida lateral com toques no chão,asthma,Asma ,caution,confirmed
+ex_286,Corrida lateral com toques no chão,cervical_hernia,Hérnia Cervical,caution,confirmed
+ex_286,Corrida lateral com toques no chão,diabetes,Diabetes,caution,confirmed
+ex_286,Corrida lateral com toques no chão,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_286,Corrida lateral com toques no chão,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_286,Corrida lateral com toques no chão,lumbar_hernia,Lombar,caution,confirmed
+ex_286,Corrida lateral com toques no chão,obesity,Obesidade ,caution,confirmed
+ex_286,Corrida lateral com toques no chão,pregnancy,Gravidez,avoid,confirmed
+ex_286,Corrida lateral com toques no chão,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_287,High knees (elevação rápida dos joelhos),asthma,Asma ,caution,confirmed
+ex_287,High knees (elevação rápida dos joelhos),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_287,High knees (elevação rápida dos joelhos),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_287,High knees (elevação rápida dos joelhos),obesity,Obesidade ,caution,confirmed
+ex_287,High knees (elevação rápida dos joelhos),pregnancy,Gravidez,avoid,confirmed
+ex_287,High knees (elevação rápida dos joelhos),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_288,Escalador crossbody,asthma,Asma ,caution,confirmed
+ex_288,Escalador crossbody,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_288,Escalador crossbody,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_288,Escalador crossbody,obesity,Obesidade ,caution,confirmed
+ex_288,Escalador crossbody,pregnancy,Gravidez,avoid,confirmed
+ex_288,Escalador crossbody,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_289,Thruster com elastico,asthma,Asma ,caution,confirmed
+ex_289,Thruster com elastico,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_289,Thruster com elastico,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_289,Thruster com elastico,neck_pain,Pescoço,caution,ai_suggested
+ex_289,Thruster com elastico,obesity,Obesidade ,caution,confirmed
+ex_289,Thruster com elastico,pregnancy,Gravidez,avoid,confirmed
+ex_289,Thruster com elastico,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_290,Bear crawl (deslocamento em 4 apoios),asthma,Asma ,caution,confirmed
+ex_290,Bear crawl (deslocamento em 4 apoios),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_290,Bear crawl (deslocamento em 4 apoios),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_290,Bear crawl (deslocamento em 4 apoios),obesity,Obesidade ,caution,confirmed
+ex_290,Bear crawl (deslocamento em 4 apoios),pregnancy,Gravidez,avoid,confirmed
+ex_290,Bear crawl (deslocamento em 4 apoios),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_290,Bear crawl (deslocamento em 4 apoios),wrist_pain,Dor no Pulso,caution,ai_suggested
+ex_291,Kettlebell swing (ou com halter),asthma,Asma ,caution,confirmed
+ex_291,Kettlebell swing (ou com halter),heart_condition,Condição Cardíaca ,caution,confirmed
+ex_291,Kettlebell swing (ou com halter),high_blood_pressure,Hipertensão ,caution,confirmed
+ex_291,Kettlebell swing (ou com halter),obesity,Obesidade ,caution,confirmed
+ex_291,Kettlebell swing (ou com halter),pregnancy,Gravidez,avoid,confirmed
+ex_291,Kettlebell swing (ou com halter),pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_292,Polichinelo com agachamento,ankle_pain,Tornozelo,caution,ai_suggested
+ex_292,Polichinelo com agachamento,asthma,Asma ,caution,confirmed
+ex_292,Polichinelo com agachamento,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_292,Polichinelo com agachamento,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_292,Polichinelo com agachamento,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_292,Polichinelo com agachamento,knee_pain,Joelho,caution,ai_suggested
+ex_292,Polichinelo com agachamento,obesity,Obesidade ,caution,confirmed
+ex_292,Polichinelo com agachamento,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_292,Polichinelo com agachamento,pregnancy,Gravidez,avoid,confirmed
+ex_292,Polichinelo com agachamento,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_293,Polichinelo com toque no chão,ankle_pain,Tornozelo,caution,ai_suggested
+ex_293,Polichinelo com toque no chão,asthma,Asma ,caution,confirmed
+ex_293,Polichinelo com toque no chão,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_293,Polichinelo com toque no chão,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_293,Polichinelo com toque no chão,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_293,Polichinelo com toque no chão,knee_pain,Joelho,caution,ai_suggested
+ex_293,Polichinelo com toque no chão,obesity,Obesidade ,caution,confirmed
+ex_293,Polichinelo com toque no chão,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_293,Polichinelo com toque no chão,pregnancy,Gravidez,avoid,confirmed
+ex_293,Polichinelo com toque no chão,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_294,Polichinelo cruzado,ankle_pain,Tornozelo,caution,ai_suggested
+ex_294,Polichinelo cruzado,asthma,Asma ,caution,confirmed
+ex_294,Polichinelo cruzado,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_294,Polichinelo cruzado,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_294,Polichinelo cruzado,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_294,Polichinelo cruzado,knee_pain,Joelho,caution,ai_suggested
+ex_294,Polichinelo cruzado,obesity,Obesidade ,caution,confirmed
+ex_294,Polichinelo cruzado,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_294,Polichinelo cruzado,pregnancy,Gravidez,avoid,confirmed
+ex_294,Polichinelo cruzado,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_295,Polichinelo frontal,ankle_pain,Tornozelo,caution,ai_suggested
+ex_295,Polichinelo frontal,asthma,Asma ,caution,confirmed
+ex_295,Polichinelo frontal,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_295,Polichinelo frontal,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_295,Polichinelo frontal,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_295,Polichinelo frontal,knee_pain,Joelho,caution,ai_suggested
+ex_295,Polichinelo frontal,obesity,Obesidade ,caution,confirmed
+ex_295,Polichinelo frontal,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_295,Polichinelo frontal,pregnancy,Gravidez,avoid,confirmed
+ex_295,Polichinelo frontal,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_296,Passos de pato,ankle_pain,Tornozelo,caution,ai_suggested
+ex_296,Passos de pato,asthma,Asma ,caution,confirmed
+ex_296,Passos de pato,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_296,Passos de pato,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_296,Passos de pato,obesity,Obesidade ,caution,confirmed
+ex_296,Passos de pato,pregnancy,Gravidez,avoid,confirmed
+ex_296,Passos de pato,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_297,Passos de caranguejo,asthma,Asma ,caution,confirmed
+ex_297,Passos de caranguejo,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_297,Passos de caranguejo,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_297,Passos de caranguejo,obesity,Obesidade ,caution,confirmed
+ex_297,Passos de caranguejo,pregnancy,Gravidez,avoid,confirmed
+ex_297,Passos de caranguejo,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_298,Passos de jacaré,asthma,Asma ,caution,confirmed
+ex_298,Passos de jacaré,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_298,Passos de jacaré,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_298,Passos de jacaré,obesity,Obesidade ,caution,confirmed
+ex_298,Passos de jacaré,pregnancy,Gravidez,avoid,confirmed
+ex_298,Passos de jacaré,pregnancy_postpartum,Pós-parto,caution,confirmed
+ex_299,Salto de sapo,ankle_pain,Tornozelo,caution,ai_suggested
+ex_299,Salto de sapo,asthma,Asma ,caution,confirmed
+ex_299,Salto de sapo,heart_condition,Condição Cardíaca ,caution,confirmed
+ex_299,Salto de sapo,high_blood_pressure,Hipertensão ,caution,confirmed
+ex_299,Salto de sapo,joint_problems_severe,Problemas Articulares Graves,caution,ai_suggested
+ex_299,Salto de sapo,knee_pain,Joelho,caution,ai_suggested
+ex_299,Salto de sapo,obesity,Obesidade ,caution,confirmed
+ex_299,Salto de sapo,pelvic_floor_issues,Problemas no Assoalho Pélvico,caution,ai_suggested
+ex_299,Salto de sapo,pregnancy,Gravidez,avoid,confirmed
+ex_299,Salto de sapo,pregnancy_postpartum,Pós-parto,caution,confirmed

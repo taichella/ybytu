@@ -1,0 +1,9 @@
+dietary_preference_id,name_ptbr,name_en,name_fr,id,sort_order
+flexitarian, Evito carne/ovos/leite - mas como de vez em quando, I mostly eat plant-based  but have meat/eggs/milk occasionally, Je mange surtout végétarien  mais de la viande/des oeufs/du lait de temps en temps,1dfca1de-1643-4b0d-beaa-f00a786f7c91,7
+no_pork, Não como carne suína, I don't eat pork, Je ne mange pas de porc,7a6b9155-1859-4c42-b4f9-be3d27974198,4
+no_red_meat, Não como carne vermelha, I don't eat red meat, Je ne mange pas de viande rouge,ba1ed2e6-b812-4b79-b297-63a024e1d168,3
+no_seafood, Não como frutos do mar, I don't eat seafood, Je ne mange pas de fruits de mer,df2d097b-2aaf-49c3-ad4b-07b8f62e4642,6
+omnivore, Como de tudo, I eat everything, Je mange de tout,17887023-ee9a-43ed-890a-2909e1d56960,0
+pescetarian, Não como carne e frango mas como peixe, No meat or poultry but I eat fish, Pas de viande ni de volaille mais je mange du poisson,9b02f99b-b739-478f-8e48-32c056394356,5
+vegan, Vegana, Vegan, Végane,f2c92004-ea4e-437a-9a65-58aa203b7135,2
+vegetarian, Vegetariana, Vegetarian, Végétarien,b5399bb6-daf8-4d5e-9877-2235e12453cf,1

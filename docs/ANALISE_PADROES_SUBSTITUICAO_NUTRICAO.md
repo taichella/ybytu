@@ -1,5 +1,10 @@
 # Análise de Padrões — Substituição de Ingredientes (99 refeições)
 
+> ⚠️ **SUPERADO em 2026-09-02.** Escrito sobre uma lista não validada contra o banco. A versão
+> boa é `docs/NUTRICIONISTA_SUBSTITUICOES_INGREDIENTES_20260901.csv` (01/09), validada linha a
+> linha contra o banco real, 21 casos falsos removidos. Nada aqui foi apagado, só marcado como
+> superado — use o CSV novo.
+
 Análise pedida antes de decidir a estratégia de correção do problema descrito em
 `REVISAO_NUTRICIONISTA.md`. **Nenhuma refeição foi alterada** — isto é só leitura e
 comparação de dados já existentes no banco (as 99 linhas com `is_active=false`).

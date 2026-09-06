@@ -250,6 +250,7 @@ function buildCalendar(
 async function buildTrainingSection(
   supabase: SupabaseClient,
   profile: any,
+  audience: 'staff' | 'student',
 ): Promise<{ section: Record<string, unknown> | null; dayCount: number; issuedAt: Date | null }> {
   if (!profile.current_training_plan_id) {
     return { section: null, dayCount: 0, issuedAt: null }
@@ -257,7 +258,7 @@ async function buildTrainingSection(
 
   const { data: planRow, error: planErr } = await supabase
     .from('training_plans')
-    .select('training_plan_id, name_ptbr, created_at, caution_warnings, is_active, ai_filled_slots, deterministic_fallback_slots')
+    .select('training_plan_id, name_ptbr, created_at, caution_warnings, skipped_slots, is_active, ai_filled_slots, deterministic_fallback_slots')
     .eq('id', profile.current_training_plan_id)
     .maybeSingle()
   if (planErr) throw new Error(`Lookup do training_plan falhou: ${planErr.message}`)
@@ -292,6 +293,20 @@ async function buildTrainingSection(
       if (!cautionByExerciseId.has(exId)) cautionByExerciseId.set(exId, [])
       cautionByExerciseId.get(exId)!.push(warning.mensagem)
     }
+  }
+
+  // Slot pulado (grupo muscular sem candidato seguro, ver
+  // docs/ACHADO_DEGRADACAO_SILENCIOSA_20260904.md): mensagem já vem pronta
+  // do gerador, uma versão pra quem revisa (staff — instrui a adicionar
+  // manualmente se julgar seguro) e outra pro aluno (sem jargão de "slot"/
+  // "grupo-alvo"). Só uma pode existir na tela ao mesmo tempo -- nunca as
+  // duas juntas, pra não misturar tom clínico com tom de aluno na mesma
+  // página.
+  const skippedNoteByDay = new Map<number, string>()
+  for (const skip of (planRow.skipped_slots ?? []) as Array<{ day_number: number; mensagem_staff: string; mensagem_aluno: string }>) {
+    const texto = audience === 'staff' ? skip.mensagem_staff : skip.mensagem_aluno
+    const existing = skippedNoteByDay.get(skip.day_number)
+    skippedNoteByDay.set(skip.day_number, existing ? `${existing} ${texto}` : texto)
   }
 
   // Agrupa por day_number preservando a ordem já vinda do ORDER BY.
@@ -402,6 +417,7 @@ async function buildTrainingSection(
       estimated_minutes: estimatedMinutes,
       estimated_kcal: estimatedKcal,
       adapted_note_ptbr: dayCautionMessages.size ? [...dayCautionMessages].join(' ') : null,
+      skipped_note_ptbr: skippedNoteByDay.get(dayNumber) ?? null,
       exercises,
     }
   })
@@ -756,6 +772,9 @@ async function buildReviewSection(
 export async function buildPlanPayload(
   supabase: SupabaseClient,
   userId: string,
+  // 'student' por padrão (mais seguro: mensagem sem instrução de editor pra
+  // quem não tem editor). ybytu-get-plan-for-staff passa 'staff' explícito.
+  audience: 'staff' | 'student' = 'student',
 ): Promise<Record<string, unknown>> {
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
@@ -795,7 +814,7 @@ export async function buildPlanPayload(
     // health_conditions_ids É direto (confirmado no gerador de treino, sem hop),
     // por isso só este aqui precisou trocar de tabela.
     labelMapByUuid(supabase, 'onboarding_physical_conditions', profile.physical_conditions_ids ?? [], 'name_ptbr'),
-    buildTrainingSection(supabase, profile),
+    buildTrainingSection(supabase, profile, audience),
     buildNutritionSection(supabase, profile),
     buildReviewSection(supabase, userId),
   ])
@@ -870,6 +889,13 @@ export async function buildPlanPayload(
       goals_ptbr: goalRows.map((g: any) => g.name_ptbr),
       physical_limitations_ptbr: [...physicalLimitations.values()],
       health_limitations_ptbr: [...healthLimitations.values()],
+      // "Outra limitação" não tem slug em physical_condition_exercise_slugs —
+      // nenhum filtro de avoid/caution roda pra quem marcou só essa opção.
+      // Sinaliza pro aluno não treinar sem contato humano antes (ver
+      // [[project_ai_caution_proposals_review_gap_measured]] e achado de
+      // 2026-09-04 sobre lacuna de captura no onboarding).
+      has_unclassified_physical_condition: [...physicalLimitations.values()]
+        .some((v) => String(v).trim().toLowerCase() === 'outra limitação'),
     },
     training: trainingResult.section,
     nutrition: nutritionResult.section,
