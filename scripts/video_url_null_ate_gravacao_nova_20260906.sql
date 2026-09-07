@@ -1,5 +1,13 @@
 -- ============================================================================
--- NAO EXECUTADO -- preparado 2026-09-06, esperando confirmacao da Taina.
+-- EXECUTADO em 2026-09-06 15:45:07 UTC (17:45:07 CEST) -- confirmado pelo
+-- backed_up_at de exercises_video_url_backup_20260906. O UPDATE rodou entre
+-- os commits 4a1460a9 (17:15 CEST, "prepara nao executa") e 1256e86f (17:47
+-- CEST) da mesma sessao (session_01AdbTLYvcRTUQWfXvsTiYCb) -- ninguem
+-- commitou um "fix:" correspondente na hora, so o comentario deste arquivo
+-- ficou dizendo "NAO EXECUTADO" por engano. Corrigido agora, 2026-09-07,
+-- depois de a Taina notar a inconsistencia e pedir reconstrucao via timestamp
+-- de backup. Estado no banco confirmado de novo nesta data: os 7 exercise_id
+-- abaixo com video_url IS NULL.
 --
 -- 7 exercicios com video_url apontando pro video ERRADO (confirmado abrindo
 -- cada link do Drive e lendo o nome ORIGINAL do arquivo -- ver
