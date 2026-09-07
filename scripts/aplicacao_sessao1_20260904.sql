@@ -22,6 +22,25 @@
 -- schema.sql (nutricao, real) e docs/SCHEMA.md (resto, desatualizado desde
 -- 2026-08-05 mas exercise_condition_proposals nao mudou desde entao -- ok
 -- usar). Se algo aqui nao bater com o banco, o banco manda, nao este script.
+--
+-- REGRA -- vale pra QUALQUER sessao futura, mesmo uma sem este contexto:
+-- a IA (Claude Code) NUNCA preenche os placeholders <<< PREENCHER deste
+-- script com respostas reais da nutricionista/personal, nem por engano nem
+-- "so pra testar" -- em hipotese nenhuma. So a Taina preenche os valores e
+-- confirma; a IA roda depois disso, nunca antes, nunca sozinha.
+-- Se a IA precisar testar a MECANICA do script (guarda, casamento de
+-- rule_id, contagem "Afeta" etc.), usa valores obviamente falsos (ex:
+-- decisao = 'caution' num bloco de teste isolado, food_id inexistente) e
+-- termina com ROLLBACK, nunca COMMIT -- mesmo padrao ja usado em C-B3
+-- (testado 2026-09-05 com BEGIN...ROLLBACK, ver comentario mais abaixo).
+-- Motivo: em 2026-09-06 outro script desta mesma familia (video_url dos 7
+-- exercicios com video trocado) foi executado em producao durante uma sessao
+-- de preparo, sem commit "fix:" registrando na hora -- o comentario do
+-- arquivo ficou dizendo "NAO EXECUTADO" por dias enquanto o UPDATE ja tinha
+-- rodado. Este script mexe em allergen_review_status, food_restriction_tags,
+-- muscle_groups_ids e exercise_condition_proposals com base em decisao
+-- clinica de profissional -- o mesmo descuido aqui e muito mais grave que
+-- num campo de video.
 -- ============================================================================
 
 
