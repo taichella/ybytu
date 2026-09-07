@@ -99,10 +99,13 @@ ON CONFLICT DO NOTHING;
 
 -- ---- A2. Bloco 2a -- piso minimo de proteina --------------------------------
 -- NAO E MUDANCA DE BANCO. E um parametro usado em codigo (troca a categoria
--- "Refeicao Incompleta" de auditoria por corte de protein_g). Quando a
--- resposta chegar (10g/15g/20g/outro), atualizar o valor onde a auditoria de
--- proteina le esse piso -- nao existe coluna/config table pra isso hoje.
--- Deixado aqui so pra nao se perder na lista de pendencias, sem SQL.
+-- "Refeicao Incompleta" de auditoria por corte de protein_g). Deixado aqui so
+-- pra nao se perder na lista de pendencias, sem SQL.
+--
+-- RESPONDIDO (Taina, 2026-09-07): 20g e o padrao; 15g opera durante o piloto;
+-- 10g e o piso absoluto (nunca aceitar abaixo disso como "completa"). Ainda
+-- NAO implementado em codigo -- fica pra quando chegar a vez desta mudanca,
+-- com dimensionamento proprio nessa hora.
 
 -- ---- A3. Bloco 2b -- coco, tree_nuts ou nao ---------------------------------
 -- IDs dos 7 alimentos de coco nao estavam listados no documento da sessao --
