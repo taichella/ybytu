@@ -1,5 +1,11 @@
--- NAO EXECUTAR ainda -- preparado 2026-09-04, aguardando confirmacao dos
--- rotulos pt-BR na Sessao 1 do personal (docs/SESSAO_1_PERSONAL_20260903.md).
+-- CONFIRMADO em 2026-09-07 -- personal confirmou os 7 rotulos propostos
+-- abaixo ("Confirma" pros 7, ver docs/SESSAO_1_PERSONAL_20260903.md, secao
+-- "Extra: confirme os rotulos"). Nenhum valor mudou em relacao a proposta
+-- original -- so tira a guarda "NAO EXECUTAR ainda". Rodar junto com
+-- scripts/aplicacao_sessao1_20260904.sql na mesma sessao (Taina, 2026-09-07):
+-- sem isso, 9 das 13 regras de caution/avoid que a Secao B decide ficam sem
+-- nenhum aluno capaz de declarar a condicao correspondente -- ver
+-- [[project_onboarding_physical_conditions_blocks_sessao1]].
 --
 -- Expande a pergunta de onboarding "Possui alguma dor ou limitacao fisica?"
 -- de 7 para 14 opcoes, adicionando as 7 condicoes que ja existem em
