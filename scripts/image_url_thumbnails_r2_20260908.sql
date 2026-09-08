@@ -1,8 +1,10 @@
 -- ============================================================================
--- NAO EXECUTAR ainda -- preparado 2026-09-08. So roda depois que a Taina
--- confirmar que arrastou os 185 arquivos de C:ybytu2_thumbnails pro
--- bucket videos no painel Cloudflare (upload manual, sem token de escrita --
--- ver docs/MIGRACAO_VIDEOS_CLOUDFLARE_20260904.md pro raciocinio).
+-- EXECUTADO 2026-09-08 18:46:48 UTC -- backup em exercises_image_url_backup_20260908_r2
+-- (185 linhas confirmadas). Taina confirmou os 185 arquivos de
+-- C:\ybytu\r2_thumbnails\ arrastados pro bucket videos no painel Cloudflare
+-- (upload manual, sem token de escrita -- ver
+-- docs/MIGRACAO_VIDEOS_CLOUDFLARE_20260904.md pro raciocinio). Testado antes
+-- de rodar: 4 nomes com espaco/parenteses resolveram 200 via R2_PUBLIC_BASE.
 --
 -- image_url grava a CHAVE do objeto (mesmo padrao do video_url), resolvida
 -- pelo mesmo resolveR2Media() em buildPlanPayload.ts (ja deployado, commit
