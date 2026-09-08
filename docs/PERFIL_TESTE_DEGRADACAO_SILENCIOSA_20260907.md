@@ -36,6 +36,15 @@ suficiente") e **não** esvaziam nenhum grupo muscular mesmo no pior caso — n�
 teste. A combinação acima funciona porque mira um músculo com exatamente 1 exercício elegível no
 pool mais raso do catálogo, não uma condição com muitas regras.
 
+## Reuso 2026-09-08: também serviu pra validar o fix do dedupe
+
+O mesmo perfil (pool raro o bastante pra forçar repetição) expôs, no primeiro teste, um bug
+separado na dedupe (ver commit `ad8afe5`): o mesmo `exercise_id` repetia até 3x no mesmo dia sem
+aviso. Reativei a conta, gerei de novo pós-fix (`tr_ai_77fe15a9`) e confirmei: dias 1 e 3 (pool
+mais raso) caem de 3x pra 2x o mesmo exercício com aviso visível; dias 2 e 4 perdem a repetição por
+completo; nenhum dia fura o piso de 3 exercícios reais. Reconfirma o valor de manter esse perfil
+pronto — serviu pra dois achados reais em dois dias diferentes.
+
 ## Como reproduzir / reusar
 
 1. Reativar a conta (remover o ban): `UPDATE auth.users SET banned_until = NULL WHERE id = 'aa00f8dd-e2c0-4fea-90e3-e0713eb08eea';`
