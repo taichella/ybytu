@@ -1036,6 +1036,12 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
       return { ...slot, chosen_exercise_id: det.exercise_id, skipped: det.skipped, filled_by: det.skipped ? 'skipped' as const : 'deterministic' as const }
     })
 
+    // Piso movido pra cá (era declarado só depois da dedupe) -- a dedupe
+    // 2026-09-07 precisa dele pra decidir "pular vale a pena" ANTES de saber
+    // se algum dia ficou abaixo do mínimo; o corte de starvedDay mais abaixo
+    // reusa esta mesma constante, não duplica o número.
+    const MIN_SLOTS_PER_DAY = 3
+
     // ── DEDUPE (dentro do dia): dois slots do mesmo dia nunca podem acabar
     // com o mesmo exercício, mesmo quando o exercise_id é diferente -- achado
     // 2026-09-04 (Marina Santos: ex_194 e ex_216, ambos "Flexão de braço com
@@ -1066,10 +1072,32 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
       slotsByDayForDedupe.set(s.day_number, list)
     }
 
-    const dedupedFilledSlots = filledSlots.map(s => ({ ...s }))
+    // ACHADO 2026-09-07 (teste ao vivo da degradação silenciosa, ex_152
+    // "Prancha com toque de ombro" 3x no mesmo dia): a dedupe por nome já
+    // detectava esse caso -- mesmo exercise_id normaliza pro mesmo nome, cai
+    // na mesma branch de "duplicata por nome" na 2ª ocorrência. O que faltava
+    // era distinguir o resultado: repetir o MESMO exercise_id (zero variação
+    // de movimento) é pior do que repetir por NOME com exercise_id diferente
+    // (pelo menos são cadastros distintos, mesmo que o catálogo tenha 19
+    // pares de nome duplicado por corrigir). Antes, os dois casos caíam no
+    // mesmo fallback silencioso. Agora: mesmo exercise_id sem alternativa
+    // tenta pular o slot -- mas só se sobrar pelo menos MIN_SLOTS_PER_DAY
+    // depois de pular (checado slot a slot, não de uma vez só, pra não
+    // derrubar um dia que teria só 1 repetição de sobra pra cortar). Se
+    // pular fizer o dia furar o piso, mantém o repetido só nesse caso e
+    // registra um aviso em skipped_slots -- reaproveita a mesma coluna e o
+    // mesmo badge âmbar de UserPlan.jsx, sem migração nova. Nome diferente
+    // com exercise_id diferente continua exatamente como antes (mantém
+    // silenciosamente): esse é o caso que a dedupe foi desenhada pra tolerar,
+    // não o que motivou esta mudança.
+    const dedupedFilledSlots: any[] = filledSlots.map(s => ({ ...s }))
+    const repeatedKeptEntries: Array<{ day_number: number; target_muscle_groups: string[] }> = []
+
     for (const daySlots of slotsByDayForDedupe.values()) {
       const usedNames = new Set<string>()
+      const usedExerciseIds = new Set<string>()
       const sortedDaySlots = [...daySlots].sort((a, b) => a.order_within_day - b.order_within_day)
+      let keptCountForDay = daySlots.filter(s => !s.skipped).length
 
       for (const slot of sortedDaySlots) {
         if (slot.skipped || !slot.chosen_exercise_id) continue
@@ -1080,6 +1108,7 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
 
         if (!usedNames.has(chosenName)) {
           usedNames.add(chosenName)
+          usedExerciseIds.add(slot.chosen_exercise_id)
           continue
         }
 
@@ -1095,10 +1124,28 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
           const target = dedupedFilledSlots.find(d => d.day_number === slot.day_number && d.order_within_day === slot.order_within_day)
           if (target) target.chosen_exercise_id = alternative.exercise_id
           usedNames.add(normalizeExerciseName(alternative.name_ptbr))
+          usedExerciseIds.add(alternative.exercise_id)
+          continue
+        }
+
+        const sameExerciseIdAsEarlierSlot = usedExerciseIds.has(slot.chosen_exercise_id)
+        if (sameExerciseIdAsEarlierSlot && keptCountForDay - 1 >= MIN_SLOTS_PER_DAY) {
+          // mesmo exercise_id, sem alternativa, e o dia aguenta perder este
+          // slot sem furar o piso -- pula em vez de repetir.
+          const target = dedupedFilledSlots.find(d => d.day_number === slot.day_number && d.order_within_day === slot.order_within_day)
+          if (target) { target.skipped = true; target.skip_reason = 'duplicate_exercise_no_alternative' }
+          keptCountForDay -= 1
+        } else if (sameExerciseIdAsEarlierSlot) {
+          // pularia furar o piso -- mantém o repetido, mas com aviso visível
+          // (diferente do fallback silencioso de antes).
+          repeatedKeptEntries.push({ day_number: slot.day_number, target_muscle_groups: slot.target_muscle_groups })
+          usedNames.add(chosenName)
         } else {
-          // pool raso, sem alternativa -- mantém o repetido de propósito
-          // (regra já registrada acima: repetir um bom exercício é melhor
-          // que forçar um ruim só por variedade)
+          // pool raso, sem alternativa, mas é nome duplicado com exercise_id
+          // DIFERENTE (o caso original que a dedupe foi criada pra tolerar) --
+          // mantém o repetido de propósito, sem aviso (regra já registrada
+          // acima: repetir um bom exercício é melhor que forçar um ruim só
+          // por variedade).
           usedNames.add(chosenName)
         }
       }
@@ -1114,8 +1161,8 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
     // no_safe_exercises: recusa a geração inteira em vez de entregar um dia
     // que não é mais um treino de verdade — cai na mesma fila de
     // ybytu-admin-failed-plans / retry que a recusa por pool vazio já usa,
-    // não inventa um terceiro estado ("plano parcialmente ruim").
-    const MIN_SLOTS_PER_DAY = 3
+    // não inventa um terceiro estado ("plano parcialmente ruim"). Constante
+    // declarada mais acima (antes da dedupe), reusada aqui.
     const realCountByDay = new Map<number, number>()
     for (const s of filledSlotsKept) realCountByDay.set(s.day_number, (realCountByDay.get(s.day_number) ?? 0) + 1)
     const starvedDay = [...new Set(filledSlots.map(s => s.day_number))]
@@ -1132,30 +1179,58 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Nomes de grupo muscular pros avisos de slot pulado (só busca se algo
-    // foi pulado — caminho comum não paga essa query).
+    // Nomes de grupo muscular pros avisos de slot pulado/repetido (só busca
+    // se tiver algo pra avisar — caminho comum não paga essa query).
     const skippedMuscleGroupNameBySlug = new Map<string, string>()
-    if (skippedSlots.length > 0) {
-      const slugsNeeded = [...new Set(skippedSlots.flatMap(s => s.target_muscle_groups ?? []))]
+    if (skippedSlots.length > 0 || repeatedKeptEntries.length > 0) {
+      const slugsNeeded = [...new Set([
+        ...skippedSlots.flatMap(s => s.target_muscle_groups ?? []),
+        ...repeatedKeptEntries.flatMap(e => e.target_muscle_groups ?? []),
+      ])]
       const { data: mgRows } = await supabase.from('muscle_groups').select('muscle_group_id, name_ptbr').in('muscle_group_id', slugsNeeded)
       for (const row of (mgRows ?? [])) skippedMuscleGroupNameBySlug.set(row.muscle_group_id, row.name_ptbr)
     }
 
-    // skipped_slots: um registro por slot pulado, com as DUAS mensagens já
-    // prontas (staff e aluno) -- evita reconstruir texto em buildPlanPayload.ts
-    // toda vez que o plano é lido, e evita divergência de redação entre as
-    // duas telas.
-    const skippedSlotsPayload = skippedSlots.map(s => {
-      const namesPtbr = (s.target_muscle_groups ?? []).map((g: string) => skippedMuscleGroupNameBySlug.get(g) ?? g)
-      const namesJoined = namesPtbr.length > 0 ? namesPtbr.join(', ') : 'um grupo muscular'
-      return {
-        day_number: s.day_number,
-        target_muscle_groups: s.target_muscle_groups ?? [],
-        condition_slugs: userConditionSlugs,
-        mensagem_staff: `Nenhum exercício seguro de ${namesJoined} disponível dadas as condições físicas declaradas. Você pode adicionar um exercício manualmente no construtor se julgar seguro — a decisão é clínica.`,
-        mensagem_aluno: `Este dia tem menos exercícios do que o normal porque as limitações físicas que você declarou restringiram as opções seguras de ${namesJoined}.`,
-      }
-    })
+    // skipped_slots: um registro por slot pulado OU repetido-sem-alternativa,
+    // com as DUAS mensagens já prontas (staff e aluno) -- evita reconstruir
+    // texto em buildPlanPayload.ts toda vez que o plano é lido, e evita
+    // divergência de redação entre as duas telas. Mesma coluna/schema pros
+    // dois casos (skip_reason distingue o motivo); repeatedKeptEntries nunca
+    // marca skipped=true no slot -- o exercício continua no plano, só ganha
+    // o aviso.
+    const skippedSlotsPayload = [
+      ...skippedSlots.map(s => {
+        const namesPtbr = (s.target_muscle_groups ?? []).map((g: string) => skippedMuscleGroupNameBySlug.get(g) ?? g)
+        const namesJoined = namesPtbr.length > 0 ? namesPtbr.join(', ') : 'um grupo muscular'
+        if (s.skip_reason === 'duplicate_exercise_no_alternative') {
+          return {
+            day_number: s.day_number,
+            target_muscle_groups: s.target_muscle_groups ?? [],
+            condition_slugs: userConditionSlugs,
+            mensagem_staff: `Um slot de ${namesJoined} foi removido neste dia porque o único exercício seguro disponível pra esse grupo (nível/ambiente/condições atuais) já preenchia outro slot -- repetir o mesmo exercício de novo não agregaria treino real. Você pode adicionar um exercício manualmente no construtor se julgar seguro.`,
+            mensagem_aluno: `Este dia tem menos exercícios do que o normal porque a opção segura disponível pra um dos grupos musculares já tinha sido usada em outro exercício do dia.`,
+          }
+        }
+        return {
+          day_number: s.day_number,
+          target_muscle_groups: s.target_muscle_groups ?? [],
+          condition_slugs: userConditionSlugs,
+          mensagem_staff: `Nenhum exercício seguro de ${namesJoined} disponível dadas as condições físicas declaradas. Você pode adicionar um exercício manualmente no construtor se julgar seguro — a decisão é clínica.`,
+          mensagem_aluno: `Este dia tem menos exercícios do que o normal porque as limitações físicas que você declarou restringiram as opções seguras de ${namesJoined}.`,
+        }
+      }),
+      ...repeatedKeptEntries.map(e => {
+        const namesPtbr = (e.target_muscle_groups ?? []).map((g: string) => skippedMuscleGroupNameBySlug.get(g) ?? g)
+        const namesJoined = namesPtbr.length > 0 ? namesPtbr.join(', ') : 'um grupo muscular'
+        return {
+          day_number: e.day_number,
+          target_muscle_groups: e.target_muscle_groups ?? [],
+          condition_slugs: userConditionSlugs,
+          mensagem_staff: `Este dia repete o mesmo exercício de ${namesJoined} porque o catálogo não tem alternativa distinta pra esse grupo muscular nesse nível/ambiente, e remover o slot deixaria o dia abaixo do mínimo de exercícios. Considere adicionar uma variação manualmente se houver uma segura.`,
+          mensagem_aluno: `Você vai notar o mesmo exercício mais de uma vez neste dia -- isso acontece porque as opções seguras disponíveis pra esse grupo muscular são limitadas no momento, não é engano.`,
+        }
+      }),
+    ]
 
     const chosenExerciseIds = [...new Set(filledSlotsKept.map(s => s.chosen_exercise_id))]
 
