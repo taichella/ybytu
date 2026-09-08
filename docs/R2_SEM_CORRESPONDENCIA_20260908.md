@@ -1,0 +1,85 @@
+# Sem correspondencia real -- casamento R2 x Drive -- 2026-09-08
+
+Nada aqui tem candidato plausivel do outro lado (nem exato, nem por erro de digitacao/palavra faltando). Ver docs/R2_REVISAO_MANUAL_20260908.md pros quase-match e ambiguos.
+
+## 7 exercicios do CSV sem nenhum arquivo correspondente no R2
+
+| exercise_id | nome | arquivo original (Drive) |
+|---|---|---|
+| ex_113 | Abdominal na máquina | ABDOMINAL NA MAQUINA.MOV |
+| ex_132 | Abdominal declinado no banco com peso | ABDOMINAL DECLINADO COM PESO.MOV |
+| ex_166 | Face pull com elástico | FACE PULL COM ELASTICO.MOV |
+| ex_255 | Face Pull com elástico | FACE PULL COM ELASTICO.MOV |
+| ex_219 | Extensão de tríceps com elástico | EXTENSAO DE TRICEPS COM ELASTICO.MOV |
+| ex_225 | Extensão de tríceps apoiado na parede | EXTENSAO DE TRICEPS APOIADO NA PAREDE.MOV |
+| ex_234 | Extensão de tríceps na polia alta com barra reta | EXTENSAO DE TRICEPS NA POLIA ALTA BARRA RETA.MOV |
+
+## 65 arquivos do R2 sem nenhum exercicio correspondente no CSV
+
+Podem ser: exercicios cujo exercise_id nao ficou registrado no CSV (nomes tipo IMG_XXXX sugerem video bruto, nao renomeado ainda), exercicios fora do catalogo dos 293 mapeados, ou testes/duplicatas de upload.
+
+- ABMAT SIT UP_2.mp4
+- AFUNDO COM OS DOIS PES NO STEP-_1.mp4
+- AFUNDO COM STEP NO PE DA FRENTE_1_3.mp4
+- AFUNDO COM STEP NO PE DA FRENTE_1_4.mp4
+- AFUNDO COM STEP NO PE DA FRENTE_3.mp4
+- AFUNDO_2.mp4
+- AGACHAMENTOCOMDESLOCAMENTOLADEPECOMELASTICO_1_2.mp4
+- AGACHAMENTOFRONTALCOMBARRAOLIMPICA_1_2.mp4
+- AGACHAMENTOSUMOCOMCARGA_1_2.mp4
+- AGACHAMENTOSUMOSEMCARGA_1_2.mp4
+- ASSAULT BIKE_2.mp4
+- AVANCO REVERSO SMITH-_1.mp4
+- BACKSQUAT(1)_2.mp4
+- BACKSQUAT_2.mp4
+- BATTLE ROPE_2.mp4
+- BODY ROW-_1.mp4
+- BURPEEINICIANTE_2.mp4
+- CAMINHADA EM INCLINACAO_2.mp4
+- CHESS PRESS_2.mp4
+- CROSSOVER NA POLIA BAIXA_2.mp4
+- CROSSOVER NO CROSS_2.mp4
+- CRUCIFIXO INVERTIDO COM HALTER_2.mp4
+- DEALIFT UNILATERAL COM PESO_2.mp4
+- DEFICT SUMO-_1.mp4
+- DESENVOLVIMENTO NA MAQUINA_2.mp4
+- ELEVACAO DE PANTURRILHA COM HALTERES_2.mp4
+- ELEVACAO DIAGONAL_2.mp4
+- ELEVACAO FRONTAL COM ANILHA_2.mp4
+- ELEVACAO FRONTAL COM ELASTICO_2.mp4
+- ELEVACAO LATERAL DE PERNA_2.mp4
+- ESCADA_2.mp4
+- FLEXAO DE BRACO ADPTADA-_1.mp4
+- FLEXAO NA CAIXA_2.mp4
+- HALF BURPEE ADAPTADO_2.mp4
+- HALF BURPEE_2.mp4
+- HOLLOW ROCKS_2.mp4
+- IMG_8455_2.mp4
+- IMG_8457_2.mp4
+- IMG_8465_2.mp4
+- IMG_8889_2.mp4
+- IMG_8913_2.mp4
+- IMG_8914_2.mp4
+- LUNGE PASSADA COM HALTERES_2.mp4
+- PANTURRILHA NO STEP_2.mp4
+- PANTURRILHA SENTADA_2.mp4
+- PASSADALATERALEMPOSICAODEAGACHAMENTO_1_2.mp4
+- PONTE COM MINI BAND_2.mp4
+- PONTE DE GLUTEOS UNILATERAL-_1.mp4
+- PRANCHA LATERAL COM ELEVACAO DE PERNA_2.mp4
+- REMADA COM ELASTICO_2.mp4
+- REMADA UNILATERAL COM HALTER_2.mp4
+- ROSCA NA POLIA COM BARRA RETA_2.mp4
+- ROSCA SCOTT HALTER-_1.mp4
+- SALTOCORDAADAPTADO_2.mp4
+- SIT-UP COM ELEVACAO DE PERNAS PESO_2.mp4
+- SKI ERG_2.mp4
+- SPIDERCLIMBERS_2.mp4
+- SPRINT NA ESTEIRA CURVA_2.mp4
+- SUMO DEADLIFT HIGH PULL(1)_2.mp4
+- SUPINO NO BANCO _1_3.mp4
+- SUPINO NO BANCO _1_4.mp4
+- SUPINO NO BANCO-_1.mp4
+- TOETAPSNOSTEP_2.mp4
+- TRICEPS NA MAQUINA_2.mp4
+- WOODCHOPPER COM ELASTICO_2.mp4
