@@ -12,6 +12,25 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 // é a mesma constante de pacing que ybytu-generate-training-plan usa pra
 // decidir quantos slots cabem na duração pedida (targetSlotsPerDay), reusada
 // pra manter estimated_kcal e estimated_minutes consistentes entre si.
+// ─── Resolver de mídia R2 (vídeo/thumbnail de exercício) ────────────────────
+// Migração Drive → R2 (docs/MIGRACAO_VIDEOS_CLOUDFLARE_20260904.md, decisão
+// fechada 2026-09-04): o banco passa a guardar só a CHAVE do objeto no
+// bucket (ex: "AGACHAMENTOLIVRE 2_2.mp4"), nunca a URL resolvida -- se um dia
+// o domínio ou o modo de acesso mudar, só esta função muda, nenhuma linha do
+// banco precisa ser tocada. Migração é parcial (185/293 nesta rodada,
+// 2026-09-08): uma linha ainda não migrada continua com link de Drive
+// completo (bate no primeiro `if`, funciona sem mudança); no instante em que
+// o UPDATE daquela linha específica roda, o valor vira chave e o mesmo
+// resolver já sabe montar a URL do R2 -- sem janela de quebra, migração
+// linha a linha.
+const R2_PUBLIC_BASE = 'https://pub-b8a8c93fcde740fcb7ad36f410c9737f.r2.dev' // Public Development URL, ver doc acima pro motivo de não ser custom domain
+
+function resolveR2Media(value: string | null | undefined): string | null {
+  if (!value) return null
+  if (value.startsWith('http')) return value // ainda no Drive (ou já é URL completa) -- usa como está
+  return `${R2_PUBLIC_BASE}/${encodeURIComponent(value)}` // chave de objeto R2 -- encodeURIComponent pq nomes têm espaço/parêntese
+}
+
 const MINUTES_PER_SLOT = 7
 const MET_BY_ROLE: Record<string, number> = {
   composto_principal: 6.0,
@@ -280,7 +299,7 @@ async function buildTrainingSection(
   const exerciseIds = [...new Set(tpeRows.map(r => r.exercise_id))]
   const { data: exerciseRows, error: exErr } = await supabase
     .from('exercises')
-    .select('exercise_id, name_ptbr, instruction_ptbr, video_url, muscle_groups_ids')
+    .select('exercise_id, name_ptbr, instruction_ptbr, video_url, image_url, muscle_groups_ids')
     .in('exercise_id', exerciseIds)
   if (exErr) throw new Error(`Lookup de exercises falhou: ${exErr.message}`)
   const exerciseById = new Map((exerciseRows ?? []).map((r: any) => [r.exercise_id, r]))
@@ -378,7 +397,8 @@ async function buildTrainingSection(
         order: String.fromCharCode(65 + idx), // A, B, C...
         name_ptbr: ex?.name_ptbr ?? null,
         instruction_ptbr: ex?.instruction_ptbr ?? null,
-        video_url: ex?.video_url ?? null,
+        video_url: resolveR2Media(ex?.video_url),
+        image_url: resolveR2Media(ex?.image_url),
         sets: slot.sets,
         reps_ptbr: String(slot.reps), // schema só tem 1 valor de reps, não faixa min-max
         cadence_ptbr: cadencePtbr(slot),
