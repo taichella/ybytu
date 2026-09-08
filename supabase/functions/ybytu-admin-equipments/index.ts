@@ -35,8 +35,8 @@ serve(async (req) => {
     const auth = await resolveStaffFromRequest(req, supabase)
     if (!auth.ok) return json({ error: auth.reason }, auth.status, corsHeaders)
 
-    if (!requireRole(auth.staff, 'admin')) {
-      return json({ error: 'role_required_admin' }, 403, corsHeaders)
+    if (!requireRole(auth.staff, 'personal') && !requireRole(auth.staff, 'admin')) {
+      return json({ error: 'role_required_personal_or_admin' }, 403, corsHeaders)
     }
 
     const body = await req.json().catch(() => null)
