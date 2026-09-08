@@ -1,0 +1,229 @@
+-- ============================================================================
+-- NAO EXECUTAR ainda -- preparado 2026-09-08. So roda depois que a Taina
+-- confirmar que arrastou os 185 arquivos de C:ybytu2_thumbnails pro
+-- bucket videos no painel Cloudflare (upload manual, sem token de escrita --
+-- ver docs/MIGRACAO_VIDEOS_CLOUDFLARE_20260904.md pro raciocinio).
+--
+-- image_url grava a CHAVE do objeto (mesmo padrao do video_url), resolvida
+-- pelo mesmo resolveR2Media() em buildPlanPayload.ts (ja deployado, commit
+-- a55d8f5 -- ja le e resolve image_url, so faltava a coluna ter valor).
+-- Nome do arquivo = mesmo nome do video, extensao trocada pra .jpg -- gerado
+-- por scripts locais, frame a 40% da duracao (ver conversa 2026-09-08).
+-- ============================================================================
+
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS exercises_image_url_backup_20260908_r2 (
+  exercise_id text, image_url text, backed_up_at timestamptz
+);
+
+INSERT INTO exercises_image_url_backup_20260908_r2 (exercise_id, image_url, backed_up_at)
+SELECT e.exercise_id, e.image_url, now()
+FROM exercises e
+WHERE e.exercise_id IN (
+  'ex_003', 'ex_004', 'ex_005', 'ex_006', 'ex_008', 'ex_009', 'ex_010', 'ex_011', 'ex_012', 'ex_014', 'ex_016', 'ex_017', 'ex_019', 'ex_020', 'ex_021', 'ex_022', 'ex_023', 'ex_024', 'ex_027', 'ex_029', 'ex_030', 'ex_032', 'ex_034', 'ex_035', 'ex_036', 'ex_037', 'ex_038', 'ex_040', 'ex_041', 'ex_042', 'ex_043', 'ex_044', 'ex_047', 'ex_049', 'ex_052', 'ex_057', 'ex_059', 'ex_064', 'ex_076', 'ex_077', 'ex_084', 'ex_088', 'ex_091', 'ex_092', 'ex_094', 'ex_097', 'ex_100', 'ex_102', 'ex_104', 'ex_105', 'ex_106', 'ex_109', 'ex_111', 'ex_112', 'ex_114', 'ex_115', 'ex_116', 'ex_119', 'ex_122', 'ex_123', 'ex_127', 'ex_129', 'ex_130', 'ex_131', 'ex_133', 'ex_134', 'ex_137', 'ex_138', 'ex_142', 'ex_143', 'ex_144', 'ex_146', 'ex_149', 'ex_151', 'ex_153', 'ex_154', 'ex_155', 'ex_156', 'ex_157', 'ex_158', 'ex_159', 'ex_160', 'ex_161', 'ex_162', 'ex_163', 'ex_164', 'ex_165', 'ex_167', 'ex_168', 'ex_171', 'ex_172', 'ex_173', 'ex_174', 'ex_175', 'ex_177', 'ex_178', 'ex_180', 'ex_181', 'ex_182', 'ex_183', 'ex_185', 'ex_186', 'ex_187', 'ex_188', 'ex_189', 'ex_190', 'ex_192', 'ex_193', 'ex_195', 'ex_196', 'ex_197', 'ex_198', 'ex_199', 'ex_200', 'ex_201', 'ex_202', 'ex_203', 'ex_204', 'ex_205', 'ex_206', 'ex_207', 'ex_208', 'ex_209', 'ex_210', 'ex_211', 'ex_212', 'ex_213', 'ex_217', 'ex_218', 'ex_220', 'ex_221', 'ex_222', 'ex_223', 'ex_226', 'ex_227', 'ex_228', 'ex_229', 'ex_230', 'ex_231', 'ex_232', 'ex_233', 'ex_238', 'ex_239', 'ex_240', 'ex_241', 'ex_242', 'ex_243', 'ex_244', 'ex_246', 'ex_247', 'ex_248', 'ex_249', 'ex_252', 'ex_253', 'ex_254', 'ex_256', 'ex_257', 'ex_258', 'ex_259', 'ex_260', 'ex_261', 'ex_262', 'ex_263', 'ex_264', 'ex_265', 'ex_266', 'ex_268', 'ex_269', 'ex_276', 'ex_278', 'ex_279', 'ex_280', 'ex_281', 'ex_282', 'ex_286', 'ex_289', 'ex_290', 'ex_292', 'ex_293', 'ex_294', 'ex_295', 'ex_296', 'ex_297', 'ex_298', 'ex_299'
+)
+  AND NOT EXISTS (
+    SELECT 1 FROM exercises_image_url_backup_20260908_r2 b WHERE b.exercise_id = e.exercise_id
+  );
+
+UPDATE exercises e SET image_url = v.r2_key
+FROM (VALUES
+  ('ex_003', 'AGACHAMENTOSUMOISO_1_2.jpg'),
+  ('ex_004', 'AGACHAMENTO COM HALTERES_2.jpg'),
+  ('ex_005', 'PASSADACOMHALTERES_1_2.jpg'),
+  ('ex_006', 'AGACHAMENTOFRONTALCOMKETTUBEL_1_2.jpg'),
+  ('ex_008', 'CADEIRAEXTENSORA_1_2.jpg'),
+  ('ex_009', 'AGACHAMENTONOSMITH_1_2.jpg'),
+  ('ex_010', 'AGACHAMENTOFRONTALCOMBARRA_1_2.jpg'),
+  ('ex_011', 'AVANCOCOMBARRA_1_2.jpg'),
+  ('ex_012', 'THRUSTHER_1_2.jpg'),
+  ('ex_014', 'FRONT SQUAT BARRA_2.jpg'),
+  ('ex_016', 'BULGAROCOMDUMBEL_2.jpg'),
+  ('ex_017', 'BULGAROCOMBARRA_2.jpg'),
+  ('ex_019', 'COSSACKSQUAT_1_2.jpg'),
+  ('ex_020', 'BULGAROSEMCARGA_2.jpg'),
+  ('ex_021', 'AGACHAMENTOCOMSALTO_1_2.jpg'),
+  ('ex_022', 'AGACHAMENTOISIOMETRICONAPAREDE_1_2.jpg'),
+  ('ex_023', 'STEP UP NO DEGRAU_2.jpg'),
+  ('ex_024', 'LUNGE PASSADA_2.jpg'),
+  ('ex_027', 'CADEIRAEXTENSORAUNILATERAL_1_2.jpg'),
+  ('ex_029', 'HACK SQUAT_2.jpg'),
+  ('ex_030', 'AGACHAMENTOFRONTALDUMBEL_1_2.jpg'),
+  ('ex_032', 'AGACHAMENTOCOMDESLOCAMENTOLATERALDEPE_1_2.jpg'),
+  ('ex_034', 'BOX SQUAT_2.jpg'),
+  ('ex_035', 'BOX SQUAT HALTERES_2.jpg'),
+  ('ex_036', 'BOX SQUAT BARRA_2.jpg'),
+  ('ex_037', 'BOX SQUAT ELASTICO_2.jpg'),
+  ('ex_038', 'BOX SQUAT UNILATERAL_2.jpg'),
+  ('ex_040', 'PASSADALATERALEMPOSICAODEAGACOMELASTICO_1_2.jpg'),
+  ('ex_041', 'THRUSTERCOMBARRAOLIMPICA_1_2.jpg'),
+  ('ex_042', 'AGACHAMENTOUNILATERAL_2.jpg'),
+  ('ex_043', 'JUMP LUNGE_2.jpg'),
+  ('ex_044', 'PONTE DE GUTEOS_2.jpg'),
+  ('ex_047', 'ABDUCAO DE QUADRIL DEITADA-_1.jpg'),
+  ('ex_049', 'CADEIRA ABDUTORA_2.jpg'),
+  ('ex_052', 'DEADLIFT_2.jpg'),
+  ('ex_057', 'AGACHAMENTOBULGAROCOMCORPOINCLINDADOCOMCARGA_2.jpg'),
+  ('ex_059', 'AGACHAMENTOBULGAROCOMTRONCOINLINADO_2.jpg'),
+  ('ex_064', 'EXTENSAO DE QUADRIL NO CROSS_2.jpg'),
+  ('ex_076', 'LEG CURL COM BOLA SUICA-_1.jpg'),
+  ('ex_077', 'GOOD MORNING COM ELASTICO_2.jpg'),
+  ('ex_084', 'AVANCO REVERSO_2.jpg'),
+  ('ex_088', 'CADEIRA FLEXORA UNILATERAL_2.jpg'),
+  ('ex_091', 'STIFF UNILATERAL-_1.jpg'),
+  ('ex_092', 'STIFF UNILATERAL COM PESO_2.jpg'),
+  ('ex_094', 'ELEVACAO UNILATERAL DE PANTURRILHA-_1.jpg'),
+  ('ex_097', 'PANTURILHA SENTADA NA MAQUINA_2.jpg'),
+  ('ex_100', 'PANTURRILHA NO STEP PAUSA ISO_2.jpg'),
+  ('ex_102', 'PANTURRILHA NO SMITH-_1.jpg'),
+  ('ex_104', 'CORRIDA EM INCLINACAO-_1.jpg'),
+  ('ex_105', 'ABDOMINAL TRADICIONAL_2.jpg'),
+  ('ex_106', 'ABDOMINAL BICICLETA-_1.jpg'),
+  ('ex_109', 'ELEVACAO DE PERNAS DEITADO_2.jpg'),
+  ('ex_111', 'ABDOMINAL TRADICIONAL COM PESO_2.jpg'),
+  ('ex_112', 'RUSSIAN TWIST_2.jpg'),
+  ('ex_114', 'V-UP_2.jpg'),
+  ('ex_115', 'ABMAT SIT UP COM MEDBALL_2.jpg'),
+  ('ex_116', 'V-UP UNILATERAL_2.jpg'),
+  ('ex_119', 'REMADOR_2.jpg'),
+  ('ex_122', 'ABDOMINAL BICICLETA COM MINIBAND_2.jpg'),
+  ('ex_123', 'ABDOMINAL COM PESO_2.jpg'),
+  ('ex_127', 'REMADORAVANCADO_2.jpg'),
+  ('ex_129', 'JOELHO NO PEITO NA MAQUINA_2.jpg'),
+  ('ex_130', 'GHD SIT UP_2.jpg'),
+  ('ex_131', 'ABDOMINAL DECLINADO NO BANCO_2.jpg'),
+  ('ex_133', 'ABDOMINAL RELOGINHO_2.jpg'),
+  ('ex_134', 'TOES TO KTB_2.jpg'),
+  ('ex_137', 'BIRD DOG(1)_2.jpg'),
+  ('ex_138', 'DEAD BUG_2.jpg'),
+  ('ex_142', 'ANTI ROTACAO COM ELASTICO_2.jpg'),
+  ('ex_143', 'PALOFF PRESS(1)_2.jpg'),
+  ('ex_144', 'WOODCHOPPER NO CROSS_2.jpg'),
+  ('ex_146', 'FARMRS CARRY UNILATERAL_2.jpg'),
+  ('ex_149', 'DEAD BUG COM MINI BAND_2.jpg'),
+  ('ex_151', 'PIKE PUSH UP_2.jpg'),
+  ('ex_153', 'ELEVACAO LATERAL-_1.jpg'),
+  ('ex_154', 'DESENVOLVIMENTO_2.jpg'),
+  ('ex_155', 'REMADA ALTA COM ELASTICO_2.jpg'),
+  ('ex_156', 'DESENVOLVIMENTO COM BARRA_2.jpg'),
+  ('ex_157', 'ELEVACAO FRONTAL_2.jpg'),
+  ('ex_158', 'CRUCIFIXO INVERTIDO NO PECK DECK_2.jpg'),
+  ('ex_159', 'ARNOLD PRESS_2.jpg'),
+  ('ex_160', 'PUSH PRESS_2.jpg'),
+  ('ex_161', 'PRANCHA PIKE WALK_2.jpg'),
+  ('ex_162', 'PRANCHA COM GIRO DE TRONCO_2.jpg'),
+  ('ex_163', 'PRANCHA COM TOQUE ALTERNADO NA PAREDE_2.jpg'),
+  ('ex_164', 'DESENVOLVIMENTO COM ELASTICO_2.jpg'),
+  ('ex_165', 'ELEVACAO LATERAL COM ELASTICO_2.jpg'),
+  ('ex_167', 'DESENVOLVIMENTO NO SMITH_2.jpg'),
+  ('ex_168', 'ELEVACAO LATERAL NA POLIA_2.jpg'),
+  ('ex_171', 'REMADA ALTA COM BARRA_2.jpg'),
+  ('ex_172', 'PRESS MILITAR CO BARRA_2.jpg'),
+  ('ex_173', 'ELEVACAO FRONTAL_LATERAL_2.jpg'),
+  ('ex_174', 'FLEXAO DE BRACO TRADICINAL_2.jpg'),
+  ('ex_175', 'FLEXAO DE BRACO PEGADA ABERTA_2.jpg'),
+  ('ex_177', 'SUPINO COM HALTERES NO CHAO_2.jpg'),
+  ('ex_178', 'FLEXAO COM BAND_2.jpg'),
+  ('ex_180', 'SUPINO RETO COM BARRA_2.jpg'),
+  ('ex_181', 'SUPINO INCLINADO_2.jpg'),
+  ('ex_182', 'CROSSOVER NA POLIA_2.jpg'),
+  ('ex_183', 'CRUCIFIXO NO PEC DECK_2.jpg'),
+  ('ex_185', 'PUSH UP EXPLOSIVO COM PALMAS_2.jpg'),
+  ('ex_186', 'BURPEE COM PUSH UP_2.jpg'),
+  ('ex_187', 'FLEXAO DIAMANTE_2.jpg'),
+  ('ex_188', 'FLEXAO ISOMETRICA_2.jpg'),
+  ('ex_189', 'FLEXAO COM APOIO DE HALTERES_2.jpg'),
+  ('ex_190', 'SUPINO INCLINADO COM HALTERES_2.jpg'),
+  ('ex_192', 'CROSSOVER NA POLIA ALTA_2.jpg'),
+  ('ex_193', 'FLEXAO COM PES ELEVADOS E APOIO DE HALTERES_2.jpg'),
+  ('ex_195', 'ROSCA DIRETA COM HALTERES_2.jpg'),
+  ('ex_196', 'ROSCA ALTERNADA COM HALTERES_2.jpg'),
+  ('ex_197', 'ROSCA MARTELO_2.jpg'),
+  ('ex_198', 'ROSCA COM ELASTICO_2.jpg'),
+  ('ex_199', 'ROSCA DIRETA COM BARRA_2.jpg'),
+  ('ex_200', 'ROSCA SCOTT COM BARRA W_2.jpg'),
+  ('ex_201', 'ROSCA CONCENTRADA_2.jpg'),
+  ('ex_202', 'ROSCA INVERTIDA_2.jpg'),
+  ('ex_203', 'CHIN UP_2.jpg'),
+  ('ex_204', 'BODY ROW COM PEGADA FECHADA_2.jpg'),
+  ('ex_205', 'FLEXAO AUSTRALIANA_2.jpg'),
+  ('ex_206', 'ROSCA 21 COM HALTERES_2.jpg'),
+  ('ex_207', 'ROSCA MARTELO ALTERNADA COM HALTERES_2.jpg'),
+  ('ex_208', 'ROSCA UNILATERAL NA POLIA BAIXA_2.jpg'),
+  ('ex_209', 'ROSCA CORDA NA POLIA__2.jpg'),
+  ('ex_210', 'ROSCA MARTELO NA POLIA COM CORDA_2.jpg'),
+  ('ex_211', 'ROSCA MARTELO ALTERNADA COM ISOMETRIA_2.jpg'),
+  ('ex_212', 'ROSCA ZOTTMAN COM HALTERES_2.jpg'),
+  ('ex_213', 'ROSCA 21 NA BARRA W_2.jpg'),
+  ('ex_217', 'TRICEPS TESTA COM HALTER_2.jpg'),
+  ('ex_218', 'TRICEPS FRANCES COM HALTER_2.jpg'),
+  ('ex_220', 'TRICEPS CORDA NA POLIA_2.jpg'),
+  ('ex_221', 'TRICEPS TESTA COM BARRA_2.jpg'),
+  ('ex_222', 'TRICEPS COICE COM HALTER_2.jpg'),
+  ('ex_223', 'TRICEPS BARRA PARALELA NO GRAVITON_2.jpg'),
+  ('ex_226', 'EXTENSAO DE TRICEPS ACIMA DA CABECA-_1.jpg'),
+  ('ex_227', 'TRICEPS CORDA WRISTS_2.jpg'),
+  ('ex_228', 'TRICEPS TESTA COM BARRA W_2.jpg'),
+  ('ex_229', 'TRICEPS FRANCES UNILATERAL COM HALTERES_2.jpg'),
+  ('ex_230', 'TRICEPS NO BANCO DIPS_2.jpg'),
+  ('ex_231', 'KICK BACK COM ELASTICO_2.jpg'),
+  ('ex_232', 'TRICEPS COICE COM ELASTICO_2.jpg'),
+  ('ex_233', 'TRICEPS TESTA COM HALTERES ALTERNADO_2.jpg'),
+  ('ex_238', 'REMADA CURVADA COM HALTERES_2.jpg'),
+  ('ex_239', 'REMADA UNILATERAL COM HALTERES_2.jpg'),
+  ('ex_240', 'PULL APART COM ELASTICO_2.jpg'),
+  ('ex_241', 'PUXADA NA FRENTE  PULLDOWN-_1.jpg'),
+  ('ex_242', 'REMADA BAIXA NA MAQUINA_2.jpg'),
+  ('ex_243', 'PULLDOWN COM TRIANGULO-_1.jpg'),
+  ('ex_244', 'REMADA CAVALINHO MAQUINA_2.jpg'),
+  ('ex_246', 'BARRA FIXA PULL UP_2.jpg'),
+  ('ex_247', 'BODY ROW COM PEGADA ABERTA_2.jpg'),
+  ('ex_248', 'KIPPING PULL UP_2.jpg'),
+  ('ex_249', 'PRANCHA COM PUXADA UNILATERAL_2.jpg'),
+  ('ex_252', 'PULLDOWN COM ELASTICO_2.jpg'),
+  ('ex_253', 'REMADA UNILATERAL NA MAQUINA-_1.jpg'),
+  ('ex_254', 'CRUCIFIXO INVERTIDO NO BANCO INCLINADO_2.jpg'),
+  ('ex_256', 'PULLOVER COM HALTERES_2.jpg'),
+  ('ex_257', 'PULLOVER NO CROSS_2.jpg'),
+  ('ex_258', 'REMADA CAVALINHO T-BAR_2.jpg'),
+  ('ex_259', 'BACK EXENSION_2.jpg'),
+  ('ex_260', 'REMADA CAVALINHO NA MAQUINA PEGADA FECHADA_2.jpg'),
+  ('ex_261', 'PULL UP NO GRAVITON_2.jpg'),
+  ('ex_262', 'REMADA BAIXA ABERTA PRONADA_2.jpg'),
+  ('ex_263', 'REMADA NO TRX_2.jpg'),
+  ('ex_264', 'POLICHINELO_2.jpg'),
+  ('ex_265', 'BURPEE_2.jpg'),
+  ('ex_266', 'MONTAINCLIMBER_2.jpg'),
+  ('ex_268', 'CORRIDANAESTEIRA_2.jpg'),
+  ('ex_269', 'BICICLETAERGOMETRICA_2.jpg'),
+  ('ex_276', 'CORRIDAESTACIONARIACOMCALCANHARNOGLUTEO_2.jpg'),
+  ('ex_278', 'REMADAEMMAQUINAROW_2.jpg'),
+  ('ex_279', 'SKATERS_2.jpg'),
+  ('ex_280', 'AFUNDOCOMSALTO_2.jpg'),
+  ('ex_281', 'SPRINTSNAESTEIRA_2.jpg'),
+  ('ex_282', 'SUBIDAEDESCIDARAPIDANOSTEP_2.jpg'),
+  ('ex_286', 'CORRIDA LATERAL COM TOQUE NO CHAO_2.jpg'),
+  ('ex_289', 'TRHUSTER COM ELASTICO_2.jpg'),
+  ('ex_290', 'BEARCRAWL_2.jpg'),
+  ('ex_292', 'POLICHINELOCOMAGACHAMENTO_2.jpg'),
+  ('ex_293', 'POLICHINELOCOMTOQUENOCHAO_2.jpg'),
+  ('ex_294', 'POLICHINELOCRUZADO_2.jpg'),
+  ('ex_295', 'POLICHINELOFRONTAL_2.jpg'),
+  ('ex_296', 'PASSODEPATO_2.jpg'),
+  ('ex_297', 'PASSODECARANGUEIJO_2.jpg'),
+  ('ex_298', 'PASSODEJACARE_2.jpg'),
+  ('ex_299', 'SALTODESAPO_2.jpg')
+) AS v(exercise_id, r2_key)
+WHERE e.exercise_id = v.exercise_id;
+
+DO $$
+DECLARE n int;
+BEGIN
+  SELECT count(*) INTO n FROM exercises_image_url_backup_20260908_r2;
+  IF n <> 185 THEN
+    RAISE EXCEPTION 'Esperado 185 linhas no backup, achou %', n;
+  END IF;
+END $$;
+
+COMMIT;
