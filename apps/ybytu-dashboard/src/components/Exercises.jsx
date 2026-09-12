@@ -2,6 +2,20 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { exerciseService } from '../services/exerciseService.js';
 
+// Mesmo resolver de mídia R2 de supabase/functions/_shared/buildPlanPayload.ts
+// (resolveR2Media) -- duplicado aqui de propósito, mesma decisão já registrada
+// lá pro roleForSlot: não dá pra importar módulo Deno de dentro do bundle
+// Vite do dashboard. exercises.image_url guarda só a CHAVE do objeto no R2
+// desde a migração Drive -> R2 (2026-09-04/08); uma linha ainda não migrada
+// continua com link de Drive completo (bate no `startsWith('http')` abaixo).
+// Sem isso, o <img src={ex.image_url}> lia a chave crua como se fosse URL.
+const R2_PUBLIC_BASE = 'https://pub-b8a8c93fcde740fcb7ad36f410c9737f.r2.dev';
+function resolveR2Media(value) {
+  if (!value) return null;
+  if (value.startsWith('http')) return value;
+  return `${R2_PUBLIC_BASE}/${encodeURIComponent(value)}`;
+}
+
 const LEVEL_COLORS = {
   ini: { bg: 'var(--surface-2)', color: 'var(--muted)' },
   inter: { bg: 'rgba(59,130,246,.12)', color: '#3b82f6' },
@@ -169,6 +183,7 @@ export default function Exercises() {
       healthTitle: [...avoidIds, ...cautionIds].map((id) => healthNames.get(id) ?? id).join(', '),
       level: levelNames.get(ex.exercise_level_id) ?? ex.exercise_level_id ?? '—',
       levelStyle: levelStyle(ex.exercise_level_id),
+      imageUrl: resolveR2Media(ex.image_url),
     };
   };
 
@@ -279,8 +294,8 @@ export default function Exercises() {
                           <td style={{ padding: '12px 16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '13px' }}>
                               <div style={{ position: 'relative', width: '60px', height: '42px', borderRadius: '9px', overflow: 'hidden', flexShrink: 0, background: 'var(--surface-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
-                                {ex.image_url ? (
-                                  <img src={ex.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                {d.imageUrl ? (
+                                  <img src={d.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 ) : (
                                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
                                 )}
@@ -341,13 +356,16 @@ export default function Exercises() {
                   const d = cardData(ex);
                   return (
                     <div key={ex.id} className="yb-hover-card" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                      {/* Slot de mídia (150px) -- image_url está vazio em 298/298
-                          hoje, então na prática cai sempre no placeholder do
-                          design até a migração dos vídeos pro R2 acontecer
-                          (ver docs/MIGRACAO_VIDEOS_CLOUDFLARE_20260904.md). */}
+                      {/* Slot de mídia (150px) -- image_url passou a vir
+                          preenchido pra parte do catálogo já migrada pro R2
+                          (185+4 exercícios em 2026-09-08/12, ver
+                          docs/MIGRACAO_VIDEOS_CLOUDFLARE_20260904.md); resolveR2Media
+                          traduz a chave salva no banco pra URL pública. O
+                          resto do catálogo continua sem image_url e cai no
+                          placeholder abaixo. */}
                       <div style={{ position: 'relative' }}>
-                        {ex.image_url ? (
-                          <img src={ex.image_url} alt="" style={{ width: '100%', height: '150px', objectFit: 'cover', display: 'block' }} />
+                        {d.imageUrl ? (
+                          <img src={d.imageUrl} alt="" style={{ width: '100%', height: '150px', objectFit: 'cover', display: 'block' }} />
                         ) : (
                           <div style={{ width: '100%', height: '150px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '7px', background: 'var(--field)', borderBottom: '1px dashed var(--border)', color: 'var(--muted)' }}>
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="m21 15-5-5L5 21"></path></svg>
