@@ -1,6 +1,6 @@
 -- ============================================================================
--- NAO EXECUTAR ainda -- preparado 2026-09-08, esperando confirmacao visual da
--- Taina (vai abrir os 3 arquivos no R2 e confirmar que e o exercicio certo).
+-- EXECUTADO 2026-09-12 -- confirmado visualmente pela Taina (preparado
+-- 2026-09-08, esperando confirmacao visual).
 --
 -- Os 3 exercicios abaixo foram zerados em 2026-09-06 como "arquivo Drive
 -- inexistente" (HTTP 404 puro, ver scripts/video_url_null_404_drive_20260906.sql).
@@ -33,10 +33,8 @@ WHERE exercise_id IN ('ex_062', 'ex_068', 'ex_179')
 UPDATE exercises SET video_url = 'CRUCIFIXO COM HALTERES DEITADO_2.mp4' WHERE exercise_id = 'ex_179';
 UPDATE exercises SET video_url = 'ABDUCAO EM PE COM BAND_2.mp4'         WHERE exercise_id = 'ex_062';
 
--- ex_068 -- ESCOLHER UMA DAS DUAS LINHAS ABAIXO (descomentar a certa, apagar
--- ou deixar comentada a outra) depois de abrir os 2 arquivos no R2:
--- UPDATE exercises SET video_url = 'SUMO DEADELIFT COM HALTERES_2.mp4'       WHERE exercise_id = 'ex_068';
--- UPDATE exercises SET video_url = 'SUMO DEADELIFT COM HALTERES(1)_2.mp4'    WHERE exercise_id = 'ex_068';
+-- ex_068 -- Taina escolheu a variante sem "(1)" (2026-09-12):
+UPDATE exercises SET video_url = 'SUMO DEADELIFT COM HALTERES_2.mp4'       WHERE exercise_id = 'ex_068';
 
 DO $$
 DECLARE n int;

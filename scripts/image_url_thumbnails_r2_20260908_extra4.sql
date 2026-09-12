@@ -1,8 +1,7 @@
 -- ============================================================================
--- NAO EXECUTAR ainda -- preparado 2026-09-08 (mesma sessao do lote de 185,
--- ver scripts/image_url_thumbnails_r2_20260908.sql). So roda depois que a
--- Taina confirmar que arrastou os 4 arquivos abaixo de r2_thumbnails/ pro
--- bucket videos no painel Cloudflare.
+-- EXECUTADO 2026-09-12 -- Taina confirmou que arrastou os 4 arquivos de
+-- r2_thumbnails/ pro bucket videos no painel Cloudflare (preparado 2026-09-08,
+-- mesma sessao do lote de 185, ver scripts/image_url_thumbnails_r2_20260908.sql).
 --
 -- Esses 4 exercicios (ex_272-275) ja tinham video_url apontando pro R2 antes
 -- deste lote (nao fizeram parte da migracao de 185 -- ja estavam la), so
