@@ -1,6 +1,6 @@
 # Revisão de segurança alimentar — sua ajuda é necessária antes do lançamento
 
-*Atualizado 2026-09-13 — coco saiu do documento (decisão de produto, ver nota abaixo); duas
+*Atualizado 2026-09-13 — coco está no documento, no Bloco 3 e numa nota própria abaixo; duas
 divulgações novas (Whey e piso de proteína); alguns itens do Bloco 3 original mudaram de bloco
 depois de revisão interna. Se você já tinha visto uma versão anterior deste documento, use esta.*
 
@@ -32,9 +32,15 @@ durante o piloto, 10g como piso absoluto. Também com base em análise prelimina
 Substitui uma categoria de auditoria antiga ("Refeição Incompleta") que tinha 80% de falso
 positivo. Aplicação ainda pendente: ainda não implementado em código.
 
-*(Coco não aparece neste documento — criamos uma opção própria no cadastro pra quem tem alergia
-a coco, sem remover nada do que já existia. É decisão de produto, não matéria de revisão clínica;
-se você quiser rediscutir a classificação depois, o assunto fica registrado pra retomar.)*
+**Coco.** Os 7 produtos de coco seguem marcados como castanha, como sempre estiveram — não mudamos
+nada. Criamos, em paralelo, uma opção "Sem Coco" no cadastro, porque a marcação de castanha
+protegia a pessoa errada: quem é alérgico só a coco não tinha como se declarar.
+
+Fica registrado que a análise preliminar recomendou remover a marcação de castanha, com este
+argumento: coco não está na lista de alergênicos obrigatórios da Anvisa (RDC 727/2022), que nomeia
+individualmente amêndoa, avelã, caju, castanha-do-pará, macadâmia, nozes, pecã, pistache e pinoli.
+A classificação americana inclui coco, mas por herança de nomenclatura. Não seguimos essa
+recomendação sem você — é pauta da sessão 2. Se quiser decidir já, é só dizer.
 
 Nenhuma outra mudança deste documento entrou em vigor ainda — está tudo esperando suas respostas
 abaixo pra aplicar tudo de uma vez.
