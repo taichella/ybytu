@@ -17,10 +17,10 @@ Sua revisão é o que transforma esse "não sabemos" em informação de verdade.
 técnica que sua resposta libera — é a diferença entre o aluno saber ou não saber o que está
 comendo.
 
-## Duas decisões já tomadas sem sua revisão formal
+## Três decisões já tomadas sem sua revisão formal
 
-Nenhuma delas tira proteção de ninguém, mas um documento que existe pra registrar proveniência
-não pode esconder isso.
+Nenhuma delas mudou o que já estava no cadastro, mas um documento que existe pra registrar
+proveniência não pode esconder isso.
 
 **Whey Protein Concentrado (soja).** Decidido: mantemos o cadastro atual (contém soja), com base
 em análise preliminar sem validação de CRN. É o alimento mais usado de todo o lote — **7
@@ -70,7 +70,7 @@ nem todo produto usa proteína de soja como aglutinante, mas é prática comum o
 aceitar a marcação automática sem confirmação sua.
 
 | Alimento | O que a análise preliminar marcou |
-|---|---|
+| --- | --- |
 | Bacon de peru | Contém soja (baixa confiança) |
 | Peito de peru defumado | Contém soja (baixa confiança) |
 
@@ -86,7 +86,7 @@ responder **"Não dá pra saber, precisa de mais dado"** — isso é uma respost
 forçar um chute.
 
 | Alimento | Por que não deu pra decidir só pelo nome |
-|---|---|
+| --- | --- |
 | Colágeno hidrolisado | A alergenicidade muda conforme a fonte (bovino, suíno, peixe ou marinho), e isso não está registrado hoje |
 | Salgadinho de pacote (tipo chips de milho) | Composição industrializada, nome não diz tudo |
 | Extrato de baunilha | Composição industrializada, nome não diz tudo |
@@ -115,7 +115,7 @@ Formato de resposta por linha: **"Confirmo, o cadastro está certo"** ou **"A se
 certa, pode remover"**.
 
 | Alimento | Aparece em quantas refeições ativas | Hoje está registrado como contendo | A segunda análise quer remover |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Presunto cozido | 3 | carne de porco | carne de porco (ficaria sem nenhum alergênico) |
 | Pão de hambúrguer | 2 | glúten, gergelim, trigo | gergelim |
 | Purê de batata (preparado) | 2 | leite | leite (ficaria sem nenhum alergênico) |
