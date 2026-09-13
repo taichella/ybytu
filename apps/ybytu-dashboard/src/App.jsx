@@ -51,10 +51,20 @@ function App() {
 
           {/* Rotas protegidas pelo Layout */}
           <Route element={<DashboardLayout />}>
-            {/* Rotas exclusivas de Admin */}
+            {/* /campaign e /campaign/failed-plans NÃO são admin-only -- visão
+                operacional aberta a todo staff, mesmo desenho de
+                ybytu-pending-plan-reviews (fila pessoal vs. visão geral).
+                Documentado no próprio backend: ybytu-campaign-stats/index.ts:6-10
+                e ybytu-admin-failed-plans/index.ts:6-10 dizem explicitamente
+                "visível pra qualquer staff ativo" -- nenhum dos dois exige
+                requireRole. Só a AÇÃO de retry (ybytu-admin-retry-plan-generation)
+                é admin-only, por isso invite-staff continua isolado abaixo.
+                Corrigido 2026-09-13: o PR anterior endureceu pra admin-only
+                sem saber que esse desenho já existia. */}
+            <Route path="/campaign" element={<Campaign />} />
+            <Route path="/campaign/failed-plans" element={<FailedPlans />} />
+
             <Route element={<ProtectedRoute allowedRoles={['admin']} fallback="/dashboard" />}>
-              <Route path="/campaign" element={<Campaign />} />
-              <Route path="/campaign/failed-plans" element={<FailedPlans />} />
               <Route path="/campaign/invite-staff" element={<InviteStaff />} />
             </Route>
 
