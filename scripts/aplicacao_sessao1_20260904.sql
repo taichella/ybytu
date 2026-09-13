@@ -464,9 +464,18 @@ BEGIN
   END IF;
 END $$;
 
+-- BUG ENCONTRADO 2026-09-13 e CORRIGIDO AQUI: esta linha usava `mg.id`
+-- (uuid, PK de muscle_groups) -- errado, exercises.muscle_groups_ids guarda
+-- SLUG texto (muscle_group_id), nao uuid. Rodou com o bug em
+-- scripts/aplicacao_sessao1_secao_b_personal_20260913.sql (extraido deste
+-- arquivo antes da correcao) e foi corrigido na hora via
+-- scripts/hotfix_muscle_groups_ids_uuid_bug_20260913.sql -- Secao B deste
+-- arquivo em si nunca chegou a rodar com o bug (foi a copia extraida que
+-- rodou). Corrigido aqui pra ninguem reintroduzir se este arquivo for usado
+-- de referencia no futuro.
 UPDATE exercises e
 SET muscle_groups_ids = (
-  SELECT array_agg(mg.id)
+  SELECT array_agg(mg.muscle_group_id)
   FROM muscle_groups mg
   WHERE mg.muscle_group_id = ANY (d.muscle_group_slugs)
 )

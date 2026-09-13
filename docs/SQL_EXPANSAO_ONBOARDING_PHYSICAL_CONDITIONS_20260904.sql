@@ -1,9 +1,22 @@
 -- CONFIRMADO em 2026-09-07 -- personal confirmou os 7 rotulos propostos
--- abaixo ("Confirma" pros 7, ver docs/SESSAO_1_PERSONAL_20260903.md, secao
--- "Extra: confirme os rotulos"). Nenhum valor mudou em relacao a proposta
--- original -- so tira a guarda "NAO EXECUTAR ainda". Rodar junto com
--- scripts/aplicacao_sessao1_20260904.sql na mesma sessao (Taina, 2026-09-07):
--- sem isso, 9 das 13 regras de caution/avoid que a Secao B decide ficam sem
+-- abaixo ("Confirma" pros 7, ver docs/SESSAO_1_PERSONAL_PARA_ENVIO_20260905.md,
+-- secao "Extra: confirme os rotulos"). Nenhum valor mudou em relacao a
+-- proposta original. CONFERIDO ao vivo 2026-09-13: nunca tinha sido
+-- executado de fato (onboarding_physical_conditions ainda com so 7 linhas),
+-- so o comentario dizia "confirmado" -- rodando agora.
+--
+-- Roda como SUA PROPRIA invocacao, SEPARADA de
+-- scripts/aplicacao_sessao1_secao_b_personal_20260913.sql -- achado
+-- 2026-09-13: `supabase db query --file` trata cada arquivo como uma unica
+-- string multi-statement (semantica padrao do protocolo simples do Postgres)
+-- -- um erro em QUALQUER statement da string pula TODO o resto sem tentar
+-- rodar, entao dois BEGIN...COMMIT logicamente independentes no MESMO
+-- arquivo nao sao seguros se um dos dois ainda pode falhar. Aqui nao ha essa
+-- pendencia (rotulos ja confirmados, fonte ja conferida), mas o habito de
+-- manter em arquivo proprio evita reintroduzir o risco depois. Ver
+-- [[feedback_db_access_via_supabase_cli]].
+--
+-- Sem isso, 9 das 13 regras de caution/avoid que a Secao B decide ficam sem
 -- nenhum aluno capaz de declarar a condicao correspondente -- ver
 -- [[project_onboarding_physical_conditions_blocks_sessao1]].
 --
@@ -57,9 +70,26 @@ join physical_conditions pc on pc.physical_condition_id = v.physical_condition_i
 update onboarding_physical_conditions set sort_order = 12 where physical_condition_id = 'other';
 update onboarding_physical_conditions set sort_order = 13 where physical_condition_id = 'none';
 
--- Conferir antes de commitar: 14 linhas, sort_order 0-13 sem buraco nem
--- repeticao, "Outra limitacao"/"Nenhuma" nas duas ultimas posicoes.
--- select physical_condition_id, name_ptbr, sort_order
--- from onboarding_physical_conditions order by sort_order;
+-- Guarda automatica: 14 linhas, sort_order 0-13 sem buraco nem repeticao --
+-- antes so tinha um SELECT comentado pra conferencia manual, sem nada que
+-- abortasse se o INSERT tivesse inserido menos de 7 linhas (join silencioso
+-- contra physical_conditions poderia ter sumido linha sem avisar).
+do $$
+declare total int; distintos int;
+begin
+  select count(*), count(distinct sort_order) into total, distintos from onboarding_physical_conditions;
+  if total <> 14 then
+    raise exception 'Esperado 14 linhas em onboarding_physical_conditions apos o INSERT, achou %', total;
+  end if;
+  if distintos <> 14 then
+    raise exception 'sort_order tem repeticao -- % valores distintos pra % linhas', distintos, total;
+  end if;
+  if (select sort_order from onboarding_physical_conditions where physical_condition_id = 'other') <> 12 then
+    raise exception 'Outra limitacao nao ficou em sort_order 12';
+  end if;
+  if (select sort_order from onboarding_physical_conditions where physical_condition_id = 'none') <> 13 then
+    raise exception 'Nenhuma nao ficou em sort_order 13';
+  end if;
+end $$;
 
 commit;
