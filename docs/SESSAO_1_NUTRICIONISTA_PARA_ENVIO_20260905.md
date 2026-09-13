@@ -1,5 +1,9 @@
 # Revisão de segurança alimentar — sua ajuda é necessária antes do lançamento
 
+*Atualizado 2026-09-13 — coco saiu do documento (decisão de produto, ver nota abaixo); duas
+divulgações novas (Whey e piso de proteína); alguns itens do Bloco 3 original mudaram de bloco
+depois de revisão interna. Se você já tinha visto uma versão anterior deste documento, use esta.*
+
 ## O que é isso
 
 O app monta o cardápio de cada aluno automaticamente, escolhendo receitas de um catálogo. Cada
@@ -13,118 +17,79 @@ Sua revisão é o que transforma esse "não sabemos" em informação de verdade.
 técnica que sua resposta libera — é a diferença entre o aluno saber ou não saber o que está
 comendo.
 
-Este documento tem 4 blocos, cerca de 57 decisões no total. A maioria do bloco 3 é confirmação
-rápida, não análise — a estimativa é maior no papel do que na prática. Do catálogo completo de
-486 alimentos, só entram aqui os que já aparecem em alguma refeição ativa hoje — o resto fica pra
-uma próxima sessão, sem urgência, e não foi esquecido.
+## Duas decisões já tomadas sem sua revisão formal
+
+Nenhuma delas tira proteção de ninguém, mas um documento que existe pra registrar proveniência
+não pode esconder isso.
+
+**Whey Protein Concentrado (soja).** Decidido: mantemos o cadastro atual (contém soja), com base
+em análise preliminar sem validação de CRN. É o alimento mais usado de todo o lote — **7
+refeições ativas**. Aplicação ainda pendente: só entra em vigor quando o restante deste lote for
+respondido e tudo rodar junto.
+
+**Piso mínimo de proteína numa refeição principal.** Decidido: 20g como padrão, 15g valendo
+durante o piloto, 10g como piso absoluto. Também com base em análise preliminar sem CRN.
+Substitui uma categoria de auditoria antiga ("Refeição Incompleta") que tinha 80% de falso
+positivo. Aplicação ainda pendente: ainda não implementado em código.
+
+*(Coco não aparece neste documento — criamos uma opção própria no cadastro pra quem tem alergia
+a coco, sem remover nada do que já existia. É decisão de produto, não matéria de revisão clínica;
+se você quiser rediscutir a classificação depois, o assunto fica registrado pra retomar.)*
+
+Nenhuma outra mudança deste documento entrou em vigor ainda — está tudo esperando suas respostas
+abaixo pra aplicar tudo de uma vez.
 
 ---
 
-## Bloco 1 — o caso mais grave, uma pergunta só
+## Bloco 1 — 31 alimentos simples onde a análise preliminar não encontrou nenhum alergênico
 
-**Whey Protein Concentrado.** Hoje o cadastro registra **leite e soja** como alergênicos desse
-produto. Uma segunda análise que fizemos revisou o cadastro e corrigiu o leite, mas retirou a
-soja — soja normalmente aparece em whey por causa da lecitina usada como emulsificante. Esse é o
-alimento mais usado de toda a lista: aparece em 7 refeições ativas hoje.
+Se concorda com todos, responda **"Confirmo os 31, sem alergênico"** — não precisa escrever
+linha por linha. Se discordar de algum, escreva o nome dele e o que ele contém.
 
-**Pergunta:** o cadastro atual registra soja. Confirma que está certo, ou a soja deveria ser
-removida?
-- [ ] Confirmo, o cadastro está certo (mantém soja)
-- [ ] A segunda análise está certa, pode remover a soja
-
-Se você só responder essa pergunta, já resolve o pior caso do lote inteiro.
+Banana · Cacau em pó (sem açúcar) · Peito de frango grelhado · Azeite de oliva extravirgem ·
+Tapioca (goma preparada) · Morango · Grão-de-bico cozido · Mel de abelha · Abacate · Batata doce
+cozida · Chia hidratada (Pudim de Chia base) · Limonada sem açúcar · Ervilha em conserva · Canela
+em pó · Aipo (Salsão) · Alface · Mamão · Feijão preto cozido · Biscoito de arroz · Farinha de
+linhaça · Farinha de grão-de-bico · Geleia de morango · Café sem açúcar · Chá verde sem açúcar ·
+Kombucha (tradicional) · Cúrcuma (Açafrão-da-terra) · Orégano seco · Gengibre em pó · Spirulina
+em pó · Açaí com xarope de guaraná · Batata frita Fast-Food
 
 ---
 
-## Bloco 2 — duas perguntas rápidas
+## Bloco 2 — 2 alimentos onde a análise preliminar tem baixa confiança
 
-### 2a. Quantidade mínima de proteína numa refeição principal (almoço/jantar)
+Bacon de peru e peito de peru defumado são embutidos industrializados. A análise preliminar
+**marcou soja nos dois**, mas com **baixa confiança**, porque depende da marca do fabricante —
+nem todo produto usa proteína de soja como aglutinante, mas é prática comum o bastante pra não
+aceitar a marcação automática sem confirmação sua.
 
-Estamos usando a proteína real de cada refeição (somada ingrediente por ingrediente) pra decidir
-se uma refeição principal tem proteína suficiente. Precisamos de um padrão:
-
-| Piso proposto | Refeições ativas abaixo desse valor hoje |
+| Alimento | O que a análise preliminar marcou |
 |---|---|
-| 10g (mínimo técnico — abaixo disso, não há fonte de proteína que se sustente) | 3 |
-| 15g | 8 |
-| 20g (recomendação geral de saciedade) | 15 (43% do cardápio principal) |
+| Bacon de peru | Contém soja (baixa confiança) |
+| Peito de peru defumado | Contém soja (baixa confiança) |
 
-**Pergunta:** qual desses três valores deveria ser o padrão? [ ] 10g [ ] 15g [ ] 20g
-[ ] Outro: ____
-
-### 2b. Coco é considerado castanha (alergênico) ou não?
-
-7 variantes de coco (seco, ralado, óleo, farinha, açúcar, leite, iogurte) estão hoje marcadas
-como alergênico do grupo das castanhas. Uma revisão anterior tinha tirado essa marcação; depois
-ela voltou, com o argumento de que o critério clínico internacional (FDA) trata coco como
-castanha pra fins de rotulagem, mesmo não sendo botanicamente uma noz de verdade. No Brasil, a
-prática comum não trata coco como castanha.
-
-**Pergunta:** mantém coco marcado como castanha (postura mais cautelosa, já em vigor), ou remove
-essa marcação?
-- [ ] Mantém [ ] Remove
+**Sua resposta por linha:** "Confirmo, contém soja" ou "Não, está correto, sem alergênico"
 
 ---
 
-## Bloco 3 — 42 alimentos que nenhum profissional revisou ainda
+## Bloco 3 — 9 alimentos que a análise preliminar não conseguiu decidir só pelo nome
 
-Estes alimentos aparecem em pelo menos uma refeição que um aluno pode receber hoje, e nenhum
-deles foi revisado ainda — enquanto continuarem assim, qualquer refeição que os use é entregue
-normalmente ao aluno, com a tela mostrando só "Alergênicos não verificados", sem dizer se há
-risco de verdade ou não.
+Aqui não tem recomendação de bulk — cada um precisa de uma resposta sua: **"Sem alergênico"** ou
+**"Contém: ______"**. Se realmente não der pra saber sem mais informação do fornecedor, pode
+responder **"Não dá pra saber, precisa de mais dado"** — isso é uma resposta válida, não vamos
+forçar um chute.
 
-A maioria aqui é confirmação rápida, não análise — banana, morango e peito de frango grelhado, por
-exemplo, são alimentos simples, sem ambiguidade nenhuma.
-
-Confirmar os 6 primeiros já cobre quase metade dos casos em que esses alimentos aparecem no
-cardápio. Confirmar os 20 primeiros cobre 83%.
-
-Formato de resposta por linha: **"Sem alergênico"** ou **"Contém: ______"** (diga qual).
-
-| # | Alimento | Aparece em quantas refeições ativas |
-|---|---|---|
-| 1 | Banana | 13 |
-| 2 | Cacau em pó (sem açúcar) | 11 |
-| 3 | Peito de frango grelhado | 9 |
-| 4 | Azeite de oliva extravirgem | 9 |
-| 5 | Molho de tomate caseiro | 9 |
-| 6 | Tapioca (goma preparada) | 9 |
-| 7 | Morango | 8 |
-| 8 | Purê de abóbora (preparado) | 6 |
-| 9 | Mel de abelha | 5 |
-| 10 | Grão-de-bico cozido | 5 |
-| 11 | Bacon de peru | 4 |
-| 12 | Abacate | 4 |
-| 13 | Chia hidratada (Pudim de Chia base) | 3 |
-| 14 | Peito de peru defumado | 3 |
-| 15 | Batata doce cozida | 3 |
-| 16 | Limonada sem açúcar | 2 |
-| 17 | Canela em pó | 2 |
-| 18 | Ervilha em conserva | 2 |
-| 19 | Guacamole | 2 |
-| 20 | Ketchup | 2 |
-| 21 | Colágeno hidrolisado | 1 |
-| 22 | Café sem açúcar | 1 |
-| 23 | Água de coco | 1 |
-| 24 | Kombucha (tradicional) | 1 |
-| 25 | Batata frita Fast-Food | 1 |
-| 26 | Salgadinho de pacote (tipo chips de milho) | 1 |
-| 27 | Cúrcuma (Açafrão-da-terra) | 1 |
-| 28 | Feijão preto cozido | 1 |
-| 29 | Alface | 1 |
-| 30 | Extrato de baunilha | 1 |
-| 31 | Orégano seco | 1 |
-| 32 | Farinha de grão-de-bico | 1 |
-| 33 | Hambúrguer vegetal (tipo carne) | 1 |
-| 34 | Açaí com xarope de guaraná | 1 |
-| 35 | Geleia de morango | 1 |
-| 36 | Aipo (Salsão) | 1 |
-| 37 | Spirulina em pó | 1 |
-| 38 | Mamão | 1 |
-| 39 | Biscoito de arroz | 1 |
-| 40 | Gengibre em pó | 1 |
-| 41 | Chá verde sem açúcar | 1 |
-| 42 | Farinha de linhaça | 1 |
+| Alimento | Por que não deu pra decidir só pelo nome |
+|---|---|
+| Colágeno hidrolisado | A alergenicidade muda conforme a fonte (bovino, suíno, peixe ou marinho), e isso não está registrado hoje |
+| Salgadinho de pacote (tipo chips de milho) | Composição industrializada, nome não diz tudo |
+| Extrato de baunilha | Composição industrializada, nome não diz tudo |
+| Molho de tomate caseiro | Prato composto, molhos costumam esconder ingrediente |
+| Ketchup | Prato composto, molhos costumam esconder ingrediente |
+| Guacamole | Prato composto, molhos costumam esconder ingrediente |
+| Hambúrguer vegetal (tipo carne) | Prato composto, composição depende da marca |
+| Purê de abóbora (preparado) | É item preparado, não ingrediente cru — mesmo cuidado dos molhos acima |
+| Água de coco | Os outros produtos de coco do catálogo (seco, ralado, óleo, farinha, açúcar, leite, iogurte) estão marcados com alergênico de castanha; esta nunca foi revisada e merece atenção individual, não confirmação em bulk |
 
 ---
 
