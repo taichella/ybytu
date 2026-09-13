@@ -1,8 +1,12 @@
 -- ============================================================================
 -- APLICACAO DAS DECISOES DA SESSAO 1 -- nutricionista (57 decisoes) + personal
--- (20 decisoes). NAO EXECUTAR ainda -- preparado 2026-09-04, esperando as
--- respostas de docs/SESSAO_1_NUTRICIONISTA_20260902.md e
--- docs/SESSAO_1_PERSONAL_20260903.md chegarem.
+-- (20 decisoes), respostas em docs/SESSAO_1_NUTRICIONISTA_20260902.md e
+-- docs/SESSAO_1_PERSONAL_20260903.md. NAO EXECUTAR ainda -- preparado
+-- 2026-09-04, esperando os placeholders <<< PREENCHER serem preenchidos com
+-- as respostas reais (ver REGRA mais abaixo). A Secao A roda sobre parecer
+-- PRELIMINAR da nutricionista, sem validacao de CRN -- decisao da Taina de
+-- aplicar mesmo assim (registro de proveniencia completo no cabecalho da
+-- Secao A, logo abaixo do BEGIN).
 --
 -- DUAS TRANSACOES INDEPENDENTES (SECAO A e SECAO B), cada uma com seu proprio
 -- BEGIN/COMMIT. Se a nutricionista responder primeiro, roda so a Secao A +
@@ -74,7 +78,7 @@ FROM food_restriction_tags;
 -- Preencher: 'confirma_banco' (mantem soy) ou 'analise_externa_certa' (remove soy).
 
 CREATE TEMP TABLE decisao_bloco1 (decisao text);
-INSERT INTO decisao_bloco1 (decisao) VALUES (NULL); -- <<< PREENCHER
+INSERT INTO decisao_bloco1 (decisao) VALUES ('confirma_banco'); -- PREENCHIDO 2026-09-12 (Taina): mantém soy
 
 DO $$
 BEGIN
@@ -102,111 +106,120 @@ ON CONFLICT DO NOTHING;
 -- "Refeicao Incompleta" de auditoria por corte de protein_g). Deixado aqui so
 -- pra nao se perder na lista de pendencias, sem SQL.
 --
--- RESPONDIDO (Taina, 2026-09-07): 20g e o padrao; 15g opera durante o piloto;
+-- RESPONDIDO (Taina, 2026-09-12): 20g e o padrao; 15g opera durante o piloto;
 -- 10g e o piso absoluto (nunca aceitar abaixo disso como "completa"). Ainda
 -- NAO implementado em codigo -- fica pra quando chegar a vez desta mudanca,
 -- com dimensionamento proprio nessa hora.
 
--- ---- A3. Bloco 2b -- coco, tree_nuts ou nao ---------------------------------
--- IDs dos 7 alimentos de coco nao estavam listados no documento da sessao --
--- rodar o SELECT abaixo pra confirmar que sao exatamente 7 antes de editar
--- a decisao.
-
--- SELECT food_id, name_ptbr FROM foods WHERE name_ptbr ILIKE '%coco%' ORDER BY food_id;
-
-CREATE TEMP TABLE decisao_bloco2b (decisao text);
-INSERT INTO decisao_bloco2b (decisao) VALUES (NULL); -- <<< PREENCHER: 'manter' ou 'remover'
-
-DO $$
-BEGIN
-  IF (SELECT decisao FROM decisao_bloco2b) IS NULL THEN
-    RAISE EXCEPTION 'Bloco 2b (coco/tree_nuts) sem decisao preenchida';
-  END IF;
-  IF (SELECT decisao FROM decisao_bloco2b) NOT IN ('manter','remover') THEN
-    RAISE EXCEPTION 'Bloco 2b: decisao invalida, use manter ou remover';
-  END IF;
-END $$;
-
-INSERT INTO food_restriction_tags (food_id, token)
-SELECT food_id, 'tree_nuts'
-FROM foods
-WHERE name_ptbr ILIKE '%coco%'
-  AND (SELECT decisao FROM decisao_bloco2b) = 'manter'
-ON CONFLICT DO NOTHING;
-
-DELETE FROM food_restriction_tags
-WHERE token = 'tree_nuts'
-  AND food_id IN (SELECT food_id FROM foods WHERE name_ptbr ILIKE '%coco%')
-  AND (SELECT decisao FROM decisao_bloco2b) = 'remover';
+-- ---- A3. Bloco 2b -- coco, tree_nuts ou nao -- OBSOLETO, ver nota ----------
+-- SUPERADO 2026-09-13: a proposta de 'remover' tree_nuts do coco (com criacao
+-- de token 'coco' condicionada a essa escolha) foi trocada por uma decisao
+-- mais simples que nao precisa escolher entre as duas coisas. Executado
+-- separadamente, FORA desta transacao, em
+-- scripts/coco_token_e_opcao_onboarding_20260913.sql: cria o token 'coco' e a
+-- opcao "Sem Coco" no onboarding, mas NAO mexe em tree_nuts -- os 7 alimentos
+-- de coco ja revisados continuam exatamente como estavam. Quem marca "Sem
+-- Oleaginosas" continua protegido (tree_nuts intacto), quem tem alergia
+-- isolada a coco agora tem caixa propria ("Sem Coco") pra declarar. Ninguem
+-- perde protecao -- por isso deixou de ser pauta obrigatoria da sessao 2 (nao
+-- e mais uma decisao que remove nada, so decisao de produto que pode ser
+-- revisada sem pressa quando a nutricionista com CRN chegar).
+--
+-- food_402 (Agua de coco) NAO fica mais amarrado a este bloco -- ele nunca
+-- dependeu da escolha tree_nuts/coco pra comecar (nunca teve NENHUM dos dois
+-- tokens, so estava unreviewed), entao volta a ser uma pergunta normal e
+-- independente do Bloco 3 (A4 abaixo), como era antes de 2026-09-12.
 
 -- ---- A4. Bloco 3 -- 42 alimentos unreviewed ---------------------------------
--- decisao: 'sem_alergeno' -> allergen_review_status = reviewed_none
---          'contem'       -> allergen_review_status = reviewed_has_allergens
---                             + preencher alergenos (array de tokens, ex:
---                             ARRAY['gluten','milk'])
+-- decisao: 'sem_alergeno'   -> allergen_review_status = reviewed_none
+--          'contem'         -> allergen_review_status = reviewed_has_allergens
+--                              + preencher alergenos (array de tokens, ex:
+--                              ARRAY['gluten','milk'])
+--          'pendente_dado'  -> NAO mexe em allergen_review_status (continua
+--                              unreviewed) nem em food_restriction_tags --
+--                              o caso e "nao da pra saber com o que ha hoje",
+--                              nao "sabemos que nao tem". Ex: colageno
+--                              hidrolisado -- alergenicidade depende da fonte
+--                              (bovino/suino/peixe/marinho), que nao esta
+--                              registrada em lugar nenhum do schema pra este
+--                              item. Forcar 'sem_alergeno' seria mentira por
+--                              omissao; forcar 'contem' sem saber qual token
+--                              tambem seria dado inventado. + preencher
+--                              motivo (texto livre), gravado em
+--                              foods_pendencia_dados_20260904 pra nao se
+--                              perder -- fica visivel pra proxima sessao
+--                              revisitar quando o dado existir (ex: pergunta
+--                              de origem do colageno virar campo do produto).
 
 CREATE TEMP TABLE decisao_bloco3 (
   food_id text PRIMARY KEY,
   nome text,
-  decisao text,       -- <<< PREENCHER: 'sem_alergeno' ou 'contem'
-  alergenos text[]     -- <<< PREENCHER apenas se decisao = 'contem'
+  decisao text,       -- <<< PREENCHER: 'sem_alergeno', 'contem' ou 'pendente_dado'
+  alergenos text[],    -- <<< PREENCHER apenas se decisao = 'contem'
+  motivo text          -- <<< PREENCHER apenas se decisao = 'pendente_dado'
 );
 
-INSERT INTO decisao_bloco3 (food_id, nome, decisao, alergenos) VALUES
-  ('food_079', 'Banana', NULL, NULL),
-  ('food_367', 'Cacau em po (sem acucar)', NULL, NULL),
-  ('food_163', 'Peito de frango grelhado', NULL, NULL),
-  ('food_320', 'Azeite de oliva extravirgem', NULL, NULL),
-  ('food_380', 'Molho de tomate caseiro', NULL, NULL),
-  ('food_260', 'Tapioca (goma preparada)', NULL, NULL),
-  ('food_088', 'Morango', NULL, NULL),
-  ('food_270', 'Pure de abobora (preparado)', NULL, NULL),
-  ('food_363', 'Mel de abelha', NULL, NULL),
-  ('food_161', 'Grao-de-bico cozido', NULL, NULL),
-  ('food_238', 'Bacon de peru', NULL, NULL),
-  ('food_028', 'Abacate', NULL, NULL),
-  ('food_497', 'Chia hidratada (Pudim de Chia base)', NULL, NULL),
-  ('food_221', 'Peito de peru defumado', NULL, NULL),
-  ('food_002', 'Batata doce cozida', NULL, NULL),
-  ('food_405', 'Limonada sem acucar', NULL, NULL),
-  ('food_489', 'Canela em po', NULL, NULL),
-  ('food_487', 'Ervilha em conserva', NULL, NULL),
-  ('food_395', 'Guacamole', NULL, NULL),
-  ('food_383', 'Ketchup', NULL, NULL),
-  ('food_430', 'Colageno hidrolisado', NULL, NULL),
-  ('food_400', 'Cafe sem acucar', NULL, NULL),
-  ('food_402', 'Agua de coco', NULL, NULL),
-  ('food_418', 'Kombucha (tradicional)', NULL, NULL),
-  ('food_464', 'Batata frita Fast-Food', NULL, NULL),
-  ('food_470', 'Salgadinho de pacote (tipo chips de milho)', NULL, NULL),
-  ('food_490', 'Curcuma (Acafrao-da-terra)', NULL, NULL),
-  ('food_159', 'Feijao preto cozido', NULL, NULL),
-  ('food_037', 'Alface', NULL, NULL),
-  ('food_494', 'Extrato de baunilha', NULL, NULL),
-  ('food_492', 'Oregano seco', NULL, NULL),
-  ('food_350', 'Farinha de grao-de-bico', NULL, NULL),
-  ('food_443', 'Hamburguer vegetal (tipo carne)', NULL, NULL),
-  ('food_378', 'Acai com xarope de guarana', NULL, NULL),
-  ('food_369', 'Geleia de morango', NULL, NULL),
-  ('food_035', 'Aipo (Salsao)', NULL, NULL),
-  ('food_498', 'Spirulina em po', NULL, NULL),
-  ('food_081', 'Mamao', NULL, NULL),
-  ('food_257', 'Biscoito de arroz', NULL, NULL),
-  ('food_493', 'Gengibre em po', NULL, NULL),
-  ('food_401', 'Cha verde sem acucar', NULL, NULL),
-  ('food_346', 'Farinha de linhaca', NULL, NULL);
+INSERT INTO decisao_bloco3 (food_id, nome, decisao, alergenos, motivo) VALUES
+  ('food_079', 'Banana', NULL, NULL, NULL),
+  ('food_367', 'Cacau em po (sem acucar)', NULL, NULL, NULL),
+  ('food_163', 'Peito de frango grelhado', NULL, NULL, NULL),
+  ('food_320', 'Azeite de oliva extravirgem', NULL, NULL, NULL),
+  ('food_380', 'Molho de tomate caseiro', NULL, NULL, NULL),
+  ('food_260', 'Tapioca (goma preparada)', NULL, NULL, NULL),
+  ('food_088', 'Morango', NULL, NULL, NULL),
+  ('food_270', 'Pure de abobora (preparado)', NULL, NULL, NULL),
+  ('food_363', 'Mel de abelha', NULL, NULL, NULL),
+  ('food_161', 'Grao-de-bico cozido', NULL, NULL, NULL),
+  ('food_238', 'Bacon de peru', NULL, NULL, NULL),
+  ('food_028', 'Abacate', NULL, NULL, NULL),
+  ('food_497', 'Chia hidratada (Pudim de Chia base)', NULL, NULL, NULL),
+  ('food_221', 'Peito de peru defumado', NULL, NULL, NULL),
+  ('food_002', 'Batata doce cozida', NULL, NULL, NULL),
+  ('food_405', 'Limonada sem acucar', NULL, NULL, NULL),
+  ('food_489', 'Canela em po', NULL, NULL, NULL),
+  ('food_487', 'Ervilha em conserva', NULL, NULL, NULL),
+  ('food_395', 'Guacamole', NULL, NULL, NULL),
+  ('food_383', 'Ketchup', NULL, NULL, NULL),
+  ('food_430', 'Colageno hidrolisado', NULL, NULL, NULL),
+  ('food_400', 'Cafe sem acucar', NULL, NULL, NULL),
+  ('food_402', 'Agua de coco', NULL, NULL, NULL), -- volta pra ca 2026-09-13, ver nota no A3
+  ('food_418', 'Kombucha (tradicional)', NULL, NULL, NULL),
+  ('food_464', 'Batata frita Fast-Food', NULL, NULL, NULL),
+  ('food_470', 'Salgadinho de pacote (tipo chips de milho)', NULL, NULL, NULL),
+  ('food_490', 'Curcuma (Acafrao-da-terra)', NULL, NULL, NULL),
+  ('food_159', 'Feijao preto cozido', NULL, NULL, NULL),
+  ('food_037', 'Alface', NULL, NULL, NULL),
+  ('food_494', 'Extrato de baunilha', NULL, NULL, NULL),
+  ('food_492', 'Oregano seco', NULL, NULL, NULL),
+  ('food_350', 'Farinha de grao-de-bico', NULL, NULL, NULL),
+  ('food_443', 'Hamburguer vegetal (tipo carne)', NULL, NULL, NULL),
+  ('food_378', 'Acai com xarope de guarana', NULL, NULL, NULL),
+  ('food_369', 'Geleia de morango', NULL, NULL, NULL),
+  ('food_035', 'Aipo (Salsao)', NULL, NULL, NULL),
+  ('food_498', 'Spirulina em po', NULL, NULL, NULL),
+  ('food_081', 'Mamao', NULL, NULL, NULL),
+  ('food_257', 'Biscoito de arroz', NULL, NULL, NULL),
+  ('food_493', 'Gengibre em po', NULL, NULL, NULL),
+  ('food_401', 'Cha verde sem acucar', NULL, NULL, NULL),
+  ('food_346', 'Farinha de linhaca', NULL, NULL, NULL);
+
+CREATE TABLE IF NOT EXISTS foods_pendencia_dados_20260904 (
+  food_id text, nome text, motivo text, logged_at timestamptz
+);
 
 DO $$
 DECLARE pendentes int; invalidos text;
 BEGIN
   SELECT count(*) INTO pendentes FROM decisao_bloco3
-  WHERE decisao IS NULL OR (decisao = 'contem' AND alergenos IS NULL);
+  WHERE decisao IS NULL
+     OR (decisao = 'contem' AND alergenos IS NULL)
+     OR (decisao = 'pendente_dado' AND motivo IS NULL);
   IF pendentes > 0 THEN
     RAISE EXCEPTION 'Bloco 3: % decisoes sem preencher', pendentes;
   END IF;
 
-  IF (SELECT count(*) FROM decisao_bloco3 WHERE decisao NOT IN ('sem_alergeno','contem')) > 0 THEN
-    RAISE EXCEPTION 'Bloco 3: decisao invalida, use sem_alergeno ou contem';
+  IF (SELECT count(*) FROM decisao_bloco3 WHERE decisao NOT IN ('sem_alergeno','contem','pendente_dado')) > 0 THEN
+    RAISE EXCEPTION 'Bloco 3: decisao invalida, use sem_alergeno, contem ou pendente_dado';
   END IF;
 
   -- valida cada token digitado contra restriction_tokens ANTES do INSERT,
@@ -222,16 +235,25 @@ BEGIN
   END IF;
 END $$;
 
+-- pendente_dado NAO entra nos UPDATE/DELETE/INSERT abaixo -- fica como esta
+-- (unreviewed, sem tags) de proposito. So registra o motivo na tabela de
+-- acompanhamento, pra nao se perder ate existir o dado que falta.
+INSERT INTO foods_pendencia_dados_20260904 (food_id, nome, motivo, logged_at)
+SELECT food_id, nome, motivo, now()
+FROM decisao_bloco3
+WHERE decisao = 'pendente_dado';
+
 UPDATE foods f
 SET allergen_review_status = CASE d.decisao
   WHEN 'sem_alergeno' THEN 'reviewed_none'
   WHEN 'contem' THEN 'reviewed_has_allergens'
 END
 FROM decisao_bloco3 d
-WHERE f.food_id = d.food_id;
+WHERE f.food_id = d.food_id
+  AND d.decisao <> 'pendente_dado';
 
 DELETE FROM food_restriction_tags
-WHERE food_id IN (SELECT food_id FROM decisao_bloco3);
+WHERE food_id IN (SELECT food_id FROM decisao_bloco3 WHERE decisao <> 'pendente_dado');
 
 INSERT INTO food_restriction_tags (food_id, token)
 SELECT food_id, unnest(alergenos)
