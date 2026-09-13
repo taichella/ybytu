@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const MEAL_ICONS = {
   'Café da manhã': '🥞',
@@ -70,13 +70,6 @@ function findMenuCalendarInfo(calendar, menuDay) {
 // leitura / impressão).
 export default function UserPlan({ payload, editable = false, onSaveLoads, embedded = false }) {
 
-  useEffect(() => {
-    // Altera a cor de fundo do body especificamente para esta página
-    document.body.style.background = '#E9ECF1';
-    return () => {
-      document.body.style.background = ''; // Limpa ao sair
-    };
-  }, []);
 
   // { [training_plan_exercise_id]: { [set_number]: number|null } } -- só as
   // séries que o personal de fato tocou nesta sessão de edição.
@@ -85,11 +78,13 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
   const [fieldEdits, setFieldEdits] = useState({});
   const [saveState, setSaveState] = useState('idle'); // idle | saving | success | error
 
-  useEffect(() => {
+  const [prevPayload, setPrevPayload] = useState(payload);
+  if (prevPayload !== payload) {
+    setPrevPayload(payload);
     setLoadEdits({});
     setFieldEdits({});
     setSaveState('idle');
-  }, [payload]);
+  }
 
   const hasLoadEdits = useMemo(
     () => Object.values(loadEdits).some((sets) => Object.keys(sets).length > 0)
@@ -207,6 +202,8 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
           padding: 20px 0;
           width: 100%;
           min-width: 0;
+          background: #E9ECF1;
+          min-height: 100vh;
         }
         .doc { box-sizing:border-box; max-width:8.5in; margin:0 auto; background:var(--bg); padding:0 0 60px; box-shadow:0 18px 60px rgba(16,24,40,.16); }
         .doc-frame { width:100%; border-collapse:collapse; table-layout:fixed; }

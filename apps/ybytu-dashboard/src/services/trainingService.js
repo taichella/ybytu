@@ -1,21 +1,12 @@
-import { supabase } from '../lib/supabase.js';
-
-async function authHeaders() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('not_authenticated');
-  return { Authorization: `Bearer ${session.access_token}` };
-}
+import { invokeFunction } from './apiClient.js';
 
 async function invoke(action, extra = {}) {
-  const headers = await authHeaders();
-  const { data, error } = await supabase.functions.invoke('ybytu-admin-trainings', {
-    headers,
+  return invokeFunction('ybytu-admin-trainings', {
     body: { action, ...extra },
+    errorMap: {
+      molde_deactivation_blocked: 'Este treino é um molde ativo (fonte do gerador) — não pode ser desativado.',
+    },
   });
-  if (error) throw error;
-  if (data?.error === 'molde_deactivation_blocked') throw new Error('Este treino é um molde ativo (fonte do gerador) — não pode ser desativado.');
-  if (data?.error) throw new Error(data.error);
-  return data;
 }
 
 export const trainingService = {

@@ -1,27 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import ThemeToggle from './ThemeToggle';
+
+const SUB = {
+  free: { sub: 'Free', subBg: 'var(--surface-2)', subColor: 'var(--muted)' },
+  start: { sub: 'Start', subBg: 'rgba(59,130,246,.12)', subColor: '#3b82f6' },
+  pro: { sub: 'Pro', subBg: 'rgba(245,95,22,.14)', subColor: '#F55F16' },
+};
+
+const AVATARS = ['#ec4899','#3b82f6','#16a34a','#a855f7','#f59e0b','#06b6d4','#ef4444','#8b5cf6'];
 
 export default function Users() {
-  const [theme, setTheme] = useState('dark');
-
-  // Sincroniza o tema
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-
-  const SUB = {
-    free: { sub: 'Free', subBg: 'var(--surface-2)', subColor: 'var(--muted)' },
-    start: { sub: 'Start', subBg: 'rgba(59,130,246,.12)', subColor: '#3b82f6' },
-    pro: { sub: 'Pro', subBg: 'rgba(245,95,22,.14)', subColor: '#F55F16' },
-  };
-  
-  const avatars = ['#ec4899','#3b82f6','#16a34a','#a855f7','#f59e0b','#06b6d4','#ef4444','#8b5cf6'];
-  
+  const [searchParams] = useSearchParams();
   const [usersData, setUsersData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(() => searchParams.get('search') || '');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
@@ -64,7 +57,7 @@ export default function Users() {
               // Subscriptions.jsx/Account.jsx pro mesmo tipo de ausencia.
               adherence: null,
               onbDone: u.onboarding_completed,
-              avatarBg: avatars[i % avatars.length],
+              avatarBg: AVATARS[i % AVATARS.length],
               needsReview: u.needsReview
             };
           });
@@ -90,7 +83,11 @@ export default function Users() {
     return usersData.filter((u) => u.name.toLowerCase().includes(s) || u.id.toLowerCase().includes(s));
   }, [usersData, searchTerm]);
 
-  useEffect(() => { setPage(1); }, [searchTerm]);
+  const [prevSearch, setPrevSearch] = useState(searchTerm);
+  if (prevSearch !== searchTerm) {
+    setPrevSearch(searchTerm);
+    setPage(1);
+  }
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageSafe = Math.min(page, pageCount);
@@ -108,9 +105,7 @@ export default function Users() {
           <input type="text" placeholder="Buscar por nome, ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ width: '100%', padding: '10px 16px 10px 42px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
+          <ThemeToggle />
           <div style={{ width: '1px', height: '24px', background: 'var(--border)' }}></div>
           <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '9px 14px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg> Exportar

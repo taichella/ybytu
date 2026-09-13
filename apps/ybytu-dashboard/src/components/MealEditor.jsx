@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { mealService } from '../services/mealService.js';
+import ThemeToggle from './ThemeToggle';
 
 const EMPTY = {
   meal_id: '', name_ptbr: '', name_en: '', name_fr: '',
@@ -14,7 +15,6 @@ export default function MealEditor() {
   const { id } = useParams();
   const isNew = !id;
 
-  const [theme, setTheme] = useState('dark');
   const [lang, setLang] = useState('pt');
   const [form, setForm] = useState(EMPTY);
   const [lookups, setLookups] = useState(null);
@@ -25,10 +25,6 @@ export default function MealEditor() {
   const [foodResults, setFoodResults] = useState([]);
   const nextItemId = useRef(0);
   const searchDebounce = useRef(null);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,7 +77,6 @@ export default function MealEditor() {
     return () => { cancelled = true; clearTimeout(searchDebounce.current); };
   }, [foodSearch]);
 
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
   const ingredientMacros = (it) => {
@@ -174,7 +169,7 @@ export default function MealEditor() {
           <input type="text" value={form.name_ptbr} onChange={(e) => set('name_ptbr', e.target.value)} placeholder="Nome da Refeição…" style={{ fontSize: '18px', fontWeight: 900, background: 'none', border: 'none', color: 'var(--text)', fontFamily: 'inherit', outline: 'none', width: '100%' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <button onClick={toggleTheme} style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
+          <ThemeToggle />
           <button onClick={() => navigate('/meals')} style={{ background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
           <button onClick={handleSave} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
             {saving ? 'Salvando…' : (isNew ? 'Criar Receita' : 'Salvar')}

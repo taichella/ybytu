@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { foodService } from '../services/foodService.js';
 
 export default function Foods() {
@@ -13,32 +13,30 @@ export default function Foods() {
   const [groupFilter, setGroupFilter] = useState('');
 
   useEffect(() => {
-    fetchFoods();
-  }, []);
-
-  const fetchFoods = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const [fetchedFoods, lookupsData] = await Promise.all([
-        foodService.getAll(),
-        foodService.getLookups()
-      ]);
-      setFoods(fetchedFoods);
-      setLookups(lookupsData);
-    } catch (err) {
-      console.error(err);
-      setError(err.message || 'Falha ao carregar alimentos.');
-    } finally {
-      setLoading(false);
+    let cancelled = false;
+    async function load() {
+      try {
+        const [fetchedFoods, lookupsData] = await Promise.all([
+          foodService.getAll(),
+          foodService.getLookups()
+        ]);
+        if (cancelled) return;
+        setFoods(fetchedFoods);
+        setLookups(lookupsData);
+      } catch (err) {
+        if (!cancelled) setError(err.message || 'Falha ao carregar alimentos.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
-  };
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   const getDonut = (p, c, f, kcal) => {
     const total = p + c + f || 1;
     const pp = (p / total) * 100;
     const cp = (c / total) * 100;
-    const fp = (f / total) * 100;
     return (
       <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: `conic-gradient(#3b82f6 0% ${pp}%, #f59e0b ${pp}% ${pp + cp}%, #a855f7 ${pp + cp}% 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
         <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: 'var(--field)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 900, color: 'var(--text)' }}>

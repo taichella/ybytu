@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { trainingService } from '../services/trainingService.js';
 import ChipMultiSelect from './ChipMultiSelect.jsx';
+import ThemeToggle from './ThemeToggle';
 
 const EMPTY_PLAN = {
   training_plan_id: '', name_ptbr: '', name_en: '', name_fr: '',
@@ -9,6 +10,8 @@ const EMPTY_PLAN = {
   days_per_week: 3, duration_minutes: '', instruction_ptbr: '', instruction_en: '', instruction_fr: '',
   is_active: true,
 };
+
+const EMPTY_SLOTS = [];
 
 export default function TrainingPlanCreator() {
   const navigate = useNavigate();
@@ -23,7 +26,6 @@ export default function TrainingPlanCreator() {
   const forUserName = searchParams.get('forUserName') || '';
   const isStudentPlan = Boolean(forUser);
 
-  const [theme, setTheme] = useState('dark');
   const [day, setDay] = useState(1);
   const [settings, setSettings] = useState(true);
   const [plan, setPlan] = useState(EMPTY_PLAN);
@@ -37,8 +39,6 @@ export default function TrainingPlanCreator() {
   const [exResults, setExResults] = useState([]);
   const nextUid = useRef(0);
   const searchDebounce = useRef(null);
-
-  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,10 +91,9 @@ export default function TrainingPlanCreator() {
     return () => { cancelled = true; clearTimeout(searchDebounce.current); };
   }, [exSearch]);
 
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const setPlanField = (field, value) => setPlan((p) => ({ ...p, [field]: value }));
 
-  const currentSlots = slotsByDay[day] ?? [];
+  const currentSlots = slotsByDay[day] ?? EMPTY_SLOTS;
 
   const dayMuscleGroups = useMemo(() => {
     const groups = new Set();
@@ -198,7 +197,7 @@ export default function TrainingPlanCreator() {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <button onClick={toggleTheme} style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
+          <ThemeToggle />
           <button onClick={() => setSettings((s) => !s)} style={{ borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', background: settings ? 'var(--brand-soft)' : 'var(--surface)', color: settings ? 'var(--brand)' : 'var(--text)', border: `1px solid ${settings ? 'rgba(245,95,22,.4)' : 'var(--border)'}` }}>Configurações</button>
           {isMolde || isStudentPlan ? (
             <button onClick={() => handleSave(true)} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>

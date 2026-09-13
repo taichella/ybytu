@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { trainingService } from '../services/trainingService.js';
+import ThemeToggle from './ThemeToggle';
 
 const COVER_GRADIENTS = [
   'linear-gradient(135deg,#F55F16,#FF7A3D)',
@@ -12,14 +13,11 @@ const COVER_GRADIENTS = [
 ];
 
 export default function Trainings() {
-  const [theme, setTheme] = useState('dark');
   const [search, setSearch] = useState('');
   const [plans, setPlans] = useState([]);
   const [lookups, setLookups] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,8 +57,6 @@ export default function Trainings() {
     !search || (p.name_ptbr ?? '').toLowerCase().includes(search.toLowerCase())
   ), [plans, search]);
 
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-
   return (
     <>
       <header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
@@ -68,9 +64,7 @@ export default function Trainings() {
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar plano de treino…" style={{ width: '100%', padding: '10px 16px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
+          <ThemeToggle />
           <Link to="/training-creator" style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '11px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
             + Criar plano
           </Link>

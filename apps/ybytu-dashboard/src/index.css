@@ -1,33 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
-:root { 
-  --brand: #F55F16; 
-  --brand-hover: #FF7A3D; 
-  --brand-soft: rgba(245,95,22,.10);
-  --bg: #F8F9FA; 
-  --surface: #FFFFFF; 
-  --surface-2: #F1F5F9; 
-  --border: #E2E8F0; 
-  --text: #1A202C; 
-  --muted: #718096; 
-  --field: #F8F9FA;
-  --success: #16a34a; 
-  --info: #3b82f6; 
-  --warning: #d97706; 
-  --danger: #ef4444; 
-  --purple: #a855f7; 
-}
-
-:root[data-theme="dark"] { 
-  --bg: #121212; 
-  --surface: #1E1E1E; 
-  --surface-2: #2A2A2A; 
-  --border: #333333; 
-  --text: #DBD9D8; 
-  --muted: #9C9C9C; 
-  --field: #161616; 
-  --brand-soft: rgba(245,95,22,.14); 
-}
+@import './tokens.css';
 
 * { 
   box-sizing: border-box; 

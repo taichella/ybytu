@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { exerciseService } from '../services/exerciseService.js';
+import ThemeToggle from './ThemeToggle';
 
 const EMPTY = {
   exercise_id: '', name_ptbr: '', name_en: '', name_fr: '',
@@ -45,17 +46,12 @@ export default function ExerciseEditor() {
   const { id } = useParams();
   const isNew = !id;
 
-  const [theme, setTheme] = useState('dark');
   const [lang, setLang] = useState('pt');
   const [lookups, setLookups] = useState(null);
   const [form, setForm] = useState(EMPTY);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -89,7 +85,6 @@ export default function ExerciseEditor() {
     return () => { cancelled = true; };
   }, [id, isNew]);
 
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
   async function handleSave() {
@@ -131,7 +126,7 @@ export default function ExerciseEditor() {
           <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 900 }}>{isNew ? 'Novo Exercício' : (form.name_ptbr || 'Editar')}</h2>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <button onClick={toggleTheme} style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
+          <ThemeToggle />
           <button onClick={() => navigate('/exercises')} style={{ background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
           <button onClick={handleSave} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
             {saving ? 'Salvando…' : (isNew ? 'Criar' : 'Salvar')}

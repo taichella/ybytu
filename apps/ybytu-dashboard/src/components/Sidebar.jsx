@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { StaffContext } from '../lib/staffContextCore';
+import YbytuLogo from './YbytuLogo';
 
 const ROLE_LABELS = {
   personal: 'Personal Trainer',
@@ -32,10 +33,7 @@ export default function Sidebar() {
   return (
     <aside className="yb-side" style={{ width: '260px', flexShrink: 0, height: '100%', background: 'var(--surface)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column' }}>
       <div style={{ height: '72px', display: 'flex', alignItems: 'center', gap: '11px', padding: '0 22px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', borderRadius: '9px', background: 'var(--brand)', color: '#fff', boxShadow: '0 4px 12px rgba(245,95,22,.3)' }}>
-          <svg viewBox="119 94 275 323" style={{ width: '20px', height: 'auto' }} fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
-        </span>
-        <span style={{ fontWeight: 900, fontSize: '17px', letterSpacing: '.02em', color: 'var(--text)' }}>Ybytu <span style={{ color: 'var(--brand)', fontSize: '10px', fontWeight: 800 }}>ADMIN</span></span>
+        <YbytuLogo size={34} showText text="Ybytu" badge="ADMIN" />
       </div>
 
       <nav style={{ flex: 1, overflowY: 'auto', padding: '18px 0' }}>

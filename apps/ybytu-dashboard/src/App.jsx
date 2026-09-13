@@ -1,85 +1,96 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LoadingFallback from './components/LoadingFallback';
+import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';
 
-import Login from './components/Login';
-import CreateAccount from './components/CreateAccount';
-import AcceptInvite from './components/AcceptInvite';
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
-import DashboardLayout from './components/DashboardLayout';
-import Dashboard from './components/Dashboard';
-import Campaign from './components/Campaign';
-import Users from './components/Users';
-import UserDetail from './components/UserDetail';
-import UserPlanPage from './components/UserPlanPage';
-import Subscriptions from './components/Subscriptions';
-import Exercises from './components/Exercises';
-import ExerciseEditor from './components/ExerciseEditor';
-import Trainings from './components/Trainings';
-import TrainingPlan from './components/TrainingPlan';
-import TrainingPlanCreator from './components/TrainingPlanCreator';
-import Equipment from './components/Equipment';
-import Foods from './components/Foods';
-import FoodEditor from './components/FoodEditor';
-import Meals from './components/Meals';
-import MealEditor from './components/MealEditor';
-import MealPlans from './components/MealPlans';
-import MealPlanCreator from './components/MealPlanCreator';
-import Account from './components/Account';
-import Tags from './components/Tags';
-import SharedPlan from './components/SharedPlan';
-import FailedPlans from './components/FailedPlans';
-import InviteStaff from './components/InviteStaff';
+const Login = lazy(() => import('./components/Login'));
+const CreateAccount = lazy(() => import('./components/CreateAccount'));
+const AcceptInvite = lazy(() => import('./components/AcceptInvite'));
+const ForgotPassword = lazy(() => import('./components/ForgotPassword'));
+const ResetPassword = lazy(() => import('./components/ResetPassword'));
+const DashboardLayout = lazy(() => import('./components/DashboardLayout'));
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const Campaign = lazy(() => import('./components/Campaign'));
+const Users = lazy(() => import('./components/Users'));
+const UserDetail = lazy(() => import('./components/UserDetail'));
+const UserPlanPage = lazy(() => import('./components/UserPlanPage'));
+const Subscriptions = lazy(() => import('./components/Subscriptions'));
+const Exercises = lazy(() => import('./components/Exercises'));
+const ExerciseEditor = lazy(() => import('./components/ExerciseEditor'));
+const Trainings = lazy(() => import('./components/Trainings'));
+const TrainingPlan = lazy(() => import('./components/TrainingPlan'));
+const TrainingPlanCreator = lazy(() => import('./components/TrainingPlanCreator'));
+const Equipment = lazy(() => import('./components/Equipment'));
+const Foods = lazy(() => import('./components/Foods'));
+const FoodEditor = lazy(() => import('./components/FoodEditor'));
+const Meals = lazy(() => import('./components/Meals'));
+const MealEditor = lazy(() => import('./components/MealEditor'));
+const MealPlans = lazy(() => import('./components/MealPlans'));
+const MealPlanCreator = lazy(() => import('./components/MealPlanCreator'));
+const Account = lazy(() => import('./components/Account'));
+const Tags = lazy(() => import('./components/Tags'));
+const SharedPlan = lazy(() => import('./components/SharedPlan'));
+const FailedPlans = lazy(() => import('./components/FailedPlans'));
+const InviteStaff = lazy(() => import('./components/InviteStaff'));
+const More = lazy(() => import('./components/More'));
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/create-account" element={<CreateAccount />} />
-        <Route path="/accept-invite/:token" element={<AcceptInvite />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        {/* Rota pública — link compartilhável do plano, fora do login */}
-        <Route path="/plano/:token" element={<SharedPlan />} />
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/create-account" element={<CreateAccount />} />
+          <Route path="/accept-invite/:token" element={<AcceptInvite />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          {/* Rota pública — link compartilhável do plano, fora do login */}
+          <Route path="/plano/:token" element={<SharedPlan />} />
 
-        {/* Rotas protegidas pelo Layout */}
-        <Route element={<DashboardLayout />}>
-          <Route path="/campaign" element={<Campaign />} />
-          <Route path="/campaign/failed-plans" element={<FailedPlans />} />
-          <Route path="/campaign/invite-staff" element={<InviteStaff />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/users/:id" element={<UserDetail />} />
-          {/* Documento do aluno como página própria (UsuarioDetalhe.dc.html,
-              "Ver plano" -> href separado) -- ver [[project_userdetail_design_gaps_product_decisions]]. */}
-          <Route path="/users/:id/plano" element={<UserPlanPage />} />
-          {/* Base separada pro botão do WhatsApp (template ybytu_staff_plan_ready)
-              cadastrada na Meta -- mesma tela do UserDetail, mas abre direto na
-              aba de plano+parecer (ver location.pathname em UserDetail.jsx).
-              Existe pra evitar sufixo dinâmico com query string no botão, que
-              corre risco de rejeição no cadastro do template. */}
-          <Route path="/review/:id" element={<UserDetail />} />
-          <Route path="/subscriptions" element={<Subscriptions />} />
-          <Route path="/exercises" element={<Exercises />} />
-          <Route path="/exercise-editor/:id?" element={<ExerciseEditor />} />
-          <Route path="/trainings" element={<Trainings />} />
-          <Route path="/trainings/:id" element={<TrainingPlan />} />
-          <Route path="/training-creator/:id?" element={<TrainingPlanCreator />} />
-          <Route path="/equipment" element={<Equipment />} />
-          <Route path="/foods" element={<Foods />} />
-          <Route path="/food-editor/:id?" element={<FoodEditor />} />
-          <Route path="/meals" element={<Meals />} />
-          <Route path="/meal-editor/:id?" element={<MealEditor />} /> 
-          <Route path="/meal-plans" element={<MealPlans />} /> 
-          <Route path="/meal-plan-creator/:id?" element={<MealPlanCreator />} />     
-          <Route path="/tags" element={<Tags />} /> 
-          <Route path="/account" element={<Account />} />  
-          
-          
-        </Route>
-      </Routes>
+          {/* Rotas protegidas pelo Layout */}
+          <Route element={<DashboardLayout />}>
+            {/* Rotas exclusivas de Admin */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} fallback="/dashboard" />}>
+              <Route path="/campaign" element={<Campaign />} />
+              <Route path="/campaign/failed-plans" element={<FailedPlans />} />
+              <Route path="/campaign/invite-staff" element={<InviteStaff />} />
+            </Route>
+
+            {/* Rotas de Treino (Admin ou Personal) */}
+            <Route element={<ProtectedRoute allowedRoles={['admin', 'personal']} fallback="/dashboard" />}>
+              <Route path="/trainings" element={<Trainings />} />
+              <Route path="/trainings/:id" element={<TrainingPlan />} />
+              <Route path="/training-creator/:id?" element={<TrainingPlanCreator />} />
+              <Route path="/exercises" element={<Exercises />} />
+              <Route path="/exercise-editor/:id?" element={<ExerciseEditor />} />
+              <Route path="/equipment" element={<Equipment />} />
+            </Route>
+
+            {/* Rotas de Nutrição (Admin ou Nutricionista) */}
+            <Route element={<ProtectedRoute allowedRoles={['admin', 'nutricionista']} fallback="/dashboard" />}>
+              <Route path="/foods" element={<Foods />} />
+              <Route path="/food-editor/:id?" element={<FoodEditor />} />
+              <Route path="/meals" element={<Meals />} />
+              <Route path="/meal-editor/:id?" element={<MealEditor />} />
+              <Route path="/meal-plans" element={<MealPlans />} />
+              <Route path="/meal-plan-creator/:id?" element={<MealPlanCreator />} />
+              <Route path="/tags" element={<Tags />} />
+            </Route>
+
+            {/* Rotas gerais acessíveis a todo Staff verificado */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/users/:id" element={<UserDetail />} />
+            <Route path="/users/:id/plano" element={<UserPlanPage />} />
+            <Route path="/review/:id" element={<UserDetail />} />
+            <Route path="/subscriptions" element={<Subscriptions />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/more" element={<More />} />
+          </Route>
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

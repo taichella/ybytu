@@ -1,20 +1,9 @@
-import { supabase } from '../lib/supabase.js';
-
-async function authHeaders() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('not_authenticated');
-  return { Authorization: `Bearer ${session.access_token}` };
-}
+import { invokeFunction } from './apiClient.js';
 
 async function invoke(action, extra = {}) {
-  const headers = await authHeaders();
-  const { data, error } = await supabase.functions.invoke('ybytu-admin-meal-plans', {
-    headers,
+  return invokeFunction('ybytu-admin-meal-plans', {
     body: { action, ...extra },
   });
-  if (error) throw error;
-  if (data?.error) throw new Error(data.error);
-  return data;
 }
 
 export const mealPlanService = {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { foodService } from '../services/foodService.js';
 
@@ -43,29 +43,31 @@ export default function FoodEditor() {
   });
 
   useEffect(() => {
-    fetchData();
-  }, [id]);
+    let cancelled = false;
+    async function load() {
+      try {
+        const lookupsData = await foodService.getLookups();
+        if (cancelled) return;
+        setLookups(lookupsData);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const lookupsData = await foodService.getLookups();
-      setLookups(lookupsData);
-
-      if (!isNew) {
-        const foodData = await foodService.getById(id);
-        setFormData({
-            ...foodData,
-            diet_tags_ids: foodData.diet_tags_ids ? (typeof foodData.diet_tags_ids === 'string' ? foodData.diet_tags_ids.split(',') : foodData.diet_tags_ids) : [],
-            functional_tags_ids: foodData.functional_tags_ids ? (typeof foodData.functional_tags_ids === 'string' ? foodData.functional_tags_ids.split(',') : foodData.functional_tags_ids) : []
-        });
+        if (!isNew) {
+          const foodData = await foodService.getById(id);
+          if (cancelled) return;
+          setFormData({
+              ...foodData,
+              diet_tags_ids: foodData.diet_tags_ids ? (typeof foodData.diet_tags_ids === 'string' ? foodData.diet_tags_ids.split(',') : foodData.diet_tags_ids) : [],
+              functional_tags_ids: foodData.functional_tags_ids ? (typeof foodData.functional_tags_ids === 'string' ? foodData.functional_tags_ids.split(',') : foodData.functional_tags_ids) : []
+          });
+        }
+      } catch (err) {
+        if (!cancelled) setError(err.message || 'Falha ao carregar dados.');
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-    } catch (err) {
-      setError(err.message || 'Falha ao carregar dados.');
-    } finally {
-      setLoading(false);
     }
-  };
+    load();
+    return () => { cancelled = true; };
+  }, [id, isNew]);
 
   const handleSave = async () => {
     try {

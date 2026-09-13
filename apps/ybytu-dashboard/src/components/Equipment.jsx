@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { equipmentService } from '../services/equipmentService.js';
 
@@ -14,22 +14,13 @@ export default function Equipment() {
   const [formData, setFormData] = useState({ id: '', exercise_equipment_id: '', name_ptbr: '', name_en: '', name_fr: '' });
 
   useEffect(() => {
-    fetchEquipments();
+    let cancelled = false;
+    equipmentService.getAll()
+      .then((data) => { if (!cancelled) setEquipments(data); })
+      .catch((err) => { if (!cancelled) setError(err.message || 'Falha ao carregar equipamentos.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
-
-  const fetchEquipments = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await equipmentService.getAll();
-      setEquipments(data);
-    } catch (err) {
-      console.error(err);
-      setError(err.message || 'Falha ao carregar equipamentos.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEdit = (eq) => {
     setFormData({
@@ -53,7 +44,8 @@ export default function Equipment() {
             await equipmentService.create(formData);
         }
         setShowForm(false);
-        fetchEquipments(); // Reload
+        const data = await equipmentService.getAll();
+        setEquipments(data);
     } catch (err) {
         setError(err.message || 'Falha ao salvar equipamento.');
     } finally {

@@ -130,8 +130,14 @@ serve(async (req) => {
       // via admin API (service_role). Usado no card "Conta & Assinatura" do
       // UserDetail (dado real que a tela de design pedia e tinha como pegar).
       let lastSignInAt = null
+      let userEmail = null
+      let userPhone = null
       const { data: authUserData } = await supabase.auth.admin.getUserById(userId)
-      if (authUserData?.user) lastSignInAt = authUserData.user.last_sign_in_at
+      if (authUserData?.user) {
+        lastSignInAt = authUserData.user.last_sign_in_at
+        userEmail = authUserData.user.email
+        userPhone = authUserData.user.phone
+      }
 
       // Entregas de WhatsApp que a Meta aceitou mas falharam (delivery_status
       // gravado async pelo webhook, ver whatsapp-webhook/index.ts) -- o dado já
@@ -163,6 +169,8 @@ serve(async (req) => {
         subscriptionIncludesTraining: subIncludesTraining,
         subscriptionIncludesMeals: subIncludesMeals,
         lastSignInAt,
+        email: userEmail,
+        phone: userPhone,
         planHistory,
         failedWhatsappNotifications: failedNotificationRows ?? [],
       }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { tagService } from '../services/tagService.js';
 
 export default function Tags() {
@@ -17,23 +17,13 @@ export default function Tags() {
   });
 
   useEffect(() => {
-    fetchTags();
-    setShowNew(false);
+    let cancelled = false;
+    tagService.getAll(tab)
+      .then((data) => { if (!cancelled) setTags(data); })
+      .catch((err) => { if (!cancelled) setError(err.message || 'Falha ao carregar tags.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [tab]);
-
-  const fetchTags = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await tagService.getAll(tab);
-      setTags(data);
-    } catch (err) {
-      console.error(err);
-      setError(err.message || 'Falha ao carregar tags.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEdit = (t) => {
       setFormData({
@@ -76,7 +66,8 @@ export default function Tags() {
           }
 
           setShowNew(false);
-          fetchTags();
+          const data = await tagService.getAll(tab);
+          setTags(data);
       } catch (err) {
           setError(err.message || 'Falha ao salvar tag.');
       } finally {
@@ -122,9 +113,9 @@ export default function Tags() {
           </header>
 
           <div style={{ display: 'flex', gap: '32px', borderBottom: '1px solid var(--border)', marginBottom: '28px', overflowX: 'auto' }}>
-            <button onClick={() => setTab('gerais')} style={{ padding: '0 0 16px', background: 'none', border: 'none', borderBottom: tab === 'gerais' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'gerais' ? 'var(--text)' : 'var(--muted)', fontSize: '14px', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .2s' }}>Gerais (Alimentos)</button>
-            <button onClick={() => setTab('funcionais')} style={{ padding: '0 0 16px', background: 'none', border: 'none', borderBottom: tab === 'funcionais' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'funcionais' ? 'var(--text)' : 'var(--muted)', fontSize: '14px', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .2s' }}>Funcionais (Alimentos)</button>
-            <button onClick={() => setTab('dieta')} style={{ padding: '0 0 16px', background: 'none', border: 'none', borderBottom: tab === 'dieta' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'dieta' ? 'var(--text)' : 'var(--muted)', fontSize: '14px', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .2s' }}>Dieta (Meals & Alimentos)</button>
+            <button onClick={() => { setTab('gerais'); setShowNew(false); }} style={{ padding: '0 0 16px', background: 'none', border: 'none', borderBottom: tab === 'gerais' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'gerais' ? 'var(--text)' : 'var(--muted)', fontSize: '14px', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .2s' }}>Gerais (Alimentos)</button>
+            <button onClick={() => { setTab('funcionais'); setShowNew(false); }} style={{ padding: '0 0 16px', background: 'none', border: 'none', borderBottom: tab === 'funcionais' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'funcionais' ? 'var(--text)' : 'var(--muted)', fontSize: '14px', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .2s' }}>Funcionais (Alimentos)</button>
+            <button onClick={() => { setTab('dieta'); setShowNew(false); }} style={{ padding: '0 0 16px', background: 'none', border: 'none', borderBottom: tab === 'dieta' ? '3px solid var(--brand)' : '3px solid transparent', color: tab === 'dieta' ? 'var(--text)' : 'var(--muted)', fontSize: '14px', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all .2s' }}>Dieta (Meals & Alimentos)</button>
           </div>
 
           {error && <div style={{ padding: '16px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '12px', marginBottom: '22px' }}>{error}</div>}

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { mealPlanService } from '../services/mealPlanService.js';
 import ChipMultiSelect from './ChipMultiSelect.jsx';
+import ThemeToggle from './ThemeToggle';
 
 const EMPTY_PLAN = {
   meal_plan_id: '', name_ptbr: '', name_en: '', name_fr: '',
@@ -9,6 +10,8 @@ const EMPTY_PLAN = {
   instruction_ptbr: '', instruction_en: '', instruction_fr: '',
   dietary_preference: '', restriction_tags: [], is_active: true, created_by_ai: false,
 };
+
+const EMPTY_SLOTS = [];
 
 export default function MealPlanCreator() {
   const navigate = useNavigate();
@@ -21,7 +24,6 @@ export default function MealPlanCreator() {
   const forUserName = searchParams.get('forUserName') || '';
   const isStudentPlan = Boolean(forUser);
 
-  const [theme, setTheme] = useState('dark');
   const [day, setDay] = useState(1);
   const [settings, setSettings] = useState(true);
   const [plan, setPlan] = useState(EMPTY_PLAN);
@@ -34,8 +36,6 @@ export default function MealPlanCreator() {
   const [mealResults, setMealResults] = useState([]);
   const nextUid = useRef(0);
   const searchDebounce = useRef(null);
-
-  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -80,10 +80,9 @@ export default function MealPlanCreator() {
     return () => { cancelled = true; clearTimeout(searchDebounce.current); };
   }, [mealSearch]);
 
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const setPlanField = (field, value) => setPlan((p) => ({ ...p, [field]: value }));
 
-  const currentSlots = slotsByDay[day] ?? [];
+  const currentSlots = slotsByDay[day] ?? EMPTY_SLOTS;
 
   const mealTypeName = (code) => (lookups?.meal_types ?? []).find((mt) => mt.meal_type_id === code)?.name_ptbr ?? code;
 
@@ -161,7 +160,7 @@ export default function MealPlanCreator() {
           <input type="text" value={plan.name_ptbr} onChange={(e) => setPlanField('name_ptbr', e.target.value)} placeholder="Nome do plano alimentar…" style={{ fontSize: '18px', fontWeight: 900, background: 'none', border: 'none', color: 'var(--text)', fontFamily: 'inherit', outline: 'none', width: '100%' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <button onClick={toggleTheme} style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', cursor: 'pointer' }}>{theme === 'dark' ? '☀️' : '🌙'}</button>
+          <ThemeToggle />
           <button onClick={() => setSettings((s) => !s)} style={{ borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', background: settings ? 'var(--brand-soft)' : 'var(--surface)', color: settings ? 'var(--brand)' : 'var(--text)', border: `1px solid ${settings ? 'rgba(245,95,22,.4)' : 'var(--border)'}` }}>Configurações</button>
           <button onClick={handleSave} disabled={saving} style={{ background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 18px', fontSize: '13px', fontWeight: 800, cursor: saving ? 'wait' : 'pointer', fontFamily: 'inherit', opacity: saving ? 0.7 : 1 }}>
             {saving ? 'Salvando…' : (isNew ? 'Criar plano' : isStudentPlan ? 'Salvar alterações' : 'Salvar')}

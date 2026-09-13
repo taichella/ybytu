@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import ThemeToggle from './ThemeToggle';
+import YbytuLogo from './YbytuLogo';
 
 const ERROR_MESSAGES = {
   invite_not_found: 'Este convite não é válido. Peça um novo ao administrador.',
@@ -18,7 +20,6 @@ const DEFAULT_ERROR_MESSAGE = 'Não foi possível concluir seu cadastro. Tente n
 export default function AcceptInvite() {
   const navigate = useNavigate();
   const { token } = useParams();
-  const [theme, setTheme] = useState('dark');
   const [showPw, setShowPw] = useState(false);
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
@@ -27,11 +28,6 @@ export default function AcceptInvite() {
   const [error, setError] = useState(null);
   const [done, setDone] = useState(false);
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const togglePw = () => setShowPw(!showPw);
 
   const handleSubmit = async (e) => {
@@ -92,19 +88,10 @@ export default function AcceptInvite() {
 
         {/* ===================== FORM PANEL ===================== */}
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', position: 'relative', background: 'var(--bg)' }}>
-          <button onClick={toggleTheme} title="Alternar tema" style={{ position: 'absolute', top: '24px', right: '24px', width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {theme === 'dark' ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
-            ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
-            )}
-          </button>
+          <ThemeToggle style={{ position: 'absolute', top: '24px', right: '24px' }} />
 
           <div style={{ width: '100%', maxWidth: '400px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '28px' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '34px', height: '34px', borderRadius: '9px', background: 'var(--brand)', color: '#fff' }}><svg viewBox="119 94 275 323" style={{ width: '20px', height: 'auto' }} fill="currentColor"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg></span>
-              <span style={{ fontWeight: 900, fontSize: '18px', letterSpacing: '.04em' }}>Ybytu <span style={{ color: 'var(--brand)', fontSize: '11px' }}>ADMIN</span></span>
-            </div>
+            <YbytuLogo size={34} showText text="Ybytu" badge="ADMIN" style={{ marginBottom: '28px' }} />
 
             {!done ? (
               <form onSubmit={handleSubmit}>

@@ -1,21 +1,11 @@
-import { useState, useEffect } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Subscriptions() {
-  const [theme, setTheme] = useState('dark');
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-
   return (
     <>
       <header style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
         <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 900 }}>Assinaturas</h2>
-        <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
+        <ThemeToggle />
       </header>
 
       {/* Não existe fonte real de assinatura/cobrança no Supabase -- planos,

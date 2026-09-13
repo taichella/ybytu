@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { StaffContext } from '../lib/staffContextCore';
+import ThemeToggle from './ThemeToggle';
 
 const VALID_TABS = new Set(['overview', 'health', 'plans', 'activity']);
 
@@ -114,7 +115,6 @@ export default function UserDetail() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  const [theme, setTheme] = useState('dark');
   // Botão "Visit website" de template do WhatsApp na Meta só aceita um
   // sufixo dinâmico simples (sem query string -- risco de rejeição no
   // cadastro do template, confirmado 2026-08-10). Por isso a rota
@@ -126,14 +126,7 @@ export default function UserDetail() {
     const requested = searchParams.get('tab');
     return VALID_TABS.has(requested) ? requested : 'overview';
   });
-  const [isBlocked, setIsBlocked] = useState(false);
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  const toggleBlock = () => setIsBlocked(!isBlocked);
 
   const tabStyle = (isActive) => ({
     border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px', fontWeight: 700, padding: '11px 16px', whiteSpace: 'nowrap',
@@ -312,6 +305,19 @@ export default function UserDetail() {
     return <main style={{ padding: '40px', textAlign: 'center' }}><p>Usuário não encontrado.</p></main>;
   }
 
+  const handleSendMessage = () => {
+    const phone = userData?.whatsapp_phone || resolvedLabels?.phone;
+    const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
+    if (cleanPhone) {
+      const waNumber = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(`Olá, ${userData?.full_name || ''}! Aqui é da equipe Ybytu.`)}`, '_blank', 'noopener,noreferrer');
+    } else if (resolvedLabels?.email) {
+      window.location.href = `mailto:${resolvedLabels.email}?subject=Ybytu%20-%20Acompanhamento`;
+    } else {
+      alert('Usuário não possui número de WhatsApp ou e-mail cadastrado para contato.');
+    }
+  };
+
   return (
     <>
       <header className="yb-work-header" style={{ height: '72px', flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', gap: '20px' }}>
@@ -328,13 +334,8 @@ export default function UserDetail() {
         </div>
 
         <div className="yb-work-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
-          <button onClick={toggleBlock} style={{ background: isBlocked ? 'rgba(239,68,68,.1)' : 'var(--surface)', color: isBlocked ? 'var(--danger)' : 'var(--text)', border: `1px solid ${isBlocked ? 'var(--danger)' : 'var(--border)'}`, borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
-            {isBlocked ? 'Desbloquear Conta' : 'Bloquear Usuário'}
-          </button>
-          <button style={{ background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Mensagem</button>
+          <ThemeToggle />
+          <button onClick={handleSendMessage} style={{ background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>Mensagem</button>
           <button onClick={() => navigate('/trainings')} title="Escolher/criar outro plano de treino no catálogo" style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Reatribuir plano
           </button>
@@ -347,18 +348,18 @@ export default function UserDetail() {
         <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
 
           {/* Profile Hero (Avatar à frente e SVG decorativo laranja)[cite: 9] */}
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', overflow: 'hidden', marginBottom: '22px', opacity: isBlocked ? 0.6 : 1, transition: 'opacity 0.3s' }}>
-            <div style={{ height: '84px', background: isBlocked ? 'var(--border)' : 'linear-gradient(135deg,#F55F16,#FF7A3D)', position: 'relative' }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '20px', overflow: 'hidden', marginBottom: '22px' }}>
+            <div style={{ height: '84px', background: 'linear-gradient(135deg,#F55F16,#FF7A3D)', position: 'relative' }}>
               <svg viewBox="119 94 275 323" style={{ position: 'absolute', right: '-30px', top: '-40px', width: '200px', opacity: '.14' }} fill="#fff"><path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"/><path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"/><path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"/></svg>
             </div>
             <div style={{ padding: '0 24px 22px', display: 'flex', alignItems: 'flex-end', gap: '18px', flexWrap: 'wrap', marginTop: '-36px' }}>
-              <div style={{ width: '84px', height: '84px', borderRadius: '22px', background: isBlocked ? 'var(--muted)' : '#ec4899', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '30px', border: '4px solid var(--surface)', flexShrink: 0, zIndex: 10 }}>{initialsStr}</div>
+              <div style={{ width: '84px', height: '84px', borderRadius: '22px', background: '#ec4899', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '30px', border: '4px solid var(--surface)', flexShrink: 0, zIndex: 10 }}>{initialsStr}</div>
               <div style={{ flex: 1, minWidth: '200px', paddingBottom: '2px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                  <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 900, letterSpacing: '-.02em', textDecoration: isBlocked ? 'line-through' : 'none' }}>{userData.full_name}</h1>
+                  <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 900, letterSpacing: '-.02em' }}>{userData.full_name}</h1>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 11px', borderRadius: '7px', fontSize: '11px', fontWeight: 800, background: 'rgba(245,95,22,.14)', color: '#F55F16', textTransform: 'uppercase' }}>{resolvedLabels.subscriptionName || 'Free'}</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 11px', borderRadius: '7px', fontSize: '11px', fontWeight: 800, background: isBlocked ? 'rgba(239,68,68,.12)' : 'rgba(22,163,74,.12)', color: isBlocked ? 'var(--danger)' : '#16a34a', textTransform: 'uppercase' }}>
-                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: isBlocked ? 'var(--danger)' : '#16a34a' }}></span> {isBlocked ? 'Inativo' : 'Ativo'}
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 11px', borderRadius: '7px', fontSize: '11px', fontWeight: 800, background: 'rgba(22,163,74,.12)', color: '#16a34a', textTransform: 'uppercase' }}>
+                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }}></span> Ativo
                   </span>
                 </div>
                 <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>

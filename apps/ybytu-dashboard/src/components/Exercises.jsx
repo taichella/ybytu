@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { exerciseService } from '../services/exerciseService.js';
+import ThemeToggle from './ThemeToggle';
 
 // Mesmo resolver de mídia R2 de supabase/functions/_shared/buildPlanPayload.ts
 // (resolveR2Media) -- duplicado aqui de propósito, mesma decisão já registrada
@@ -29,7 +30,6 @@ function levelStyle(levelCode) {
 }
 
 export default function Exercises() {
-  const [theme, setTheme] = useState('dark');
   const [view, setView] = useState('table');
   const [exercises, setExercises] = useState([]);
   const [lookups, setLookups] = useState(null);
@@ -44,10 +44,6 @@ export default function Exercises() {
   const [selected, setSelected] = useState(new Set());
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 20;
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -115,7 +111,19 @@ export default function Exercises() {
     });
   }, [exercises, search, listFilter, muscleFilter, equipFilter, levelFilter, healthFilter, muscleNames]);
 
-  useEffect(() => { setPage(1); }, [search, listFilter, muscleFilter, equipFilter, levelFilter, healthFilter]);
+  const [prevFilters, setPrevFilters] = useState({ search, listFilter, muscleFilter, equipFilter, levelFilter, healthFilter });
+
+  if (
+    prevFilters.search !== search ||
+    prevFilters.listFilter !== listFilter ||
+    prevFilters.muscleFilter !== muscleFilter ||
+    prevFilters.equipFilter !== equipFilter ||
+    prevFilters.levelFilter !== levelFilter ||
+    prevFilters.healthFilter !== healthFilter
+  ) {
+    setPrevFilters({ search, listFilter, muscleFilter, equipFilter, levelFilter, healthFilter });
+    setPage(1);
+  }
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageSafe = Math.min(page, pageCount);
@@ -145,8 +153,6 @@ export default function Exercises() {
     background: on ? 'var(--brand)' : 'var(--surface-2)', color: on ? '#fff' : 'var(--muted)',
     opacity: on ? 1 : 0.55, border: on ? 'none' : '1px solid var(--border)',
   });
-
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   const viewBtnStyle = (isActive) => ({
     display: 'flex', alignItems: 'center', gap: '6px', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: 800, padding: '7px 14px', borderRadius: '7px', whiteSpace: 'nowrap',
@@ -200,9 +206,7 @@ export default function Exercises() {
           />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
+          <ThemeToggle />
           <Link to="/exercise-editor" style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
             + Novo exercício
           </Link>

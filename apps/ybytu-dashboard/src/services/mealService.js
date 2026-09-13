@@ -1,20 +1,13 @@
-import { supabase } from '../lib/supabase.js';
-
-async function authHeaders() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('not_authenticated');
-  return { Authorization: `Bearer ${session.access_token}` };
-}
+import { invokeFunction } from './apiClient.js';
 
 async function invoke(action, extra = {}) {
-  const headers = await authHeaders();
-  const { data, error } = await supabase.functions.invoke('ybytu-admin-meals', {
-    headers,
+  return invokeFunction('ybytu-admin-meals', {
     body: { action, ...extra },
+    formatError: (data) =>
+      data.error === 'invalid_ingredient_food_ids' && Array.isArray(data.missing)
+        ? `Ingredientes inválidos: ${data.missing.join(', ')}`
+        : null,
   });
-  if (error) throw error;
-  if (data?.error) throw new Error(data.error === 'invalid_ingredient_food_ids' ? `Ingredientes inválidos: ${data.missing.join(', ')}` : data.error);
-  return data;
 }
 
 export const mealService = {

@@ -1,23 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { mealService } from '../services/mealService.js';
+import ThemeToggle from './ThemeToggle';
 
 const MEAL_TYPE_ICON = {
   breakfast: '🥞', lunch: '🥗', dinner: '🍽️', snack: '🥛',
 };
 
 export default function Meals() {
-  const [theme, setTheme] = useState('dark');
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
   const [meals, setMeals] = useState([]);
   const [lookups, setLookups] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,8 +50,6 @@ export default function Meals() {
     return true;
   }), [meals, tab, search]);
 
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-
   const tabStyle = (isActive) => ({
     border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '14px', fontWeight: 700, padding: '11px 16px', whiteSpace: 'nowrap',
     borderBottom: `2px solid ${isActive ? 'var(--brand)' : 'transparent'}`,
@@ -90,9 +84,7 @@ export default function Meals() {
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar refeição, receita…" style={{ width: '100%', padding: '10px 16px', borderRadius: '11px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '14px', fontFamily: 'inherit', outline: 'none' }} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
+          <ThemeToggle />
           <Link to="/meal-editor" style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '11px 18px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none', boxShadow: '0 4px 12px rgba(245,95,22,.25)' }}>
             + Nova refeição
           </Link>

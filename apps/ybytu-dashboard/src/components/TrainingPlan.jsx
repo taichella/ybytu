@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { trainingService } from '../services/trainingService.js';
+import ThemeToggle from './ThemeToggle';
 
 const DAY_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
 export default function TrainingPlan() {
   const { id } = useParams();
-  const [theme, setTheme] = useState('dark');
   const [plan, setPlan] = useState(null);
   const [isMolde, setIsMolde] = useState(false);
   const [usersCount, setUsersCount] = useState(0);
@@ -15,8 +15,6 @@ export default function TrainingPlan() {
   const [day, setDay] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -76,8 +74,6 @@ export default function TrainingPlan() {
 
   const dayTotalSets = daySlots.reduce((acc, s) => acc + (Number(s.sets) || 0), 0);
 
-  const toggleTheme = () => setTheme((prev) => prev === 'dark' ? 'light' : 'dark');
-
   if (loading) return <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>Carregando…</main>;
   if (error) return <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>{error}</main>;
   if (!plan) return null;
@@ -107,9 +103,7 @@ export default function TrainingPlan() {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <button onClick={toggleTheme} title="Alternar tema" style={{ width: '40px', height: '40px', borderRadius: '10px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-            {theme === 'dark' ? '☀️' : '🌙'}
-          </button>
+          <ThemeToggle />
           <button
             disabled
             title="Atribuição direta de plano ainda não existe no app — precisa ser construída (fluxo de atribuição a usuário)"
