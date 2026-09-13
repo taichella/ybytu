@@ -51,6 +51,11 @@ const TOKEN_LABEL_PTBR: Record<string, string> = {
   crustacean: 'crustáceos', mollusk: 'moluscos', sesame: 'gergelim',
   lupin: 'tremoço', mustard: 'mostarda', sulfites: 'sulfitos',
   pork: 'carne suína', red_meat: 'carne vermelha',
+  // coco: token próprio desde a Sessão 1 (2026-09-12) -- antes disso coco
+  // usava tree_nuts, decisão de produto revertida porque cobria a população
+  // errada (excluía coco de quem é alérgico a castanha, não de quem é
+  // alérgico a coco). Ver scripts/aplicacao_sessao1_20260904.sql Bloco 2b.
+  coco: 'coco',
 }
 // Tokens que contam como "alérgeno confirmado presente" (badge "Contém").
 // pork e red_meat ficam fora daqui -- não são alérgeno clínico, viram o
@@ -60,7 +65,7 @@ const TOKEN_LABEL_PTBR: Record<string, string> = {
 const ALLERGEN_TOKENS_FOR_BADGE = new Set([
   'milk', 'gluten', 'wheat', 'rye', 'egg', 'soy', 'peanuts', 'tree_nuts',
   'nuts', 'fish', 'shellfish', 'crustacean', 'mollusk', 'sesame', 'lupin',
-  'mustard', 'sulfites',
+  'mustard', 'sulfites', 'coco',
 ])
 // Risco de contaminação cruzada pendente de certificação do fornecedor --
 // achado 2026-09-02: silêncio aqui repetia o bug do array vazio (11 foods,
