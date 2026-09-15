@@ -1,7 +1,7 @@
 # Padrão: "o sistema não sabia que não sabia" (referência, não lição de moral)
 
-Oito casos reais deste projeto, formas diferentes do mesmo bug: o sistema (ou a ferramenta usada
-pra verificá-lo, caso 7; ou o repositório que deveria descrever o sistema, caso 8) tinha um estado
+Nove casos reais deste projeto, formas diferentes do mesmo bug: o sistema (ou a ferramenta usada
+pra verificá-lo, caso 7; ou o repositório que deveria descrever o sistema, casos 8 e 9) tinha um estado
 inválido, ausente ou incerto e serviu normal mesmo assim, sem sinalizar nada. Nenhum foi achado por
 um mecanismo que o pegasse de graça — todos foram achados por alguém desconfiar e ir olhar.
 Registrado pra decidir, no próximo projeto, onde vale gastar esforço de arquitetura antes do
@@ -161,6 +161,47 @@ a rodar `detect-silent-revert.sh` antes de mergear. A correção não é lembrar
 recusa seguir sem ela. `scripts/deploy-functions.sh` faz isso: substitui o comando de deploy em
 si (não um passo extra antes dele) e recusa deployar se a function tiver mudança não commitada ou
 commit não empurrado — a mesma correção estrutural do padrão, aplicada aqui.
+
+## 9. Commit sem deploy — a mesma janela do caso 8, invertida
+
+**O quê:** o commit `1d4c964d` (2026-09-13) adicionou o token `'coco'` ao mapa de badge de
+alérgenos em `buildPlanPayload.ts` — criado *de propósito antes* do dado correspondente ir pro ar,
+exatamente pra nunca existir uma janela em que o dado exista sem o código saber renderizá-lo
+(mesmo raciocínio do caso 8, aplicado de antemão). O token `'coco'` foi criado no banco no mesmo
+dia. O deploy de `ybytu-get-plan-payload`/`ybytu-get-plan-for-staff` (as duas functions que
+importam `buildPlanPayload.ts`) **não rodou** — nem naquele dia, nem nos 5 dias seguintes.
+Resultado: qualquer aluno que marcasse "Sem Coco" no onboarding (opção real, já selecionável)
+recebia um card de alergênico mostrando o token cru `coco` ou nada — a mesma classe de falha que o
+commit foi escrito pra evitar, só que pelo lado que ninguém tinha automatizado. Achado numa
+varredura manual pedida por causa de um número de arquivos pendentes que parecia alto demais para
+não esconder nada — mesma origem do caso 8.
+
+**Por que é uma forma nova, não repetição do caso 8:** o caso 8 é código no ar sem existir no git.
+Este é o oposto exato — código correto no git, correto no `origin`, e a produção rodando a versão
+de antes mesmo assim. `scripts/deploy-functions.sh` (a correção estrutural do caso 8) não pega
+isto porque só roda **no momento em que alguém chama deploy** — a falha aqui foi justamente não
+existir momento nenhum: ninguém chamou `supabase functions deploy` depois daquele commit, então a
+guarda nunca teve chance de disparar. Uma guarda que depende de uma ação acontecer não pega a
+ausência da ação.
+
+**Custo pra achar:** a mesma investigação do caso 8, de novo — comparar timestamp de deploy de
+cada function (`supabase functions list`) contra o commit mais recente que a toca, à mão, function
+por function, porque não havia ferramenta que fizesse essa comparação sozinha.
+
+**Regra que teria evitado:** uma auditoria que roda independente de alguém lembrar de chamá-la —
+não um gate de deploy (isso já existe, é `deploy-functions.sh`, e protege a outra direção), mas uma
+varredura periódica que não depende de ação nenhuma pra disparar. `scripts/check-stale-deploys.sh`
+faz isso: compara todas as functions de uma vez contra seus deploys reais, sem bloquear nada, feito
+pra rodar como hábito (antes de teste com aluno real, depois de qualquer sessão que mexeu em edge
+function) em vez de esperar alguém desconfiar de nuvem de arquivo pendente de novo. Rodá-lo pela
+primeira vez contra o estado atual do projeto achou mais 8 candidatos com o mesmo padrão (commits
+de 2026-09-06, provavelmente o próprio fechamento do caso 8 documentando código que já estava no
+ar — não confirmado por conteúdo, só por timestamp, registrado sem redeployar às cegas).
+
+**Lição geral, não só deste caso:** uma guarda que só dispara quando alguém executa a ação que ela
+protege não pega a ausência dessa ação. O caso 8 e o caso 9 são a mesma lição nas duas metades do
+mesmo fluxo — commitar e deployar são dois passos separados, e qualquer checagem presa a só um dos
+dois deixa a outra metade sem cobertura nenhuma.
 
 ## Técnicas de detecção reutilizáveis
 
