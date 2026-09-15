@@ -120,7 +120,7 @@ for (const slug of localSlugs) {
     rows.push({
       slug,
       status: 'STALE',
-      detail: `commit ${gapHours}h mais novo que o ultimo deploy -- rodar: bash scripts/deploy-functions.sh ${slug}`,
+      detail: `commit ${gapHours}h mais novo que o ultimo deploy -- SUSPEITA, nao confirmacao, ver aviso abaixo`,
     })
   } else {
     rows.push({ slug, status: 'OK', detail: 'deploy cobre o commit mais recente' })
@@ -144,6 +144,20 @@ for (const r of rows.sort((a, b) => (a.status === 'OK') - (b.status === 'OK'))) 
   console.log(r.slug.padEnd(width) + r.status.padEnd(28) + r.detail)
 }
 console.log()
+
+const staleCount = rows.filter((r) => r.status === 'STALE').length
+if (staleCount > 0) {
+  console.log('AVISO: STALE indica suspeita por timestamp, NAO confirmacao de gap real.')
+  console.log('Confirme por conteudo antes de redeployar qualquer coisa -- pegadinha ja')
+  console.log('confirmada 2026-09-14: checkout local usa CRLF, o que sai do Supabase vem em')
+  console.log('LF, entao `diff` comum marca o arquivo inteiro como diferente mesmo sem')
+  console.log('nenhuma mudanca de conteudo (quase redeployamos 6 functions sem necessidade).')
+  console.log('Pra cada STALE, rode:')
+  console.log('  npx supabase functions download <nome> --use-api --project-ref <ref>')
+  console.log('  diff --strip-trailing-cr supabase/functions/<nome>/index.ts <baixado>/index.ts')
+  console.log('So redeploye (scripts/deploy-functions.sh <nome>) se o diff mostrar diferenca de verdade.')
+  console.log()
+}
 
 if (problems.length === 0) {
   console.log(`OK: todas as ${rows.length} functions com deploy cobrindo o commit mais recente.`)
