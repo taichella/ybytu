@@ -35,3 +35,11 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Artefatos locais da migracao de midia pro R2 (2026-09) -- os JPGs ja
+# estao no bucket, versionar copia local so polui o repo. Processo de
+# regeneracao documentado em docs/MIGRACAO_VIDEOS_CLOUDFLARE_20260904.md
+# ("Geracao de thumbnail -- frame a 40% da duracao"), nao depende de nada
+# que so exista nestes arquivos.
+r2_thumbnails/
+r2_videos.txt
