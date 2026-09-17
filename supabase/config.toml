@@ -452,3 +452,18 @@ entrypoint = "./functions/ybytu-generate-training-plan/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/ybytu-generate-meal-plan/index.ts"
+
+# Mesma razão das acima: ybytu-onboarding-complete aceita tanto o JWT do
+# aluno (widget) quanto chamada interna (cron/retry) com
+# INTERNAL_FUNCTION_SECRET; ybytu-onboarding-retry-cron só aceita chamada
+# interna. Achado testando ao vivo 2026-09-17: sem isso o gateway rejeita
+# com 401 ("Invalid JWT") antes do código rodar.
+[functions.ybytu-onboarding-complete]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-onboarding-complete/index.ts"
+
+[functions.ybytu-onboarding-retry-cron]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-onboarding-retry-cron/index.ts"
