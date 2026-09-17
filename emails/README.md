@@ -12,15 +12,12 @@ produção hoje, revisado e ligado a `ybytu-send-onboarding-email` (ver tabela).
 
 ## ⚠️ Antes de ligar qualquer um destes a uma function
 
-Revise contra **dado fabricado** — texto ou número que parece vir de um estado real
-mas na verdade é fixo, igual pra todo mundo. Foi exatamente o defeito achado e
-corrigido no `03` (barra de progresso "Em andamento 65%" com checklist ✓/⏳/○ que
-não vinha de lugar nenhum, mesmo padrão do
-`docs/PADRAO_SISTEMA_NAO_SABIA_QUE_NAO_SABIA_20260904.md`). Perguntas a fazer pra
-cada template antes de ligar:
-- Todo número/percentual/data que aparece tem uma variável real por trás, ou é texto fixo do design?
-- Toda variável `{{ }}` tem uma coluna/consulta real de onde vir? Se não tiver dado, a function deve **recusar o envio e logar**, nunca mandar `{{ variavel }}` literal pro destinatário (regra já aplicada no `03`).
-- O link/botão aponta pra uma URL que existe de verdade no produto? (`03` tinha um `{{ tracking_link }}` pra uma área logada que nunca existiu — removido.)
+Ver checklist completo em `docs/POS_PILOTO.md` ("Templates de e-mail — revisão
+contra dado fabricado antes de ligar"). Resumo: `03` tinha uma barra de
+progresso com percentual fixo e checklist ✓/⏳/○ que não vinha de estado real
+nenhum (mesmo padrão de `docs/PADRAO_SISTEMA_NAO_SABIA_QUE_NAO_SABIA_20260904.md`)
+e um `{{ tracking_link }}` pra uma área logada que nunca existiu — os 9
+restantes precisam da mesma checagem antes de qualquer function os usar.
 
 ## Templates
 
