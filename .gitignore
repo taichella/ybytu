@@ -43,3 +43,11 @@ Thumbs.db
 # que so exista nestes arquivos.
 r2_thumbnails/
 r2_videos.txt
+
+# Saida do graphify (docs/GRAPHIFY.md) -- graph.json/graph.html/GRAPH_REPORT.md sao
+# versionados (sanitizados via scripts/sanitize-graphify.sh antes de cada commit);
+# o resto e cache/estado local que muda a cada regeneracao e so gera ruido no diff.
+graphify-out/cache/
+graphify-out/manifest.json
+graphify-out/cost.json
+graphify-out/.graphify_python
