@@ -22,11 +22,13 @@
 // qualquer sessao que tenha mexido em edge function -- ver README.
 
 import { execSync } from 'node:child_process'
-import { readdirSync, statSync, readFileSync } from 'node:fs'
+import { readdirSync, statSync, readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
+import { createHash } from 'node:crypto'
 
 const REPO_ROOT = execSync('git rev-parse --show-toplevel', { encoding: 'utf8' }).trim()
 const FUNCTIONS_DIR = join(REPO_ROOT, 'supabase', 'functions')
+const ALLOWLIST_PATH = join(REPO_ROOT, 'scripts', 'stale-allowlist.txt')
 
 function run(cmd) {
   return execSync(cmd, { cwd: REPO_ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
@@ -73,6 +75,60 @@ function targetsFor(slug) {
   return [`supabase/functions/${slug}`, ...shared]
 }
 
+// ── 3b. Hash do conteudo REAL da function (TODOS os arquivos da pasta -- inclui
+//       deno.json/import_map se existir, ver whatsapp-webhook -- + _shared/ que ela
+//       importa), CRLF normalizado pra LF -- usado pra allowlist de STALE confirmado
+//       como falso positivo (Caso 8/CRLF). A supressao so vale enquanto esse hash nao
+//       mudar; qualquer edicao de conteudo (1 byte que seja, em qualquer arquivo da
+//       pasta) muda o hash e o STALE volta a aparecer. Deliberadamente NAO e allowlist
+//       por nome -- por nome, um STALE de verdade depois de editar a function ficaria
+//       escondido pra sempre.
+function hashFunctionContent(slug) {
+  const dir = join(FUNCTIONS_DIR, slug)
+  const localFiles = readdirSync(dir)
+    .filter((f) => statSync(join(dir, f)).isFile())
+    .sort()
+    .map((f) => ({ rel: `${slug}/${f}`, abs: join(dir, f) }))
+  const shared = sharedFilesUsedBy(slug)
+    .sort()
+    .map((f) => ({ rel: `_shared/${f}`, abs: join(FUNCTIONS_DIR, '_shared', f) }))
+  const hash = createHash('sha256')
+  for (const { rel, abs } of [...localFiles, ...shared]) {
+    hash.update(rel + '\n')
+    hash.update(readFileSync(abs, 'utf8').replace(/\r\n/g, '\n'))
+    hash.update('\0')
+  }
+  return hash.digest('hex').slice(0, 16)
+}
+
+function loadAllowlist() {
+  const map = new Map()
+  if (!existsSync(ALLOWLIST_PATH)) return map
+  for (const line of readFileSync(ALLOWLIST_PATH, 'utf8').split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) continue
+    const parts = trimmed.split(/\s+/)
+    const [slug, hash, date, ...motivoParts] = parts
+    if (!slug || !hash) continue
+    map.set(slug, { hash, date, motivo: motivoParts.join(' ') || '(sem motivo registrado)' })
+  }
+  return map
+}
+
+// --print-hash <slug>: utilitario pra preencher/atualizar scripts/stale-allowlist.txt
+// depois de confirmar por conteudo (diff --strip-trailing-cr) que um STALE e falso positivo.
+if (process.argv[2] === '--print-hash') {
+  const slug = process.argv[3]
+  if (!slug || !localSlugs.includes(slug)) {
+    console.error(`Uso: node scripts/check-stale-deploys.mjs --print-hash <function>`)
+    process.exit(2)
+  }
+  console.log(hashFunctionContent(slug))
+  process.exit(0)
+}
+
+const allowlist = loadAllowlist()
+
 // ── 4. Working tree sujo conta como "pior que stale" -- deploy-functions.sh ja bloqueia
 //      isso no momento do deploy, mas aqui reportamos tambem pra dar o quadro completo. ──
 function isDirty(targets) {
@@ -117,17 +173,27 @@ for (const slug of localSlugs) {
   const GRACE_SECONDS = 3600
   if (commitEpoch - deployEpoch > GRACE_SECONDS) {
     const gapHours = Math.round((commitEpoch - deployEpoch) / 3600)
-    rows.push({
-      slug,
-      status: 'STALE',
-      detail: `commit ${gapHours}h mais novo que o ultimo deploy -- SUSPEITA, nao confirmacao, ver aviso abaixo`,
-    })
+    const contentHash = hashFunctionContent(slug)
+    const allow = allowlist.get(slug)
+    if (allow && allow.hash === contentHash) {
+      rows.push({
+        slug,
+        status: 'SUPPRESSED',
+        detail: `STALE suprimido (allowlist ${allow.date}, hash ${contentHash} confere): ${allow.motivo}`,
+      })
+    } else {
+      rows.push({
+        slug,
+        status: 'STALE',
+        detail: `commit ${gapHours}h mais novo que o ultimo deploy -- SUSPEITA, nao confirmacao, ver aviso abaixo${allow ? ' (allowlist existe mas hash NAO confere -- conteudo mudou desde a confirmacao)' : ''}`,
+      })
+    }
   } else {
     rows.push({ slug, status: 'OK', detail: 'deploy cobre o commit mais recente' })
   }
 }
 
-// ── 5. Deployada no Supabase mas sumiu do repo local (ex: rename, remocao acidental) ──
+// ── 5b. Deployada no Supabase mas sumiu do repo local (ex: rename, remocao acidental) ──
 for (const dep of deployed) {
   if (!localSlugs.includes(dep.slug)) {
     rows.push({ slug: dep.slug, status: 'SEM CORRESPONDENCIA LOCAL', detail: 'deployada no Supabase, pasta nao existe neste checkout -- confirme se e intencional' })
@@ -135,15 +201,24 @@ for (const dep of deployed) {
 }
 
 // ── Saida ──
-const problems = rows.filter((r) => r.status !== 'OK')
+const problems = rows.filter((r) => r.status !== 'OK' && r.status !== 'SUPPRESSED')
+const suppressed = rows.filter((r) => r.status === 'SUPPRESSED')
 const width = Math.max(...rows.map((r) => r.slug.length), 'FUNCTION'.length) + 2
 
 console.log('FUNCTION'.padEnd(width) + 'STATUS'.padEnd(28) + 'DETALHE')
 console.log('-'.repeat(width + 28 + 40))
-for (const r of rows.sort((a, b) => (a.status === 'OK') - (b.status === 'OK'))) {
+for (const r of rows.filter((r) => r.status !== 'SUPPRESSED').sort((a, b) => (a.status === 'OK') - (b.status === 'OK'))) {
   console.log(r.slug.padEnd(width) + r.status.padEnd(28) + r.detail)
 }
 console.log()
+
+if (suppressed.length > 0) {
+  console.log(`SUPPRESSED (${suppressed.length}) -- STALE confirmado como falso positivo, hash de conteudo ainda bate com a allowlist:`)
+  for (const r of suppressed) {
+    console.log('  ' + r.slug.padEnd(width) + r.detail)
+  }
+  console.log()
+}
 
 const staleCount = rows.filter((r) => r.status === 'STALE').length
 if (staleCount > 0) {
@@ -156,11 +231,13 @@ if (staleCount > 0) {
   console.log('  npx supabase functions download <nome> --use-api --project-ref <ref>')
   console.log('  diff --strip-trailing-cr supabase/functions/<nome>/index.ts <baixado>/index.ts')
   console.log('So redeploye (scripts/deploy-functions.sh <nome>) se o diff mostrar diferenca de verdade.')
+  console.log('Se for falso positivo confirmado, registre em scripts/stale-allowlist.txt:')
+  console.log('  node scripts/check-stale-deploys.mjs --print-hash <nome>')
   console.log()
 }
 
 if (problems.length === 0) {
-  console.log(`OK: todas as ${rows.length} functions com deploy cobrindo o commit mais recente.`)
+  console.log(`OK: todas as ${rows.length - suppressed.length} function(s) com deploy cobrindo o commit mais recente (${suppressed.length} suprimida(s) por allowlist confirmada).`)
   process.exit(0)
 } else {
   console.log(`ATENCAO: ${problems.length} de ${rows.length} function(s) com problema -- ver acima.`)

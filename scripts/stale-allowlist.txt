@@ -1,0 +1,16 @@
+# Allowlist de falsos positivos CONFIRMADOS do check-stale-deploys.mjs.
+# Formato: <function> <hash-conteudo-normalizado-LF-16hex> <data-confirmacao> <motivo>
+#
+# A supressao so vale enquanto o hash bater com o conteudo ATUAL da function
+# (arquivos da pasta + _shared/ que ela importa, CRLF normalizado pra LF).
+# Mudou 1 byte que seja -> hash diverge -> STALE volta a aparecer. Nao existe
+# supressao por nome de function sozinho.
+#
+# Recalcular hash: node scripts/check-stale-deploys.mjs --print-hash <function>
+whatsapp-webhook                    84d8c459ff140ff2  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-admin-foods                   d777de2461c831c0  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-campaign-stats                1fa90caa9baa93e1  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-create-plan-share-token       1fc927f1d9b63351  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-generate-meal-plan            36fd6687bde06abd  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-notify-onboarding-received    38c0575b39b3a8bc  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-plan-review-reminder-cron     ea1fe9a0ab660782  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
