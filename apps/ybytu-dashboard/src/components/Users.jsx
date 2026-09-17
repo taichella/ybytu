@@ -28,8 +28,15 @@ export default function Users() {
         setError(null);
         const { data, error: funcError } = await supabase.functions.invoke('ybytu-admin-users');
         if (funcError) throw funcError;
+        // Achado 2026-09-17 (revisão Antigravity): data null/objeto de erro em
+        // vez de array (200 com corpo inesperado, ou invoke() sem lançar)
+        // ficava em silêncio -- lista vazia sem nenhuma mensagem, ou
+        // "data.map is not a function" cru se algo além de null chegasse aqui.
+        if (!Array.isArray(data)) {
+          throw new Error(data?.error || 'Resposta inválida do servidor.');
+        }
 
-        if (isMounted && data) {
+        if (isMounted) {
           const mapped = data.map((u, i) => {
             const subName = u.resolvedSub || 'Free';
             let subKey = 'free';

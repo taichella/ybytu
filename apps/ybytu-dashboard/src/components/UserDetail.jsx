@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams, useLocation } from 'react-rout
 import { supabase } from '../lib/supabase';
 import { StaffContext } from '../lib/staffContextCore';
 import ThemeToggle from './ThemeToggle';
+import UserLimitationsList from './UserLimitationsList';
 
 const VALID_TABS = new Set(['overview', 'health', 'plans', 'activity']);
 
@@ -564,25 +565,12 @@ export default function UserDetail() {
 
                           {/* LIMITAÇÕES E RESTRIÇÕES */}
                           <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '14px' }}>
-                            <p style={{ margin: '0 0 8px', fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Limitações declaradas</p>
-
-                            <div style={{ marginBottom: '12px' }}>
-                              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>Físicas & Lesões</p>
-                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                {(resolvedLabels?.physicalConditions?.length > 0) ? resolvedLabels?.physicalConditions.map((g, i) => (
-                                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '7px', fontSize: '11.5px', fontWeight: 700, background: g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.1)' : 'rgba(217,119,6,.12)', color: g.toLowerCase().includes('outra') ? 'var(--danger)' : '#d97706', border: `1px solid ${g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.2)' : 'rgba(217,119,6,.2)'}` }}>{g}</span>
-                                )) : <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Nenhuma limitação declarada</span>}
-                              </div>
-                            </div>
-
-                            <div>
-                              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>Alimentares</p>
-                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                {(resolvedLabels?.dietaryRestrictions?.length > 0) ? resolvedLabels?.dietaryRestrictions.map((g, i) => (
-                                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '7px', fontSize: '11.5px', fontWeight: 700, background: g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.1)' : 'var(--surface-2)', color: g.toLowerCase().includes('outra') ? 'var(--danger)' : 'var(--text)', border: `1px solid ${g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.2)' : 'var(--border)'}` }}>{g}</span>
-                                )) : <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Nenhuma limitação declarada</span>}
-                              </div>
-                            </div>
+                            <UserLimitationsList
+                              physicalConditions={resolvedLabels?.physicalConditions}
+                              dietaryRestrictions={resolvedLabels?.dietaryRestrictions}
+                              declaredNonePhysical={resolvedLabels?.declaredNonePhysical}
+                              declaredNoneDietary={resolvedLabels?.declaredNoneDietary}
+                            />
                           </div>
 
                           <ParecerMiniForm
@@ -633,25 +621,12 @@ export default function UserDetail() {
 
                           {/* LIMITAÇÕES E RESTRIÇÕES */}
                           <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '14px' }}>
-                            <p style={{ margin: '0 0 8px', fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: 'var(--muted)', textTransform: 'uppercase' }}>Limitações declaradas</p>
-
-                            <div style={{ marginBottom: '12px' }}>
-                              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>Físicas & Lesões</p>
-                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                {(resolvedLabels?.physicalConditions?.length > 0) ? resolvedLabels?.physicalConditions.map((g, i) => (
-                                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '7px', fontSize: '11.5px', fontWeight: 700, background: g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.1)' : 'rgba(217,119,6,.12)', color: g.toLowerCase().includes('outra') ? 'var(--danger)' : '#d97706', border: `1px solid ${g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.2)' : 'rgba(217,119,6,.2)'}` }}>{g}</span>
-                                )) : <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Nenhuma limitação declarada</span>}
-                              </div>
-                            </div>
-
-                            <div>
-                              <p style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700, color: 'var(--text)' }}>Alimentares</p>
-                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                                {(resolvedLabels?.dietaryRestrictions?.length > 0) ? resolvedLabels?.dietaryRestrictions.map((g, i) => (
-                                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: '7px', fontSize: '11.5px', fontWeight: 700, background: g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.1)' : 'var(--surface-2)', color: g.toLowerCase().includes('outra') ? 'var(--danger)' : 'var(--text)', border: `1px solid ${g.toLowerCase().includes('outra') ? 'rgba(239,68,68,.2)' : 'var(--border)'}` }}>{g}</span>
-                                )) : <span style={{ fontSize: '12px', color: 'var(--muted)' }}>Nenhuma limitação declarada</span>}
-                              </div>
-                            </div>
+                            <UserLimitationsList
+                              physicalConditions={resolvedLabels?.physicalConditions}
+                              dietaryRestrictions={resolvedLabels?.dietaryRestrictions}
+                              declaredNonePhysical={resolvedLabels?.declaredNonePhysical}
+                              declaredNoneDietary={resolvedLabels?.declaredNoneDietary}
+                            />
                           </div>
 
                           <ParecerMiniForm

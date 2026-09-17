@@ -43,10 +43,15 @@ export default function FailedPlans() {
       const parts = [];
       if (result.results?.training) parts.push(`treino: ${result.results.training.ok ? 'ok' : 'falhou'}`);
       if (result.results?.meal) parts.push(`nutrição: ${result.results.meal.ok ? 'ok' : 'falhou'}`);
-      setRetryResult((prev) => ({ ...prev, [userId]: parts.join(' · ') || 'concluído' }));
+      // Achado 2026-09-17 (revisão Antigravity): cor do resultado dependia de
+      // texto começar com "Erro" -- se uma mensagem de sucesso um dia
+      // incluísse essa palavra (ex: "0 erros"), mostraria vermelho num
+      // resultado bom. Guarda o sucesso/falha explícito em vez de inferir do texto.
+      const allOk = !result.results || Object.values(result.results).every((r) => r?.ok !== false);
+      setRetryResult((prev) => ({ ...prev, [userId]: { ok: allOk, text: parts.join(' · ') || 'concluído' } }));
       load();
     } catch (e) {
-      setRetryResult((prev) => ({ ...prev, [userId]: `Erro: ${e.message}` }));
+      setRetryResult((prev) => ({ ...prev, [userId]: { ok: false, text: `Erro: ${e.message}` } }));
     } finally {
       setRetrying(null);
     }
@@ -112,8 +117,8 @@ export default function FailedPlans() {
                 )}
 
                 {retryResult[p.id] && (
-                  <p style={{ margin: '10px 0 0', fontSize: '12px', fontWeight: 700, color: retryResult[p.id].startsWith('Erro') ? '#dc2626' : '#16a34a' }}>
-                    {retryResult[p.id]}
+                  <p style={{ margin: '10px 0 0', fontSize: '12px', fontWeight: 700, color: retryResult[p.id].ok ? '#16a34a' : '#dc2626' }}>
+                    {retryResult[p.id].text}
                   </p>
                 )}
               </div>

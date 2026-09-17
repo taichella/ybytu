@@ -95,7 +95,15 @@ function App() {
             <Route path="/users/:id" element={<UserDetail />} />
             <Route path="/users/:id/plano" element={<UserPlanPage />} />
             <Route path="/review/:id" element={<UserDetail />} />
-            <Route path="/subscriptions" element={<Subscriptions />} />
+            {/* Achado 2026-09-17 (revisão Antigravity): /subscriptions não
+                tinha nenhuma trava de papel -- qualquer staff logado (ex:
+                personal) acessava. Baixa severidade hoje (tela é só um aviso
+                estático de redirect pro WordPress, sem dado real), mas a
+                trava é o padrão certo mesmo assim. Aninhado no MESMO
+                DashboardLayout já aberto acima, não um segundo. */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} fallback="/dashboard" />}>
+              <Route path="/subscriptions" element={<Subscriptions />} />
+            </Route>
             <Route path="/account" element={<Account />} />
             <Route path="/more" element={<More />} />
           </Route>

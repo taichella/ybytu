@@ -179,6 +179,8 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
   const goals = profile.goals_ptbr || [];
   const physicalLimitations = profile.physical_limitations_ptbr || [];
   const healthLimitations = profile.health_limitations_ptbr || [];
+  const declaredNonePhysical = profile.declared_none_physical === true;
+  const declaredNoneHealth = profile.declared_none_health === true;
   const hasReview = Boolean(review.personal || review.nutricionista);
   const reviewCount = (review.personal ? 1 : 0) + (review.nutricionista ? 1 : 0);
   const dailyMacroPct = nutrition ? macroPercents(nutrition.macro_distribution) : null;
@@ -506,7 +508,12 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                   <span className="name">YBYTU</span>
                   <span className="tag">PLANO PERSONALIZADO · #{meta.plan_code || '—'}</span>
                 </div>
-                <p className="eyebrow">Desafio {meta.cycle_days || 15} dias</p>
+                {/* "Desafio X dias" removido pro piloto -- achado 2026-09-17
+                    (revisão Antigravity): meta.cycle_days é CYCLE_DAYS, uma
+                    constante fixa em buildPlanPayload.ts (não há campo de
+                    duração de desafio no schema), então o número nunca varia
+                    por aluno. Exibir como se fosse um dado do plano dele é
+                    dado fabricado. Ver docs/POS_PILOTO.md. */}
                 <h1>Plano de Treino<br />&amp; Nutrição</h1>
                 <p className="sub">Montado a partir do seu perfil, objetivos e condições de saúde — com acompanhamento de personal e nutricionista.</p>
               </header>
@@ -568,31 +575,43 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                         </div>
                       </div>
                     )}
-                    {physicalLimitations.length > 0 && (
-                      <div className="pref-group">
-                        <p className="lab">Limitações físicas</p>
-                        <div className="chips">
-                          {physicalLimitations.map((l) => (
+                    {/* Achado 2026-09-17 (revisão Antigravity): o bloco inteiro
+                        sumia quando o array vinha vazio, escondendo tanto
+                        "aluno nunca respondeu" quanto "aluno marcou Nenhuma" --
+                        agora os 3 estados reais aparecem sempre. */}
+                    <div className="pref-group">
+                      <p className="lab">Limitações físicas</p>
+                      <div className="chips">
+                        {declaredNonePhysical ? (
+                          <span className="chip unverified">Nenhuma (declarado pelo aluno)</span>
+                        ) : physicalLimitations.length > 0 ? (
+                          physicalLimitations.map((l) => (
                             <span className="chip warn dot" key={l}>{l}</span>
-                          ))}
-                        </div>
+                          ))
+                        ) : (
+                          <span className="chip unverified">Não informado</span>
+                        )}
                       </div>
-                    )}
-                    {healthLimitations.length > 0 && (
-                      <div className="pref-group">
-                        <p className="lab">Limitações de saúde</p>
-                        <div className="chips">
-                          {healthLimitations.map((l) => (
+                    </div>
+                    <div className="pref-group">
+                      <p className="lab">Limitações de saúde</p>
+                      <div className="chips">
+                        {declaredNoneHealth ? (
+                          <span className="chip unverified">Nenhuma (declarado pelo aluno)</span>
+                        ) : healthLimitations.length > 0 ? (
+                          healthLimitations.map((l) => (
                             <span className="chip warn dot" key={l}>{l}</span>
-                          ))}
-                        </div>
+                          ))
+                        ) : (
+                          <span className="chip unverified">Não informado</span>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   {calendar.length > 0 && (
                     <div className="card" style={{ marginTop: '14px' }}>
-                      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg> Calendário do Desafio · {meta.cycle_days || calendar.length} dias</h3>
+                      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg> Calendário do Desafio · {calendar.length} dias</h3>
                       <p className="fine" style={{ marginBottom: '10px' }}>Nos dias ON: mesmo dia cobre treino e dieta. Dias-tipo em rodízio ao longo do desafio.</p>
                       <div className="cal15">
                         {calendar.map((day) => (

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { FunctionsFetchError, FunctionsRelayError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import ThemeToggle from './ThemeToggle';
 import YbytuLogo from './YbytuLogo';
@@ -38,19 +39,39 @@ const handleLogin = async (e) => {
     // que o próprio usuário controla). ybytu-whoami consulta staff/staff_roles
     // via service_role.
     const accessToken = data.session?.access_token;
-    let isStaff;
+    let isStaff = false;
+    let connectionFailed = false;
     try {
       const { data: whoami, error: whoamiError } = await supabase.functions.invoke('ybytu-whoami', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-      isStaff = !whoamiError && whoami?.isStaff === true;
+      if (whoamiError) {
+        // FunctionsFetchError/FunctionsRelayError = a checagem em si não
+        // rodou (rede caiu, função fora do ar, CORS, etc.) -- não é o mesmo
+        // problema que "rodou e disse que não é staff". Achado 2026-09-17
+        // (revisão Antigravity): as duas causas caíam na mesma mensagem
+        // "Acesso negado", escondendo um problema de infra atrás de uma
+        // mensagem de identidade.
+        connectionFailed = whoamiError instanceof FunctionsFetchError || whoamiError instanceof FunctionsRelayError;
+        isStaff = false;
+      } else {
+        isStaff = whoami?.isStaff === true;
+      }
     } catch {
-      isStaff = false;
+      // invoke() documentado como "não lança, devolve { error }", mas se
+      // lançar mesmo assim (ex: bug futuro do SDK) trata como falha de
+      // conexão, não como identidade -- mesmo raciocínio do bloco acima.
+      connectionFailed = true;
+    }
+
+    if (connectionFailed) {
+      setError('Falha ao validar credenciais no servidor. Verifique sua conexão e tente novamente.');
+      setLoading(false);
+      return;
     }
 
     if (!isStaff) {
-      // Se for um usuário comum do App (ou a checagem falhou), desloga
-      // imediatamente e mostra erro
+      // Checagem rodou e confirmou: não é staff. Desloga imediatamente.
       await supabase.auth.signOut();
       setError('Acesso negado. Esta área é restrita para administradores.');
       setLoading(false);

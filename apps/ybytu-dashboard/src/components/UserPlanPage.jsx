@@ -37,10 +37,15 @@ export default function UserPlanPage() {
           supabase.functions.invoke('ybytu-get-plan-for-staff', { body: { userId: id } })
         ]);
         if (userRes.error) throw userRes.error;
+        // Achado 2026-09-17 (revisão Antigravity): planRes.error era engolido
+        // em silêncio -- página ficava sem plano E sem mensagem nenhuma,
+        // indistinguível de "aluno sem plano ainda" (que é um estado real,
+        // não um erro). Só o erro real precisa virar mensagem visível.
+        if (planRes.error) throw planRes.error;
         if (isMounted) {
           const name = userRes.data?.profile?.full_name || '';
           if (name) document.title = `Plano — ${name}`;
-          if (planRes.data && !planRes.error) setPlanPayload(planRes.data);
+          if (planRes.data) setPlanPayload(planRes.data);
         }
       } catch (err) {
         if (isMounted) setError(err.message);
