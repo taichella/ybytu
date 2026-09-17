@@ -7,6 +7,11 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Versão FIXADA (não @latest) -- confirmado 2026-09-17: bundle/libphonenumber-js.min.js
+     expõe window.libphonenumber (AsYouType, parsePhoneNumberFromString, isValidPhoneNumber,
+     getCountries, getCountryCallingCode). Carrega como <script> normal, ANTES do bloco
+     Babel -- não passa pelo Babel, roda igual a qualquer outra lib de CDN. -->
+<script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.13.13/bundle/libphonenumber-js.min.js"></script>
 
 <!-- 3. Blindagem NUCLEAR DE VERDADE contra o Elementor -->
 <style>
@@ -91,13 +96,102 @@
     flexitarian: [],
   };
 
-  // Mascara o WhatsApp exibido na tela de confirmação -- mantém os 4
-  // primeiros e os 2 últimos caracteres visíveis, independente do formato
-  // que a pessoa digitou (sem validação/normalização ainda, ver item 7).
+  // ─── País / DDI (seletor de WhatsApp internacional) ──────────────────────
+  // Achado 2026-09-17 (revisão Antigravity): campo de WhatsApp era texto
+  // livre sem validação nem DDI -- número de outro país (Portugal, França)
+  // não tinha como ser conferido nem normalizado antes de gravar.
+  const PRIORITY_COUNTRIES = ['BR', 'PT', 'FR'];
+  // Fallback pros 3 principais + qualquer outro país, caso Intl.DisplayNames
+  // não exista no navegador (não deveria acontecer -- suportado desde
+  // 2021 nos principais engines -- mas nunca deixa a tela quebrar por isso).
+  const FALLBACK_COUNTRY_NAMES = { BR: 'Brasil', PT: 'Portugal', FR: 'França' };
+  let countryNameFormatter = null;
+  try { countryNameFormatter = new Intl.DisplayNames(['pt'], { type: 'region' }); } catch (e) { /* segue sem, usa fallback */ }
+  const getCountryLabel = (iso) => {
+    if (countryNameFormatter) {
+      try {
+        const name = countryNameFormatter.of(iso);
+        if (name && name !== iso) return name;
+      } catch (e) { /* ISO não reconhecido pelo formatter, cai no fallback */ }
+    }
+    return FALLBACK_COUNTRY_NAMES[iso] || iso;
+  };
+  const getFlagEmoji = (iso) => {
+    try {
+      return String.fromCodePoint(...[...String(iso).toUpperCase()].map((c) => 127397 + c.charCodeAt(0)));
+    } catch (e) { return ''; }
+  };
+  // Lista construída 1x (não muda em runtime) -- BR/PT/FR no topo, resto em
+  // ordem alfabética pt-BR, com busca feita no próprio array na hora de renderizar.
+  const ALL_COUNTRIES = (() => {
+    if (!window.libphonenumber) return [];
+    const isos = window.libphonenumber.getCountries();
+    const list = isos.map((iso) => ({
+      iso,
+      name: getCountryLabel(iso),
+      dial: `+${window.libphonenumber.getCountryCallingCode(iso)}`,
+      flag: getFlagEmoji(iso),
+    }));
+    const byIso = Object.fromEntries(list.map((c) => [c.iso, c]));
+    const priority = PRIORITY_COUNTRIES.map((iso) => byIso[iso]).filter(Boolean);
+    const rest = list
+      .filter((c) => !PRIORITY_COUNTRIES.includes(c.iso))
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    return [...priority, ...rest];
+  })();
+
+  // Valida + normaliza um número digitado livremente (espaço, parêntese,
+  // traço, zero inicial tipo "06 12 34 56 78") contra o país escolhido no
+  // seletor. Se a pessoa colar um número já com "+DDI", usa esse DDI (ignora
+  // o país selecionado) -- quem chama atualiza o seletor a partir de
+  // result.detectedCountry quando isso acontece.
+  const getPhoneValidation = (rawValue, countryIso) => {
+    const raw = String(rawValue || '').trim();
+    if (!raw) return { error: null, e164: null, preview: null, detectedCountry: null };
+    if (!window.libphonenumber) {
+      // Lib de CDN não carregou -- nunca trava o formulário por causa de um
+      // recurso externo fora do ar, só não valida/normaliza desta vez.
+      return { error: null, e164: raw, preview: raw, detectedCountry: null };
+    }
+    const parsed = raw.startsWith('+')
+      ? window.libphonenumber.parsePhoneNumberFromString(raw)
+      : window.libphonenumber.parsePhoneNumberFromString(raw, countryIso);
+    if (!parsed || !parsed.isValid()) {
+      return {
+        error: `Número inválido para ${getCountryLabel(countryIso)}. Confira o DDD/código de área.`,
+        e164: null,
+        preview: null,
+        detectedCountry: null,
+      };
+    }
+    return {
+      error: null,
+      e164: parsed.number, // E.164 com "+" -- ver _shared/whatsapp.ts (Meta aceita com "+")
+      preview: parsed.formatInternational(),
+      detectedCountry: parsed.country || null,
+    };
+  };
+
+  // Mascara o WhatsApp (já em E.164) exibido na tela de confirmação -- DDI
+  // sempre visível, resto mascarado exceto os 2 últimos dígitos; número
+  // curto nunca aparece inteiro (mascara pelo menos 1 dígito sempre).
+  // Achado 2026-09-17: a versão antiga mascarava o texto cru (sem "+"/DDI
+  // reconhecíveis), agora opera sobre o E.164 normalizado no submit.
   const maskPhone = (phone) => {
-    const clean = String(phone || '').trim();
-    if (clean.length < 7) return clean;
-    return `${clean.slice(0, 4)}${'•'.repeat(clean.length - 6)}${clean.slice(-2)}`;
+    const raw = String(phone || '').trim();
+    if (!raw) return raw;
+    const parsed = window.libphonenumber && window.libphonenumber.parsePhoneNumberFromString(raw);
+    if (!parsed) {
+      // Fallback bruto -- não deveria acontecer pra dado já validado no submit.
+      if (raw.length < 7) return raw;
+      return `${raw.slice(0, 4)}${'•'.repeat(Math.max(raw.length - 6, 0))}${raw.slice(-2)}`;
+    }
+    const cc = `+${parsed.countryCallingCode}`;
+    const national = parsed.nationalNumber;
+    if (national.length <= 4) {
+      return `${cc} ${'•'.repeat(Math.max(national.length - 1, 1))}${national.slice(-1)}`;
+    }
+    return `${cc} ${'•'.repeat(national.length - 2)}${national.slice(-2)}`;
   };
 
   function OnboardingApp() {
@@ -124,7 +218,20 @@
       dedicated_days_per_week: 4
     });
 
-    const userName = answers.first_name || 'Futuro Aluno'; 
+    // WhatsApp internacional -- país do seletor (DDI), separado de answers
+    // porque não é uma resposta do onboarding, é estado de UI do campo.
+    const [whatsappCountry, setWhatsappCountry] = useState('BR');
+    const [countryPickerOpen, setCountryPickerOpen] = useState(false);
+    const [countrySearch, setCountrySearch] = useState('');
+
+    // Só usado depois que o profile já foi salvo com sucesso (tela de
+    // confirmação/botão de WhatsApp da equipe) -- first_name é obrigatório
+    // pra passar da etapa de cadastro, então nunca chega vazio aqui. Fallback
+    // 'Futuro Aluno' removido 2026-09-17 (revisão Antigravity): nunca era
+    // realmente usado, só escondia o caso de first_name faltando em vez de
+    // estourar um erro visível (que seria o comportamento certo, mas nunca
+    // acontece na prática).
+    const userName = answers.first_name;
 
     const checkCondition = (currentAnswers, stepsData, field, matchTerm) => {
       const step = stepsData.find(s => s.dbField === field);
@@ -454,7 +561,10 @@
       const stepData = visibleSteps[currentStep];
       const value = answers[stepData.dbField];
       if (stepData.type === 'form') {
-        return !answers.first_name || !answers.last_name || !answers.email || !answers.whatsapp_phone;
+        if (!answers.first_name || !answers.last_name || !answers.email || !answers.whatsapp_phone) return true;
+        // Número inválido bloqueia PRÓXIMO -- nunca segue em silêncio com um
+        // WhatsApp que a Meta vai rejeitar na hora de notificar o aluno.
+        return !!getPhoneValidation(answers.whatsapp_phone, whatsappCountry).error;
       }
       // 'single' e 'multiple' cobrem todas as perguntas de catálogo (gênero,
       // condições físicas, objetivos, etc.) -- sem isso o usuário avançava
@@ -486,18 +596,31 @@
       window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank', 'noopener');
     };
 
+    // Guarda contra duplo clique -- achado 2026-09-17 (revisão Antigravity):
+    // o botão FINALIZAR só desabilitava por isNextDisabled() (campos
+    // preenchidos), não pelo estado de submissão em andamento -- um segundo
+    // clique durante o await disparava um segundo signUp/upsert em paralelo.
+    // useRef (não state) porque não precisa re-render, só bloquear reentrância.
+    const submittingRef = React.useRef(false);
+
     const nextStep = async () => {
       if (isNextDisabled()) return;
 
       if (currentStep < visibleSteps.length - 1) {
         setCurrentStep(currentStep + 1);
       } else {
+        if (submittingRef.current) return;
+        submittingRef.current = true;
         setLoading(true);
         try {
           const email = answers.email?.trim();
           const firstName = answers.first_name?.trim();
           const lastName = answers.last_name?.trim();
-          const whatsappPhone = answers.whatsapp_phone?.trim();
+          // Normaliza pro E.164 (com "+") na hora de submeter -- isNextDisabled
+          // já bloqueou PRÓXIMO se inválido, então getPhoneValidation aqui só
+          // formaliza o valor que a tela já mostrou como "vai ficar assim".
+          const phoneValidation = getPhoneValidation(answers.whatsapp_phone, whatsappCountry);
+          const whatsappPhone = phoneValidation.e164 || answers.whatsapp_phone?.trim();
 
           // 1. Criar conta — senha gerada, invisível, nunca guardada por nós.
           // Se o usuário precisar voltar depois, o caminho é reset de senha por
@@ -532,165 +655,149 @@
           }
 
           if (!signUpData?.session) {
+            // Achado 2026-09-17 (revisão Antigravity): esse return ficava
+            // silencioso (só o alert, sem log) -- se "Confirm email" for
+            // ligado no Supabase Auth, TODO onboarding cai aqui e ninguém
+            // saberia por quê sem esse log. Ver docs/CHECKLIST_PRIMEIRO_ALUNO_REAL.md.
+            console.error('signUp não retornou session -- "Confirm email" pode estar ligado no Supabase Auth (Authentication > Providers > Email). Onboarding não pode prosseguir sem sessão imediata.', { userId: signUpData?.user?.id });
             alert('Conta criada! Confirme seu e-mail para continuar.');
             return;
           }
 
           const userId = signUpData.user.id;
 
-          // 2. A linha de profile não nasce sozinha — upsert inicial primeiro.
-          const { error: upsertError } = await supabase.from('profiles').upsert({
-            id: userId,
-            full_name: `${firstName} ${lastName}`.trim(),
-            first_name: firstName,
-            last_name: lastName,
-            whatsapp_phone: whatsappPhone,
-          });
-          if (upsertError) throw new Error('Erro ao criar perfil: ' + upsertError.message);
+          const withTimeout = (promise, ms) => Promise.race([
+            promise,
+            new Promise((resolve) => setTimeout(() => resolve({ timedOut: true }), ms)),
+          ]);
 
-          // 3. Atualiza com os campos do onboarding — remapeamentos:
-          // exercise_equipment_ids (form) -> exercise_equipments_ids (coluna),
-          // dedicated_days_per_week (form) -> alimenta os dois generators.
-          // subscription_type_id NÃO é mais enviado por aqui -- vira DEFAULT
-          // da coluna no banco (piloto só oferece COMPLETE, ver migration de
-          // 2026-09-17); isTraining/isMeal abaixo continuam calculados
-          // localmente com answers.subscription_type_id (que segue sendo
-          // COMPLETE, nunca muda nesta tela).
+          // 2. Salva o perfil E dispara a geração numa ÚNICA chamada pro
+          // servidor -- achado 2026-09-17 (revisão Antigravity, caso real
+          // "Rayan Road"): antes disso o navegador salvava o perfil aqui e
+          // depois chamava meal → training em sequência, um await por vez.
+          // Se a aba fechasse entre as duas chamadas, a segunda nunca
+          // disparava, e não havia rede de segurança pra notar depois
+          // (plan_generation_status ficava 'pending' pra sempre). Agora
+          // ybytu-onboarding-complete faz upsert+update do perfil e roda a
+          // geração INTEIRA no servidor antes de responder -- fechar a aba
+          // depois de chamar isto não interrompe mais nada.
           //
-          // pregnancy_trimester e exercise_equipments_ids só são gravados se
+          // pregnancy_trimester e exercise_equipments_ids só são mandados se
           // a etapa que os preenche está VISÍVEL no momento do FINALIZAR --
           // um resquício de resposta de uma condição que a pessoa desmarcou
           // depois (ex: marcou "Gravidez", escolheu o trimestre, desmarcou
           // "Gravidez" de novo) não deve sobreviver no perfil salvo.
           const isPregnancyVisible = steps.find(s => s.id === 'pregnancy_trimester')?.condition(answers, steps) ?? false;
           const isEquipmentsVisible = steps.find(s => s.id === 'exercise_equipments')?.condition(answers, steps) ?? false;
+          // Rede de segurança antes do envio (achado 2026-09-17, revisão
+          // Antigravity) -- handleSelect já limpa isso quando a preferência
+          // muda e a etapa de restrições já desabilita as opções bloqueadas,
+          // então hoje não há caminho conhecido pra um id bloqueado sobreviver
+          // até aqui, mas o filtro é barato e blinda contra um futuro
+          // reordenamento de steps ou um bug nessas duas defesas.
+          const blockedRestrictionIdsAtSubmit = getBlockedRestrictionIds(answers.dietary_preference_id);
+          const safeDietaryRestrictions = (answers.dietary_restrictions_ids || [])
+            .filter((id) => !blockedRestrictionIdsAtSubmit.includes(id));
 
-          const { error: profileError } = await supabase.from('profiles').update({
-            goals_ids: answers.goals_ids || [],
-            gender_id: answers.gender_id,
-            age: answers.age,
-            weight_kg: answers.weight_kg,
-            height_cm: answers.height_cm,
-            activity_level_id: answers.activity_level_id,
-            health_conditions_ids: answers.health_conditions_ids || [],
-            pregnancy_trimester: isPregnancyVisible ? answers.pregnancy_trimester : null,
-            physical_conditions_ids: answers.physical_conditions_ids || [],
-            muscle_groups_ids: answers.muscle_groups_ids || [],
-            exercise_environment_id: answers.exercise_environment_id,
-            exercise_equipments_ids: isEquipmentsVisible ? (answers.exercise_equipment_ids || []) : [],
-            training_duration_minutes: answers.training_duration_minutes,
-            exercise_level_id: answers.exercise_level_id,
-            training_days_per_week: answers.dedicated_days_per_week,
-            nutrition_days_per_week: answers.dedicated_days_per_week,
-            meals_per_day: answers.meals_per_day,
-            dietary_preference_id: answers.dietary_preference_id,
-            dietary_restrictions_ids: answers.dietary_restrictions_ids || [],
-            disliked_foods: answers.disliked_foods,
-            onboarding_completed: true,
-          }).eq('id', userId);
+          // subscription_type_id NÃO é mandado por aqui -- vira DEFAULT da
+          // coluna no banco (piloto só oferece COMPLETE, ver migration
+          // 20260917104200); ybytu-onboarding-complete lê subscription_type_id
+          // JÁ GRAVADO no banco pra decidir treino/nutrição, nunca mais um
+          // valor local do client (essa suposição -- client sempre "acha" que
+          // é COMPLETE -- foi a causa raiz do caso Rayan Road).
+          const { data: completeResult, error: completeError } = await withTimeout(
+            supabase.functions.invoke('ybytu-onboarding-complete', {
+              body: {
+                profile: {
+                  identity: {
+                    full_name: `${firstName} ${lastName}`.trim(),
+                    first_name: firstName,
+                    last_name: lastName,
+                    whatsapp_phone: whatsappPhone,
+                  },
+                  onboarding: {
+                    goals_ids: answers.goals_ids || [],
+                    gender_id: answers.gender_id,
+                    age: answers.age,
+                    weight_kg: answers.weight_kg,
+                    height_cm: answers.height_cm,
+                    activity_level_id: answers.activity_level_id,
+                    health_conditions_ids: answers.health_conditions_ids || [],
+                    pregnancy_trimester: isPregnancyVisible ? answers.pregnancy_trimester : null,
+                    physical_conditions_ids: answers.physical_conditions_ids || [],
+                    muscle_groups_ids: answers.muscle_groups_ids || [],
+                    exercise_environment_id: answers.exercise_environment_id,
+                    exercise_equipments_ids: isEquipmentsVisible ? (answers.exercise_equipment_ids || []) : [],
+                    training_duration_minutes: answers.training_duration_minutes,
+                    exercise_level_id: answers.exercise_level_id,
+                    training_days_per_week: answers.dedicated_days_per_week,
+                    nutrition_days_per_week: answers.dedicated_days_per_week,
+                    meals_per_day: answers.meals_per_day,
+                    dietary_preference_id: answers.dietary_preference_id,
+                    dietary_restrictions_ids: safeDietaryRestrictions,
+                    disliked_foods: answers.disliked_foods,
+                  },
+                },
+              },
+            }),
+            20000,
+          );
 
-          if (profileError) throw new Error('Erro ao salvar perfil: ' + profileError.message);
+          // Timeout de 20s: NÃO é erro -- o perfil já foi salvo no servidor
+          // antes da geração começar (passo 1 de ybytu-onboarding-complete),
+          // e a geração real leva 13-57s medidos em produção, bem dentro do
+          // limite de 150s das Edge Functions. Se o client desistir de
+          // esperar, a orquestração continua rodando no servidor mesmo assim
+          // -- o cron de retomada (a cada 15min) cobre qualquer caso raro que
+          // realmente tenha travado.
+          if (completeResult?.timedOut) {
+            console.error('ybytu-onboarding-complete não respondeu em 20s -- seguindo mesmo assim, geração continua no servidor.');
+          } else if (completeError) {
+            // Erro de verdade (perfil não foi salvo, ou token inválido) --
+            // este sim trava o fluxo, diferente do timeout acima.
+            throw new Error('Erro ao salvar perfil/gerar plano: ' + completeError.message);
+          } else if (completeResult?.data?.error) {
+            throw new Error('Erro ao salvar perfil/gerar plano: ' + completeResult.data.error);
+          }
 
-          // withTimeout definido aqui em cima pra poder envolver o envio de
-          // e-mail já nesta etapa (ver 3c abaixo), reaproveitado de novo
-          // mais adiante pra notify-plan-ready/create-plan-share-token.
-          const withTimeout = (promise, ms) => Promise.race([
-            promise,
-            new Promise((resolve) => setTimeout(() => resolve({ timedOut: true }), ms)),
-          ]);
-
-          // 3b. Avisa usuário ("recebemos seu perfil, estamos montando") e
-          // sales ("novo aluno completou onboarding") — fire-and-forget,
-          // ANTES dos geradores pra não deixar o usuário no vácuo enquanto a
-          // IA roda. Sem await de propósito: os geradores (com IA) já são
-          // lentos, não vale atrasar o loading por uma garantia de ordem que
-          // o gap humano de validação do plano (horas) já dá de qualquer jeito.
+          // 3. Avisa usuário ("recebemos seu perfil, estamos montando") e
+          // sales ("novo aluno completou onboarding") — fire-and-forget.
+          // Sem await de propósito: não é crítico como o passo 2 acima.
           supabase.functions.invoke('ybytu-notify-onboarding-received').catch((e) => console.error(e));
 
-          // 3c. Email de confirmação + recapitulativo (Resend) — AGORA
-          // aguardado com timeout (não mais fire-and-forget), pra saber na
-          // hora de montar a tela de confirmação se o e-mail realmente foi
-          // enviado. Achado 2026-09-17: SPF de send.ybytu.app confere, mas
-          // não achei DKIM verificado nem o id da mensagem do Resend em
-          // lugar nenhum (a function não loga isso) -- não dá pra prometer
-          // "também enviamos e-mail" sem confirmar de verdade a resposta
-          // desta chamada. emailSent alimenta a tela de confirmação abaixo.
+          // 4. Email de confirmação + recapitulativo (Resend) — aguardado com
+          // timeout, pra saber na hora de montar a tela de confirmação se o
+          // e-mail realmente foi enviado. emailSent alimenta a tela abaixo.
           let emailSent = false;
           try {
             const emailResult = await withTimeout(supabase.functions.invoke('ybytu-send-onboarding-email'), 5000);
-            emailSent = !emailResult?.timedOut && !emailResult?.error;
-            if (emailResult?.error) console.error('ybytu-send-onboarding-email retornou erro:', emailResult.error);
-            else if (emailResult?.timedOut) console.error('ybytu-send-onboarding-email não respondeu em 5s (timeout)');
+            // emailSent só vira true pela confirmação REAL do corpo
+            // (ybytu-send-onboarding-email responde {ok:true, resend_id} no
+            // sucesso) -- nunca pela ausência de erro sozinha.
+            emailSent = emailResult?.data?.ok === true;
+            if (emailResult?.timedOut) console.error('ybytu-send-onboarding-email não respondeu em 5s (timeout)');
+            else if (emailResult?.error) console.error('ybytu-send-onboarding-email retornou erro:', emailResult.error);
+            else if (!emailSent) console.error('ybytu-send-onboarding-email respondeu sem ok:true (corpo inesperado):', emailResult?.data);
           } catch (e) {
             console.error('ybytu-send-onboarding-email falhou:', e);
           }
 
-          // 4. Dispara os geradores novos — fail-soft: erro não trava o
-          // redirect (não perde o lead), só marca a flag pra suporte ver depois.
-          const isTraining = [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
-          const isMeal = [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(answers.subscription_type_id);
+          // 5. Gera o link compartilhável (/plano/<token>) na hora, em vez de
+          // alguém ter que criar a linha em plan_share_tokens na mão pra
+          // conseguir revisar/testar o plano depois -- fail-soft (aviso ao
+          // staff de que há parecer pendente já rodou DENTRO de
+          // ybytu-onboarding-complete, server-side, não depende mais do
+          // client sobreviver até aqui).
+          const shareTokenResult = await withTimeout(supabase.functions.invoke('ybytu-create-plan-share-token'), 5000);
+          if (shareTokenResult?.timedOut) console.error('ybytu-create-plan-share-token não respondeu em 5s (timeout) -- seguindo mesmo assim (fail-soft)');
+          else if (shareTokenResult?.error) console.error('ybytu-create-plan-share-token falhou:', shareTokenResult.error);
 
-          // plan_generation_status agora é escrito pela PRÓPRIA edge function
-          // (ybytu-generate-training-plan / ybytu-generate-meal-plan) no fim da
-          // execução real, não mais inferido daqui de o fetch ter resolvido
-          // antes de um timeout do client — Gemini pode levar 3+min e o client
-          // desistir enquanto o gerador termina certinho no servidor (ver
-          // memória project_plan_generation_status_false_positive). Erro de
-          // uma chamada não trava o redirect (fail-soft), só loga.
-          //
-          // SEQUENCIAL, não Promise.all (2026-08-31, achado investigando o
-          // rate limit de TPM do Groq): as duas functions competem pelo MESMO
-          // orçamento de tokens/min da organização. Nutrição primeiro (1
-          // chamada, rápida) porque o treino é quem tem múltiplas chamadas
-          // (1 por dia) e mais chance de colidir — deixar o treino disparar
-          // só depois da nutrição já ter liberado o teto elimina a maior
-          // fonte de disputa simultânea (a chamada de nutrição sozinha
-          // reservava >50% do teto de uma vez). Não elimina 100% (planos de
-          // treino de 5+ dias ainda podem colidir entre si), mas reduz
-          // bastante — ver docs/TESTE_GERADOR_TREINO_SPLIT_POR_DIA_20260831.md.
-          if (isMeal) await supabase.functions.invoke('ybytu-generate-meal-plan').catch((e) => console.error(e));
-          if (isTraining) await supabase.functions.invoke('ybytu-generate-training-plan').catch((e) => console.error(e));
-
-          // 4b. Avisa personal/nutri que tem plano novo pra validar —
-          // fail-soft igual ao resto: se falhar, o cron de lembrete (12h)
-          // cobre o caso mesmo assim, não trava o redirect do usuário.
-          // 4c. Gera o link compartilhável (/plano/<token>) na hora, em vez
-          // de alguém ter que criar a linha em plan_share_tokens na mão pra
-          // conseguir revisar/testar o plano depois — mesmo fail-soft.
-          // Sempre dispara os dois: ambas as functions já checam
-          // plan_generation_status='ok' no servidor antes de fazer qualquer
-          // coisa, então um erro/timeout do LADO DO CLIENTE aqui (Gemini
-          // pode levar 3+min) não deve impedir o disparo -- geração pode ter
-          // terminado certinha no servidor mesmo com o client tendo dado erro
-          // (ver memória project_plan_generation_status_false_positive). Gate
-          // client-side aqui já causou 0 notificações pro staff em 2
-          // onboardings reais (2026-08-26 e 2026-08-27) apesar do plano ter
-          // sido gerado com sucesso.
-          //
-          // AWAIT com timeout de 5s antes do redirect (achado 2026-09-17):
-          // window.location.href logo em seguida podia cancelar essas 2
-          // chamadas fire-and-forget no meio do voo -- o navegador não
-          // garante que um fetch em andamento termina quando a página troca
-          // de URL. Promise.allSettled (não Promise.all) pra um erro em uma
-          // não esperar/derrubar a outra; timeout de 5s pra não segurar o
-          // redirect indefinidamente se alguma travar. withTimeout definido
-          // mais acima (reaproveitado do envio de e-mail, item 3c).
-          const notifyResults = await Promise.allSettled([
-            withTimeout(supabase.functions.invoke('ybytu-notify-plan-ready'), 5000),
-            withTimeout(supabase.functions.invoke('ybytu-create-plan-share-token'), 5000),
-          ]);
-          notifyResults.forEach((result, i) => {
-            const label = i === 0 ? 'ybytu-notify-plan-ready' : 'ybytu-create-plan-share-token';
-            if (result.status === 'rejected') console.error(`${label} falhou:`, result.reason);
-            else if (result.value?.timedOut) console.error(`${label} não respondeu em 5s (timeout) -- seguindo mesmo assim (fail-soft)`);
-          });
-
-          // 5. Mostra a tela de confirmação -- SEM redirect automático pro
+          // 6. Mostra a tela de confirmação -- SEM redirect automático pro
           // WhatsApp (achado 2026-09-17, ver item 3a: whatsapp-webhook nunca
           // reage a mensagem recebida, não é opt-in nem abre janela de 24h
           // pra nada que a gente manda depois -- é sempre template HSM
           // business-initiated. O botão de WhatsApp na tela de confirmação é
-          // opcional). Mostra mesmo se o gerador ou as notificações acima
+          // opcional). Mostra mesmo se a geração ou as notificações acima
           // falharam (fail-soft) -- o aluno já está com o profile salvo.
           setFinished({ firstName, email, whatsappPhone, emailSent });
         } catch (e) {
@@ -698,6 +805,7 @@
           console.error(e);
         } finally {
           setLoading(false);
+          submittingRef.current = false;
         }
       }
     };
@@ -715,7 +823,7 @@
       return (
         <div className="flex w-full bg-bgBody justify-center items-center font-sans p-2 rounded-xl">
           <div className="flex flex-col w-full max-w-2xl bg-bgBody shadow-lg rounded-xl sm:border sm:border-borderColor overflow-hidden">
-            <div className="px-8 pt-10 pb-8">
+            <div className="px-4 sm:px-8 pt-10 pb-8">
               <span className="inline-flex w-14 h-14 rounded-full bg-green-100 items-center justify-center text-green-600 mb-5">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
               </span>
@@ -763,7 +871,7 @@
               </div>
             </div>
 
-            <div className="px-8 pb-8">
+            <div className="px-4 sm:px-8 pb-8">
               <button
                 onClick={openTeamWhatsApp}
                 className="flex items-center justify-center gap-2 w-full p-3 rounded-xl border border-borderColor text-textMuted font-bold text-sm"
@@ -801,16 +909,90 @@
 
             {currentData.type === 'form' ? (
               <div className="flex flex-col gap-4">
-                {currentData.fields.map((field) => (
-                  <input 
-                    key={field.id}
-                    type={field.type}
-                    value={answers[field.id] || ''} 
-                    onChange={(e) => setAnswers({...answers, [field.id]: e.target.value})} 
-                    placeholder={field.placeholder} 
-                    className="w-full bg-surface text-textMain p-5 rounded-2xl text-xl border border-borderColor transition-all min-h-[60px]" 
-                  />
-                ))}
+                {currentData.fields.map((field) => {
+                  if (field.id !== 'whatsapp_phone') {
+                    return (
+                      <input
+                        key={field.id}
+                        type={field.type}
+                        value={answers[field.id] || ''}
+                        onChange={(e) => setAnswers({...answers, [field.id]: e.target.value})}
+                        placeholder={field.placeholder}
+                        className="w-full bg-surface text-textMain p-5 rounded-2xl text-xl border border-borderColor transition-all min-h-[60px]"
+                      />
+                    );
+                  }
+                  const selectedCountry = ALL_COUNTRIES.find((c) => c.iso === whatsappCountry) || ALL_COUNTRIES[0];
+                  const filteredCountries = countrySearch.trim()
+                    ? ALL_COUNTRIES.filter((c) => c.name.toLowerCase().includes(countrySearch.trim().toLowerCase()) || c.dial.includes(countrySearch.trim()))
+                    : ALL_COUNTRIES;
+                  const validation = getPhoneValidation(answers.whatsapp_phone, whatsappCountry);
+                  return (
+                    <div key={field.id} className="relative">
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCountryPickerOpen((v) => !v)}
+                          className="flex items-center gap-1.5 bg-surface text-textMain px-3.5 rounded-2xl text-lg border border-borderColor min-h-[60px] whitespace-nowrap"
+                        >
+                          <span>{selectedCountry ? selectedCountry.flag : ''}</span>
+                          <span className="font-bold">{selectedCountry ? selectedCountry.dial : ''}</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                        <input
+                          type="tel"
+                          value={answers.whatsapp_phone || ''}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+                            // Colou um número já com "+DDI" -- detecta o país
+                            // e atualiza o seletor em vez de validar contra o
+                            // país que já estava selecionado.
+                            if (raw.trim().startsWith('+') && window.libphonenumber) {
+                              const parsed = window.libphonenumber.parsePhoneNumberFromString(raw.trim());
+                              if (parsed && parsed.country && parsed.country !== whatsappCountry) {
+                                setWhatsappCountry(parsed.country);
+                              }
+                            }
+                            setAnswers({...answers, whatsapp_phone: raw});
+                          }}
+                          placeholder="Ex: 11 91234-5678"
+                          className="flex-1 min-w-0 bg-surface text-textMain p-5 rounded-2xl text-xl border border-borderColor transition-all min-h-[60px]"
+                        />
+                      </div>
+
+                      {countryPickerOpen && (
+                        <div className="absolute z-10 top-[64px] left-0 w-full max-h-72 overflow-y-auto bg-bgBody border border-borderColor rounded-2xl shadow-lg p-2">
+                          <input
+                            type="text"
+                            value={countrySearch}
+                            onChange={(e) => setCountrySearch(e.target.value)}
+                            placeholder="Buscar país..."
+                            className="w-full bg-surface text-textMain p-3 rounded-xl text-base border border-borderColor mb-2"
+                            autoFocus
+                          />
+                          {filteredCountries.map((c) => (
+                            <button
+                              type="button"
+                              key={c.iso}
+                              onClick={() => { setWhatsappCountry(c.iso); setCountryPickerOpen(false); setCountrySearch(''); }}
+                              className="flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-lg hover:bg-surface text-base"
+                            >
+                              <span>{c.flag}</span>
+                              <span className="flex-1 text-textMain">{c.name}</span>
+                              <span className="text-textMuted font-bold">{c.dial}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {validation.error ? (
+                        <p className="text-red-600 text-sm mt-2 font-semibold">{validation.error}</p>
+                      ) : validation.preview ? (
+                        <p className="text-textMuted text-sm mt-2">Vai ficar assim: <strong className="text-textMain">{validation.preview}</strong></p>
+                      ) : null}
+                    </div>
+                  );
+                })}
               </div>
             ) : currentData.type === 'number' || currentData.type === 'text' ? (
               <input 
@@ -895,7 +1077,7 @@
             </button>
             <button 
               onClick={nextStep} 
-              disabled={isNextDisabled()}
+              disabled={isNextDisabled() || loading}
               className={`flex-[2] p-4 rounded-xl flex items-center justify-center transition-all ${isNextDisabled() ? 'bg-gray-300 cursor-not-allowed text-gray-500' : 'bg-brand hover:bg-brand/90 text-white shadow-md'}`}
             >
               <span className="font-black text-lg">

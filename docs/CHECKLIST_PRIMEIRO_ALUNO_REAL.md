@@ -1,6 +1,18 @@
 # Checklist do primeiro aluno real
 
-*Revisado 2026-09-17 — item 0 fechado (era suspeita, agora confirmado), resto sem mudança.*
+*Revisado 2026-09-17 — item 0 fechado (era suspeita, agora confirmado); item 1 atualizado (o
+redirect automático foi substituído por tela de confirmação); aviso sobre "Confirm email" adicionado.*
+
+---
+
+**⚠️ NUNCA ligue "Confirm email" em Authentication → Providers → Email no Supabase Auth deste
+projeto** (confirmado 2026-09-17: hoje está desligado — `mailer_autoconfirm: true` no
+`/auth/v1/settings` público — e é disso que o onboarding depende). Se for ligado, `supabase.auth.signUp()`
+no `OnboardingPreLaunch.html` para de devolver `session` imediatamente, e o código cai num
+`if (!signUpData?.session)` que mostra "Conta criada! Confirme seu e-mail" e **para o fluxo inteiro**
+ali — perfil nunca é salvo, plano nunca é gerado. Agora loga um `console.error` explícito nesse ponto
+(antes era silencioso), mas o comportamento de quebrar o onboarding continua sendo o mesmo enquanto
+esse fluxo depender de sessão imediata pós-signup.
 
 Uma página. Confira nesta ordem depois que a primeira pessoa de verdade completar o onboarding com
 um plano que vai ser usado (não teste, não Marina/E2E). Cada item diz onde olhar, o que deveria ter
@@ -19,10 +31,13 @@ rota que existe e funciona — nunca foi `/validar/`, era só comentário desatu
 
 **Onde olhar:** o próprio celular do aluno (ou, do seu lado, `whatsapp_notifications` no banco,
 filtrando pelo `user_id` dele).
-**Deveria ter acontecido:** mensagem de confirmação logo após o onboarding, redirecionando pro
-WhatsApp com "Olá! Sou [nome] e acabei de finalizar meu perfil...".
-**Indica problema:** se não chegou nada, o onboarding pode ter parado antes do redirect (ver
-item 2) — não é falha do WhatsApp em si, o redirect é a última linha do fluxo.
+**Deveria ter acontecido:** a TELA (não mais um redirect automático — trocado 2026-09-17, ver
+[[project_two_onboardings_distinction]]) mostra "Perfil confirmado" com os próximos passos assim que
+o perfil é salvo; o WhatsApp que o aluno recebe de fato é o template `ybytu_user_onboarding_received`,
+disparado pela function `ybytu-notify-onboarding-received`. O botão "Falar com a equipe no WhatsApp" na
+tela é opcional, pra quem quiser, não é mais automático.
+**Indica problema:** se a mensagem não chegou, cheque `whatsapp_notifications` (status `failed` com o
+erro da Meta) — não é mais "o onboarding parou antes do redirect", já que não há mais redirect.
 
 ## 2. O perfil e o plano foram gerados?
 

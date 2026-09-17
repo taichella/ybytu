@@ -308,9 +308,13 @@ export default function UserDetail() {
 
   const handleSendMessage = () => {
     const phone = userData?.whatsapp_phone || resolvedLabels?.phone;
-    const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
-    if (cleanPhone) {
-      const waNumber = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+    // Achado 2026-09-17 (revisão Antigravity): cravava "55" (Brasil) sempre
+    // que o número não começava com 55, quebrando qualquer aluno com DDI de
+    // outro país (ex: França). whatsapp_phone é gravado em E.164 (com "+")
+    // desde o onboarding -- wa.me exige só dígitos, sem "+", nada de adivinhar
+    // ou prefixar DDI aqui.
+    const waNumber = phone ? phone.replace(/\D/g, '') : '';
+    if (waNumber) {
       window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(`Olá, ${userData?.full_name || ''}! Aqui é da equipe Ybytu.`)}`, '_blank', 'noopener,noreferrer');
     } else if (resolvedLabels?.email) {
       window.location.href = `mailto:${resolvedLabels.email}?subject=Ybytu%20-%20Acompanhamento`;

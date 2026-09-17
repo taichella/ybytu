@@ -40,15 +40,18 @@ export default function FailedPlans() {
     setRetryResult((prev) => ({ ...prev, [userId]: null }));
     try {
       const result = await failedPlansService.retry(userId);
-      const parts = [];
-      if (result.results?.training) parts.push(`treino: ${result.results.training.ok ? 'ok' : 'falhou'}`);
-      if (result.results?.meal) parts.push(`nutrição: ${result.results.meal.ok ? 'ok' : 'falhou'}`);
       // Achado 2026-09-17 (revisão Antigravity): cor do resultado dependia de
       // texto começar com "Erro" -- se uma mensagem de sucesso um dia
       // incluísse essa palavra (ex: "0 erros"), mostraria vermelho num
       // resultado bom. Guarda o sucesso/falha explícito em vez de inferir do texto.
-      const allOk = !result.results || Object.values(result.results).every((r) => r?.ok !== false);
-      setRetryResult((prev) => ({ ...prev, [userId]: { ok: allOk, text: parts.join(' · ') || 'concluído' } }));
+      // Formato mudou 2026-09-17 (orquestração via ybytu-onboarding-complete):
+      // não é mais {results:{training,meal}} por chamada separada, é um
+      // status/erro único (a conferência real de qual gerador faltou já vem
+      // dentro do texto do erro, ver _shared/onboardingOrchestration.ts).
+      const status = result.result?.plan_generation_status;
+      const allOk = status === 'ok';
+      const text = allOk ? 'concluído' : (result.result?.plan_generation_error || result.result?.skipped || 'falhou');
+      setRetryResult((prev) => ({ ...prev, [userId]: { ok: allOk, text } }));
       load();
     } catch (e) {
       setRetryResult((prev) => ({ ...prev, [userId]: { ok: false, text: `Erro: ${e.message}` } }));
@@ -98,6 +101,19 @@ export default function FailedPlans() {
                     <p style={{ margin: '4px 0 0', fontSize: '12px' }}>
                       {p.has_training_plan ? '✅' : '—'} treino &nbsp; {p.has_meal_plan ? '✅' : '—'} nutrição
                     </p>
+                    {/* Achado 2026-09-17: pending/generating travados (nunca chegaram a
+                        'failed' de verdade) ficavam invisíveis aqui -- agora aparecem, com
+                        o motivo real de por que chegaram nesta tela. */}
+                    {p.stuck_as && (
+                      <p style={{ margin: '4px 0 0', fontSize: '11px', fontWeight: 700, color: '#d97706' }}>
+                        Travado como "{p.stuck_as}" há mais de 10 min — o cron automático já tentou retomar
+                      </p>
+                    )}
+                    {p.exhausted_retries && (
+                      <p style={{ margin: '4px 0 0', fontSize: '11px', fontWeight: 800, color: '#dc2626' }}>
+                        Falhou {p.attempts}x — cron parou de tentar sozinho, precisa de ação manual
+                      </p>
+                    )}
                   </div>
                   {isAdmin && (
                     <button
