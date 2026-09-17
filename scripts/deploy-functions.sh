@@ -84,6 +84,15 @@ else
   echo "AVISO: branch atual sem upstream configurado -- nao foi possivel checar se o commit foi empurrado." >&2
 fi
 
+# ── Checagem 3: template de e-mail sincronizado (só quando afeta essa function) ──
+# ybytu-send-onboarding-email lê supabase/functions/ybytu-send-onboarding-email/
+# template.html, que é uma cópia de deploy de emails/03-plano-em-preparacao.html
+# (a fonte da verdade, versionada, fora do bundle da function). Deployar com
+# as duas divergentes manda pro ar um e-mail diferente do que foi revisado.
+if [ -z "$FUNC_NAME" ] || [ "$FUNC_NAME" = "ybytu-send-onboarding-email" ]; then
+  "$REPO_ROOT/scripts/check-email-templates.sh"
+fi
+
 echo "OK: $SCOPE_DESC limpo e sincronizado com o remoto. Deployando..."
 echo
 exec npx supabase functions deploy "$@"

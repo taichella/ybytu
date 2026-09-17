@@ -2,11 +2,25 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
 
-// Email de confirmação + recapitulativo, disparado pelo próprio
-// OnboardingPreLaunch.html logo após o profile ser salvo (mesmo ponto de
-// ybytu-notify-onboarding-received), fire-and-forget. Só o próprio usuário
-// pode chamar pra SI MESMO (JWT normal dele) -- mesmo padrão das outras
-// notify functions. Idempotente via onboarding_email_sent_at.
+// Fonte de verdade do design: emails/03-plano-em-preparacao.html (raiz do
+// repo, ao lado dos outros 9 templates do Antigravity). Essa cópia local
+// existe só porque o deploy do Supabase empacota apenas a pasta da própria
+// function + _shared/ -- emails/ na raiz não viaja no bundle. Se o design
+// mudar, copie de novo (não edite as duas cópias separadamente):
+//   cp emails/03-plano-em-preparacao.html supabase/functions/ybytu-send-onboarding-email/template.html
+const TEMPLATE_PATH = new URL('./template.html', import.meta.url)
+
+// {{ tracking_link }} removido do template (2026-09-17) -- apontava pra uma
+// área logada de acompanhamento que não existe no produto ainda. Única
+// variável real que sobrou é {{ name }}.
+function renderTemplate(template: string, vars: Record<string, string>): string {
+  let html = template
+  for (const [key, value] of Object.entries(vars)) {
+    html = html.replaceAll(`{{ ${key} }}`, value)
+  }
+  return html
+}
+
 serve(async (req) => {
   const corsHeaders = corsHeadersFor(req)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -33,7 +47,7 @@ serve(async (req) => {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('full_name, first_name, goals_ids, training_days_per_week, meals_per_day, dietary_preference_id, onboarding_email_sent_at')
+      .select('first_name, full_name, onboarding_email_sent_at')
       .eq('id', userId)
       .maybeSingle()
 
@@ -56,32 +70,18 @@ serve(async (req) => {
       })
     }
 
-    const [goalsRes, preferenceRes] = await Promise.all([
-      profile.goals_ids?.length
-        ? supabase.from('goals').select('name_ptbr').in('id', profile.goals_ids)
-        : Promise.resolve({ data: [] as { name_ptbr: string }[] }),
-      profile.dietary_preference_id
-        ? supabase.from('dietary_preferences').select('name_ptbr').eq('id', profile.dietary_preference_id).maybeSingle()
-        : Promise.resolve({ data: null as { name_ptbr: string } | null }),
-    ])
+    // Regra explícita: variável sem valor NUNCA sai como "{{ name }}" literal
+    // pro aluno -- loga e recusa o envio.
+    const name = (profile.first_name || profile.full_name || '').trim()
+    if (!name) {
+      console.error(`ybytu-send-onboarding-email: variável 'name' vazia pro usuário ${userId} -- e-mail NÃO enviado`)
+      return new Response(JSON.stringify({ error: 'missing_template_variable', variable: 'name' }), {
+        status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
-    const goalsLabel = (goalsRes.data ?? []).map((g) => g.name_ptbr).join(', ') || '—'
-    const preferenceLabel = preferenceRes.data?.name_ptbr?.trim() || '—'
-    const firstName = profile.first_name || profile.full_name || 'aluno(a)'
-
-    const html = `
-      <p>Oi ${firstName},</p>
-      <p>Seu cadastro na Ybytu foi concluído com sucesso. Aqui está o resumo do que você nos contou:</p>
-      <ul>
-        <li><strong>Objetivo:</strong> ${goalsLabel}</li>
-        <li><strong>Dias por semana dedicados:</strong> ${profile.training_days_per_week ?? '—'}</li>
-        <li><strong>Refeições por dia:</strong> ${profile.meals_per_day ?? '—'}</li>
-        <li><strong>Preferência alimentar:</strong> ${preferenceLabel}</li>
-      </ul>
-      <p>Nosso personal trainer e nutricionista vão revisar e validar seu plano personalizado agora.
-      Você recebe o link do plano pelo WhatsApp, no número que você cadastrou, em até 48 horas úteis.</p>
-      <p>Qualquer dúvida, é só responder este e-mail.</p>
-    `
+    const template = await Deno.readTextFile(TEMPLATE_PATH)
+    const html = renderTemplate(template, { name })
 
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
     if (!resendApiKey) {
@@ -99,23 +99,30 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'Ybytu <onboarding@send.ybytu.app>',
+        reply_to: 'onboarding@send.ybytu.app',
         to: [email],
-        subject: `Recebemos seu perfil, ${firstName}! 🎉`,
+        subject: 'Seu plano está sendo montado pelos profissionais',
         html,
       }),
     })
 
+    const resendBody = await resendResponse.json().catch(() => null)
+
     if (!resendResponse.ok) {
-      const errBody = await resendResponse.text().catch(() => '')
-      console.error('Erro retornado pelo Resend:', resendResponse.status, errBody)
+      console.error('Erro retornado pelo Resend:', resendResponse.status, JSON.stringify(resendBody))
       return new Response(JSON.stringify({ error: `resend_error_${resendResponse.status}` }), {
         status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
+    // Id da mensagem no Resend -- logado pra dar rastreabilidade que faltava
+    // (achado 2026-09-17: não havia como confirmar um envio específico sem
+    // acesso direto ao painel do Resend).
+    console.log(`ybytu-send-onboarding-email: enviado pro usuário ${userId}, resend_id=${resendBody?.id ?? 'desconhecido'}`)
+
     await supabase.from('profiles').update({ onboarding_email_sent_at: new Date().toISOString() }).eq('id', userId)
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ ok: true, resend_id: resendBody?.id ?? null }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
