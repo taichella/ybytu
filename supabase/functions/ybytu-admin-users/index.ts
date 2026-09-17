@@ -78,6 +78,14 @@ serve(async (req) => {
       const healthConditions = await fetchLookupMulti('health_conditions', profile.health_conditions_ids, 'name_ptbr')
       const physicalConditions = await fetchLookupMulti('onboarding_physical_conditions', profile.physical_conditions_ids, 'name_ptbr')
       const dietaryRestrictions = await fetchLookupMulti('dietary_restrictions', profile.dietary_restrictions_ids, 'name_ptbr')
+
+      // IDs fixos da opção "Nenhuma" em cada catálogo (confirmados no banco
+      // 2026-09-17) -- distingue "aluno marcou que não tem nenhuma" de "aluno
+      // nunca respondeu" na origem, em vez do frontend comparar texto do
+      // rótulo resolvido (frágil, quebra se o catálogo for renomeado).
+      const declaredNonePhysical = (profile.physical_conditions_ids ?? []).includes('f310a010-8f13-4d24-bfa5-2081f39426d7')
+      const declaredNoneDietary = (profile.dietary_restrictions_ids ?? []).includes('b1b8af2c-d163-436c-a207-0204a3e8067b')
+      const declaredNoneHealth = (profile.health_conditions_ids ?? []).includes('f2d72dfc-6065-4357-842e-1ccb6474e2dc')
       const muscleGroups = await fetchLookupMulti('onboarding_muscle_groups', profile.muscle_groups_ids, 'name_ptbr')
       const exerciseEquipments = await fetchLookupMulti('onboarding_exercise_equipments', profile.exercise_equipments_ids, 'name_ptbr')
 
@@ -163,6 +171,9 @@ serve(async (req) => {
         healthConditions,
         physicalConditions,
         dietaryRestrictions,
+        declaredNonePhysical,
+        declaredNoneDietary,
+        declaredNoneHealth,
         muscleGroups,
         exerciseEquipments,
         subscriptionName: subName,

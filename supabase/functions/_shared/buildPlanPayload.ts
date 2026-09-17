@@ -790,6 +790,14 @@ async function buildReviewSection(
   }
 }
 
+// IDs fixos da opção "Nenhuma" nos catálogos de onboarding (confirmados no
+// banco 2026-09-17). Usados pra distinguir "aluno respondeu que não tem
+// nenhuma limitação" de "aluno nunca respondeu" -- achado da revisão
+// Antigravity: comparar o TEXTO do rótulo resolvido era frágil (quebra se o
+// catálogo for renomeado); comparar o id na origem é a fonte da verdade.
+const NONE_OPTION_ID_PHYSICAL = 'f310a010-8f13-4d24-bfa5-2081f39426d7' // onboarding_physical_conditions.Nenhuma
+const NONE_OPTION_ID_HEALTH = 'f2d72dfc-6065-4357-842e-1ccb6474e2dc' // health_conditions.Nenhuma
+
 // ─── Montagem do payload ────────────────────────────────────────────────────
 // Recebe o user_id já validado (pelo token OU pela sessão de staff — quem
 // chamou já decidiu isso antes de chegar aqui) e devolve o JSON completo pro
@@ -914,6 +922,8 @@ export async function buildPlanPayload(
       goals_ptbr: goalRows.map((g: any) => g.name_ptbr),
       physical_limitations_ptbr: [...physicalLimitations.values()],
       health_limitations_ptbr: [...healthLimitations.values()],
+      declared_none_physical: (profile.physical_conditions_ids ?? []).includes(NONE_OPTION_ID_PHYSICAL),
+      declared_none_health: (profile.health_conditions_ids ?? []).includes(NONE_OPTION_ID_HEALTH),
       // "Outra limitação" não tem slug em physical_condition_exercise_slugs —
       // nenhum filtro de avoid/caution roda pra quem marcou só essa opção.
       // Sinaliza pro aluno não treinar sem contato humano antes (ver
