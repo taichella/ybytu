@@ -1,22 +1,17 @@
 # Checklist do primeiro aluno real
 
+*Revisado 2026-09-17 — item 0 fechado (era suspeita, agora confirmado), resto sem mudança.*
+
 Uma página. Confira nesta ordem depois que a primeira pessoa de verdade completar o onboarding com
 um plano que vai ser usado (não teste, não Marina/E2E). Cada item diz onde olhar, o que deveria ter
 acontecido, e o que indicaria problema.
 
 ---
 
-## 0. Antes de mais nada — o botão do profissional funciona?
-
-**Não verificado nesta sessão, verificar com prioridade.** O código
-(`ybytu-notify-plan-ready/index.ts:125`) registra que o botão do WhatsApp enviado ao personal/
-nutricionista usa base fixa `https://pro.ybytu.app/validar/<id>` — mas **não existe rota
-`/validar/:id` no dashboard** (só `/users/:id` e `/review/:id`). Se o template cadastrado na Meta
-usa mesmo essa base, o clique leva pra tela em branco.
-
-**Como conferir:** quando o WhatsApp de "parecer pendente" chegar pro personal/nutricionista,
-**clique no botão de verdade** (não abra `/review/:id` direto pela barra de endereço). Se abrir em
-branco ou der erro, é isso — me avise, a correção é recadastrar o template na Meta, não é código.
+**Item 0 (botão do profissional) fechado, não é mais item de verificação.** Confirmado no painel da
+Meta (WhatsApp Manager → `ybytu_staff_plan_ready`): a base do botão é `https://pro.ybytu.app/review/`,
+rota que existe e funciona — nunca foi `/validar/`, era só comentário desatualizado no código
+(corrigido). Nenhuma ação pendente aqui.
 
 ---
 
@@ -81,5 +76,4 @@ caso, checar se `ybytu-send-user-whatsapp` disparou (log em `whatsapp_notificati
 
 **Se tudo isso passou:** o fluxo funcionou de ponta a ponta com gente de verdade, pode considerar o
 piloto tecnicamente validado pro primeiro caso. Guarde este checklist pros próximos alunos também —
-não precisa repetir tudo depois que uns 3-5 passarem sem problema, mas o item 0 (botão do WhatsApp)
-vale conferir sempre até confirmar que o template está certo de vez.
+não precisa repetir tudo depois que uns 3-5 passarem sem problema.
