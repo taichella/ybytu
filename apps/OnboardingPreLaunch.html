@@ -102,7 +102,12 @@
       // arrasta o handle avança com answers.training_duration_minutes undefined,
       // o update() não manda a chave, e a coluna fica no default do schema (30),
       // divergindo do que a pessoa viu na tela. Bug real, achado 2026-08-22.
-      training_duration_minutes: 45
+      training_duration_minutes: 45,
+      // Mesmo bug do slider acima, achado 2026-09-17: quem não arrasta o
+      // handle de "dias por semana" avança com dedicated_days_per_week
+      // undefined -- training_days_per_week/nutrition_days_per_week ficam no
+      // default do schema em vez do "4 dias" (recommended) que a tela mostra.
+      dedicated_days_per_week: 4
     });
 
     const userName = answers.first_name || 'Futuro Aluno'; 
@@ -527,8 +532,21 @@
           // 3. Atualiza com os campos do onboarding — remapeamentos:
           // exercise_equipment_ids (form) -> exercise_equipments_ids (coluna),
           // dedicated_days_per_week (form) -> alimenta os dois generators.
+          // subscription_type_id NÃO é mais enviado por aqui -- vira DEFAULT
+          // da coluna no banco (piloto só oferece COMPLETE, ver migration de
+          // 2026-09-17); isTraining/isMeal abaixo continuam calculados
+          // localmente com answers.subscription_type_id (que segue sendo
+          // COMPLETE, nunca muda nesta tela).
+          //
+          // pregnancy_trimester e exercise_equipments_ids só são gravados se
+          // a etapa que os preenche está VISÍVEL no momento do FINALIZAR --
+          // um resquício de resposta de uma condição que a pessoa desmarcou
+          // depois (ex: marcou "Gravidez", escolheu o trimestre, desmarcou
+          // "Gravidez" de novo) não deve sobreviver no perfil salvo.
+          const isPregnancyVisible = steps.find(s => s.id === 'pregnancy_trimester')?.condition(answers, steps) ?? false;
+          const isEquipmentsVisible = steps.find(s => s.id === 'exercise_equipments')?.condition(answers, steps) ?? false;
+
           const { error: profileError } = await supabase.from('profiles').update({
-            subscription_type_id: answers.subscription_type_id,
             goals_ids: answers.goals_ids || [],
             gender_id: answers.gender_id,
             age: answers.age,
@@ -536,11 +554,11 @@
             height_cm: answers.height_cm,
             activity_level_id: answers.activity_level_id,
             health_conditions_ids: answers.health_conditions_ids || [],
-            pregnancy_trimester: answers.pregnancy_trimester,
+            pregnancy_trimester: isPregnancyVisible ? answers.pregnancy_trimester : null,
             physical_conditions_ids: answers.physical_conditions_ids || [],
             muscle_groups_ids: answers.muscle_groups_ids || [],
             exercise_environment_id: answers.exercise_environment_id,
-            exercise_equipments_ids: answers.exercise_equipment_ids || [],
+            exercise_equipments_ids: isEquipmentsVisible ? (answers.exercise_equipment_ids || []) : [],
             training_duration_minutes: answers.training_duration_minutes,
             exercise_level_id: answers.exercise_level_id,
             training_days_per_week: answers.dedicated_days_per_week,
@@ -607,10 +625,31 @@
           // client-side aqui já causou 0 notificações pro staff em 2
           // onboardings reais (2026-08-26 e 2026-08-27) apesar do plano ter
           // sido gerado com sucesso.
-          supabase.functions.invoke('ybytu-notify-plan-ready').catch((e) => console.error(e));
-          supabase.functions.invoke('ybytu-create-plan-share-token').catch((e) => console.error(e));
+          //
+          // AWAIT com timeout de 5s antes do redirect (achado 2026-09-17):
+          // window.location.href logo em seguida podia cancelar essas 2
+          // chamadas fire-and-forget no meio do voo -- o navegador não
+          // garante que um fetch em andamento termina quando a página troca
+          // de URL. Promise.allSettled (não Promise.all) pra um erro em uma
+          // não esperar/derrubar a outra; timeout de 5s pra não segurar o
+          // redirect indefinidamente se alguma travar.
+          const withTimeout = (promise, ms) => Promise.race([
+            promise,
+            new Promise((resolve) => setTimeout(() => resolve({ timedOut: true }), ms)),
+          ]);
 
-          // 5. WhatsApp sempre — mesmo se o gerador falhou (fail-soft).
+          const notifyResults = await Promise.allSettled([
+            withTimeout(supabase.functions.invoke('ybytu-notify-plan-ready'), 5000),
+            withTimeout(supabase.functions.invoke('ybytu-create-plan-share-token'), 5000),
+          ]);
+          notifyResults.forEach((result, i) => {
+            const label = i === 0 ? 'ybytu-notify-plan-ready' : 'ybytu-create-plan-share-token';
+            if (result.status === 'rejected') console.error(`${label} falhou:`, result.reason);
+            else if (result.value?.timedOut) console.error(`${label} não respondeu em 5s (timeout) -- seguindo mesmo assim (fail-soft)`);
+          });
+
+          // 5. WhatsApp sempre — mesmo se o gerador ou as notificações acima
+          // falharam (fail-soft).
           redirectToWhatsApp();
         } catch (e) {
           alert(e.message || "Ocorreu um erro ao salvar o perfil.");

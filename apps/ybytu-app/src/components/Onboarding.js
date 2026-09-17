@@ -303,9 +303,13 @@ export function Onboarding({ session, onComplete }) {
         // PASSO 1: GUARDAR TODOS OS DADOS NA TABELA PROFILES
         // ====================================================================
         const { error: profileError } = await supabase.from('profiles').update({
-          subscription_type_id: answers.subscription_type_id, 
-          
-          goals_ids: answers.goals_ids || [], 
+          // subscription_type_id NÃO é mais gravado pelo cliente (migration
+          // 2026-09-17 -- coluna virou UPDATE fora do grant de authenticated).
+          // A escolha de plano pós-piloto desta tela precisa passar por uma
+          // Edge Function (service_role) que valide o pagamento antes de
+          // gravar; até essa function existir, a coluna fica no DEFAULT
+          // (COMPLETE) que todo signup do piloto já usa.
+          goals_ids: answers.goals_ids || [],
           gender_id: answers.gender_id || null,
           age: answers.age ? parseInt(answers.age) : null,
           weight_kg: answers.weight_kg ? parseFloat(answers.weight_kg) : null,
