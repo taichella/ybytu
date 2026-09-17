@@ -122,12 +122,15 @@ serve(async (req) => {
         notifiedRoles.push(role)
         continue
       }
-      // Botão "Visit website" do template: base fixa https://pro.ybytu.app/validar/
+      // Botão "Visit website" do template: base fixa https://pro.ybytu.app/review/
       // cadastrada na Meta + sufixo dinâmico = só o userId (sem query string --
       // dynamic URL button da Meta valida a URL no cadastro do template e
       // parâmetro com "?"/"=" corre risco de rejeição, ver [[project_whatsapp_button_url_no_query_string]]).
-      // A rota /validar/:id já abre direto no plano gerado (com formulário de
-      // parecer + edição de carga) -- ver App.jsx/UserDetail.jsx.
+      // A rota /review/:id já abre direto no plano gerado (com formulário de
+      // parecer + edição de carga) -- ver App.jsx/UserDetail.jsx. Comentário
+      // corrigido 2026-09-15 -- dizia /validar/ (rota que nunca existiu no
+      // App.jsx); confirmado no painel da Meta que a base real sempre foi
+      // /review/, o comentário estava desatualizado, nunca houve bug.
       const result = await sendWhatsAppTemplate(supabase, userId, phone, templateId, [profile.full_name ?? 'aluno(a)'], userId)
       if (result.ok) {
         notifiedRoles.push(role)
