@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#F55F16; --brand-hover:#FF7A3D; --brand-soft:rgba(245,95,22,.10);
+    --bg:#ffffff; --surface:#f8fafc; --border:#e2e8f0;
+    --text:#0f172a; --muted:#64748b; --success:#16a34a; --success-soft:rgba(22,163,74,.10);
+    --danger:#ef4444; --danger-soft:rgba(239,68,68,.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  @keyframes ybPop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+</style>
+</helmet>
+
+<div style="display:flex;width:100%;min-height:100vh;justify-content:center;align-items:center;padding:16px;background:var(--bg);">
+  <div style="display:flex;flex-direction:column;width:100%;max-width:640px;background:var(--bg);box-shadow:0 10px 40px rgba(15,23,42,.10);border-radius:16px;border:1px solid var(--border);overflow:hidden;">
+
+    <!-- ===================== STATE: erro (upsert/update falhou) ===================== -->
+    <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:48px 32px;text-align:center;">
+        <span style="display:inline-flex;width:60px;height:60px;border-radius:50%;background:var(--danger-soft);align-items:center;justify-content:center;color:var(--danger);margin-bottom:20px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+        </span>
+        <h2 style="font-size:22px;font-weight:900;margin:0 0 8px;">Não conseguimos salvar seu perfil</h2>
+        <p style="color:var(--muted);font-size:15px;line-height:1.55;margin:0;">{{ errorMessage }}</p>
+      </div>
+    </sc-if>
+
+    <!-- ===================== STATE: confirmação (sucesso) ===================== -->
+    <sc-if value="{{ isSuccess }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:40px 32px 32px;">
+        <span style="display:inline-flex;width:60px;height:60px;border-radius:50%;background:var(--success-soft);align-items:center;justify-content:center;color:var(--success);margin-bottom:20px;animation:ybPop .4s ease-out both;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+        </span>
+        <h1 style="font-size:26px;font-weight:900;letter-spacing:-.01em;margin:0 0 10px;line-height:1.2;">Perfil confirmado, {{ firstName }}!</h1>
+        <p style="color:var(--muted);font-size:15px;line-height:1.6;margin:0 0 28px;">Recebemos suas respostas. Aqui está o que acontece agora:</p>
+
+        <!-- Próximos passos -->
+        <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;">1</span>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;padding-top:3px;"><strong>Seu plano já está sendo gerado</strong> com base nas suas respostas.</p>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;">2</span>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;padding-top:3px;"><strong>Um personal trainer e uma nutricionista revisam</strong> tudo antes de liberar pra você.</p>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <span style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;">3</span>
+            <p style="margin:0;font-size:14.5px;line-height:1.5;padding-top:3px;"><strong>O link do plano chega pelo seu WhatsApp</strong> assim que a revisão terminar.</p>
+          </div>
+        </div>
+
+        <!-- Prazo -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:22px;display:flex;gap:10px;align-items:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brand);flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+          <p style="margin:0;font-size:14px;color:var(--text);"><strong>Prazo de revisão:</strong> em até 48 horas</p>
+        </div>
+
+        <!-- WhatsApp confirmado -->
+        <div style="border-top:1px solid var(--border);padding-top:20px;margin-bottom:16px;">
+          <p style="margin:0 0 4px;font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Vamos te avisar pelo WhatsApp</p>
+          <p style="margin:0;font-size:15px;">{{ maskedPhone }} &nbsp;·&nbsp; <a href="#" style="color:var(--brand);font-weight:700;text-decoration:none;">Número errado? Fale com a gente</a></p>
+        </div>
+
+        <!-- E-mail -->
+        <p style="margin:0 0 16px;font-size:14px;color:var(--muted);line-height:1.55;">Também enviamos um e-mail de confirmação com esse resumo para <strong style="color:var(--text);">{{ email }}</strong>.</p>
+
+        <!-- Se o link não chegar -->
+        <div style="background:var(--surface);border-radius:12px;padding:14px 16px;margin-bottom:8px;">
+          <p style="margin:0 0 4px;font-size:13.5px;font-weight:700;">Não recebeu o link dentro do prazo?</p>
+          <p style="margin:0;font-size:13.5px;color:var(--muted);line-height:1.5;">Confira se o número do WhatsApp está correto acima e olhe sua caixa de spam no e-mail. Se ainda assim não chegar, fale com a gente pelo WhatsApp da equipe abaixo.</p>
+        </div>
+      </div>
+
+      <!-- Botão opcional -- sem redirect automático, sem voltar, sem reenviar -->
+      <div style="padding:16px 32px 28px;">
+        <a href="#" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:12px;border:1px solid var(--border);color:var(--muted);font-weight:700;font-size:14px;text-decoration:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91S17.5 2 12.04 2Z"></path></svg>
+          Falar com a equipe no WhatsApp (opcional)
+        </a>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <!-- ===================== VARIATION SWITCHER (só na pré-visualização) ===================== -->
+  <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:6px;box-shadow:0 8px 30px rgba(0,0,0,.18);">
+    <span style="font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--muted);padding:0 8px 0 10px;text-transform:uppercase;">Estado</span>
+    <button onClick="{{ showSuccess }}" style="{{ tabSuccess }}">Sucesso</button>
+    <button onClick="{{ showError }}" style="{{ tabError }}">Erro</button>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:760}}">
+class Component extends DCLogic {
+  state = { view: 'success' };
+
+  showSuccess = () => this.setState({ view: 'success' });
+  showError = () => this.setState({ view: 'error' });
+
+  renderVals(){
+    const v = this.state.view;
+    const tab = (on) => on
+      ? 'border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:8px 16px;border-radius:999px;background:var(--brand);color:#fff;'
+      : 'border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:800;padding:8px 16px;border-radius:999px;background:transparent;color:var(--muted);';
+    return {
+      isSuccess: v === 'success',
+      isError: v === 'error',
+      firstName: 'Rayan',
+      email: 'rayanroad.rouen@gmail.com',
+      maskedPhone: '+55 (11) 9****-0000',
+      errorMessage: 'Erro ao salvar perfil: [mensagem real do erro aqui]. Tente novamente em alguns instantes.',
+      showSuccess: this.showSuccess,
+      showError: this.showError,
+      tabSuccess: tab(v === 'success'),
+      tabError: tab(v === 'error'),
+    };
+  }
+}
+</script>
+</body>
+</html>

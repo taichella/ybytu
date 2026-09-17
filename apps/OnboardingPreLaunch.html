@@ -91,10 +91,24 @@
     flexitarian: [],
   };
 
+  // Mascara o WhatsApp exibido na tela de confirmação -- mantém os 4
+  // primeiros e os 2 últimos caracteres visíveis, independente do formato
+  // que a pessoa digitou (sem validação/normalização ainda, ver item 7).
+  const maskPhone = (phone) => {
+    const clean = String(phone || '').trim();
+    if (clean.length < 7) return clean;
+    return `${clean.slice(0, 4)}${'•'.repeat(clean.length - 6)}${clean.slice(-2)}`;
+  };
+
   function OnboardingApp() {
     const [currentStep, setCurrentStep] = useState(0);
     const [loading, setLoading] = useState(true);
-    
+    // Preenchido só depois que o profile foi salvo com SUCESSO -- erro no
+    // upsert/update cai no catch (alert), nunca seta isso. Uma vez setado,
+    // troca a tela inteira pela confirmação; não existe caminho de volta
+    // pro formulário nesta sessão (sem botão VOLTAR, sem reenvio).
+    const [finished, setFinished] = useState(null);
+
     const [answers, setAnswers] = useState({
       subscription_type_id: SUBSCRIPTION_PLANS.COMPLETE,
       // Slider é opcional (isNextDisabled ignora), mas a tela já mostra "45 min"
@@ -462,9 +476,14 @@
       return false;
     };
 
-    const redirectToWhatsApp = () => {
-      const message = encodeURIComponent(`Olá! Sou o ${userName} e acabei de finalizar meu perfil na plataforma. Gostaria de ativar meu plano!`);
-      window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+    // Não é mais chamado automaticamente no fim do formulário (ver item 3a:
+    // essa mensagem nunca foi lida por nenhum código nosso -- o webhook só
+    // processa callback de entrega dos templates que A GENTE manda, nunca
+    // reage a mensagem recebida). Fica como botão OPCIONAL na tela de
+    // confirmação, pra quem quiser abrir uma conversa com a equipe.
+    const openTeamWhatsApp = () => {
+      const message = encodeURIComponent(`Olá! Sou o ${userName} e acabei de finalizar meu perfil na plataforma.`);
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank', 'noopener');
     };
 
     const nextStep = async () => {
@@ -572,6 +591,14 @@
 
           if (profileError) throw new Error('Erro ao salvar perfil: ' + profileError.message);
 
+          // withTimeout definido aqui em cima pra poder envolver o envio de
+          // e-mail já nesta etapa (ver 3c abaixo), reaproveitado de novo
+          // mais adiante pra notify-plan-ready/create-plan-share-token.
+          const withTimeout = (promise, ms) => Promise.race([
+            promise,
+            new Promise((resolve) => setTimeout(() => resolve({ timedOut: true }), ms)),
+          ]);
+
           // 3b. Avisa usuário ("recebemos seu perfil, estamos montando") e
           // sales ("novo aluno completou onboarding") — fire-and-forget,
           // ANTES dos geradores pra não deixar o usuário no vácuo enquanto a
@@ -580,9 +607,23 @@
           // o gap humano de validação do plano (horas) já dá de qualquer jeito.
           supabase.functions.invoke('ybytu-notify-onboarding-received').catch((e) => console.error(e));
 
-          // 3c. Email de confirmação + recapitulativo (Resend) — mesmo
-          // fire-and-forget, mesmo motivo.
-          supabase.functions.invoke('ybytu-send-onboarding-email').catch((e) => console.error(e));
+          // 3c. Email de confirmação + recapitulativo (Resend) — AGORA
+          // aguardado com timeout (não mais fire-and-forget), pra saber na
+          // hora de montar a tela de confirmação se o e-mail realmente foi
+          // enviado. Achado 2026-09-17: SPF de send.ybytu.app confere, mas
+          // não achei DKIM verificado nem o id da mensagem do Resend em
+          // lugar nenhum (a function não loga isso) -- não dá pra prometer
+          // "também enviamos e-mail" sem confirmar de verdade a resposta
+          // desta chamada. emailSent alimenta a tela de confirmação abaixo.
+          let emailSent = false;
+          try {
+            const emailResult = await withTimeout(supabase.functions.invoke('ybytu-send-onboarding-email'), 5000);
+            emailSent = !emailResult?.timedOut && !emailResult?.error;
+            if (emailResult?.error) console.error('ybytu-send-onboarding-email retornou erro:', emailResult.error);
+            else if (emailResult?.timedOut) console.error('ybytu-send-onboarding-email não respondeu em 5s (timeout)');
+          } catch (e) {
+            console.error('ybytu-send-onboarding-email falhou:', e);
+          }
 
           // 4. Dispara os geradores novos — fail-soft: erro não trava o
           // redirect (não perde o lead), só marca a flag pra suporte ver depois.
@@ -632,12 +673,8 @@
           // garante que um fetch em andamento termina quando a página troca
           // de URL. Promise.allSettled (não Promise.all) pra um erro em uma
           // não esperar/derrubar a outra; timeout de 5s pra não segurar o
-          // redirect indefinidamente se alguma travar.
-          const withTimeout = (promise, ms) => Promise.race([
-            promise,
-            new Promise((resolve) => setTimeout(() => resolve({ timedOut: true }), ms)),
-          ]);
-
+          // redirect indefinidamente se alguma travar. withTimeout definido
+          // mais acima (reaproveitado do envio de e-mail, item 3c).
           const notifyResults = await Promise.allSettled([
             withTimeout(supabase.functions.invoke('ybytu-notify-plan-ready'), 5000),
             withTimeout(supabase.functions.invoke('ybytu-create-plan-share-token'), 5000),
@@ -648,9 +685,14 @@
             else if (result.value?.timedOut) console.error(`${label} não respondeu em 5s (timeout) -- seguindo mesmo assim (fail-soft)`);
           });
 
-          // 5. WhatsApp sempre — mesmo se o gerador ou as notificações acima
-          // falharam (fail-soft).
-          redirectToWhatsApp();
+          // 5. Mostra a tela de confirmação -- SEM redirect automático pro
+          // WhatsApp (achado 2026-09-17, ver item 3a: whatsapp-webhook nunca
+          // reage a mensagem recebida, não é opt-in nem abre janela de 24h
+          // pra nada que a gente manda depois -- é sempre template HSM
+          // business-initiated. O botão de WhatsApp na tela de confirmação é
+          // opcional). Mostra mesmo se o gerador ou as notificações acima
+          // falharam (fail-soft) -- o aluno já está com o profile salvo.
+          setFinished({ firstName, email, whatsappPhone, emailSent });
         } catch (e) {
           alert(e.message || "Ocorreu um erro ao salvar o perfil.");
           console.error(e);
@@ -664,6 +706,73 @@
       return (
         <div className="flex w-full py-20 bg-bgBody justify-center items-center rounded-xl">
           <div className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      );
+    }
+
+    // Tela final -- substitui o formulário inteiro, sem caminho de volta.
+    if (finished) {
+      return (
+        <div className="flex w-full bg-bgBody justify-center items-center font-sans p-2 rounded-xl">
+          <div className="flex flex-col w-full max-w-2xl bg-bgBody shadow-lg rounded-xl sm:border sm:border-borderColor overflow-hidden">
+            <div className="px-8 pt-10 pb-8">
+              <span className="inline-flex w-14 h-14 rounded-full bg-green-100 items-center justify-center text-green-600 mb-5">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+              </span>
+              <h1 className="text-2xl font-black text-textMain mb-2 leading-tight">Perfil confirmado, {finished.firstName}!</h1>
+              <p className="text-textMuted mb-7">Recebemos suas respostas. Aqui está o que acontece agora:</p>
+
+              <div className="flex flex-col gap-4 mb-6">
+                <div className="flex gap-3 items-start">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-xs font-bold">1</span>
+                  <p className="m-0 text-sm leading-relaxed pt-0.5"><strong>Seu plano já está sendo gerado</strong> com base nas suas respostas.</p>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-xs font-bold">2</span>
+                  <p className="m-0 text-sm leading-relaxed pt-0.5"><strong>Um personal trainer e uma nutricionista revisam</strong> tudo antes de liberar pra você.</p>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-xs font-bold">3</span>
+                  <p className="m-0 text-sm leading-relaxed pt-0.5"><strong>O link do plano chega pelo seu WhatsApp</strong> assim que a revisão terminar.</p>
+                </div>
+              </div>
+
+              <div className="bg-surface border border-borderColor rounded-xl px-4 py-3 mb-6 flex gap-2.5 items-center">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand flex-shrink-0"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+                <p className="m-0 text-sm"><strong>Prazo de revisão:</strong> em até 48 horas</p>
+              </div>
+
+              <div className="border-t border-borderColor pt-5 mb-4">
+                <p className="m-0 mb-1 text-xs text-textMuted font-bold uppercase tracking-wide">Vamos te avisar pelo WhatsApp</p>
+                <p className="m-0 text-sm">
+                  {maskPhone(finished.whatsappPhone)}
+                  {' · '}
+                  <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Olá, sou ${finished.firstName} -- o número de WhatsApp que cadastrei está errado, poderiam me ajudar a corrigir?`)}`} target="_blank" rel="noopener" className="text-brand font-bold no-underline">Número errado? Fale com a gente</a>
+                </p>
+              </div>
+
+              {finished.emailSent && (
+                <p className="text-sm text-textMuted leading-relaxed mb-4">Também enviamos um e-mail de confirmação com esse resumo para <strong className="text-textMain">{finished.email}</strong>.</p>
+              )}
+
+              <div className="bg-surface rounded-xl px-4 py-3">
+                <p className="m-0 mb-1 text-sm font-bold">Não recebeu o link dentro do prazo?</p>
+                <p className="m-0 text-sm text-textMuted leading-relaxed">
+                  Confira se o número do WhatsApp está correto acima{finished.emailSent ? ' e olhe sua caixa de spam no e-mail' : ''}. Se ainda assim não chegar, fale com a gente pelo WhatsApp da equipe abaixo.
+                </p>
+              </div>
+            </div>
+
+            <div className="px-8 pb-8">
+              <button
+                onClick={openTeamWhatsApp}
+                className="flex items-center justify-center gap-2 w-full p-3 rounded-xl border border-borderColor text-textMuted font-bold text-sm"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91S17.5 2 12.04 2Z" /></svg>
+                Falar com a equipe no WhatsApp (opcional)
+              </button>
+            </div>
+          </div>
         </div>
       );
     }
