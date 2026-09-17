@@ -8,6 +8,9 @@ produção. Cada entrada: o que reverter, e por quê pode ser necessário.
 **O que foi adicionado:**
 - Colunas `profiles.plan_generation_started_at` (timestamptz) e `profiles.plan_generation_attempts`
   (integer, default 0).
+- CHECK constraint `profiles_plan_generation_status_check` ampliada pra aceitar `'generating'`
+  além de `'pending'/'ok'/'failed'` (migration `20260917151500` — achado testando ao vivo: a
+  reivindicação atômica falhava com "violates check constraint" até isso ser corrigido).
 - Cron `ybytu-onboarding-retry-15min` (a cada 15 min), chamando `ybytu-onboarding-retry-cron`.
 - Functions `ybytu-onboarding-complete`, `ybytu-onboarding-retry-cron`,
   `_shared/onboardingOrchestration.ts`.
