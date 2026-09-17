@@ -3,20 +3,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
 
-// Mesmos ids que o onboarding usa (apps/OnboardingPreLaunch.html,
-// SUBSCRIPTION_PLANS) — decide quais geradores rodar de novo pra este perfil.
-const SUBSCRIPTION_PLANS = {
-  TRAINING: '3a5ccc00-77ed-4b87-8e83-bc35be63a862',
-  MEAL: '7458939c-ed4b-4a16-960e-b647f94e6a9b',
-  COMPLETE: '7b5502f1-eeed-4640-8c4f-0ebc0502481e',
-}
-
-// Retry admin-only pra um plano com plan_generation_status='failed'. Chama os
-// mesmos geradores que o onboarding chama, mas autenticado via
-// INTERNAL_FUNCTION_SECRET + user_id explícito no corpo — NUNCA o
-// service_role key direto, e NUNCA um user_id vindo de fora sem passar antes
-// pelo gate admin desta function (mesma lição do generate_user_plans deletado
-// por impersonação — ver memória do projeto).
+// Retry admin-only pra um plano travado/falho. Reseta plan_generation_attempts
+// (senão o cron de retomada, que respeita o limite de 3 tentativas, poderia
+// achar que já esgotou e nunca mais tentar de novo sozinho) e delega a
+// ybytu-onboarding-complete (mesma lógica de claim atômico + geração
+// sequencial + conferência real que o cron e o widget usam -- ver
+// _shared/onboardingOrchestration.ts). Antes esta function chamava os
+// geradores diretamente e duplicava a decisão de isTraining/isMeal; agora um
+// só lugar decide isso, lendo subscription_type_id do banco.
 serve(async (req) => {
   const corsHeaders = corsHeadersFor(req)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -49,7 +43,7 @@ serve(async (req) => {
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, subscription_type_id, plan_generation_status')
+      .select('id, plan_generation_status')
       .eq('id', userId)
       .single()
     if (profileError || !profile) {
@@ -57,37 +51,35 @@ serve(async (req) => {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
-    if (profile.plan_generation_status !== 'failed') {
-      return new Response(JSON.stringify({ error: 'not_failed', current_status: profile.plan_generation_status }), {
+    // Retry manual é o botão de "última linha" -- funciona em qualquer status
+    // que não seja 'ok' (não só 'failed'), incluindo 'pending'/'generating'
+    // travados que o cron já desistiu por terem passado de 3 tentativas.
+    if (profile.plan_generation_status === 'ok') {
+      return new Response(JSON.stringify({ error: 'already_ok', current_status: profile.plan_generation_status }), {
         status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const wantsTraining = [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(profile.subscription_type_id)
-    const wantsMeal = [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(profile.subscription_type_id)
+    // Zera o contador ANTES de reivindicar -- senão claimGenerationJob (que
+    // respeita o limite de 3) recusaria uma 4ª tentativa mesmo sendo um
+    // retry manual explícito do staff.
+    const { error: resetError } = await supabase
+      .from('profiles')
+      .update({ plan_generation_attempts: 0 })
+      .eq('id', userId)
+    if (resetError) throw new Error(`reset de plan_generation_attempts falhou: ${resetError.message}`)
 
     const internalSecret = Deno.env.get('INTERNAL_FUNCTION_SECRET')!
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const res = await fetch(`${supabaseUrl}/functions/v1/ybytu-onboarding-complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${internalSecret}` },
+      body: JSON.stringify({ user_id: userId }),
+    })
+    const result = await res.json().catch(() => ({}))
 
-    async function invokeGenerator(fnName: string) {
-      const res = await fetch(`${supabaseUrl}/functions/v1/${fnName}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${internalSecret}` },
-        body: JSON.stringify({ user_id: userId }),
-      })
-      const data = await res.json().catch(() => ({}))
-      return { ok: res.ok && data?.success === true, status: res.status, data }
-    }
-
-    const results: Record<string, unknown> = {}
-    if (wantsTraining) results.training = await invokeGenerator('ybytu-generate-training-plan')
-    if (wantsMeal) results.meal = await invokeGenerator('ybytu-generate-meal-plan')
-
-    // plan_generation_status já foi reescrito pelos próprios geradores
-    // (ok em cada sucesso, failed com o novo motivo em cada falha) — não
-    // reescrevemos aqui de novo, só reportamos o resultado agregado.
-    return new Response(JSON.stringify({ success: true, results }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(JSON.stringify({ success: true, result }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
     console.error('ybytu-admin-retry-plan-generation error:', err)
