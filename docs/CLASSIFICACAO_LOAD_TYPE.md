@@ -1,6 +1,6 @@
 # Classificação de carga dos exercícios (`exercises.load_type`) — para o personal preencher
 
-Gerado em 2026-09-19. **Nada disto foi aplicado ao banco ainda**: a migration está pronta em `supabase/migrations/20260919180000_add_load_type_to_exercises.sql` e só roda depois de aprovada.
+Gerado em 2026-09-19. **A coluna já está aplicada em produção** (migration `20260919180000`, aprovada em 2026-09-19): os 298 exercícios têm um valor. Os 240 decididos pelo equipamento são definitivos; os **58 ambíguos estão com a sugestão provisória** abaixo até o personal decidir. Reverter a coluna: ver `docs/ROLLBACK_PILOTO.md`.
 
 ## O que é e por que existe
 
@@ -90,7 +90,7 @@ Confiança da sugestão: 36 alta (nome cita barra/peso externo ou é um exercíc
 
 ## Pontos que dependem de decisão sua (além da lista)
 
-1. **Cardio.** 12 exercícios de cardio (esteira, bicicleta, elíptico, remo, simulador de escada, corda de pular, corda naval) ficaram como `bodyweight` porque não têm kg. Se você quiser tratar cardio como categoria própria (velocidade, nível de resistência), é um 5º valor — hoje a coluna aceita só os 4 acordados.
+1. **Cardio (decisão de 2026-09-19: por ora fica `bodyweight`; o personal pode pedir uma 5ª categoria).** 12 exercícios de cardio (esteira, bicicleta, elíptico, remo, simulador de escada, corda de pular, corda naval) ficaram como `bodyweight` porque não têm kg. Se você quiser tratar cardio como categoria própria (velocidade, nível de resistência), é um 5º valor — hoje a coluna aceita só os 4 acordados.
 2. **Elástico.** `band` esconde o campo de kg. Se o elástico deve ter uma prescrição (cor/nível), é outro campo, não a carga.
 3. **Pares duplicados do catálogo.** ex_055/ex_083, ex_071/ex_079 e ex_184/ex_191 estão na lista acima e também em `docs/POS_PILOTO.md` (fusão dos 19 pares). Classifique os dois lados do mesmo jeito.
 

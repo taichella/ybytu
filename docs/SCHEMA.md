@@ -100,6 +100,9 @@ Gerado a partir de `information_schema.columns` no banco Supabase linkado (proje
 | video_url | text | YES |  |
 | exercise_id | text | YES |  |
 | id | uuid | NO | `gen_random_uuid()` |
+| load_type | text | NO | `'weighted'::text` |
+
+`load_type` (2026-09-19): `bodyweight` | `weighted` | `machine` | `band` (CHECK `exercises_load_type_check`). Diz se o exercício usa carga em kg; ver `docs/CLASSIFICACAO_LOAD_TYPE.md`.
 
 ### `foods`
 
