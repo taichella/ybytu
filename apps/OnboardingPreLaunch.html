@@ -18,10 +18,12 @@
   /* Reset global absoluto dentro do nosso container */
   #onboarding-root * {
     -webkit-tap-highlight-color: transparent !important;
+    box-sizing: border-box !important;
   }
   
   #onboarding-root button,
   #onboarding-root input,
+  #onboarding-root select,
   #onboarding-root button:focus,
   #onboarding-root button:active,
   #onboarding-root button:focus-visible,
@@ -31,6 +33,30 @@
     box-shadow: none !important;
     --tw-ring-shadow: 0 0 #0000 !important;
     --tw-ring-color: transparent !important;
+  }
+
+  /* Blindagem rigorosa contra temas WordPress/Elementor que forçam bordas e cores em botões */
+  #onboarding-root button {
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    line-height: inherit;
+    text-transform: none;
+  }
+
+  /* Blindagem dos itens do seletor de países contra temas WordPress */
+  #onboarding-root .country-item {
+    border: 0 !important;
+    background-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  #onboarding-root .country-item:hover {
+    background-color: #f8fafc !important;
+  }
+  #onboarding-root .country-item.is-active {
+    border: 1px solid #F55F16 !important;
+    background-color: rgba(245, 95, 22, 0.08) !important;
   }
 
   /* Remove bordas nativas internas do Firefox que geram contornos */
@@ -65,7 +91,7 @@
 
 <!-- 5. App Completo (Babel compila no navegador) -->
 <script type="text/babel">
-  const { useState, useEffect, useMemo } = React;
+  const { useState, useEffect, useMemo, useRef } = React;
 
   const SUPABASE_URL = 'https://jwjfmvkfzelbdvyqetyb.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_NPp7sXlnySRgcATvV2K2fA_FD-kgfsx';           
@@ -172,26 +198,47 @@
     };
   };
 
+  // Exemplos de formato dinâmicos por país
+  const COUNTRY_PLACEHOLDERS = {
+    BR: 'Ex: (11) 91234-5678',
+    PT: 'Ex: 912 345 678',
+    FR: 'Ex: 06 12 34 56 78',
+    US: 'Ex: (201) 555-0123',
+    GB: 'Ex: 07911 123456',
+    ES: 'Ex: 612 34 56 78',
+    DE: 'Ex: 01512 3456789',
+    IT: 'Ex: 312 345 6789',
+  };
+  const getCountryPlaceholder = (iso) => COUNTRY_PLACEHOLDERS[iso] || 'Ex: Número de WhatsApp';
+
   // Mascara o WhatsApp (já em E.164) exibido na tela de confirmação -- DDI
-  // sempre visível, resto mascarado exceto os 2 últimos dígitos; número
-  // curto nunca aparece inteiro (mascara pelo menos 1 dígito sempre).
-  // Achado 2026-09-17: a versão antiga mascarava o texto cru (sem "+"/DDI
-  // reconhecíveis), agora opera sobre o E.164 normalizado no submit.
+  // e DDD/prefixo sempre visíveis para o usuário conferir a área, resto
+  // protegido por privacidade.
   const maskPhone = (phone) => {
     const raw = String(phone || '').trim();
     if (!raw) return raw;
     const parsed = window.libphonenumber && window.libphonenumber.parsePhoneNumberFromString(raw);
     if (!parsed) {
-      // Fallback bruto -- não deveria acontecer pra dado já validado no submit.
+      // Fallback bruto se lib indisponível
       if (raw.length < 7) return raw;
       return `${raw.slice(0, 4)}${'•'.repeat(Math.max(raw.length - 6, 0))}${raw.slice(-2)}`;
     }
     const cc = `+${parsed.countryCallingCode}`;
     const national = parsed.nationalNumber;
+    // Brasil: mostra DDI, DDD e os 2 últimos dígitos (ex: +55 (11) •••••-••78)
+    if (parsed.country === 'BR' && national.length >= 10) {
+      const ddd = national.slice(0, 2);
+      const end = national.slice(-2);
+      return `${cc} (${ddd}) •••••-••${end}`;
+    }
+    // Outros países: DDI, primeiros 2 dígitos da área e 2 finais
     if (national.length <= 4) {
       return `${cc} ${'•'.repeat(Math.max(national.length - 1, 1))}${national.slice(-1)}`;
     }
-    return `${cc} ${'•'.repeat(national.length - 2)}${national.slice(-2)}`;
+    const prefix = national.slice(0, 2);
+    const suffix = national.slice(-2);
+    const masked = '•'.repeat(Math.max(national.length - 4, 2));
+    return `${cc} ${prefix}${masked}${suffix}`;
   };
 
   function OnboardingApp() {
@@ -223,6 +270,65 @@
     const [whatsappCountry, setWhatsappCountry] = useState('BR');
     const [countryPickerOpen, setCountryPickerOpen] = useState(false);
     const [countrySearch, setCountrySearch] = useState('');
+    const [phoneTouched, setPhoneTouched] = useState(false);
+
+    // Fecha modal de países com a tecla Escape
+    useEffect(() => {
+      if (!countryPickerOpen) return;
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+          setCountryPickerOpen(false);
+          setCountrySearch('');
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [countryPickerOpen]);
+
+    // Lista de países filtrada por busca com busca resiliente a acentos
+    const filteredCountries = useMemo(() => {
+      if (!countrySearch.trim()) return ALL_COUNTRIES;
+      const q = countrySearch.trim().toLowerCase();
+      const queryClean = q.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return ALL_COUNTRIES.filter((c) => {
+        const nameClean = (c.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return nameClean.includes(queryClean) || c.dial.includes(q) || (c.iso && c.iso.toLowerCase().includes(q));
+      });
+    }, [countrySearch]);
+
+    // Formata o número de telefone em tempo real (AsYouType)
+    const handlePhoneChange = (e) => {
+      const raw = e.target.value;
+      // Se o usuário colou um número internacional com "+", detecta o país e atualiza o seletor
+      if (raw.trim().startsWith('+') && window.libphonenumber) {
+        const parsed = window.libphonenumber.parsePhoneNumberFromString(raw.trim());
+        if (parsed) {
+          if (parsed.country && parsed.country !== whatsappCountry) {
+            setWhatsappCountry(parsed.country);
+          }
+          const targetCountry = parsed.country || whatsappCountry;
+          try {
+            const ayt = new window.libphonenumber.AsYouType(targetCountry);
+            const formatted = ayt.input(parsed.nationalNumber || '');
+            setAnswers((prev) => ({ ...prev, whatsapp_phone: formatted }));
+            return;
+          } catch (err) {}
+        }
+      }
+
+      // Digitação comum: formata com o país ativo
+      if (window.libphonenumber) {
+        try {
+          const ayt = new window.libphonenumber.AsYouType(whatsappCountry);
+          const formatted = ayt.input(raw);
+          setAnswers((prev) => ({ ...prev, whatsapp_phone: formatted }));
+        } catch (err) {
+          setAnswers((prev) => ({ ...prev, whatsapp_phone: raw }));
+        }
+      } else {
+        setAnswers((prev) => ({ ...prev, whatsapp_phone: raw }));
+      }
+    };
 
     // Só usado depois que o profile já foi salvo com sucesso (tela de
     // confirmação/botão de WhatsApp da equipe) -- first_name é obrigatório
@@ -604,6 +710,7 @@
     const submittingRef = React.useRef(false);
 
     const nextStep = async () => {
+      setPhoneTouched(true);
       if (isNextDisabled()) return;
 
       if (currentStep < visibleSteps.length - 1) {
@@ -903,7 +1010,7 @@
             </span>
           </div>
 
-          <div className="px-6 pb-6 flex-grow overflow-y-auto max-h-[60vh]">
+          <div className="px-6 pb-6 flex-grow overflow-y-auto max-h-[75vh]">
             <h2 className="text-3xl font-black text-textMain mb-2 leading-tight">{currentData.title}</h2>
             <p className="text-textMuted mb-8">{currentData.subtitle}</p>
 
@@ -923,73 +1030,64 @@
                     );
                   }
                   const selectedCountry = ALL_COUNTRIES.find((c) => c.iso === whatsappCountry) || ALL_COUNTRIES[0];
-                  const filteredCountries = countrySearch.trim()
-                    ? ALL_COUNTRIES.filter((c) => c.name.toLowerCase().includes(countrySearch.trim().toLowerCase()) || c.dial.includes(countrySearch.trim()))
-                    : ALL_COUNTRIES;
                   const validation = getPhoneValidation(answers.whatsapp_phone, whatsappCountry);
                   return (
                     <div key={field.id} className="relative">
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          onClick={() => setCountryPickerOpen((v) => !v)}
-                          className="flex items-center gap-1.5 bg-surface text-textMain px-3.5 rounded-2xl text-lg border border-borderColor min-h-[60px] whitespace-nowrap"
+                          onClick={() => { setCountryPickerOpen(true); setCountrySearch(''); }}
+                          className="flex items-center gap-2 bg-surface text-textMain px-4 rounded-2xl text-lg border border-borderColor min-h-[60px] whitespace-nowrap hover:bg-slate-100 transition-colors cursor-pointer flex-shrink-0"
+                          style={{ border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}
+                          title="Alterar país / DDI"
                         >
-                          <span>{selectedCountry ? selectedCountry.flag : ''}</span>
-                          <span className="font-bold">{selectedCountry ? selectedCountry.dial : ''}</span>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                          <span className="text-2xl leading-none">{selectedCountry ? selectedCountry.flag : '🌐'}</span>
+                          <span className="font-bold text-base text-textMain">{selectedCountry ? selectedCountry.dial : '+55'}</span>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-textMuted"><path d="m6 9 6 6 6-6"/></svg>
                         </button>
                         <input
                           type="tel"
                           value={answers.whatsapp_phone || ''}
-                          onChange={(e) => {
-                            const raw = e.target.value;
-                            // Colou um número já com "+DDI" -- detecta o país
-                            // e atualiza o seletor em vez de validar contra o
-                            // país que já estava selecionado.
-                            if (raw.trim().startsWith('+') && window.libphonenumber) {
-                              const parsed = window.libphonenumber.parsePhoneNumberFromString(raw.trim());
-                              if (parsed && parsed.country && parsed.country !== whatsappCountry) {
-                                setWhatsappCountry(parsed.country);
-                              }
-                            }
-                            setAnswers({...answers, whatsapp_phone: raw});
-                          }}
-                          placeholder="Ex: 11 91234-5678"
+                          onChange={handlePhoneChange}
+                          onBlur={() => setPhoneTouched(true)}
+                          placeholder={getCountryPlaceholder(whatsappCountry)}
                           className="flex-1 min-w-0 bg-surface text-textMain p-5 rounded-2xl text-xl border border-borderColor transition-all min-h-[60px]"
+                          style={{ border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}
                         />
                       </div>
 
-                      {countryPickerOpen && (
-                        <div className="absolute z-10 top-[64px] left-0 w-full max-h-72 overflow-y-auto bg-bgBody border border-borderColor rounded-2xl shadow-lg p-2">
-                          <input
-                            type="text"
-                            value={countrySearch}
-                            onChange={(e) => setCountrySearch(e.target.value)}
-                            placeholder="Buscar país..."
-                            className="w-full bg-surface text-textMain p-3 rounded-xl text-base border border-borderColor mb-2"
-                            autoFocus
-                          />
-                          {filteredCountries.map((c) => (
-                            <button
-                              type="button"
-                              key={c.iso}
-                              onClick={() => { setWhatsappCountry(c.iso); setCountryPickerOpen(false); setCountrySearch(''); }}
-                              className="flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-lg hover:bg-surface text-base"
-                            >
-                              <span>{c.flag}</span>
-                              <span className="flex-1 text-textMain">{c.name}</span>
-                              <span className="text-textMuted font-bold">{c.dial}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {validation.error ? (
-                        <p className="text-red-600 text-sm mt-2 font-semibold">{validation.error}</p>
-                      ) : validation.preview ? (
-                        <p className="text-textMuted text-sm mt-2">Vai ficar assim: <strong className="text-textMain">{validation.preview}</strong></p>
-                      ) : null}
+                      {/* Validação / Preview do WhatsApp */}
+                      {(() => {
+                        if (!answers.whatsapp_phone || !answers.whatsapp_phone.trim()) {
+                          return (
+                            <p className="text-textMuted text-xs mt-1.5 mb-0">
+                              Informe seu DDD e número de celular para receber o plano por WhatsApp.
+                            </p>
+                          );
+                        }
+                        if (!validation.error && validation.preview) {
+                          return (
+                            <p className="flex items-center gap-1.5 text-emerald-600 text-sm mt-2 mb-0 font-medium">
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600 flex-shrink-0"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                              <span>Número verificado: <strong className="text-emerald-700">{validation.preview}</strong></span>
+                            </p>
+                          );
+                        }
+                        const digitsCount = (answers.whatsapp_phone.match(/\d/g) || []).length;
+                        if (phoneTouched || digitsCount >= 8) {
+                          return (
+                            <p className="flex items-center gap-1.5 text-red-600 text-sm mt-2 mb-0 font-medium">
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-red-600 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                              <span>{validation.error || 'Confira o DDD e número digitados.'}</span>
+                            </p>
+                          );
+                        }
+                        return (
+                          <p className="text-textMuted text-xs mt-1.5 mb-0">
+                            Informe seu DDD e número de celular para receber o plano por WhatsApp.
+                          </p>
+                        );
+                      })()}
                     </div>
                   );
                 })}
@@ -1072,6 +1170,7 @@
               onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
               disabled={currentStep === 0}
               className={`flex-1 p-4 rounded-xl items-center justify-center font-bold transition-opacity ${currentStep === 0 ? 'opacity-50 cursor-not-allowed bg-gray-200 text-gray-500' : 'bg-surface hover:bg-gray-100 text-textMuted'}`}
+              style={{ border: 'none' }}
             >
               VOLTAR
             </button>
@@ -1079,6 +1178,7 @@
               onClick={nextStep} 
               disabled={isNextDisabled() || loading}
               className={`flex-[2] p-4 rounded-xl flex items-center justify-center transition-all ${isNextDisabled() ? 'bg-gray-300 cursor-not-allowed text-gray-500' : 'bg-brand hover:bg-brand/90 text-white shadow-md'}`}
+              style={{ border: 'none' }}
             >
               <span className="font-black text-lg">
                 {currentStep === visibleSteps.length - 1 ? 'FINALIZAR' : 'PRÓXIMO'}
@@ -1087,6 +1187,113 @@
           </div>
 
         </div>
+
+        {/* Modal de Seleção de País / DDI -- Posicionado em fixed z-[99999] para não sofrer overflow/clipping */}
+        {countryPickerOpen && (
+          <div 
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => { setCountryPickerOpen(false); setCountrySearch(''); }}
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+          >
+            <div 
+              className="bg-bgBody rounded-3xl shadow-2xl border border-borderColor w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+              style={{ backgroundColor: '#ffffff', maxHeight: '85vh' }}
+            >
+              {/* Header do Modal */}
+              <div className="px-6 py-4 border-b border-borderColor flex items-center justify-between bg-surface">
+                <div>
+                  <h3 className="text-lg font-bold text-textMain m-0 leading-tight">Selecione o país</h3>
+                  <p className="text-xs text-textMuted m-0 mt-0.5">Código telefônico (DDI) para seu WhatsApp</p>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => { setCountryPickerOpen(false); setCountrySearch(''); }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-textMuted hover:text-textMain hover:bg-slate-200 transition-colors cursor-pointer border-0 p-0"
+                  style={{ border: 'none', background: 'transparent' }}
+                  aria-label="Fechar"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+
+              {/* Campo de Busca */}
+              <div className="p-4 border-b border-borderColor bg-bgBody">
+                <div className="relative flex items-center">
+                  <span className="absolute left-3.5 text-textMuted pointer-events-none flex items-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  </span>
+                  <input
+                    type="text"
+                    value={countrySearch}
+                    onChange={(e) => setCountrySearch(e.target.value)}
+                    placeholder="Buscar país ou código (ex: Brasil, 55, Portugal)..."
+                    className="w-full bg-surface text-textMain pl-10 pr-16 py-3 rounded-xl text-base border border-borderColor focus:border-brand transition-all"
+                    autoFocus
+                  />
+                  {countrySearch && (
+                    <button
+                      type="button"
+                      onClick={() => setCountrySearch('')}
+                      className="absolute right-3 text-xs text-textMuted hover:text-textMain font-bold px-2 py-1 rounded-md hover:bg-gray-200 border-0 cursor-pointer"
+                      style={{ border: 'none', background: 'transparent' }}
+                    >
+                      LIMPAR
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Lista de Países */}
+              <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-1" style={{ maxHeight: '55vh' }}>
+                {filteredCountries.length === 0 ? (
+                  <div className="p-8 text-center text-textMuted text-sm">
+                    Nenhum país encontrado para "{countrySearch}"
+                  </div>
+                ) : (
+                  filteredCountries.map((c) => {
+                    const isSelected = c.iso === whatsappCountry;
+                    return (
+                      <button
+                        type="button"
+                        key={c.iso}
+                        onClick={() => {
+                          setWhatsappCountry(c.iso);
+                          setCountryPickerOpen(false);
+                          setCountrySearch('');
+                          if (answers.whatsapp_phone && window.libphonenumber) {
+                            try {
+                              const ayt = new window.libphonenumber.AsYouType(c.iso);
+                              const reformatted = ayt.input(answers.whatsapp_phone);
+                              setAnswers((prev) => ({ ...prev, whatsapp_phone: reformatted }));
+                            } catch(e) {}
+                          }
+                        }}
+                        className={`country-item flex items-center gap-3 w-full text-left px-3.5 py-3 rounded-xl transition-all cursor-pointer ${
+                          isSelected 
+                            ? 'bg-brand/10 text-brand font-bold is-active' 
+                            : 'hover:bg-surface text-textMain'
+                        }`}
+                        style={{
+                          border: isSelected ? '1px solid #F55F16' : 'none',
+                          backgroundColor: isSelected ? 'rgba(245, 95, 22, 0.08)' : 'transparent',
+                        }}
+                      >
+                        <span className="text-2xl leading-none">{c.flag}</span>
+                        <span className="flex-1 text-base font-medium truncate">{c.name}</span>
+                        <span className={`text-sm font-bold ${isSelected ? 'text-brand' : 'text-textMuted'}`}>{c.dial}</span>
+                        {isSelected && (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F55F16" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-brand flex-shrink-0"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     );
   }
