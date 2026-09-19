@@ -567,13 +567,15 @@ export default function UserDetail() {
                             <button onClick={() => navigate('/trainings')} title="Escolher outro plano de treino no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
                           </div>
 
-                          {/* LIMITAÇÕES E RESTRIÇÕES */}
+                          {/* LIMITAÇÕES E RESTRIÇÕES: TREINO */}
                           <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '14px' }}>
                             <UserLimitationsList
+                              specialty="training"
                               physicalConditions={resolvedLabels?.physicalConditions}
-                              dietaryRestrictions={resolvedLabels?.dietaryRestrictions}
+                              healthConditions={resolvedLabels?.healthConditions}
+                              healthConditionIds={userData?.health_conditions_ids}
                               declaredNonePhysical={resolvedLabels?.declaredNonePhysical}
-                              declaredNoneDietary={resolvedLabels?.declaredNoneDietary}
+                              declaredNoneHealth={resolvedLabels?.declaredNoneHealth}
                             />
                           </div>
 
@@ -623,13 +625,16 @@ export default function UserDetail() {
                             <button onClick={() => navigate('/meal-plans')} title="Escolher outro plano alimentar no catálogo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px 14px', borderRadius: '11px', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v6h6M21 12A9 9 0 0 0 6 5.3L3 8"></path><path d="M21 22v-6h-6M3 12a9 9 0 0 0 15 6.7l3-2.7"></path></svg> Trocar</button>
                           </div>
 
-                          {/* LIMITAÇÕES E RESTRIÇÕES */}
+                          {/* LIMITAÇÕES E RESTRIÇÕES: NUTRIÇÃO */}
                           <div style={{ marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '14px' }}>
                             <UserLimitationsList
-                              physicalConditions={resolvedLabels?.physicalConditions}
+                              specialty="nutrition"
                               dietaryRestrictions={resolvedLabels?.dietaryRestrictions}
-                              declaredNonePhysical={resolvedLabels?.declaredNonePhysical}
+                              dietaryPreference={resolvedLabels?.dietaryPreference}
+                              healthConditions={resolvedLabels?.healthConditions}
+                              healthConditionIds={userData?.health_conditions_ids}
                               declaredNoneDietary={resolvedLabels?.declaredNoneDietary}
+                              declaredNoneHealth={resolvedLabels?.declaredNoneHealth}
                             />
                           </div>
 

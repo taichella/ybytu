@@ -70,6 +70,28 @@ function sanitizePlan(data: Record<string, unknown>) {
   return out
 }
 
+// Carga (sets_detail[].load_kg) precisa ser null ("a definir") ou um número
+// finito >= 0. Achado 2026-09-19: o plano ativo da Gisele tinha load_kg = -1
+// gravado, porque este endpoint repassava sets_detail sem olhar (o caminho
+// load_updates de ybytu-submit-plan-review já validava, este não).
+// Roda ANTES de qualquer escrita, em create e update: replaceSlots apaga todos
+// os slots do plano antes de reinserir, então um valor inválido descoberto
+// depois do DELETE deixaria o plano sem exercício nenhum.
+function validateSlotLoads(slots: unknown): 'invalid_sets_detail' | 'invalid_load_kg' | null {
+  if (!Array.isArray(slots)) return null
+  for (const slot of slots as any[]) {
+    const detail = slot?.sets_detail
+    if (detail === undefined || detail === null) continue
+    if (!Array.isArray(detail)) return 'invalid_sets_detail'
+    for (const set of detail) {
+      const kg = set?.load_kg
+      if (kg === undefined || kg === null) continue
+      if (typeof kg !== 'number' || !Number.isFinite(kg) || kg < 0) return 'invalid_load_kg'
+    }
+  }
+  return null
+}
+
 async function replaceSlots(supabase: any, planBusinessId: string, slots: unknown, changedBy: string) {
   if (!Array.isArray(slots)) return
 
@@ -274,6 +296,9 @@ serve(async (req) => {
         return json({ error: 'training_plan_id_reserved_for_molde' }, 400, corsHeaders)
       }
 
+      const slotsLoadError = validateSlotLoads(body?.slots)
+      if (slotsLoadError) return json({ error: slotsLoadError }, 400, corsHeaders)
+
       const { data, error } = await supabase.from('training_plans').insert([payload]).select().single()
       if (error) throw error
       if (Array.isArray(body?.slots)) await replaceSlots(supabase, data.training_plan_id, body.slots, auth.staff.userId)
@@ -293,6 +318,9 @@ serve(async (req) => {
         return json({ error: 'molde_deactivation_blocked' }, 403, corsHeaders)
       }
       delete payload.training_plan_id // código de negócio dos moldes nunca muda por update
+
+      const slotsLoadError = validateSlotLoads(body?.slots)
+      if (slotsLoadError) return json({ error: slotsLoadError }, 400, corsHeaders)
 
       const { data, error } = await supabase.from('training_plans').update(payload).eq('id', id).select().single()
       if (error) throw error

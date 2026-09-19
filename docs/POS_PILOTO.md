@@ -107,3 +107,13 @@ Em **8 dos 19 pares** os dois registros do mesmo movimento têm flags de seguran
 | Wall ball | ex_013 / ex_285 | — | avoid pregnancy + 5 cautelas |
 
 Como o gerador se comporta enquanto isso (`exerciseNames.ts`): o `avoid` continua sendo aplicado **antes** do colapso, registro a registro (comportamento inalterado); entre duplicatas que sobraram seguras, o colapso mantém a que tem **mais cautelas para as condições do aluno** e só desempata pelo menor id. Não cria segurança nova: não corrige um `avoid` que falta num dos registros (ex.: gestante ainda pode receber o registro sem `avoid pregnancy` de Pular corda ou Wall ball). Só a fusão com decisão do personal fecha isso.
+
+## Classificação clínica de condições de saúde por especialidade (Personal vs Nutricionista)
+
+Registrado em 2026-09-19: no componente `UserLimitationsList.jsx` (cards de parecer em `UserDetail.jsx`), as condições de saúde declaradas pelo aluno no onboarding são separadas entre Treino e Nutrição por UUID da tabela `health_conditions`.
+Por decisão de precaução clínica, as seguintes condições foram classificadas provisoriamente e aguardam validação técnica com os respectivos profissionais (especialmente com a nutricionista):
+
+- **Ansiedade** (`ba4bd85c-6569-40ac-a467-d94f19eb8e1d` / `anxiety`): Provisoriamente em `['training', 'nutrition']`. Medicações psicotrópicas / ansiolíticos frequentemente interferem no apetite, metabolismo basal e peso corporal. A nutricionista deve avaliar se deseja manter visível em seu card ou se deve ser restrita ao treino.
+- **Depressão** (`ba1eb16d-6a89-40e3-8f61-071cfd7bf2a9` / `depression`): Provisoriamente em `['training', 'nutrition']`. Semelhante à ansiedade, fármacos antidepressivos têm impacto clínico direto em apetite, motilidade gastrointestinal e oscilação ponderal. Requer validação da nutricionista.
+- **Asma** (`10a8b1c6-3602-481b-923b-0cf6277b9bea` / `asthma`): Atualmente em `['training']`. Requer confirmação se a nutricionista precisa visualizar casos de asma (ex.: interação de sulfitos/aditivos ou broncoespasmo induzido por refluxo/alimentos).
+- **Problemas de Equilíbrio** (`b805a72f-d11c-41a8-8b03-b4e4ebf8983b` / `balance_issues`): Atualmente em `['training']`. Requer confirmação da nutricionista se há relevância metabólica/vestibular (ex.: labirintopatias associadas a sódio/cafeína/glicemia).

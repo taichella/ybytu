@@ -125,8 +125,19 @@ serve(async (req) => {
         }
         const loadsBySetNumber = new Map<number, unknown>()
         for (const l of loads) {
-          if (typeof l?.set_number !== 'number') {
+          if (typeof l?.set_number !== 'number' || !Number.isInteger(l.set_number) || l.set_number < 1) {
             return new Response(JSON.stringify({ error: 'invalid_load_update' }), {
+              status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            })
+          }
+          // Valida a carga AQUI, no parse, antes de qualquer escrita. Antes
+          // (2026-09-19) só normalizeLoadKg no merge validava, dentro do loop de
+          // UPDATEs: com 2+ exercícios no mesmo pedido, o primeiro era gravado
+          // antes do segundo (inválido) estourar -- escrita parcial.
+          try {
+            normalizeLoadKg(l.load_kg)
+          } catch {
+            return new Response(JSON.stringify({ error: 'invalid_load_kg' }), {
               status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             })
           }
