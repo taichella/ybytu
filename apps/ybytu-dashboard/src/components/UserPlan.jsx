@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import ExerciseThumb from './ExerciseThumb.jsx';
 
 const MEAL_ICONS = {
   'Café da manhã': '🥞',
@@ -348,6 +349,9 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
         .exname .exbody .instr { font-size:11px; color:var(--muted); font-weight:500; margin-top:3px; line-height:1.45; }
         .exname .exbody .vid { font-size:11px; font-weight:800; color:var(--brand); text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin-top:5px; }
         .dash { color:var(--faint); }
+        .load-val { font-weight:800; white-space:nowrap; }
+        .load-tbd { color:var(--muted); font-weight:700; font-style:italic; white-space:nowrap; }
+        .load-none { color:var(--muted); font-weight:600; font-size:11px; }
         .mono { font-variant-numeric:tabular-nums; font-weight:800; }
 
         /* meal */
@@ -743,7 +747,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                                   4 campos ao editar (vira "-"). Colunas continuam no banco -- nenhum
                                   dado foi apagado, só a exibição. Pendência: cadência real por
                                   exercício exige curadoria do personal, não implementado ainda. */}
-                              <thead><tr><th>Exercício</th><th className="c">Séries</th>{editable && <th className="c screen-only">Carga (kg)</th>}<th className="c">Reps</th><th className="c">Descanso</th></tr></thead>
+                              <thead><tr><th>Exercício</th><th className="c">Séries</th><th className="c">Carga</th><th className="c">Reps</th><th className="c">Descanso</th></tr></thead>
                               {/* Reps/Descanso editáveis (Passo 5b) reaproveitam a mesma coluna --
                                   em tela mostram input quando editable, na impressão (PDF) caem no
                                   texto de sempre via CSS screen-only/print-only já existente no arquivo. */}
@@ -753,6 +757,9 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                                     <td>
                                       <div className="exname">
                                         <span className="ltr">{ex.order}</span>
+                                        {/* Miniatura ~200px (image_thumb_url) com queda pro original e, sem imagem,
+                                            espaço reservado COM O NOME -- nunca imagem quebrada. Vale pra tela e PDF. */}
+                                        <ExerciseThumb sources={[ex.image_thumb_url, ex.image_url]} label={ex.name_ptbr || ''} width={64} height={48} radius={8} style={{ background: 'var(--panel)', borderColor: 'var(--line)' }} />
                                         <div className="exbody">
                                           <div>{ex.name_ptbr || '—'}</div>
                                           {ex.instruction_ptbr && <div className="instr">{ex.instruction_ptbr}</div>}
@@ -761,10 +768,14 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                                       </div>
                                     </td>
                                     <td className="c mono">{ex.sets}</td>
-                                    {editable && (
-                                      <td className="c screen-only">
-                                        {Array.isArray(ex.sets_detail) && ex.id ? (
-                                          <div className="load-inputs">
+                                    {/* Carga: SEMPRE visível pro aluno (tela e PDF). Texto pronto do servidor
+                                        (load_display_ptbr, ver _shared/loadDisplay.ts): "12,5 kg" | "a definir" |
+                                        "Peso corporal" | "Elástico" -- nunca "0 kg". Os inputs de edição só
+                                        existem com editable E exercício que usa kg. */}
+                                    {(
+                                      <td className="c">
+                                        {editable && ex.load_type !== 'bodyweight' && ex.load_type !== 'band' && Array.isArray(ex.sets_detail) && ex.id ? (
+                                          <div className="load-inputs screen-only">
                                             {ex.sets_detail.map((s) => {
                                               const override = loadEdits[ex.id]?.[s.set_number];
                                               const value = override !== undefined ? override : s.load_kg;
@@ -783,7 +794,17 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                                               );
                                             })}
                                           </div>
-                                        ) : <span className="dash">—</span>}
+                                        ) : (
+                                          <span
+                                            data-load-cell={ex.load_type ?? 'weighted'}
+                                            className={ex.load_type === 'bodyweight' || ex.load_type === 'band' ? 'load-none' : (ex.load_display_ptbr && ex.load_display_ptbr !== 'a definir' ? 'load-val' : 'load-tbd')}
+                                          >
+                                            {ex.load_display_ptbr || 'a definir'}
+                                          </span>
+                                        )}
+                                        {editable && ex.load_type !== 'bodyweight' && ex.load_type !== 'band' && Array.isArray(ex.sets_detail) && ex.id && (
+                                          <span className="print-only">{ex.load_display_ptbr || 'a definir'}</span>
+                                        )}
                                       </td>
                                     )}
                                     <td className="c mono">

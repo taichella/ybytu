@@ -4,6 +4,15 @@ import { trainingService } from '../services/trainingService.js';
 import { exerciseService } from '../services/exerciseService.js';
 import ChipMultiSelect from './ChipMultiSelect.jsx';
 import ThemeToggle from './ThemeToggle';
+import ExerciseThumb from './ExerciseThumb.jsx';
+import { thumbSources } from '../lib/media.js';
+
+// exercises.load_type (2026-09-19): 'bodyweight' e 'band' não usam carga em kg,
+// então o campo de carga some pra esses exercícios. Tipo ausente (resposta de
+// servidor antiga) ou desconhecido = usa kg, o mesmo default do banco: errar por
+// mostrar o campo é visível; errar por esconder deixaria o aluno sem carga.
+const NO_KG_HINT = { bodyweight: 'Peso corporal', band: 'Elástico' };
+const usesKg = (exercise) => !(exercise?.load_type in NO_KG_HINT);
 
 const EMPTY_PLAN = {
   training_plan_id: '', name_ptbr: '', name_en: '', name_fr: '',
@@ -297,7 +306,9 @@ export default function TrainingPlanCreator() {
           const sets = Number(s.sets) || 0;
           const reps = Number(s.reps) || 0;
           const restSeconds = s.rest_seconds === '' ? null : Number(s.rest_seconds);
-          const loadKg = s.load_kg === '' || s.load_kg === null || s.load_kg === undefined ? null : Number(s.load_kg);
+          // Exercício sem carga (peso corporal/elástico) nunca grava kg, mesmo que exista
+          // um valor antigo no slot -- o campo está escondido, o valor não pode sobreviver.
+          const loadKg = !usesKg(s.exercise) || s.load_kg === '' || s.load_kg === null || s.load_kg === undefined ? null : Number(s.load_kg);
           const setsDetail = loadKg === null ? null : Array.from({ length: sets }, (_, setIdx) => ({
             set_number: setIdx + 1, reps, load_kg: loadKg, rest_seconds: restSeconds, set_type: 'normal',
           }));
@@ -882,6 +893,7 @@ export default function TrainingPlanCreator() {
                   style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: '11px', background: 'var(--surface)', cursor: 'pointer', transition: 'border-color .15s' }}
                   title="Clique para adicionar à ficha do dia"
                 >
+                  <ExerciseThumb sources={thumbSources(ex.image_url)} label={ex.name_ptbr} width={44} height={44} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ margin: 0, fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {ex.name_ptbr}
@@ -954,6 +966,7 @@ export default function TrainingPlanCreator() {
                     <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '12px', flexShrink: 0 }}>
                       {String.fromCharCode(65 + i)}
                     </span>
+                    <ExerciseThumb sources={thumbSources(s.exercise?.image_url)} label={s.exercise?.name_ptbr ?? s.exercise_id} width={44} height={44} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ margin: 0, fontWeight: 800, fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {s.exercise?.name_ptbr ?? s.exercise_id}
@@ -981,10 +994,17 @@ export default function TrainingPlanCreator() {
                       <label style={{ display: 'block', fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Descanso (s)</label>
                       <input type="number" min="0" step="5" value={s.rest_seconds ?? ''} onChange={(e) => updateSlot(s.uniqueId, 'rest_seconds', e.target.value)} style={{ ...inputStyle, textAlign: 'center' }} />
                     </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Carga (kg)</label>
-                      <input type="number" min="0" step="0.5" value={s.load_kg ?? ''} onChange={(e) => updateSlot(s.uniqueId, 'load_kg', e.target.value)} placeholder="—" style={{ ...inputStyle, textAlign: 'center' }} />
-                    </div>
+                    {usesKg(s.exercise) ? (
+                      <div>
+                        <label style={{ display: 'block', fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Carga (kg)</label>
+                        <input type="number" min="0" step="0.5" value={s.load_kg ?? ''} onChange={(e) => updateSlot(s.uniqueId, 'load_kg', e.target.value)} placeholder="a definir" data-load-input="true" style={{ ...inputStyle, textAlign: 'center' }} />
+                      </div>
+                    ) : (
+                      <div data-load-hidden={s.exercise?.load_type}>
+                        <label style={{ display: 'block', fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Carga</label>
+                        <p style={{ margin: 0, padding: '9px 4px', fontSize: '12px', fontWeight: 700, color: 'var(--muted)', textAlign: 'center' }}>{NO_KG_HINT[s.exercise?.load_type]} · sem kg</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

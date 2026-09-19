@@ -2,20 +2,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { exerciseService } from '../services/exerciseService.js';
 import ThemeToggle from './ThemeToggle';
+import ExerciseThumb from './ExerciseThumb.jsx';
+import EnvironmentTag from './EnvironmentTag.jsx';
+import { thumbSources, fullSources } from '../lib/media.js';
 
-// Mesmo resolver de mídia R2 de supabase/functions/_shared/buildPlanPayload.ts
-// (resolveR2Media) -- duplicado aqui de propósito, mesma decisão já registrada
-// lá pro roleForSlot: não dá pra importar módulo Deno de dentro do bundle
-// Vite do dashboard. exercises.image_url guarda só a CHAVE do objeto no R2
-// desde a migração Drive -> R2 (2026-09-04/08); uma linha ainda não migrada
-// continua com link de Drive completo (bate no `startsWith('http')` abaixo).
-// Sem isso, o <img src={ex.image_url}> lia a chave crua como se fosse URL.
-const R2_PUBLIC_BASE = 'https://pub-b8a8c93fcde740fcb7ad36f410c9737f.r2.dev';
-function resolveR2Media(value) {
-  if (!value) return null;
-  if (value.startsWith('http')) return value;
-  return `${R2_PUBLIC_BASE}/${encodeURIComponent(value)}`;
-}
+// Resolução de mídia R2 (chave -> URL pública, miniatura _w200): ../lib/media.js.
 
 const LEVEL_COLORS = {
   ini: { bg: 'var(--surface-2)', color: 'var(--muted)' },
@@ -189,7 +180,12 @@ export default function Exercises() {
       healthTitle: [...avoidIds, ...cautionIds].map((id) => healthNames.get(id) ?? id).join(', '),
       level: levelNames.get(ex.exercise_level_id) ?? ex.exercise_level_id ?? '—',
       levelStyle: levelStyle(ex.exercise_level_id),
-      imageUrl: resolveR2Media(ex.image_url),
+      // Lista: miniatura (60x42) com queda pro original; grade: original (card grande).
+      thumbSources: thumbSources(ex.image_url),
+      fullSources: fullSources(ex.image_url),
+      // Tag de ambiente vem PRONTA do servidor (mesma regra do gerador); ausente = "não definido".
+      envTag: ex.environment_tag,
+      envLabel: ex.environment_label_ptbr,
     };
   };
 
@@ -297,16 +293,11 @@ export default function Exercises() {
                           </td>
                           <td style={{ padding: '12px 16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '13px' }}>
-                              <div style={{ position: 'relative', width: '60px', height: '42px', borderRadius: '9px', overflow: 'hidden', flexShrink: 0, background: 'var(--surface-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
-                                {d.imageUrl ? (
-                                  <img src={d.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                ) : (
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
-                                )}
-                              </div>
+                              <ExerciseThumb sources={d.thumbSources} width={60} height={42} />
                               <div>
                                 <p style={{ margin: 0, fontWeight: 700, fontSize: '14px' }}>{ex.name_ptbr}</p>
                                 <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--muted)', fontFamily: 'monospace' }}>{ex.exercise_id}</p>
+                                <div style={{ marginTop: '5px' }}><EnvironmentTag tag={d.envTag} label={d.envLabel} small /></div>
                               </div>
                             </div>
                           </td>
@@ -368,14 +359,19 @@ export default function Exercises() {
                           resto do catálogo continua sem image_url e cai no
                           placeholder abaixo. */}
                       <div style={{ position: 'relative' }}>
-                        {d.imageUrl ? (
-                          <img src={d.imageUrl} alt="" style={{ width: '100%', height: '150px', objectFit: 'cover', display: 'block' }} />
-                        ) : (
-                          <div style={{ width: '100%', height: '150px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '7px', background: 'var(--field)', borderBottom: '1px dashed var(--border)', color: 'var(--muted)' }}>
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="m21 15-5-5L5 21"></path></svg>
-                            <span style={{ fontSize: '11.5px', fontWeight: 700 }}>Arraste vídeo / foto</span>
-                          </div>
-                        )}
+                        <ExerciseThumb
+                          sources={d.fullSources}
+                          width="100%"
+                          height={150}
+                          radius={0}
+                          style={{ border: 'none', background: 'transparent' }}
+                          renderEmpty={() => (
+                            <div style={{ width: '100%', height: '150px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '7px', background: 'var(--field)', borderBottom: '1px dashed var(--border)', color: 'var(--muted)' }}>
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="m21 15-5-5L5 21"></path></svg>
+                              <span style={{ fontSize: '11.5px', fontWeight: 700 }}>Arraste vídeo / foto</span>
+                            </div>
+                          )}
+                        />
                         {d.healthCount > 0 && (
                           <span title={d.healthTitle} style={{ position: 'absolute', top: '10px', left: '10px', display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 9px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, background: d.healthBg, color: d.healthColor, backdropFilter: 'blur(4px)' }}>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg> {d.healthCount}
@@ -396,6 +392,8 @@ export default function Exercises() {
                           </div>
                           <span style={{ display: 'inline-flex', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', flexShrink: 0, background: d.levelStyle.bg, color: d.levelStyle.color }}>{d.level}</span>
                         </div>
+
+                        <div style={{ marginBottom: '10px' }}><EnvironmentTag tag={d.envTag} label={d.envLabel} /></div>
 
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
                           {d.groupsShown.map((g, i) => (
