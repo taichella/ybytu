@@ -35,15 +35,6 @@
     --tw-ring-color: transparent !important;
   }
 
-  /* Blindagem rigorosa contra temas WordPress/Elementor que forçam bordas e cores em botões */
-  #onboarding-root button {
-    border: none;
-    background: transparent;
-    font-family: inherit;
-    line-height: inherit;
-    text-transform: none;
-  }
-
   /* Blindagem dos itens do seletor de países contra temas WordPress */
   #onboarding-root .country-item {
     border: 0 !important;
@@ -211,9 +202,12 @@
   };
   const getCountryPlaceholder = (iso) => COUNTRY_PLACEHOLDERS[iso] || 'Ex: Número de WhatsApp';
 
-  // Mascara o WhatsApp (já em E.164) exibido na tela de confirmação -- DDI
-  // e DDD/prefixo sempre visíveis para o usuário conferir a área, resto
-  // protegido por privacidade.
+  // Mascara o WhatsApp (já em E.164) exibido na tela de confirmação. O objetivo
+  // é a pessoa conferir a ÁREA do número, nunca o número: DDI + código de área
+  // visíveis, o meio mascarado e só os 2 últimos dígitos à mostra. Quantos
+  // dígitos nacionais iniciais contam como "área": BR = DDD (2), EUA/Canadá =
+  // area code (3), FR = 1º dígito depois do 0 (6/7 = celular); demais, 2.
+  const PHONE_AREA_DIGITS = { BR: 2, US: 3, CA: 3, FR: 1 };
   const maskPhone = (phone) => {
     const raw = String(phone || '').trim();
     if (!raw) return raw;
@@ -224,21 +218,21 @@
       return `${raw.slice(0, 4)}${'•'.repeat(Math.max(raw.length - 6, 0))}${raw.slice(-2)}`;
     }
     const cc = `+${parsed.countryCallingCode}`;
-    const national = parsed.nationalNumber;
-    // Brasil: mostra DDI, DDD e os 2 últimos dígitos (ex: +55 (11) •••••-••78)
-    if (parsed.country === 'BR' && national.length >= 10) {
-      const ddd = national.slice(0, 2);
-      const end = national.slice(-2);
-      return `${cc} (${ddd}) •••••-••${end}`;
-    }
-    // Outros países: DDI, primeiros 2 dígitos da área e 2 finais
-    if (national.length <= 4) {
-      return `${cc} ${'•'.repeat(Math.max(national.length - 1, 1))}${national.slice(-1)}`;
-    }
-    const prefix = national.slice(0, 2);
-    const suffix = national.slice(-2);
-    const masked = '•'.repeat(Math.max(national.length - 4, 2));
-    return `${cc} ${prefix}${masked}${suffix}`;
+    // BR fica no formato nacional "(11) 91234-5678" (parênteses e hífen, como o
+    // brasileiro escreve); os demais no internacional sem o DDI ("6 12 34 56 78").
+    const body = parsed.country === 'BR'
+      ? parsed.formatNational()
+      : parsed.formatInternational().replace(/^\+\d+\s*/, '');
+    const totalDigits = (body.match(/\d/g) || []).length;
+    // Número curto nunca aparece inteiro: a parte de área encolhe pra sempre
+    // sobrar pelo menos 1 dígito mascarado.
+    const areaDigits = Math.min(PHONE_AREA_DIGITS[parsed.country] ?? 2, Math.max(totalDigits - 3, 0));
+    let seen = 0;
+    const masked = body.replace(/\d/g, (d) => {
+      const i = seen++;
+      return (i < areaDigits || i >= totalDigits - 2) ? d : '•';
+    });
+    return `${cc} ${masked}`;
   };
 
   function OnboardingApp() {
@@ -299,21 +293,28 @@
     // Formata o número de telefone em tempo real (AsYouType)
     const handlePhoneChange = (e) => {
       const raw = e.target.value;
-      // Se o usuário colou um número internacional com "+", detecta o país e atualiza o seletor
+      // Número com "+DDI" (colado ou digitado): detecta o país e atualiza o seletor.
+      // Só REESCREVE o campo quando o país foi identificado com certeza. Enquanto
+      // o DDI é ambíguo (+1 = EUA/Canadá, +44 = Reino Unido/ilhas, digitando
+      // tecla a tecla), o parse já "funciona" mas sem país -- reescrever aí com
+      // o país que estava selecionado descartava o DDI e gerava um número válido
+      // de OUTRO país (ex: +1 201... virava um número brasileiro). Ambíguo =
+      // mantém o texto cru e deixa a validação olhar o "+" inteiro.
       if (raw.trim().startsWith('+') && window.libphonenumber) {
         const parsed = window.libphonenumber.parsePhoneNumberFromString(raw.trim());
-        if (parsed) {
-          if (parsed.country && parsed.country !== whatsappCountry) {
+        if (parsed && parsed.country) {
+          if (parsed.country !== whatsappCountry) {
             setWhatsappCountry(parsed.country);
           }
-          const targetCountry = parsed.country || whatsappCountry;
           try {
-            const ayt = new window.libphonenumber.AsYouType(targetCountry);
+            const ayt = new window.libphonenumber.AsYouType(parsed.country);
             const formatted = ayt.input(parsed.nationalNumber || '');
             setAnswers((prev) => ({ ...prev, whatsapp_phone: formatted }));
             return;
           } catch (err) {}
         }
+        setAnswers((prev) => ({ ...prev, whatsapp_phone: raw }));
+        return;
       }
 
       // Digitação comum: formata com o país ativo
