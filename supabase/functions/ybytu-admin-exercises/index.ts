@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
+import { environmentTagForEquipment, ENVIRONMENT_TAG_LABEL_PTBR } from '../_shared/exerciseEnvironment.ts'
 
 // CRUD da base curada de exercícios (dashboard pro). Toda leitura e escrita
 // passa por aqui -- o client nunca fala direto com a tabela `exercises`
@@ -30,8 +31,21 @@ const WRITABLE_FIELDS = [
   'instruction_ptbr', 'instruction_en', 'instruction_fr',
   'muscle_groups_ids', 'exercise_equipments_ids', 'exercise_level_id',
   'avoid_health_conditions_ids', 'caution_health_condition_ids',
-  'calories', 'image_url', 'video_url',
+  'calories', 'image_url', 'video_url', 'load_type',
 ]
+
+// exercises.load_type (2026-09-19): se e como o exercício usa carga em kg.
+// O CHECK do banco já barra outro valor, mas aqui devolve 400 legível em vez
+// de 500 genérico.
+const VALID_LOAD_TYPES = new Set(['bodyweight', 'weighted', 'machine', 'band'])
+
+// Tag de ambiente derivada (NÃO é coluna): mesma função que o gerador usa pra
+// filtrar o pool -- ver _shared/exerciseEnvironment.ts. Vazio = 'undefined',
+// nunca um valor presumido.
+function withEnvironmentTag(row: any) {
+  const tag = environmentTagForEquipment(row?.exercise_equipments_ids)
+  return { ...row, environment_tag: tag, environment_label_ptbr: ENVIRONMENT_TAG_LABEL_PTBR[tag] }
+}
 
 function sanitizeWrite(data: Record<string, unknown>) {
   const out: Record<string, unknown> = {}
@@ -85,7 +99,7 @@ serve(async (req) => {
       const { data, error } = await supabase.from('exercises').select('*').eq('id', id).maybeSingle()
       if (error) throw error
       if (!data) return json({ error: 'not_found' }, 404, corsHeaders)
-      return json({ exercise: data }, 200, corsHeaders)
+      return json({ exercise: withEnvironmentTag(data) }, 200, corsHeaders)
     }
 
     if (action === 'list' || !action) {
@@ -102,12 +116,13 @@ serve(async (req) => {
 
       const { data, error } = await query
       if (error) throw error
-      return json({ exercises: data }, 200, corsHeaders)
+      return json({ exercises: (data ?? []).map(withEnvironmentTag) }, 200, corsHeaders)
     }
 
     if (action === 'create') {
       const payload = sanitizeWrite(body?.data ?? {})
       if (!payload.name_ptbr) return json({ error: 'missing_name_ptbr' }, 400, corsHeaders)
+      if ('load_type' in payload && !VALID_LOAD_TYPES.has(payload.load_type as string)) return json({ error: 'invalid_load_type' }, 400, corsHeaders)
       const { data, error } = await supabase.from('exercises').insert([payload]).select().single()
       if (error) throw error
       return json({ exercise: data }, 201, corsHeaders)
@@ -117,6 +132,7 @@ serve(async (req) => {
       const id = typeof body?.id === 'string' ? body.id : ''
       if (!id) return json({ error: 'missing_id' }, 400, corsHeaders)
       const payload = sanitizeWrite(body?.data ?? {})
+      if ('load_type' in payload && !VALID_LOAD_TYPES.has(payload.load_type as string)) return json({ error: 'invalid_load_type' }, 400, corsHeaders)
       const { data, error } = await supabase.from('exercises').update(payload).eq('id', id).select().single()
       if (error) throw error
       return json({ exercise: data }, 200, corsHeaders)

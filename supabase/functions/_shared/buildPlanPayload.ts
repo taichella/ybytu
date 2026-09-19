@@ -6,6 +6,7 @@
 // lado, sessão de staff do outro — só o "dado um userId já validado, monta
 // o JSON" mora aqui. Ver [[project_staff_role_system_design]].
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { formatLoadPtbr } from './loadDisplay.ts'
 
 // ─── MET por papel do slot (fórmula de gasto calórico, PENDENTE de aprovação) ─
 // kcal_slot = MET × peso_kg × (7min / 60). O "7min/slot" não é inventado aqui:
@@ -29,6 +30,20 @@ function resolveR2Media(value: string | null | undefined): string | null {
   if (!value) return null
   if (value.startsWith('http')) return value // ainda no Drive (ou já é URL completa) -- usa como está
   return `${R2_PUBLIC_BASE}/${encodeURIComponent(value)}` // chave de objeto R2 -- encodeURIComponent pq nomes têm espaço/parêntese
+}
+
+// Miniatura (~200px de largura) da imagem do exercício, pro PDF/tela do aluno:
+// a imagem original pesa em média 420 KB (até ~1 MB), 25 exercícios num PDF
+// passariam de 10 MB. A miniatura é um arquivo À PARTE no mesmo bucket, com o
+// sufixo abaixo antes da extensão ("ARNOLD PRESS_2.jpg" -> "ARNOLD PRESS_2_w200.jpg"),
+// nunca substitui o original. MESMA regra de apps/ybytu-dashboard/src/lib/media.js
+// (mudou aqui, muda lá). Só existe pra chave de R2; link http (Drive) não tem miniatura.
+const R2_THUMB_SUFFIX = '_w200'
+function resolveR2Thumb(value: string | null | undefined): string | null {
+  if (!value || value.startsWith('http')) return null
+  const dot = value.lastIndexOf('.')
+  const key = dot > 0 ? `${value.slice(0, dot)}${R2_THUMB_SUFFIX}${value.slice(dot)}` : `${value}${R2_THUMB_SUFFIX}`
+  return `${R2_PUBLIC_BASE}/${encodeURIComponent(key)}`
 }
 
 const MINUTES_PER_SLOT = 7
@@ -304,7 +319,7 @@ async function buildTrainingSection(
   const exerciseIds = [...new Set(tpeRows.map(r => r.exercise_id))]
   const { data: exerciseRows, error: exErr } = await supabase
     .from('exercises')
-    .select('exercise_id, name_ptbr, instruction_ptbr, video_url, image_url, muscle_groups_ids')
+    .select('exercise_id, name_ptbr, instruction_ptbr, video_url, image_url, muscle_groups_ids, load_type')
     .in('exercise_id', exerciseIds)
   if (exErr) throw new Error(`Lookup de exercises falhou: ${exErr.message}`)
   const exerciseById = new Map((exerciseRows ?? []).map((r: any) => [r.exercise_id, r]))
@@ -404,6 +419,16 @@ async function buildTrainingSection(
         instruction_ptbr: ex?.instruction_ptbr ?? null,
         video_url: resolveR2Media(ex?.video_url),
         image_url: resolveR2Media(ex?.image_url),
+        // Miniatura ~200px (arquivo à parte no R2). Se ainda não foi enviada ao
+        // bucket, a tela cai sozinha pra image_url (onError) e depois pro
+        // espaço reservado com o nome -- nunca imagem quebrada.
+        image_thumb_url: resolveR2Thumb(ex?.image_url),
+        // Carga (2026-09-19): load_type diz se o exercício usa kg;
+        // load_display_ptbr já vem pronto ("12,5 kg" | "a definir" |
+        // "Peso corporal" | "Elástico") pra tela do aluno, PDF e documento
+        // do staff mostrarem o MESMO texto -- ver _shared/loadDisplay.ts.
+        load_type: ex?.load_type ?? 'weighted',
+        load_display_ptbr: formatLoadPtbr(ex?.load_type, (slot as any).sets_detail),
         sets: slot.sets,
         reps_ptbr: String(slot.reps), // schema só tem 1 valor de reps, não faixa min-max
         cadence_ptbr: cadencePtbr(slot),

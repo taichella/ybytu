@@ -199,7 +199,7 @@ serve(async (req) => {
 
     if (action === 'search_exercises') {
       const search = typeof body?.search === 'string' ? body.search.trim() : ''
-      let query = supabase.from('exercises').select('id, exercise_id, name_ptbr, exercise_level_id').limit(30)
+      let query = supabase.from('exercises').select('id, exercise_id, name_ptbr, exercise_level_id, image_url, load_type').limit(30)
       if (search) query = query.ilike('name_ptbr', `%${search}%`)
       const { data, error } = await query
       if (error) throw error
@@ -223,7 +223,7 @@ serve(async (req) => {
 
       const exerciseIds = [...new Set((slots ?? []).map((s: any) => s.exercise_id))]
       const { data: exercises, error: exErr } = exerciseIds.length
-        ? await supabase.from('exercises').select('id, exercise_id, name_ptbr, muscle_groups_ids').in('exercise_id', exerciseIds)
+        ? await supabase.from('exercises').select('id, exercise_id, name_ptbr, muscle_groups_ids, image_url, load_type').in('exercise_id', exerciseIds)
         : { data: [], error: null }
       if (exErr) throw exErr
 

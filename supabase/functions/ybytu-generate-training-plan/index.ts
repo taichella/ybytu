@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
 import { collapseDuplicateNames, findDuplicateNameIds, normalizeExerciseName } from './exerciseNames.ts'
+import { allowedEquipmentForEnvironment } from '../_shared/exerciseEnvironment.ts'
 
 // ─── Gate de acesso (piloto) ──────────────────────────────────────────────────
 // DÉBITO: não existe tabela `subscriptions` nem coluna de início de trial
@@ -17,15 +18,11 @@ function checkAccess(profile: { id: string }): { allowed: boolean; reason: strin
   return { allowed: false, reason: 'no_active_subscription_or_trial' }
 }
 
-// ─── Equipamento elegível por ambiente (decisão A/B da revisão de arquitetura) ─
-// bar_fixed_bar entra em "casa": barra de porta é equipamento doméstico comum
-// e barato — sem ela o pool de costas em casa cai para quase zero (verificado:
-// 197 exercícios sem ela, 242 com ela — bate com o número fechado na revisão).
-const HOME_EQUIPMENT_WHITELIST = [
-  'none_bodyweight', 'dumbbells', 'elastic_band_mini_band', 'bench', 'box',
-  'kettlebell', 'step', 'ab_wheel', 'wall', 'medicine_ball', 'jump_rope',
-  'mat_rug', 'trx', 'swiss_ball', 'battle_rope', 'bar_fixed_bar',
-]
+// ─── Equipamento elegível por ambiente ────────────────────────────────────────
+// A regra (HOME_EQUIPMENT_WHITELIST e quais equipamentos cada ambiente admite)
+// mora em ../_shared/exerciseEnvironment.ts, compartilhada com
+// ybytu-admin-exercises -- a tag de ambiente do card de exercício vem da MESMA
+// função que filtra o pool aqui (2026-09-19). Não redeclarar a lista neste arquivo.
 
 // ─── Molde de dias (esqueleto de split) ───────────────────────────────────────
 // tr_201 (o único Original "home") não tem day_number/order_within_day
@@ -827,17 +824,8 @@ serve(async (req) => {
     // ── POOL SEGURO ───────────────────────────────────────────────────────────
     const eligibleLevels = levelSlug === 'intermediate' ? ['intermediate', 'beginner'] : [levelSlug]
 
-    let allowedEquipment: string[] | null = null // null = qualquer equipamento (gym tem tudo)
-    if (environmentSlug === 'home_no_equipment' || environmentSlug === 'outdoors') {
-      // Confirmado: catálogo não tem exercício outdoor-específico — tratamos como bodyweight puro.
-      allowedEquipment = ['none_bodyweight']
-    } else if (environmentSlug === 'home_with_equipment') {
-      allowedEquipment = [...new Set([
-        'none_bodyweight',
-        ...equipmentSlugs.filter(s => HOME_EQUIPMENT_WHITELIST.includes(s)),
-      ])]
-    }
-    // environmentSlug === 'gym' → allowedEquipment fica null (todo o catálogo)
+    // null = qualquer equipamento (gym tem tudo). Regra em _shared/exerciseEnvironment.ts.
+    const allowedEquipment: string[] | null = allowedEquipmentForEnvironment(environmentSlug, equipmentSlugs)
 
     let poolQuery = supabase
       .from('exercises')
