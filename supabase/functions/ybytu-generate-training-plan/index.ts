@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
+import { collapseDuplicateNames, findDuplicateNameIds, normalizeExerciseName } from './exerciseNames.ts'
 
 // ─── Gate de acesso (piloto) ──────────────────────────────────────────────────
 // DÉBITO: não existe tabela `subscriptions` nem coluna de início de trial
@@ -864,7 +865,34 @@ serve(async (req) => {
       avoidExerciseIds = new Set((avoidRows ?? []).map((r: any) => r.exercise_id))
     }
 
-    const safePool = (candidatePool ?? []).filter((e: any) => !avoidExerciseIds.has(e.exercise_id))
+    const poolAfterAvoid = (candidatePool ?? []).filter((e: any) => !avoidExerciseIds.has(e.exercise_id))
+
+    // Colapsa exercícios de mesmo nome (o catálogo tem 19 pares duplicados) em 1
+    // registro -- ver exerciseNames.ts. Depois do filtro de segurança de
+    // propósito: só colapsa entre exercícios já seguros. Entre duplicatas, fica
+    // a que tem MAIS cautelas pras condições deste aluno (em 8 dos 19 pares as
+    // cautelas divergem, e manter só o menor id escondia um aviso do catálogo);
+    // sem condição declarada ou sem divergência, empata e vale o menor id.
+    const cautionCountById = new Map<string, number>()
+    const duplicateNameIds = findDuplicateNameIds(poolAfterAvoid as any[])
+    if (userConditionSlugs.length > 0 && duplicateNameIds.length > 0) {
+      const { data: dupCautionRows, error: dupCautionError } = await supabase
+        .from('exercise_effective_cautions')
+        .select('exercise_id, condition_slug')
+        .eq('tipo', 'caution')
+        .in('condition_slug', userConditionSlugs)
+        .in('exercise_id', duplicateNameIds)
+      if (dupCautionError) throw new Error('Duplicate-name caution lookup failed: ' + dupCautionError.message)
+      const slugsById = new Map<string, Set<string>>()
+      for (const row of (dupCautionRows ?? [])) {
+        slugsById.set(row.exercise_id, (slugsById.get(row.exercise_id) ?? new Set()).add(row.condition_slug))
+      }
+      for (const [id, slugs] of slugsById) cautionCountById.set(id, slugs.size)
+    }
+    const { pool: safePool, collapsed: collapsedNameGroups } = collapseDuplicateNames(poolAfterAvoid as any[], cautionCountById)
+    if (collapsedNameGroups.length > 0) {
+      console.log('[ybytu-generate-training-plan] pool: nomes duplicados colapsados', JSON.stringify(collapsedNameGroups))
+    }
 
     if (safePool.length === 0) {
       const failMessage = `no_safe_exercises: pool vazio pra level=${levelSlug} environment=${environmentSlug} condition_slugs=${userConditionSlugs.join(',') || '-'}`
@@ -1053,17 +1081,11 @@ Return ONLY valid JSON: { "selections": { "<slot_key>": "exercise_id", ... } }`
     // que não tinham proteção nenhuma antes disso. Comparação por NOME
     // normalizado (minúsculas, sem acento), não por exercise_id -- os pares
     // duplicados variam capitalização/acentuação entre si.
-    function normalizeExerciseName(name: string): string {
-      // NFD separa a letra do sinal diacritico (acento/til/cedilha) em dois
-      // code points -- filtra pelo range Unicode de "Combining Diacritical
-      // Marks" (U+0300-U+036F) numericamente, em vez de literal na regex,
-      // pra nao depender de encoding de arquivo pro caractere combinado.
-      const codePoints = Array.from(name.normalize('NFD')).filter((ch) => {
-        const code = ch.codePointAt(0) ?? 0
-        return code < 0x0300 || code > 0x036f
-      })
-      return codePoints.join('').toLowerCase().trim()
-    }
+    // 2026-09-19: desde que o pool é colapsado por nome (collapseDuplicateNames,
+    // acima), esta dedupe deixou de ser a defesa principal contra pares
+    // duplicados do catálogo -- fica como rede de segurança (nomes que só
+    // divergem em algo que a normalização não cobre). normalizeExerciseName
+    // agora vem de ./exerciseNames.ts, a mesma função do colapso.
 
     const slotsByDayForDedupe = new Map<number, typeof filledSlots>()
     for (const s of filledSlots) {
