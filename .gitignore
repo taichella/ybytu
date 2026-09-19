@@ -42,6 +42,8 @@ Thumbs.db
 # ("Geracao de thumbnail -- frame a 40% da duracao"), nao depende de nada
 # que so exista nestes arquivos.
 r2_thumbnails/
+# Miniaturas _w200 geradas por scripts/gen-r2-thumbs.sh (mesma razão: estão no bucket, regeneráveis).
+r2_thumbnails_w200/
 r2_videos.txt
 
 # Saida do graphify (docs/GRAPHIFY.md) -- graph.json/graph.html/GRAPH_REPORT.md sao

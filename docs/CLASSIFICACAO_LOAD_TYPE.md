@@ -94,6 +94,8 @@ Confiança da sugestão: 36 alta (nome cita barra/peso externo ou é um exercíc
 2. **Elástico.** `band` esconde o campo de kg. Se o elástico deve ter uma prescrição (cor/nível), é outro campo, não a carga.
 3. **Pares duplicados do catálogo.** ex_055/ex_083, ex_071/ex_079 e ex_184/ex_191 estão na lista acima e também em `docs/POS_PILOTO.md` (fusão dos 19 pares). Classifique os dois lados do mesmo jeito.
 
+4. **Nome e equipamento discordam (achado 2026-09-19, ao testar a tela).** Só um caso entre os classificados sem kg: **ex_132 "Abdominal declinado no banco com peso"** tem equipamento cadastrado só `none_bodyweight`, então saiu `bodyweight` (sem campo de carga) e a tag de ambiente mostra "Casa (sem equipamento)". Pelo nome, deveria levar banco + peso, ou seja, provavelmente `weighted` e ambiente "Casa (com equipamento)". Corrigir o equipamento do exercício resolve as duas coisas; ex_128 e ex_203 (barra fixa) estão certos como `bodyweight`.
+
 ## Apêndice — decididos pelo equipamento (para conferência)
 
 ### `weighted` — halter, kettlebell ou medicine ball (60)
