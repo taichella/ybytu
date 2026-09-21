@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
-import { collapseDuplicateNames, findDuplicateNameIds, normalizeExerciseName } from './exerciseNames.ts'
+import { collapseDuplicateNames, filterAvoidedIncludingSiblings, findDuplicateNameIds, normalizeExerciseName } from './exerciseNames.ts'
 import { allowedEquipmentForEnvironment } from '../_shared/exerciseEnvironment.ts'
 
 // ─── Gate de acesso (piloto) ──────────────────────────────────────────────────
@@ -853,7 +853,25 @@ serve(async (req) => {
       avoidExerciseIds = new Set((avoidRows ?? []).map((r: any) => r.exercise_id))
     }
 
-    const poolAfterAvoid = (candidatePool ?? []).filter((e: any) => !avoidExerciseIds.has(e.exercise_id))
+    // O avoid vale pro par inteiro de mesmo nome (ver filterAvoidedIncludingSiblings):
+    // busca o nome dos exercícios com avoid no catálogo inteiro, não só no pool.
+    const avoidedNames = new Set<string>()
+    if (avoidExerciseIds.size > 0) {
+      const { data: avoidedRows, error: avoidedNamesError } = await supabase
+        .from('exercises')
+        .select('exercise_id, name_ptbr')
+        .in('exercise_id', [...avoidExerciseIds])
+      if (avoidedNamesError) throw new Error('Avoid name lookup failed: ' + avoidedNamesError.message)
+      for (const r of (avoidedRows ?? [])) {
+        if (r.name_ptbr) avoidedNames.add(normalizeExerciseName(r.name_ptbr))
+      }
+    }
+
+    const { pool: poolAfterAvoid, removedViaSibling } = filterAvoidedIncludingSiblings(
+      (candidatePool ?? []) as any[], avoidExerciseIds, avoidedNames)
+    if (removedViaSibling.length > 0) {
+      console.log('[ybytu-generate-training-plan] pool: removidos por avoid do irmão de mesmo nome', JSON.stringify(removedViaSibling))
+    }
 
     // Colapsa exercícios de mesmo nome (o catálogo tem 19 pares duplicados) em 1
     // registro -- ver exerciseNames.ts. Depois do filtro de segurança de

@@ -26,6 +26,35 @@ export function normalizeExerciseName(name: string): string {
   return codePoints.join('').toLowerCase().trim()
 }
 
+// Propaga o 'avoid' pro PAR inteiro (2026-09-21): o catálogo tem pares de mesmo
+// nome em que só UM registro tem o avoid (hoje 5 pares, todos 'pregnancy':
+// bird dog ex_137/ex_236, deadlift com barra olímpica ex_055/ex_083, pular
+// corda ex_103/ex_267, supino declinado com barra ex_184/ex_191, wall ball
+// ex_013/ex_285). É o mesmo movimento, então o avoid de um vale pro outro;
+// enquanto o personal não decide a fusão no catálogo, o gerador não deixa o
+// irmão sem avoid entrar no plano. `avoidedNames` são os nomes (já
+// normalizados) dos exercícios com avoid, lidos do catálogo INTEIRO -- o irmão
+// com avoid pode estar fora do pool (outro nível/equipamento) e mesmo assim
+// tem que valer. Roda no lugar do filtro por id; devolve também quais ids
+// saíram SÓ por causa do irmão, pro log.
+export function filterAvoidedIncludingSiblings<T extends PoolExercise>(
+  pool: T[],
+  avoidIds: Set<string>,
+  avoidedNames: Set<string>,
+): { pool: T[]; removedViaSibling: string[] } {
+  const removedViaSibling: string[] = []
+  const kept = pool.filter((ex) => {
+    if (avoidIds.has(ex.exercise_id)) return false
+    const key = ex.name_ptbr ? normalizeExerciseName(ex.name_ptbr) : ''
+    if (key && avoidedNames.has(key)) {
+      removedViaSibling.push(ex.exercise_id)
+      return false
+    }
+    return true
+  })
+  return { pool: kept, removedViaSibling }
+}
+
 // "ex_194" < "ex_216" pelo número, não pelo texto ("ex_99" vs "ex_100"). Id
 // fora do padrão cai na comparação de texto.
 export function compareExerciseIds(a: string, b: string): number {
