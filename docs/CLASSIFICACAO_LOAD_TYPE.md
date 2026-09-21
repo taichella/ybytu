@@ -96,6 +96,17 @@ Confiança da sugestão: 36 alta (nome cita barra/peso externo ou é um exercíc
 
 4. **Nome e equipamento discordam (achado 2026-09-19, ao testar a tela).** Só um caso entre os classificados sem kg: **ex_132 "Abdominal declinado no banco com peso"** tem equipamento cadastrado só `none_bodyweight`, então saiu `bodyweight` (sem campo de carga) e a tag de ambiente mostra "Casa (sem equipamento)". Pelo nome, deveria levar banco + peso, ou seja, provavelmente `weighted` e ambiente "Casa (com equipamento)". Corrigir o equipamento do exercício resolve as duas coisas; ex_128 e ex_203 (barra fixa) estão certos como `bodyweight`.
 
+5. **Equipamento corrigido em 2026-09-21 (aprovado pela Taina; nenhum plano usava estes exercícios).** Script e rollback em `scripts/correcao_equipamentos_exercicios_20260921.sql`.
+   - **ex_132 Abdominal declinado no banco com peso:** `none_bodyweight` -> `bench` + `dumbbells`, `load_type` `bodyweight` -> `weighted`. **Personal: confirmar halter ou anilha** (anilha muda a tag para "Só academia": `weight_plate` não está na lista de equipamentos de casa).
+   - **ex_113 Abdominal na máquina** e **ex_129 Joelho no peito na máquina:** `ab_wheel` -> `crunch_machine` (antes apareciam como "Casa (com equipamento)"). O `load_type` continua `bodyweight`; **personal: dizer se é `machine`** (carga em kg).
+   - **ex_170 Elevação frontal com anilha:** `bar_fixed_bar` -> `weight_plate`.
+   - **ex_223 Tríceps na barra paralela (Graviton):** `bar_fixed_bar` -> `assisted_pull_up`.
+
+6. **Polia/máquina de remada: equipamento vago, fica para o personal (não alterado).** Todos cadastrados como `cable_row` ("remada baixa"), mas o nome pede outra coisa ou não dá para saber:
+   - ex_215 Rosca na polia com barra reta (pegada supinada) e ex_234 Extensão de tríceps na polia alta com barra reta: provavelmente `cable_machine`.
+   - ex_242 Remada baixa na máquina, ex_244 e ex_260 Remada cavalinho na máquina, ex_253 Remada unilateral na máquina, ex_257 Pullover no cross ou na máquina: `cable_row` pode estar certo; ex_257 provavelmente é `cable_crossover` ou máquina de pullover.
+   Todos já são `machine` e `cable_row` não está na lista de equipamentos de casa, então nenhum vai para quem treina em casa.
+
 ## Apêndice — decididos pelo equipamento (para conferência)
 
 ### `weighted` — halter, kettlebell ou medicine ball (60)
