@@ -71,3 +71,17 @@ apagadas) na mesma limpeza, mesmo critério:
 (`7d3b7923-e07b-4dfe-a847-b3cf5520fec2`, criada 2026-07-30) sem nenhuma linha em `profiles` —
 signup órfão, nem teste identificado nem aluno real. Não tocada nesta limpeza por falta de
 contexto — verificar com a Taina antes de decidir o que fazer com ela.
+
+## Mais duas contas de teste desativadas (2026-09-21)
+
+Por pedido da Taina (contas dela, de teste), `auth.users.banned_until = 2100-01-01`, dado preservado,
+mesmo método das anteriores:
+
+- `tainachella@gmail.com` — perfil "Marina Santos" (`c6cc13af-9f3b-4aa0-a6fd-b16ae048d8ea`, criada 2026-09-04)
+- `taina.chella@althero.fr` — perfil "Marcia Pontes" (`efdfc64c-bcfe-4eea-ac45-4cf59b9c23cb`, criada 2026-09-06)
+
+Reverter: `UPDATE auth.users SET banned_until = NULL WHERE id IN (...)`.
+
+Sinal usado pra reconhecer conta de teste: o `whatsapp_phone` (+33766338362) é o mesmo em Marina,
+Marcia, Gisele Nascimento, Ana Silva e Rayan Road (nova, `8669a6af-...`, criada 2026-09-17).
+A Rayan Road **não** foi desativada nem tocada: investigação só de leitura, decisão pendente com a Taina.
