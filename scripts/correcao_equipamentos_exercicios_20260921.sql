@@ -12,3 +12,8 @@ UPDATE exercises SET exercise_equipments_ids = ARRAY['assisted_pull_up'] WHERE e
 -- UPDATE exercises SET exercise_equipments_ids = ARRAY['none_bodyweight'], load_type = 'bodyweight' WHERE exercise_id = 'ex_132';
 -- UPDATE exercises SET exercise_equipments_ids = ARRAY['ab_wheel']        WHERE exercise_id IN ('ex_113','ex_129');
 -- UPDATE exercises SET exercise_equipments_ids = ARRAY['bar_fixed_bar']   WHERE exercise_id IN ('ex_170','ex_223');
+
+-- 2026-09-21 (2o passo, aprovado pela Taina): ex_113 e ex_129 sao "na maquina" -> load_type machine
+-- (carga em kg). Nenhum plano usava estes exercicios.
+UPDATE exercises SET load_type = 'machine' WHERE exercise_id IN ('ex_113','ex_129');
+-- ROLLBACK: UPDATE exercises SET load_type = 'bodyweight' WHERE exercise_id IN ('ex_113','ex_129');

@@ -18,6 +18,7 @@ const ORDEM = [
   'public.training_plans', 'public.training_plan_exercises', 'public.training_plan_exercises_history',
   'public.meal_plans', 'public.meal_plan_meals',
   'auth.users', 'auth.identities', 'auth.sessions', 'auth.refresh_tokens', 'auth.mfa_factors', 'auth.one_time_tokens',
+  'public.staff', 'public.staff_roles',
   'public.profiles', 'public.user_training_profiles', 'public.user_meal_profiles',
   'public.user_training_plans', 'public.user_meal_plans', 'public.plan_share_tokens', 'public.plan_reviews',
   'public.completed_meals', 'public.completed_workouts', 'public.whatsapp_notifications',

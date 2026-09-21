@@ -87,28 +87,44 @@ Commit `5e04168a`. Reverter: `git revert 5e04168a` + deploy de `ybytu-onboarding
 `ybytu-onboarding-retry-cron`. Efeito de reverter: perfil com `subscription_type_id` NULL volta a receber
 `ok` sem plano nenhum gerado.
 
-### Limpeza dos alunos de teste (script pronto, ver status abaixo)
-**Status: NÃO executada até a escolha da opção (a) pela Taina.**
+### Limpeza dos alunos de teste (EXECUTADA em 2026-09-21 21:44 +02:00, opção (a))
+Removidas 11 contas de `auth.users` (10 alunos de teste + `contato+teste_ui_staff_20260919@ybytu.app`, staff revogado
+sem perfil), 10 perfis, 20 planos de treino `tr_ai_` (17 de alunos + 3 órfãos de 04/09, 404 exercícios), 10 planos
+de nutrição `mp_ai_` (200 refeições), 8 tokens `/plano/<token>`, 5 pareceres, 29 linhas de `whatsapp_notifications`,
+sessões e refresh tokens. Ficaram as 3 contas da equipe (mymba.studio@gmail.com, contato+personal@ybytu.app,
+contato+nutri@ybytu.app), os 7 moldes `tr_201..207` (179 linhas) e os 300 planos de nutrição do catálogo, sem alteração
+(conferido por hash). Ficaram 19 linhas antigas de `whatsapp_notifications` com `user_id` nulo (envios de teste ao
++33766338362 anteriores a 29/08; nenhuma tela de aluno as conta).
 
-Backup (fora do repo, contém hash de senha): `C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260921_212736.json`
-(563 KB, gerado em 2026-09-21 21:27 +02:00 via `supabase db query --linked`; 10 contas, 21 tabelas, 728 linhas
-com auth.*, `_meta` no início do arquivo). O `supabase db dump` não rodou: precisa do Docker Desktop, que estava desligado.
+**Backup (contém HASH DE SENHA de `auth.users`; apagar quando o piloto estabilizar):**
+`C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260921_214330.json` — 597 KB, gerado em 2026-09-21 21:43 +02:00 via
+`supabase db query --linked` (11 contas, 23 tabelas, 818 linhas). Fica **fora do repo** de propósito; nunca commitar,
+nunca enviar por e-mail/chat. Apagar o arquivo quando o piloto estabilizar (depois do primeiro aluno real
+funcionando ponta a ponta e do ponto de restauração `piloto-v1.0` existir). O backup anterior (subconjunto, 10 contas)
+foi apagado por estar contido neste.
 
-Executar: `npx supabase db query --linked -f scripts/limpeza_alunos_teste_20260921.sql`
-(uma transação; aborta sozinha se o alvo não for exatamente as 10 contas de hoje, se incluir conta da
-equipe, ou se algum aluno estiver ligado a molde/catálogo).
-
-**Restaurar** (recria contas com a mesma senha, perfis, planos, tokens `/plano/<token>`, pareceres e log de WhatsApp):
+**Restaurar** (recria contas com a mesma senha, perfis, planos, tokens `/plano/<token>`, pareceres, log de WhatsApp e a
+linha de staff revogada):
 ```bash
-node scripts/restaurar_alunos_do_backup.mjs "C:/Users/tahch/ybytu-backups/alunos_pre_limpeza_20260921_212736.json" > restore.sql
+node scripts/restaurar_alunos_do_backup.mjs "C:/Users/tahch/ybytu-backups/alunos_pre_limpeza_20260921_214330.json" > restore.sql
 npx supabase db query --linked -f restore.sql
 ```
-O SQL é idempotente (`ON CONFLICT DO NOTHING`), insere na ordem das FKs e pula colunas geradas.
-**Ensaio feito em 2026-09-21** (apagar + restaurar + comparar dentro de uma transação abortada por erro forçado,
-nada persistiu): todas as contagens e os hashes de `auth.users`, `profiles` e dos exercícios dos planos voltaram
-idênticos ao estado anterior; hashes de moldes, catálogo de refeições e exercícios não mudaram em nenhum momento.
-Depois de restaurar, os links `/plano/<token>` voltam a funcionar (tokens dentro do prazo de 90 dias).
+O SQL é idempotente (`ON CONFLICT DO NOTHING`), insere na ordem das FKs e pula colunas geradas. **Ensaiado antes de
+executar** (apagar + restaurar + comparar numa transação abortada por erro forçado): contagens e hashes de `auth.users`,
+`profiles`, `staff_roles` e exercícios dos planos voltaram idênticos (0 divergências). Depois de restaurar, os links
+`/plano/<token>` voltam a funcionar (tokens têm validade de 90 dias). O script de remoção ficou em
+`scripts/limpeza_alunos_teste_20260921.sql` (com guardas: aborta se o alvo não for exatamente 11 contas, se a equipe
+não estiver ativa, se sobrar perfil fora do alvo ou se aluno estiver ligado a molde/catálogo); não rode de novo sem
+revisar o `<> 11`.
 
-**Se optar por banir em vez de apagar (b):** `UPDATE auth.users SET banned_until = '2100-01-01' ...`,
-`UPDATE plan_share_tokens SET revoked_at = now() ...`, `UPDATE training_plans/meal_plans SET is_active = false ...`.
-Reverter: `banned_until = NULL`, `revoked_at = NULL`, `is_active = true`.
+### ex_113 e ex_129: load_type machine (aplicado 2026-09-21)
+Antes `bodyweight`, agora `machine` (são "na máquina"). Nenhum plano usava. Rollback:
+`UPDATE exercises SET load_type = 'bodyweight' WHERE exercise_id IN ('ex_113','ex_129');`
+(também em `scripts/correcao_equipamentos_exercicios_20260921.sql`).
+
+### Backup do banco inteiro (ponto de restauração piloto-v1.0)
+Estado em 2026-09-21: o backup diário automático do Supabase **não aparece ativo** (`supabase backups list` devolve
+`backups: []`, `pitr_enabled: false`); o plano não é legível pela CLI, confirmar em Dashboard > Settings > Database >
+Backups. `supabase db dump --linked` exige Docker Desktop LIGADO (sem ele falha ao subir o container do pg_dump; com
+`--dry-run` a autenticação da CLI resolve sem senha). Para o piloto-v1.0: ligar o Docker e gerar schema + dados
+(`--data-only --schema public,auth`) + roles, arquivados fora do repo.

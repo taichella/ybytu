@@ -98,7 +98,7 @@ Confiança da sugestão: 36 alta (nome cita barra/peso externo ou é um exercíc
 
 5. **Equipamento corrigido em 2026-09-21 (aprovado pela Taina; nenhum plano usava estes exercícios).** Script e rollback em `scripts/correcao_equipamentos_exercicios_20260921.sql`.
    - **ex_132 Abdominal declinado no banco com peso:** `none_bodyweight` -> `bench` + `dumbbells`, `load_type` `bodyweight` -> `weighted`. **Personal: confirmar halter ou anilha** (anilha muda a tag para "Só academia": `weight_plate` não está na lista de equipamentos de casa).
-   - **ex_113 Abdominal na máquina** e **ex_129 Joelho no peito na máquina:** `ab_wheel` -> `crunch_machine` (antes apareciam como "Casa (com equipamento)"). O `load_type` continua `bodyweight`; **personal: dizer se é `machine`** (carga em kg).
+   - **ex_113 Abdominal na máquina** e **ex_129 Joelho no peito na máquina:** `ab_wheel` -> `crunch_machine` (antes apareciam como "Casa (com equipamento)"). `load_type` `bodyweight` -> `machine` (aprovado 2026-09-21, são "na máquina": carga em kg). Personal pode revisar.
    - **ex_170 Elevação frontal com anilha:** `bar_fixed_bar` -> `weight_plate`.
    - **ex_223 Tríceps na barra paralela (Graviton):** `bar_fixed_bar` -> `assisted_pull_up`.
 
