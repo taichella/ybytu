@@ -119,6 +119,18 @@ export async function runGenerationAndVerify(
   // mesma execução, ou de uma anterior) -- nunca mais confiar num valor local
   // do client, que foi a causa raiz do caso Rayan Road (client sempre
   // assumia COMPLETE independente do que estava gravado).
+  //
+  // Assinatura NULL ou fora dos 3 planos conhecidos = 'failed', nunca 'ok'
+  // (achado 2026-09-21, conta Rayan Road de 17/09: com NULL, isMeal e
+  // isTraining davam false, nada era gerado, e a conferência abaixo passava
+  // por vazio -- 'ok' sem plano nenhum exigido, invisível em FailedPlans).
+  // 'ok' só vale depois de conferir que os planos EXIGIDOS existem, e sem
+  // saber a assinatura não se sabe o que é exigido.
+  if (!Object.values(SUBSCRIPTION_PLANS).includes(profile.subscription_type_id)) {
+    const msg = 'assinatura ausente ou desconhecida'
+    await supabase.from('profiles').update({ plan_generation_status: 'failed', plan_generation_error: msg }).eq('id', userId)
+    return { status: 'failed', error: msg }
+  }
   const isMeal = [SUBSCRIPTION_PLANS.MEAL, SUBSCRIPTION_PLANS.COMPLETE].includes(profile.subscription_type_id)
   const isTraining = [SUBSCRIPTION_PLANS.TRAINING, SUBSCRIPTION_PLANS.COMPLETE].includes(profile.subscription_type_id)
 
