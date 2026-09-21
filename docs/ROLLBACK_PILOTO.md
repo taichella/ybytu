@@ -70,3 +70,45 @@ WHERE id = 'c1a431ac-982d-41a4-b77c-2e759af29862';   -- Flexão de braço com pe
 UPDATE training_plan_exercises SET sets_detail = (SELECT jsonb_agg(jsonb_set(s,'{load_kg}','3'::jsonb) ORDER BY (s->>'set_number')::int) FROM jsonb_array_elements(sets_detail) s)
 WHERE id = 'ad83e41e-4032-4164-abd0-ec40a2935aff';   -- Good morning com peso corporal, 3 séries, era 3 kg
 ```
+
+## 2026-09-21 — Correções de catálogo/gerador e limpeza dos alunos de teste
+
+### Equipamento de 5 exercícios (aplicado)
+`scripts/correcao_equipamentos_exercicios_20260921.sql` tem o UPDATE e o rollback (valores antigos de
+ex_132, ex_113, ex_129, ex_170, ex_223). Nenhum plano usava esses exercícios no momento da troca.
+
+### Gerador: avoid vale para o par de mesmo nome (deployado)
+Commit `e8e27192` (`filterAvoidedIncludingSiblings`). Reverter: `git revert e8e27192` e
+`scripts/deploy-functions.sh ybytu-generate-training-plan`. Efeito de reverter: os 5 irmãos sem avoid
+(ex_236, 083, 103, 191, 013) voltam a poder entrar no plano de gestante.
+
+### Orquestração: assinatura NULL/desconhecida grava 'failed' (deployado)
+Commit `5e04168a`. Reverter: `git revert 5e04168a` + deploy de `ybytu-onboarding-complete` e
+`ybytu-onboarding-retry-cron`. Efeito de reverter: perfil com `subscription_type_id` NULL volta a receber
+`ok` sem plano nenhum gerado.
+
+### Limpeza dos alunos de teste (script pronto, ver status abaixo)
+**Status: NÃO executada até a escolha da opção (a) pela Taina.**
+
+Backup (fora do repo, contém hash de senha): `C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260921_212736.json`
+(563 KB, gerado em 2026-09-21 21:27 +02:00 via `supabase db query --linked`; 10 contas, 21 tabelas, 728 linhas
+com auth.*, `_meta` no início do arquivo). O `supabase db dump` não rodou: precisa do Docker Desktop, que estava desligado.
+
+Executar: `npx supabase db query --linked -f scripts/limpeza_alunos_teste_20260921.sql`
+(uma transação; aborta sozinha se o alvo não for exatamente as 10 contas de hoje, se incluir conta da
+equipe, ou se algum aluno estiver ligado a molde/catálogo).
+
+**Restaurar** (recria contas com a mesma senha, perfis, planos, tokens `/plano/<token>`, pareceres e log de WhatsApp):
+```bash
+node scripts/restaurar_alunos_do_backup.mjs "C:/Users/tahch/ybytu-backups/alunos_pre_limpeza_20260921_212736.json" > restore.sql
+npx supabase db query --linked -f restore.sql
+```
+O SQL é idempotente (`ON CONFLICT DO NOTHING`), insere na ordem das FKs e pula colunas geradas.
+**Ensaio feito em 2026-09-21** (apagar + restaurar + comparar dentro de uma transação abortada por erro forçado,
+nada persistiu): todas as contagens e os hashes de `auth.users`, `profiles` e dos exercícios dos planos voltaram
+idênticos ao estado anterior; hashes de moldes, catálogo de refeições e exercícios não mudaram em nenhum momento.
+Depois de restaurar, os links `/plano/<token>` voltam a funcionar (tokens dentro do prazo de 90 dias).
+
+**Se optar por banir em vez de apagar (b):** `UPDATE auth.users SET banned_until = '2100-01-01' ...`,
+`UPDATE plan_share_tokens SET revoked_at = now() ...`, `UPDATE training_plans/meal_plans SET is_active = false ...`.
+Reverter: `banned_until = NULL`, `revoked_at = NULL`, `is_active = true`.
