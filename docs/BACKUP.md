@@ -62,6 +62,10 @@ Nenhum destes é o mesmo token/bucket já usado pros vídeos — criar tudo novo
 
 ## Como restaurar
 
+**Espaço em disco:** o Docker Desktop e os dumps/backups locais ficam em `E:\` (`E:\DockerData` e
+`E:\ybytu-backups`, movidos de C: em 2026-09-22 porque o disco C: da máquina de desenvolvimento ficou sem espaço
+livre). Manter assim — não apontar de volta pro C:.
+
 **Teste local (não toca produção), quando o Docker estiver ligado:**
 ```bash
 scripts/backup/restore-local.sh ybytu-backup-20260922-020000.tar.age chave-privada-backup.txt

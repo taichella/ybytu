@@ -97,16 +97,18 @@ contato+nutri@ybytu.app), os 7 moldes `tr_201..207` (179 linhas) e os 300 planos
 +33766338362 anteriores a 29/08; nenhuma tela de aluno as conta).
 
 **Backup (contém HASH DE SENHA de `auth.users`; apagar quando o piloto estabilizar):**
-`C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260921_214330.json` — 597 KB, gerado em 2026-09-21 21:43 +02:00 via
+`E:\ybytu-backups\alunos_pre_limpeza_20260921_214330.json` — 597 KB, gerado em 2026-09-21 21:43 +02:00 via
 `supabase db query --linked` (11 contas, 23 tabelas, 818 linhas). Fica **fora do repo** de propósito; nunca commitar,
 nunca enviar por e-mail/chat. Apagar o arquivo quando o piloto estabilizar (depois do primeiro aluno real
 funcionando ponta a ponta e do ponto de restauração `piloto-v1.0` existir). O backup anterior (subconjunto, 10 contas)
-foi apagado por estar contido neste.
+foi apagado por estar contido neste. **Movido de `C:\Users\tahch\ybytu-backups\` para `E:\ybytu-backups\` em
+2026-09-22** (o C: da máquina ficou sem espaço livre; o Docker Desktop também foi realocado pra
+`E:\DockerData`) — integridade conferida por tamanho e sha256 idênticos nos dois lados antes de apagar a cópia em C:.
 
 **Restaurar** (recria contas com a mesma senha, perfis, planos, tokens `/plano/<token>`, pareceres, log de WhatsApp e a
 linha de staff revogada):
 ```bash
-node scripts/restaurar_alunos_do_backup.mjs "C:/Users/tahch/ybytu-backups/alunos_pre_limpeza_20260921_214330.json" > restore.sql
+node scripts/restaurar_alunos_do_backup.mjs "E:/ybytu-backups/alunos_pre_limpeza_20260921_214330.json" > restore.sql
 npx supabase db query --linked -f restore.sql
 ```
 O SQL é idempotente (`ON CONFLICT DO NOTHING`), insere na ordem das FKs e pula colunas geradas. **Ensaiado antes de
@@ -150,7 +152,8 @@ backup `alunos_pre_limpeza_20260921_214330.json`, que já continha estas 19 linh
 **Limpeza (executada 2026-09-22 18:44, `scripts/limpeza_alunos_teste_mvp_20260922.sql`):** removidas as 3 contas de
 teste do dia (`tainachella@gmail.com`, `loyedo4524@kingdais.com` "Teste A Aluno", `komofe3268@art2mart.com`
 "Teste B Aluno"), 3 planos de treino + 3 de nutrição, 3 tokens, 9 notificações WhatsApp. Backup:
-`C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260922_184456.json` (108 KB, hash de senha, apagar quando o piloto
-estabilizar — ver regra na seção de 2026-09-21 acima). Restaurar: mesmo `restaurar_alunos_do_backup.mjs`. Ficam 3
+`E:\ybytu-backups\alunos_pre_limpeza_20260922_184447.json` (108 KB, hash de senha, apagar quando o piloto
+estabilizar — ver regra na seção de 2026-09-21 acima; movido de C: pro mesmo motivo e na mesma checagem descrita
+acima). Restaurar: mesmo `restaurar_alunos_do_backup.mjs`. Ficam 3
 contas no Auth (equipe) + a conta de demonstração criada depois desta limpeza (WhatsApp real da Taina, **não** faz
 parte de nenhum backup/limpeza de teste — é a conta real de demonstração pro cliente).
