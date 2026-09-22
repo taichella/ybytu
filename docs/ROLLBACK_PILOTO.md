@@ -139,3 +139,18 @@ limpeza de 21/09 — todas as linhas com `user_id` preenchido já tinham sido re
 foram apagadas. `SELECT count(*) FROM whatsapp_notifications WHERE user_id IS NULL`: 19 antes, 0 depois;
 tabela inteira: 19 antes, 0 depois. Sem rollback: não há campo que preserve o texto original fora do
 backup `alunos_pre_limpeza_20260921_214330.json`, que já continha estas 19 linhas.
+
+## 2026-09-22 — MVP: fix do PDF, 3 contas de teste limpas, conta de demonstração criada
+
+**PDF (deployado, commit 8551eb57):** `@media print` em `UserPlan.jsx` agora zera `box-shadow` também em
+`.card/.day/.meal/.pcard/.mini/.stat/.diag`, não só `.doc`. Medido no mesmo plano antes/depois: 2,88 MB → 1,13 MB
+(imagens rasterizadas de sombra: 1,79 MB → 0,10 MB). Rollback: reverter o commit, ou remover a linha
+`.card, .day, .meal, .pcard, .mini, .stat, .diag { box-shadow: none !important; }` perto da linha 468.
+
+**Limpeza (executada 2026-09-22 18:44, `scripts/limpeza_alunos_teste_mvp_20260922.sql`):** removidas as 3 contas de
+teste do dia (`tainachella@gmail.com`, `loyedo4524@kingdais.com` "Teste A Aluno", `komofe3268@art2mart.com`
+"Teste B Aluno"), 3 planos de treino + 3 de nutrição, 3 tokens, 9 notificações WhatsApp. Backup:
+`C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260922_184456.json` (108 KB, hash de senha, apagar quando o piloto
+estabilizar — ver regra na seção de 2026-09-21 acima). Restaurar: mesmo `restaurar_alunos_do_backup.mjs`. Ficam 3
+contas no Auth (equipe) + a conta de demonstração criada depois desta limpeza (WhatsApp real da Taina, **não** faz
+parte de nenhum backup/limpeza de teste — é a conta real de demonstração pro cliente).
