@@ -465,6 +465,12 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
           .doc { max-width:none!important; margin:0!important; box-shadow:none!important; padding-bottom: 0 !important;}
           .hdr-space, .ftr-space { display:table-cell; height:0.5in; }
           h1, h2, h3, h4 { break-after:avoid; }
+          /* 2026-09-22: sem isso, cada box-shadow (.card/.day/.meal/.pcard/.mini/.stat/.diag)
+             virava uma imagem cinza rasterizada quase do tamanho da página no PDF do
+             Chromium -- 99 delas, 1,79 MB de 2,88 MB no plano medido (99% do peso não eram
+             as imagens de exercício, eram sombra). Mesma lista de classes de break-inside
+             abaixo, só que zerando a sombra em vez de evitar quebra de página. */
+          .card, .day, .meal, .pcard, .mini, .stat, .diag { box-shadow: none !important; }
           .card, .day, .meal, .diag, .stat, .note, .mini, .pcard, table.ex tr, .meal-head { break-inside:avoid; }
           .day-head { break-after:avoid; }
           .section { break-inside:avoid-page; }
