@@ -129,6 +129,10 @@ Backups. `supabase db dump --linked` exige Docker Desktop LIGADO (sem ele falha 
 `--dry-run` a autenticação da CLI resolve sem senha). Para o piloto-v1.0: ligar o Docker e gerar schema + dados
 (`--data-only --schema public,auth`) + roles, arquivados fora do repo.
 
+**Decisão 2026-09-21:** continuar no plano Free durante o piloto, com backup automático próprio (não o da Supabase).
+Ver `docs/BACKUP.md` — proposta pronta (GitHub Action diária, criptografada com `age`, R2 privado, retenção
+7 diários + 4 semanais), ainda **não agendada** (falta a Taina criar os secrets e uma rodada manual de teste).
+
 ### whatsapp_notifications órfãs removidas (2026-09-22)
 As 19 linhas com `user_id` nulo (envios de teste ao +33766338362, anteriores a 29/08, já órfãs desde a
 limpeza de 21/09 — todas as linhas com `user_id` preenchido já tinham sido removidas junto com as contas)

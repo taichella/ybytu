@@ -1,0 +1,132 @@
+# PROPOSTA (2026-09-22) -- ainda NÃO agendado de propósito.
+#
+# Este workflow só roda quando disparado manualmente (aba Actions > este workflow > "Run
+# workflow"), e vai falhar até os 6 secrets abaixo existirem no repositório -- isso é
+# esperado, é o teste real de que o desenho funciona antes de agendar.
+#
+# Depois que a Taina confirmar (secrets criados + uma rodada manual bem-sucedida), troca-se
+# o comentário abaixo por um `schedule:` de verdade e este aviso sai. Ver docs/BACKUP.md.
+#
+# Secrets que este workflow precisa (Settings > Secrets and variables > Actions):
+#   SUPABASE_DB_URL         -- connection string do Session Pooler (porta 5432), pg_dump
+#   BACKUP_AGE_PUBLIC_KEY   -- chave PÚBLICA age (começa com "age1..."); a privada nunca entra aqui
+#   R2_BACKUP_ACCOUNT_ID    -- account id da Cloudflare (monta o endpoint do R2)
+#   R2_BACKUP_ACCESS_KEY_ID -- token do R2 escopado SÓ ao bucket privado de backup
+#   R2_BACKUP_SECRET_ACCESS_KEY
+#   R2_BACKUP_BUCKET        -- nome do bucket privado (diferente do bucket público de vídeos)
+
+name: Backup do banco (proposta -- disparo manual)
+
+on:
+  workflow_dispatch: {}
+  # schedule:
+  #   - cron: '0 2 * * *'  # ~03h/04h em Paris (varia com horário de verão), horario de pouco uso
+
+permissions:
+  contents: read
+  issues: write  # só pra abrir issue de alerta em caso de falha
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instala supabase CLI, age e aws-cli
+        run: |
+          set -euo pipefail
+          curl -sSfL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar -xz -C /usr/local/bin supabase
+          curl -sSfL https://github.com/FiloSottile/age/releases/latest/download/age-v1.2.1-linux-amd64.tar.gz | tar -xz -C /tmp
+          sudo mv /tmp/age/age /tmp/age/age-keygen /usr/local/bin/
+          sudo apt-get update -y && sudo apt-get install -y awscli
+          supabase --version
+
+      - name: Dump schema (public + auth)
+        run: supabase db dump --db-url "$SUPABASE_DB_URL" --schema public,auth -f schema.sql
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Dump dados (public + auth)
+        run: supabase db dump --db-url "$SUPABASE_DB_URL" --schema public,auth --data-only --use-copy -f data.sql
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Dump roles
+        run: supabase db dump --db-url "$SUPABASE_DB_URL" --role-only -f roles.sql
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Valida os 3 dumps antes de criptografar (ver scripts/backup/validate-dump.sh)
+        run: bash scripts/backup/validate-dump.sh schema.sql data.sql roles.sql
+
+      - name: Empacota e confere o conteúdo do tar
+        run: |
+          set -euo pipefail
+          tar -cf backup.tar schema.sql data.sql roles.sql
+          tar -tf backup.tar | sort > /tmp/tar-listing.txt
+          diff <(printf 'data.sql\nroles.sql\nschema.sql\n') /tmp/tar-listing.txt
+
+      - name: Criptografa com age (só a chave PÚBLICA entra aqui)
+        run: |
+          set -euo pipefail
+          STAMP=$(date -u +%Y%m%d-%H%M%S)
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
+          age -r "$BACKUP_AGE_PUBLIC_KEY" -o "ybytu-backup-$STAMP.tar.age" backup.tar
+          rm -f schema.sql data.sql roles.sql backup.tar  # nunca sobem em texto puro
+        env:
+          BACKUP_AGE_PUBLIC_KEY: ${{ secrets.BACKUP_AGE_PUBLIC_KEY }}
+
+      - name: Envia pro R2 (bucket privado, prefixo daily/) e confere que chegou
+        run: |
+          set -euo pipefail
+          FILE="ybytu-backup-$STAMP.tar.age"
+          aws s3api put-object --endpoint-url "$R2_ENDPOINT_URL" --bucket "$R2_BACKUP_BUCKET" \
+            --key "daily/$FILE" --body "$FILE"
+          REMOTE_SIZE=$(aws s3api head-object --endpoint-url "$R2_ENDPOINT_URL" --bucket "$R2_BACKUP_BUCKET" --key "daily/$FILE" --query ContentLength --output text)
+          LOCAL_SIZE=$(stat -c%s "$FILE")
+          [ "$REMOTE_SIZE" = "$LOCAL_SIZE" ] || { echo "tamanho remoto ($REMOTE_SIZE) != local ($LOCAL_SIZE)"; exit 1; }
+          # Domingo (ISO weekday 7) também promove pra weekly/, mesma cópia, sem gerar dump de novo.
+          if [ "$(date -u +%u)" = "7" ]; then
+            aws s3api copy-object --endpoint-url "$R2_ENDPOINT_URL" --bucket "$R2_BACKUP_BUCKET" \
+              --copy-source "$R2_BACKUP_BUCKET/daily/$FILE" --key "weekly/$FILE"
+          fi
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_BACKUP_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_BACKUP_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT_URL: https://${{ secrets.R2_BACKUP_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          R2_BACKUP_BUCKET: ${{ secrets.R2_BACKUP_BUCKET }}
+
+      - name: Aplica retenção (7 diários + 4 semanais)
+        run: |
+          set -euo pipefail
+          PREFIX=daily KEEP=7 R2_ENDPOINT_URL="$R2_ENDPOINT_URL" R2_BACKUP_BUCKET="$R2_BACKUP_BUCKET" bash scripts/backup/prune-r2.sh
+          PREFIX=weekly KEEP=4 R2_ENDPOINT_URL="$R2_ENDPOINT_URL" R2_BACKUP_BUCKET="$R2_BACKUP_BUCKET" bash scripts/backup/prune-r2.sh
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_BACKUP_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_BACKUP_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ENDPOINT_URL: https://${{ secrets.R2_BACKUP_ACCOUNT_ID }}.r2.cloudflarestorage.com
+          R2_BACKUP_BUCKET: ${{ secrets.R2_BACKUP_BUCKET }}
+
+      - name: Alerta -- abre issue se qualquer passo acima falhou
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Backup do banco falhou -- ' + new Date().toISOString().slice(0, 10);
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'backup-failure',
+            });
+            if (existing.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: existing[0].number,
+                body: `Falhou de novo: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo, title, labels: ['backup-failure'],
+                body: `O backup diário do banco falhou. Log completo: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nVer docs/BACKUP.md pra diagnosticar.`,
+              });
+            }
