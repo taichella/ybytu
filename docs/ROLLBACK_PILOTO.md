@@ -128,3 +128,10 @@ Estado em 2026-09-21: o backup diário automático do Supabase **não aparece at
 Backups. `supabase db dump --linked` exige Docker Desktop LIGADO (sem ele falha ao subir o container do pg_dump; com
 `--dry-run` a autenticação da CLI resolve sem senha). Para o piloto-v1.0: ligar o Docker e gerar schema + dados
 (`--data-only --schema public,auth`) + roles, arquivados fora do repo.
+
+### whatsapp_notifications órfãs removidas (2026-09-22)
+As 19 linhas com `user_id` nulo (envios de teste ao +33766338362, anteriores a 29/08, já órfãs desde a
+limpeza de 21/09 — todas as linhas com `user_id` preenchido já tinham sido removidas junto com as contas)
+foram apagadas. `SELECT count(*) FROM whatsapp_notifications WHERE user_id IS NULL`: 19 antes, 0 depois;
+tabela inteira: 19 antes, 0 depois. Sem rollback: não há campo que preserve o texto original fora do
+backup `alunos_pre_limpeza_20260921_214330.json`, que já continha estas 19 linhas.
