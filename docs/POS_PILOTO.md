@@ -200,3 +200,35 @@ body), a tabela de exercícios perde Reps/Descanso e a seção de refeições ta
 - **Link do plano vale 90 dias** (`plan_share_tokens.expires_at`), a campanha 15: depois do dia
   15 o aluno vê um calendário vencido. Decidir o que a página mostra quando a campanha termina
   (esconder o calendário, mostrar "campanha encerrada", renovar ciclo...).
+
+## Rate limit nos endpoints públicos — não existe (2026-09-25)
+
+Nenhuma function existente limita requisições por IP, usuário ou token. As únicas com limite são
+as novas de OTP do app do aluno (`ybytu-auth-request-otp` / `-verify-otp`, ainda não deployadas).
+Por prioridade:
+
+1. **Link do plano** (`ybytu-get-plan-payload`, `/plano/<token>`): autentica só pelo token na URL.
+   Adivinhar token não é o risco (43 caracteres aleatórios), e sim abuso: cada chamada monta o
+   payload inteiro (várias consultas) e grava `last_accessed_at` — dá pra martelar o banco com
+   um único link vazado. Limitar por token e por IP; considerar cache curto do payload.
+2. **Geração de plano** (`ybytu-onboarding-complete`, `ybytu-generate-training-plan`,
+   `ybytu-generate-meal-plan`, `verify_jwt=false` + JWT conferido no código): qualquer usuário
+   logado dispara geração com IA (custo por chamada, Groq) quantas vezes quiser. Limitar por
+   usuário (ex.: N gerações/dia) — e signup aberto significa que "usuário logado" é qualquer um.
+3. **`ybytu-notify-plan-ready` / `ybytu-send-user-whatsapp`**: aceitam usuário logado ou chamada
+   interna; envio de WhatsApp tem custo e reputação do número — limitar por destinatário.
+4. **`whatsapp-webhook`**: POST já exige assinatura HMAC (`WHATSAPP_APP_SECRET`); rate limit aqui
+   é defesa em profundidade, prioridade menor.
+
+## Histórico do git: limpeza opcional depois de tornar o repositório privado
+
+O repositório foi público de 2026-07-01 a (data em que for privado). O histórico ainda contém:
+o token antigo de verificação do webhook do WhatsApp (commit `201f30ca` — **rotacionado em
+<data da rotação>**, então o valor antigo não vale mais), dados pessoais removidos dos arquivos
+atuais em 2026-09-25 (telefone, e-mails, nomes, UUIDs de conta) e `apps/ybytu-app/node_modules`
+(commit `07c0f61b`, removido do versionamento em `b09016a6`; o pack tem ~150 MB por causa dele).
+**Opcional**, só depois de privado: `git filter-repo` pra reescrever o histórico. É destrutivo —
+muda todos os hashes de commit, exige force-push e que toda cópia (inclusive a de outros agentes)
+seja clonada de novo; tags e referências a commits em docs (ex.: `201f30ca`) ficam inválidas.
+Privar sozinho não apaga o que já foi público (caches/arquivos externos), por isso a rotação do
+token vem antes e não depende desta limpeza.
