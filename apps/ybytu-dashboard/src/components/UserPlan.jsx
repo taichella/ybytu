@@ -533,7 +533,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                   <span className="tag">PLANO PERSONALIZADO · #{meta.plan_code || '—'}</span>
                 </div>
                 {/* "Desafio X dias" removido pro piloto -- achado 2026-09-17
-                    (revisão Antigravity): meta.cycle_days é CYCLE_DAYS, uma
+                    (revisão Antigravity): meta.cycle_days é CAMPAIGN_CYCLE_DAYS, uma
                     constante fixa em buildPlanPayload.ts (não há campo de
                     duração de desafio no schema), então o número nunca varia
                     por aluno. Exibir como se fosse um dado do plano dele é
@@ -637,7 +637,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
 
                   {calendar.length > 0 && (
                     <div className="card" style={{ marginTop: '14px' }}>
-                      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg> Calendário do Desafio · {calendar.length} dias</h3>
+                      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg> Calendário da campanha {meta.campaign_name_ptbr || `Desafio ${calendar.length} dias`}</h3>
                       <p className="fine" style={{ marginBottom: '10px' }}>Nos dias ON: mesmo dia cobre treino e dieta. Dias-tipo em rodízio ao longo do desafio.</p>
                       <div className="cal15">
                         {calendar.map((day) => (

@@ -227,14 +227,21 @@ function cadencePtbr(row: {
   return parts.join('-')
 }
 
-// ─── Calendário de 15 dias ──────────────────────────────────────────────────
+// ─── Calendário da campanha (CAMPAIGN_CYCLE_DAYS) ───────────────────────────
 // DECISÃO sem instrução explícita: distribui os dias de treino nos primeiros
 // N dias de cada bloco de 7 (N = training_days_per_week), o resto vira "livre".
 // training_day_ref cicla pelos dias do split (1..trainingDayCount); meal_day_ref
 // cicla independentemente pelos menus disponíveis (podem ter contagens
 // diferentes se training_days_per_week != nutrition_days_per_week/menus).
 const WEEKDAYS_PTBR = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-const CYCLE_DAYS = 15 // DECISÃO: não há campo de duração de desafio no schema — fixo em 15, igual ao mockup.
+// Duração da CAMPANHA de pré-lançamento (Desafio 15 dias), NÃO do plano: não
+// existe campo de duração de plano no schema (training_plans/meal_plans só têm
+// dias por semana e minutos por sessão). Renomeado de CYCLE_DAYS em 2026-09-25
+// pra não parecer dado do aluno. Vale enquanto todo aluno do piloto estiver na
+// campanha -- qualquer plano fora dela precisa de um campo real de duração antes
+// (ver docs/POS_PILOTO.md).
+const CAMPAIGN_CYCLE_DAYS = 15
+const CAMPAIGN_NAME_PTBR = `Desafio ${CAMPAIGN_CYCLE_DAYS} dias`
 
 // ─── Rótulo de região macro por dia (formato do título aprovado pela Taina) ───
 // "Misto" quando não há maioria clara (empate entre 2+ categorias) — decisão
@@ -267,7 +274,7 @@ function buildCalendar(
   const calendar: Array<Record<string, unknown>> = []
   let trainingCounter = 0
   let mealCounter = 0
-  for (let day = 1; day <= CYCLE_DAYS; day++) {
+  for (let day = 1; day <= CAMPAIGN_CYCLE_DAYS; day++) {
     const date = new Date(issuedAt)
     date.setDate(date.getDate() + (day - 1))
     const weekdayPtbr = WEEKDAYS_PTBR[date.getDay()]
@@ -931,7 +938,10 @@ export async function buildPlanPayload(
       // schema — gerado deterministicamente a partir do user_id só pra exibição.
       plan_code: `PL-${userId.replace(/-/g, '').slice(0, 8).toUpperCase()}`,
       issued_at: issuedAt.toISOString().slice(0, 10),
-      cycle_days: CYCLE_DAYS,
+      // cycle_days mantido na resposta (nenhuma tela lê hoje); campaign_name_ptbr
+      // é o que o documento mostra no título do calendário.
+      cycle_days: CAMPAIGN_CYCLE_DAYS,
+      campaign_name_ptbr: CAMPAIGN_NAME_PTBR,
       calendar,
     },
     profile: {

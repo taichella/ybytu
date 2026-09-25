@@ -176,3 +176,27 @@ Achados do revisor (leitura de código) deixados conscientemente pra depois do p
   onboarding, adesão) e os botões Exportar/Convidar foram escondidos em 2026-09-25 porque não
   faziam nada. Assinatura, objetivo e onboarding são filtráveis com dado que a lista já tem;
   adesão depende de rastreio de treino/refeição concluído, que não existe.
+
+## PDF: ramo de 4 polegadas do `handlePrint` é código morto — remover (2026-09-25)
+
+`UserPlan.jsx` `handlePrint()` injeta, em tela ≤680px, `@page { size: 4in 11in; margin: 0.25in }`
++ `.doc { zoom: 1.25 }` num `<style>` no `<head>`. O `@page { size:letter; margin:0 }` do próprio
+componente vem depois (no `<style>` dentro do `<body>`) e vence: o PDF do celular sai **Letter**
+(medido: MediaBox 612×792 pt). Só o `zoom: 1.25` tem efeito. Resultado medido no PDF real:
+todas as colunas legíveis (96/96 células, fonte efetiva 15,6px no celular, 12,5px no computador).
+
+**Não ativar** esse ramo sem refazer o documento: forçando a página de 4in (style no fim do
+body), a tabela de exercícios perde Reps/Descanso e a seção de refeições também corta
+(Calorias, legenda de macros). Remover o `@page` de 4in do `handlePrint` e decidir se o
+`zoom: 1.25` no celular fica (hoje ajuda a legibilidade).
+
+## Duração do plano e campanha "Desafio 15 dias" (2026-09-25)
+
+- `CAMPAIGN_CYCLE_DAYS = 15` (`_shared/buildPlanPayload.ts`, antes `CYCLE_DAYS`) é a duração da
+  **campanha**, não do plano. Não existe campo de duração em `training_plans`/`meal_plans`
+  (só dias por semana e minutos por sessão). O documento agora diz "Calendário da campanha
+  Desafio 15 dias". **Pré-requisito pra qualquer plano fora da campanha** (mensal, pós-piloto):
+  criar um campo real de duração e o calendário ler dele — senão o 15 vira dado fabricado.
+- **Link do plano vale 90 dias** (`plan_share_tokens.expires_at`), a campanha 15: depois do dia
+  15 o aluno vê um calendário vencido. Decidir o que a página mostra quando a campanha termina
+  (esconder o calendário, mostrar "campanha encerrada", renovar ciclo...).
