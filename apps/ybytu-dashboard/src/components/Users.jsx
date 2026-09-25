@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { invokeFunction } from '../services/apiClient.js';
 import ThemeToggle from './ThemeToggle';
 
 const SUB = {
@@ -26,8 +26,8 @@ export default function Users() {
       try {
         setIsLoading(true);
         setError(null);
-        const { data, error: funcError } = await supabase.functions.invoke('ybytu-admin-users');
-        if (funcError) throw funcError;
+        // apiClient (2026-09-25): mesma trava de { error } / success:false dos outros services.
+        const data = await invokeFunction('ybytu-admin-users');
         // Achado 2026-09-17 (revisão Antigravity): data null/objeto de erro em
         // vez de array (200 com corpo inesperado, ou invoke() sem lançar)
         // ficava em silêncio -- lista vazia sem nenhuma mensagem, ou
@@ -113,13 +113,8 @@ export default function Users() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <ThemeToggle />
-          <div style={{ width: '1px', height: '24px', background: 'var(--border)' }}></div>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: '11px', padding: '9px 14px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg> Exportar
-          </button>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '7px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '11px', padding: '10px 16px', fontSize: '13px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg> Convidar
-          </button>
+          {/* Exportar / Convidar escondidos (2026-09-25): não tinham ação nenhuma --
+              controle morto na tela é pior que ausência. Ver docs/POS_PILOTO.md. */}
         </div>
       </header>
 
@@ -159,13 +154,9 @@ export default function Users() {
             </div>
           </div>
 
-          {/* Filters[cite: 8] */}
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '18px' }}>
-            <select style={{ padding: '9px 14px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: '13px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>Qualquer assinatura</option><option>Free</option><option>Start</option><option>Pro</option></select>
-            <select style={{ padding: '9px 14px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: '13px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>Qualquer objetivo</option><option>Emagrecimento</option><option>Hipertrofia</option><option>Condicionamento</option></select>
-            <select style={{ padding: '9px 14px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: '13px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>Onboarding</option><option>Completo</option><option>Incompleto</option></select>
-            <select style={{ padding: '9px 14px', borderRadius: '10px', background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: '13px', fontFamily: 'inherit', fontWeight: 600, outline: 'none', cursor: 'pointer' }}><option>Adesão</option><option>Alta (≥80%)</option><option>Média (40–79%)</option><option>Baixa (&lt;40%)</option></select>
-          </div>
+          {/* Filtros escondidos (2026-09-25): os 4 selects não tinham value nem onChange
+              (não filtravam nada) e "Adesão" oferecia faixas de um dado que não existe.
+              Religar com estado real quando houver -- ver docs/POS_PILOTO.md. */}
 
           {/* Table[cite: 8] */}
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>

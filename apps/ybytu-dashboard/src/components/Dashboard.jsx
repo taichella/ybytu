@@ -131,7 +131,9 @@ export default function Dashboard() {
               nunca ausente: se não houver cadastro/assinatura ainda, mostra
               o card com estado vazio em vez de sumir. */}
           {!error && !loading && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.7fr) minmax(0,1fr)', gap: '18px', marginBottom: '18px' }}>
+            // yb-work-grid (index.css): empilha em 1 coluna até 860px -- em 360px as
+            // 2 colunas espremiam gráfico e donut (2026-09-25).
+            <div className="yb-work-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.7fr) minmax(0,1fr)', gap: '18px', marginBottom: '18px' }}>
               <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '8px' }}>
                   <div>

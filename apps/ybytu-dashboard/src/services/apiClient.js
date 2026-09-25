@@ -26,6 +26,21 @@ export async function invokeFunction(functionName, options = {}) {
   });
 
   if (error) {
+    // Resposta não-2xx (FunctionsHttpError): o supabase-js devolve data=null e
+    // uma mensagem genérica, mas o corpo { error: 'codigo' } da function está
+    // em error.context (Response). Lê o corpo pra mostrar o motivo real em vez
+    // de "Edge Function returned a non-2xx status code" (2026-09-25).
+    let body = null;
+    try {
+      if (error.context && typeof error.context.json === 'function') body = await error.context.json();
+    } catch { /* corpo não-JSON: fica a mensagem genérica */ }
+    if (body?.error) {
+      const code = body.error;
+      const friendly = (options.errorMap && options.errorMap[code])
+        || (typeof options.formatError === 'function' && options.formatError(body))
+        || code;
+      throw new ApiError(friendly, { ...body, httpStatus: error.context?.status, originalError: error });
+    }
     throw new ApiError(error.message || 'Erro de comunicação com o servidor.', { originalError: error });
   }
 

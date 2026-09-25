@@ -1,11 +1,23 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { invokeFunction } from '../services/apiClient.js';
 import { StaffContext } from '../lib/staffContextCore';
 import ThemeToggle from './ThemeToggle';
 import UserLimitationsList from './UserLimitationsList';
 
 const VALID_TABS = new Set(['overview', 'health', 'plans', 'activity']);
+
+// Códigos de erro de ybytu-submit-plan-review -> mensagem pro profissional.
+// Código fora do mapa aparece cru (melhor que esconder o motivo).
+const REVIEW_ERROR_MESSAGES = {
+  role_not_held_by_caller: 'Você não tem o papel necessário para dar este parecer.',
+  invalid_role: 'Papel de parecer inválido.',
+  invalid_status: 'Status de parecer inválido.',
+  missing_user_id: 'Aluno não identificado.',
+  user_has_no_active_training_plan: 'O aluno não tem plano de treino ativo.',
+  training_plan_not_active_for_user: 'Este plano de treino não é mais o plano ativo do aluno — recarregue a página.',
+  internal_error: 'Erro interno no servidor.',
+};
 
 // Mesmas opções do passo "meals_per_day" do onboarding (OnboardingPreLaunch.html)
 // -- profiles.meals_per_day guarda só o número (3-6), o rótulo nunca foi
@@ -181,22 +193,21 @@ export default function UserDetail() {
       setIsLoading(true);
       setError(null);
       try {
+        // apiClient (2026-09-25): rejeita também corpo { error } / success:false
+        // com HTTP 200. "Aluno sem plano" não é erro (payload normal, training/
+        // nutrition nulos), então o plano não precisa mais ser engolido em
+        // silêncio -- falha real do plano vira mensagem, não tela sem plano.
         const [userRes, planRes] = await Promise.all([
-          supabase.functions.invoke('ybytu-admin-users', { body: { id } }),
-          supabase.functions.invoke('ybytu-get-plan-for-staff', { body: { userId: id } })
+          invokeFunction('ybytu-admin-users', { body: { id } }),
+          invokeFunction('ybytu-get-plan-for-staff', { body: { userId: id } }),
         ]);
 
-        if (userRes.error) throw userRes.error;
-        // Do not throw on planRes.error, it might be that user has no plan, or let's handle gracefully
-
         if (isMounted) {
-          if (userRes.data && userRes.data.profile) {
-            setUserData(userRes.data.profile);
-            setResolvedLabels(userRes.data.resolved || {});
+          if (userRes?.profile) {
+            setUserData(userRes.profile);
+            setResolvedLabels(userRes.resolved || {});
           }
-          if (planRes.data && !planRes.error) {
-            setPlanPayload(planRes.data);
-          }
+          if (planRes) setPlanPayload(planRes);
         }
       } catch (err) {
         if (isMounted) setError(err.message);
@@ -247,7 +258,12 @@ export default function UserDetail() {
   const submitReview = async (role, notePtbr, reviewStatus) => {
     setSubmittingRole(role);
     try {
-      const res = await supabase.functions.invoke('ybytu-submit-plan-review', {
+      // apiClient (2026-09-25, bloqueava piloto): invoke direto só olhava
+      // res.error -- um { error } / ok:false no corpo passava como sucesso e o
+      // profissional achava que tinha validado. invokeFunction lança nos dois
+      // casos e o catch abaixo mostra o motivo.
+      await invokeFunction('ybytu-submit-plan-review', {
+        errorMap: REVIEW_ERROR_MESSAGES,
         body: {
           user_id: id,
           role,
@@ -257,10 +273,13 @@ export default function UserDetail() {
           meal_plan_id: role === 'nutricionista' ? (planPayload?.nutrition?.meal_plan_id ?? null) : null,
         }
       });
-      if (res.error) throw res.error;
-      const planRes = await supabase.functions.invoke('ybytu-get-plan-for-staff', { body: { userId: id } });
-      if (planRes.data && !planRes.error) {
-        setPlanPayload(planRes.data);
+      // Parecer já gravado: se o recarregamento falhar, avisa sem dizer que o
+      // parecer falhou (ele não falhou).
+      try {
+        const planRes = await invokeFunction('ybytu-get-plan-for-staff', { body: { userId: id } });
+        if (planRes) setPlanPayload(planRes);
+      } catch (reloadErr) {
+        alert('Parecer salvo, mas não foi possível recarregar o plano: ' + reloadErr.message + ' — recarregue a página.');
       }
       return true;
     } catch (err) {
@@ -363,9 +382,8 @@ export default function UserDetail() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                   <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 900, letterSpacing: '-.02em' }}>{userData.full_name}</h1>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 11px', borderRadius: '7px', fontSize: '11px', fontWeight: 800, background: 'rgba(245,95,22,.14)', color: '#F55F16', textTransform: 'uppercase' }}>{resolvedLabels.subscriptionName || 'Free'}</span>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 11px', borderRadius: '7px', fontSize: '11px', fontWeight: 800, background: 'rgba(22,163,74,.12)', color: '#16a34a', textTransform: 'uppercase' }}>
-                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }}></span> Ativo
-                  </span>
+                  {/* Badge "Ativo" removido (2026-09-25): era fixo pra qualquer aluno e
+                      não existe status de aluno no schema (ybytu-admin-users não devolve nenhum). */}
                 </div>
                 <p style={{ margin: '6px 0 0', fontSize: '13px', color: 'var(--muted)', fontWeight: 600 }}>
                   {memberSinceLabel ? `Membro desde ${memberSinceLabel} · ` : ''}ID {userData.id.slice(0, 4)}…{userData.id.slice(-4)}
@@ -432,31 +450,21 @@ export default function UserDetail() {
                 </div>
               </section>
 
+              {/* Saúde, físicas e alimentares: mesmo componente dos cards de parecer
+                  (2026-09-25) -- "Nenhuma" declarada deixa de aparecer como alerta
+                  vermelho e "não informado" só aparece quando o aluno de fato não respondeu. */}
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Condições de Saúde</h3>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {(resolvedLabels.healthConditions && resolvedLabels.healthConditions.length > 0) ? resolvedLabels.healthConditions.map((g, i) => (
-                      <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 13px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'rgba(239,68,68,.1)', color: 'var(--danger)', border: '1px solid rgba(239,68,68,.2)' }}>{g}</span>
-                  )) : <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Não informado</span>}
-                </div>
-              </section>
-
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Condições Físicas & Lesões</h3>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {(resolvedLabels?.physicalConditions?.length > 0) ? resolvedLabels?.physicalConditions.map((g, i) => (
-                      <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 13px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'rgba(217,119,6,.12)', color: '#d97706', border: '1px solid rgba(217,119,6,.2)' }}>{g}</span>
-                  )) : <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Não informado</span>}
-                </div>
-              </section>
-
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>
-                <h3 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Restrições Alimentares</h3>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {(resolvedLabels?.dietaryRestrictions?.length > 0) ? resolvedLabels?.dietaryRestrictions.map((g, i) => (
-                      <span key={i} style={{ display: 'inline-flex', alignItems: 'center', padding: '6px 13px', borderRadius: '9px', fontSize: '13px', fontWeight: 700, background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)' }}>{g}</span>
-                  )) : <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Não informado</span>}
-                </div>
+                <h3 style={{ margin: '0 0 12px', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' }}>Limitações declaradas</h3>
+                <UserLimitationsList
+                  specialty="all"
+                  physicalConditions={resolvedLabels?.physicalConditions}
+                  dietaryRestrictions={resolvedLabels?.dietaryRestrictions}
+                  healthConditions={resolvedLabels?.healthConditions}
+                  healthConditionIds={userData?.health_conditions_ids}
+                  declaredNonePhysical={resolvedLabels?.declaredNonePhysical}
+                  declaredNoneDietary={resolvedLabels?.declaredNoneDietary}
+                  declaredNoneHealth={resolvedLabels?.declaredNoneHealth}
+                />
               </section>
 
               <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px' }}>

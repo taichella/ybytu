@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { invokeFunction } from '../services/apiClient.js';
 import UserPlan from './UserPlan';
 
 // Página própria do documento do aluno (UsuarioDetalhe.dc.html, "Ver plano" ->
@@ -32,20 +32,19 @@ export default function UserPlanPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const [userRes, planRes] = await Promise.all([
-          supabase.functions.invoke('ybytu-admin-users', { body: { id } }),
-          supabase.functions.invoke('ybytu-get-plan-for-staff', { body: { userId: id } })
+        // invokeFunction (apiClient) em vez de invoke direto (2026-09-25): além do
+        // erro de transporte (já tratado em 09-17), rejeita corpo { error } ou
+        // success:false com HTTP 200 -- antes um { error: ... } virava "plano"
+        // e a folha saía em branco como se fosse válida. "Aluno sem plano" não
+        // é erro: o payload chega normal com training/nutrition nulos.
+        const [userData, planData] = await Promise.all([
+          invokeFunction('ybytu-admin-users', { body: { id } }),
+          invokeFunction('ybytu-get-plan-for-staff', { body: { userId: id } }),
         ]);
-        if (userRes.error) throw userRes.error;
-        // Achado 2026-09-17 (revisão Antigravity): planRes.error era engolido
-        // em silêncio -- página ficava sem plano E sem mensagem nenhuma,
-        // indistinguível de "aluno sem plano ainda" (que é um estado real,
-        // não um erro). Só o erro real precisa virar mensagem visível.
-        if (planRes.error) throw planRes.error;
         if (isMounted) {
-          const name = userRes.data?.profile?.full_name || '';
+          const name = userData?.profile?.full_name || '';
           if (name) document.title = `Plano — ${name}`;
-          if (planRes.data) setPlanPayload(planRes.data);
+          if (planData) setPlanPayload(planData);
         }
       } catch (err) {
         if (isMounted) setError(err.message);

@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { trainingService } from '../services/trainingService.js';
 import ThemeToggle from './ThemeToggle';
+import ExerciseThumb from './ExerciseThumb.jsx';
+import { thumbSources } from '../lib/media.js';
 
 const DAY_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
@@ -199,12 +201,11 @@ export default function TrainingPlan() {
               </div>
               <div>
                 {daySlots.map((s, i) => (
-                  <div key={s.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 22px', borderBottom: '1px solid var(--border)' }}>
+                  <div key={s.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: '12px 16px', padding: '16px 22px', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
                     <span style={{ width: '32px', height: '32px', borderRadius: '9px', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '14px', flexShrink: 0 }}>{DAY_LETTERS[i] ?? i + 1}</span>
-                    <div style={{ width: '64px', height: '46px', borderRadius: '9px', background: 'var(--surface-2)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', flexShrink: 0, overflow: 'hidden' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* Miniatura real (2026-09-25), mesma ExerciseThumb do construtor e do documento do aluno. */}
+                    <ExerciseThumb sources={thumbSources(s.exercise?.image_url)} label={s.exercise?.name_ptbr ?? s.exercise_id} width={64} height={46} />
+                    <div style={{ flex: 1, minWidth: '140px' }}>
                       <p style={{ margin: 0, fontWeight: 800, fontSize: '15px' }}>{s.exercise?.name_ptbr ?? s.exercise_id}</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '3px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600 }}>{(s.exercise?.muscle_groups ?? []).join(', ') || '—'}</span>
@@ -214,6 +215,8 @@ export default function TrainingPlan() {
                       <div style={{ textAlign: 'center' }}><p style={{ margin: 0, fontSize: '18px', fontWeight: 900 }}>{s.sets ?? '—'}</p><p style={{ margin: '1px 0 0', fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Séries</p></div>
                       <div style={{ textAlign: 'center' }}><p style={{ margin: 0, fontSize: '18px', fontWeight: 900 }}>{s.reps ?? '—'}</p><p style={{ margin: '1px 0 0', fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Reps</p></div>
                       <div style={{ textAlign: 'center' }}><p style={{ margin: 0, fontSize: '18px', fontWeight: 900 }}>{s.rest_seconds ? `${s.rest_seconds}s` : '—'}</p><p style={{ margin: '1px 0 0', fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Desc.</p></div>
+                      {/* Carga (2026-09-25): texto pronto do servidor, mesma regra do PDF (_shared/loadDisplay.ts). */}
+                      <div style={{ textAlign: 'center' }}><p style={{ margin: 0, fontSize: s.load_display_ptbr && s.load_display_ptbr.length > 6 ? '13px' : '18px', fontWeight: 900, lineHeight: s.load_display_ptbr && s.load_display_ptbr.length > 6 ? '24px' : undefined, color: !s.load_display_ptbr || s.load_display_ptbr === 'a definir' ? 'var(--muted)' : 'var(--text)' }}>{s.load_display_ptbr || 'a definir'}</p><p style={{ margin: '1px 0 0', fontSize: '10px', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>Carga</p></div>
                     </div>
                   </div>
                 ))}

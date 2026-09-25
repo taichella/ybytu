@@ -443,7 +443,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
           .day-head .time { margin-left: 0; }
 
           .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -1px; }
-          table.ex { width: 100%; min-width: auto; }
+          table.ex { width: 100%; }
           table.ex th { padding: 8px 6px; font-size: 8.5px; }
           table.ex td { padding: 8px 6px; font-size: 11px; }
           .exname { gap: 6px; }
@@ -455,6 +455,15 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
           .ing { flex-wrap: wrap; row-gap: 2px; }
 
           .footer { flex-direction: column; align-items: flex-start; gap: 6px; padding: 16px 16px 0; }
+        }
+
+        /* 560px restaurado (2026-09-25): 9d1f3153 trocou por min-width:auto e as
+           colunas (séries/reps/descanso/carga) ficaram esmagadas no celular -- a
+           tabela rola dentro de .table-scroll em vez de espremer. SÓ na tela:
+           o @media (max-width:680px) acima também vale na impressão estreita
+           (@page 4in, ver handlePrint) e ali 560px cortaria a tabela no PDF. */
+        @media screen and (max-width: 680px) {
+          table.ex { min-width: 560px; }
         }
 
         @page { size:letter; margin:0; }
@@ -500,6 +509,11 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
               {saveState === 'saving' ? 'Salvando…' : saveState === 'success' ? 'Cargas salvas ✓' : 'Salvar cargas'}
             </button>
           )}
+          {editable && onSaveLoads && saveState === 'error' && (
+            <span role="alert" style={{ color: 'var(--danger, #dc2626)', fontSize: '13px', fontWeight: 700 }}>
+              Não foi possível salvar as cargas — nada foi alterado. Tente de novo.
+            </span>
+          )}
           <button onClick={handlePrint}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg> Salvar PDF
           </button>
@@ -534,7 +548,9 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                   <div className="ava">{initials(profile.name)}</div>
                   <div>
                     <p className="nm">{profile.name || '—'}</p>
-                    <div className="rw"><span className="pill pro">Plano Pro</span><span className="pill ok">Onboarding completo</span></div>
+                    {/* Pills "Plano Pro" / "Onboarding completo" removidas (2026-09-25):
+                        eram literais iguais pra todo aluno (revisão Antigravity 09-17) e o
+                        payload não traz assinatura nem status de onboarding. */}
                   </div>
                 </div>
                 <div className="mini"><span className="l">Emitido</span><span className="v" style={{ fontSize: '15px' }}>{formatIssuedDate(meta.issued_at)}</span></div>
