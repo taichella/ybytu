@@ -19,8 +19,8 @@ fail() { echo "VALIDACAO FALHOU: $1" >&2; exit 1; }
 [ -s "$ROLES_FILE" ] || fail "roles.sql vazio"
 
 # Confere que as DUAS schemas pedidas (public e auth) realmente vieram, não só uma.
-grep -q 'CREATE TABLE "public"\."profiles"' "$SCHEMA_FILE" || fail "schema.sql sem public.profiles"
-grep -q 'CREATE TABLE "auth"\."users"' "$SCHEMA_FILE" || fail "schema.sql sem auth.users"
+grep -q 'CREATE TABLE.*"public"\."profiles"' "$SCHEMA_FILE" || fail "schema.sql sem public.profiles"
+grep -q 'CREATE TABLE.*"auth"\."users"' "$SCHEMA_FILE" || fail "schema.sql sem auth.users"
 grep -qE '^(COPY|INSERT INTO) "public"\."exercises"' "$DATA_FILE" || fail "data.sql sem dados de public.exercises"
 grep -qE '^(COPY|INSERT INTO) "auth"\."users"' "$DATA_FILE" || fail "data.sql sem dados de auth.users"
 
