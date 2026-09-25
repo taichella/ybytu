@@ -62,9 +62,10 @@ Nenhum destes é o mesmo token/bucket já usado pros vídeos — criar tudo novo
 
 ## Como restaurar
 
-**Espaço em disco:** o Docker Desktop e os dumps/backups locais ficam em `E:\` (`E:\DockerData` e
-`E:\ybytu-backups`, movidos de C: em 2026-09-22 porque o disco C: da máquina de desenvolvimento ficou sem espaço
-livre). Manter assim — não apontar de volta pro C:.
+**Espaço em disco (atualizado 2026-09-25):** os backups locais estão em `C:\Users\tahch\ybytu-backups`. O disco
+externo E: (SSD USB, onde ficavam backups e `E:\DockerData` desde 2026-09-22) falhou com erro de hardware e foi
+aposentado — ver "Backups: onde estão" em `docs/ROLLBACK_PILOTO.md`. O teste de restauração passa a rodar dentro do
+próprio workflow (Postgres descartável no runner), sem depender do Docker desta máquina.
 
 **Teste local (não toca produção), quando o Docker estiver ligado:**
 ```bash

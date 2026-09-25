@@ -97,18 +97,19 @@ contato+nutri@ybytu.app), os 7 moldes `tr_201..207` (179 linhas) e os 300 planos
 <TELEFONE_TESTE_EQUIPE> anteriores a 29/08; nenhuma tela de aluno as conta).
 
 **Backup (contém HASH DE SENHA de `auth.users`; apagar quando o piloto estabilizar):**
-`E:\ybytu-backups\alunos_pre_limpeza_20260921_214330.json` — 597 KB, gerado em 2026-09-21 21:43 +02:00 via
+`C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260921_214330.json` — 597 KB, gerado em 2026-09-21 21:43 +02:00 via
 `supabase db query --linked` (11 contas, 23 tabelas, 818 linhas). Fica **fora do repo** de propósito; nunca commitar,
 nunca enviar por e-mail/chat. Apagar o arquivo quando o piloto estabilizar (depois do primeiro aluno real
 funcionando ponta a ponta e do ponto de restauração `piloto-v1.0` existir). O backup anterior (subconjunto, 10 contas)
 foi apagado por estar contido neste. **Movido de `C:\Users\tahch\ybytu-backups\` para `E:\ybytu-backups\` em
 2026-09-22** (o C: da máquina ficou sem espaço livre; o Docker Desktop também foi realocado pra
-`E:\DockerData`) — integridade conferida por tamanho e sha256 idênticos nos dois lados antes de apagar a cópia em C:.
+`E:\DockerData`) — integridade conferida por tamanho e sha256 idênticos nos dois lados antes de apagar a cópia em C:. **Voltou pro C: em 2026-09-25** — o E: falhou com erro de
+hardware; ver "Backups: onde estão" no fim deste arquivo.
 
 **Restaurar** (recria contas com a mesma senha, perfis, planos, tokens `/plano/<token>`, pareceres, log de WhatsApp e a
 linha de staff revogada):
 ```bash
-node scripts/restaurar_alunos_do_backup.mjs "E:/ybytu-backups/alunos_pre_limpeza_20260921_214330.json" > restore.sql
+node scripts/restaurar_alunos_do_backup.mjs "C:/Users/tahch/ybytu-backups/alunos_pre_limpeza_20260921_214330.json" > restore.sql
 npx supabase db query --linked -f restore.sql
 ```
 O SQL é idempotente (`ON CONFLICT DO NOTHING`), insere na ordem das FKs e pula colunas geradas. **Ensaiado antes de
@@ -152,8 +153,43 @@ backup `alunos_pre_limpeza_20260921_214330.json`, que já continha estas 19 linh
 **Limpeza (executada 2026-09-22 18:44, `scripts/limpeza_alunos_teste_mvp_20260922.sql`):** removidas as 3 contas de
 teste do dia (`<EMAIL_PESSOAL_1>`, `<EMAIL_TESTE_B>` "Teste A Aluno", `<EMAIL_TESTE_C>`
 "Teste B Aluno"), 3 planos de treino + 3 de nutrição, 3 tokens, 9 notificações WhatsApp. Backup:
-`E:\ybytu-backups\alunos_pre_limpeza_20260922_184447.json` (108 KB, hash de senha, apagar quando o piloto
+`C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260922_184447.json` (108 KB, hash de senha, apagar quando o piloto
 estabilizar — ver regra na seção de 2026-09-21 acima; movido de C: pro mesmo motivo e na mesma checagem descrita
 acima). Restaurar: mesmo `restaurar_alunos_do_backup.mjs`. Ficam 3
 contas no Auth (equipe) + a conta de demonstração criada depois desta limpeza (WhatsApp real da Taina, **não** faz
 parte de nenhum backup/limpeza de teste — é a conta real de demonstração pro cliente).
+
+## Backups: onde estão (2026-09-25) — RISCO: cópia única, só no C:
+
+**Hoje os 4 backups existem SÓ no disco interno desta máquina**, em `C:\Users\tahch\ybytu-backups\`. Não há segunda
+cópia em lugar nenhum. Se este disco falhar, ou a máquina for perdida, os backups vão junto. Isso é risco aberto
+**até o backup automático no R2 (bucket privado, ver `docs/BACKUP.md`) rodar com sucesso** — a partir daí o dump
+diário fica fora da máquina e testado.
+
+| Arquivo | Bytes | sha256 |
+|---|---|---|
+| `alunos_pre_limpeza_20260921_214330.json` | 597531 | `925c9599b19edab558d985e113e72baac730eca5655b25d17ab9f39d0184041f` |
+| `alunos_pre_limpeza_20260922_184447.json` | 110813 | `2b42146275c9cc7a30a9e1870c7eddbdf82a71a4e76c21985548a846fe87f024` |
+| `piloto-v1.0-dump-20260922-1853.tar` | 3604480 | `6fbe5e589e981d205503fbe89a1b052ef454a0c315b8d6a3d8e9a8b573c26afc` |
+| `piloto-v1.0-dump-20260925-1622.tar` | 3614720 | `4f57f54ff05108842e775fd2dd9f571b30b4a7e49f5b84b55d0d3ef290f98e1a` |
+| `piloto-v1.0-prod-counts-20260925-1622.json` (contagens de produção no momento do dump de 25/09) | 4782 | `091fb908f1e591d3a1b3d2888745bc39a20c5b419d859eca1699608205c15482` |
+
+Os dois `alunos_pre_limpeza_*.json` e os dois dumps contêm **hash de senha** de `auth.users` — nunca commitar, nunca
+enviar por e-mail/chat.
+
+**Integridade:** os 3 arquivos antigos foram copiados do E: pro C: em 2026-09-25 enquanto a leitura ainda funcionava;
+sha256 idêntico nos dois lados, e conteúdo conferido de forma independente (dump de 22/09 passa em
+`scripts/backup/validate-dump.sh`; os JSON têm as contagens registradas na época: 11 contas em 21/09, 3 em 22/09).
+O dump de 25/09 (14:22–14:23 UTC, schema + dados de `public`/`auth` + roles, 67 tabelas / 23.994 linhas em produção)
+foi gerado direto no C: e também passa no `validate-dump.sh`.
+
+**Disco E: aposentado.** O SSD USB externo (Verbatim Portable SSD) que guardava os backups desde 22/09 falhou com erro
+de hardware: 612 eventos 154 ("falha de E/S por erro de hardware") e 775 eventos 153 em 2 horas, a cada minuto, sem
+nenhuma cópia em andamento — mesmo depois de trocar cabo e porta. O Windows continuava reportando o disco como
+"Healthy". **Não usar o E: pra nada**, nem como destino de backup nem pro Docker. Ficaram lá dois resíduos das
+tentativas de 25/09 (um `.tar` de 0 byte e a pasta parcial `piloto-v1.0-20260925-1616`), sem valor — não é backup.
+
+**Teste de restauração:** não depende mais do Docker desta máquina (que tinha os dados no E:). Decisão 2026-09-25: o
+próprio workflow de backup restaura cada dump num Postgres descartável no runner do GitHub e confere as contagens
+antes de criptografar e enviar. O ponto de restauração `piloto-v1.0` passa a depender dessa primeira rodada
+testada, não de um restore local.
