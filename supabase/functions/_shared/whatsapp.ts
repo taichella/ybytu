@@ -62,7 +62,7 @@ async function doSendWhatsAppTemplate(
   // Normaliza formatação (espaço/traço/parênteses) sem mexer no "+" -- achado
   // 2026-09-17 (revisão Antigravity): a Cloud API da Meta aceita o "to" com
   // ou sem "+" na prática (confirmado com um envio real: target_phone
-  // "+33766338362", status 'sent', sem erro) -- não precisa remover o "+"
+  // "<TELEFONE_TESTE_EQUIPE>", status 'sent', sem erro) -- não precisa remover o "+"
   // pra número internacional (E.164) funcionar, só limpar ruído de digitação.
   const normalizedPhone = phone.replace(/[\s()-]/g, '')
 

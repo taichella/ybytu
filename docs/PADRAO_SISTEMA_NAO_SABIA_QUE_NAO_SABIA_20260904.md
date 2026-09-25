@@ -58,7 +58,7 @@ sempre que o client desistia de esperar o Gemini/Groq responder, mesmo quando o 
 de gerar com sucesso no servidor. O "safety net" (cron de lembrete) também não cobria esse caso
 exato: `.lt('plan_ready_notified_at', cutoff)` nunca bate linha com `NULL`.
 
-**Custo pra achar:** 2 onboardings reais (Rayan Road, Camila Ozene) com zero notificação, achado
+**Custo pra achar:** 2 onboardings reais (aluno de teste RR, aluna de teste CO) com zero notificação, achado
 só comparando manualmente `plan_generation_status` contra `whatsapp_notifications` no banco.
 
 **Regra que teria evitado:** todo comentário tipo "o cron pega isso depois" precisa ser checado

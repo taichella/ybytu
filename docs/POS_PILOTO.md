@@ -61,7 +61,7 @@ listados aqui. Itens adiados pra pós-piloto:
 
 ## Catálogo de exercícios — 19 pares duplicados por nome (fusão com o personal)
 
-Achado 2026-09-19 (caso Gisele): o catálogo tem **19 pares de exercícios com o mesmo nome e exercise_id diferente**. O par ex_194/ex_216 ("Flexão de braço com pegada fechada") caiu duas vezes no mesmo dia de um plano ativo. Causa raiz e correção provisória estão em `supabase/functions/ybytu-generate-training-plan/exerciseNames.ts`: o gerador **colapsa o pool por nome, mantendo o menor exercise_id** e unindo os músculos do par. Isso protege planos NOVOS; a fusão definitiva no catálogo continua pendente e depende do personal.
+Achado 2026-09-19 (caso aluna de teste GN): o catálogo tem **19 pares de exercícios com o mesmo nome e exercise_id diferente**. O par ex_194/ex_216 ("Flexão de braço com pegada fechada") caiu duas vezes no mesmo dia de um plano ativo. Causa raiz e correção provisória estão em `supabase/functions/ybytu-generate-training-plan/exerciseNames.ts`: o gerador **colapsa o pool por nome, mantendo o menor exercise_id** e unindo os músculos do par. Isso protege planos NOVOS; a fusão definitiva no catálogo continua pendente e depende do personal.
 
 **O que o personal precisa decidir, par a par:** (1) é mesmo o mesmo movimento? (2) qual registro sobrevive (o gerador hoje mantém o de menor id); (3) qual texto de instrução/vídeo/músculos/nível vale, principalmente onde a coluna "difere em" não está vazia. Depois da decisão: reapontar `training_plan_exercises.exercise_id` do registro descartado para o mantido e remover o descartado.
 

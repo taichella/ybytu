@@ -131,7 +131,7 @@ das outras duas.
 ## Teste "depois" (2026-09-01) — mesmo perfil pesado
 
 Onboarding real novo, mesmas escolhas do teste "antes" (6 dias, academia, iniciante,
-5 refeições/dia, emagrecer) — conta nova (`auditoria.retry.31ago@ybytu.app`) pra não
+5 refeições/dia, emagrecer) — conta nova (`<EMAIL_TESTE_AUDITORIA_RETRY>`) pra não
 reusar o perfil anterior.
 
 **Resultado: 30 de 30 slots via IA no treino (100%), 0 no determinístico. Zero 429

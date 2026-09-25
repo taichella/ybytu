@@ -1,7 +1,7 @@
 // Nome de exercício normalizado (minúsculas, sem acento) e colapso de
 // duplicatas por nome no pool do gerador de treino.
 //
-// Por que existe (2026-09-19, caso Gisele): o catálogo tem 19 pares de
+// Por que existe (2026-09-19, caso aluna de teste GN): o catálogo tem 19 pares de
 // exercícios com o MESMO nome e exercise_id diferente (ex: ex_194 e ex_216,
 // "Flexão de braço com pegada fechada" -- mesmo movimento, mesmo vídeo). A
 // dedupe DENTRO do dia (index.ts, depois da escolha) só troca o exercício se

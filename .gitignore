@@ -53,3 +53,6 @@ graphify-out/cache/
 graphify-out/manifest.json
 graphify-out/cost.json
 graphify-out/.graphify_python
+
+# Pasta de trabalho do Supabase CLI (project-ref, pooler-url, versões) -- local, nunca versionar (2026-09-25).
+supabase/.temp/

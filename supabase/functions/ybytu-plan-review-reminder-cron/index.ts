@@ -29,7 +29,7 @@ serve(async (req) => {
     // disparar (ex: gate client-side que abortou por engano, ver
     // OnboardingPreLaunch.html) ficavam invisíveis pro cron pra sempre,
     // apesar do comentário dizer que isso cobre o caso. Achado 2026-08-29
-    // (Rayan Road 08-27 e Camila Ozene 08-26, plan_generation_status='ok'
+    // (aluno de teste RR 08-27 e aluna de teste CO 08-26, plan_generation_status='ok'
     // mas 0 notificação e reminder também nunca disparou). Agora cobre os
     // dois casos: nunca notificado (usa created_at como base do prazo) OU
     // notificado mas sem lembrete ainda.

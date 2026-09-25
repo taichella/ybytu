@@ -8,8 +8,8 @@ zera o pool de um slot) deu trabalho real, vale manter pronto pra reuso.
 
 ## Credenciais
 
-- Email: `teste.degradacao.silenciosa+20260907@ybytu.app`
-- Auth user id: `aa00f8dd-e2c0-4fea-90e3-e0713eb08eea`
+- Email: `<EMAIL_TESTE_DEGRADACAO>`
+- Auth user id: `<USER_ID_TESTE_DEGRADACAO>`
 - Status: `banned_until = 2100-01-01` (login bloqueado, dado preservado)
 - Plano gerado no teste: `training_plan_id = tr_ai_30e50cb2` (`is_active = false`, nunca foi pra
   revisão de propósito)
@@ -47,7 +47,7 @@ pronto — serviu pra dois achados reais em dois dias diferentes.
 
 ## Como reproduzir / reusar
 
-1. Reativar a conta (remover o ban): `UPDATE auth.users SET banned_until = NULL WHERE id = 'aa00f8dd-e2c0-4fea-90e3-e0713eb08eea';`
+1. Reativar a conta (remover o ban): `UPDATE auth.users SET banned_until = NULL WHERE id = '<USER_ID_TESTE_DEGRADACAO>';`
 2. Login normal (email/senha, a senha foi definida no signup original — se perdida, resetar via
    fluxo padrão) OU chamar a function de geração via `isInternalServiceCall` se o
    `INTERNAL_FUNCTION_SECRET` estiver disponível.
@@ -61,14 +61,14 @@ pronto — serviu pra dois achados reais em dois dias diferentes.
 Duas outras contas descartáveis, órfãs de sessões anteriores, foram **desativadas** (não
 apagadas) na mesma limpeza, mesmo critério:
 
-- `auditoria.treino.31ago@ybytu.app` (`70ddc1f8-f6d4-4db0-97a8-83b520516f49`) — perfil
+- `<EMAIL_TESTE_AUDITORIA_TREINO>` (`<USER_ID_TESTE_AUDITORIA_TREINO>`) — perfil
   "Auditoria TesteTreino31Ago", usado na auditoria de 2026-08-31
   ([[project_silent_slot_degradation_finding]] cita esse profile).
-- `auditoria.retry.31ago@ybytu.app` (`c1de7398-af65-4b70-9d57-c5badedd30de`) — perfil
+- `<EMAIL_TESTE_AUDITORIA_RETRY>` (`<USER_ID_TESTE_AUDITORIA_RETRY>`) — perfil
   "Auditoria TesteRetry31Ago", mesma auditoria.
 
-**Achado à parte, não resolvido**: existe uma conta `mymba.studio@gmail.com`
-(`7d3b7923-e07b-4dfe-a847-b3cf5520fec2`, criada 2026-07-30) sem nenhuma linha em `profiles` —
+**Achado à parte, não resolvido**: existe uma conta `<EMAIL_ADMIN>`
+(`<USER_ID_ADMIN>`, criada 2026-07-30) sem nenhuma linha em `profiles` —
 signup órfão, nem teste identificado nem aluno real. Não tocada nesta limpeza por falta de
 contexto — verificar com a Taina antes de decidir o que fazer com ela.
 
@@ -77,11 +77,11 @@ contexto — verificar com a Taina antes de decidir o que fazer com ela.
 Por pedido da Taina (contas dela, de teste), `auth.users.banned_until = 2100-01-01`, dado preservado,
 mesmo método das anteriores:
 
-- `tainachella@gmail.com` — perfil "Marina Santos" (`c6cc13af-9f3b-4aa0-a6fd-b16ae048d8ea`, criada 2026-09-04)
-- `taina.chella@althero.fr` — perfil "Marcia Pontes" (`efdfc64c-bcfe-4eea-ac45-4cf59b9c23cb`, criada 2026-09-06)
+- `<EMAIL_PESSOAL_1>` — perfil "Marina Santos" (`<USER_ID_TESTE_MARINA>`, criada 2026-09-04)
+- `<EMAIL_PESSOAL_2>` — perfil "Marcia Pontes" (`<USER_ID_TESTE_MARCIA>`, criada 2026-09-06)
 
 Reverter: `UPDATE auth.users SET banned_until = NULL WHERE id IN (...)`.
 
-Sinal usado pra reconhecer conta de teste: o `whatsapp_phone` (+33766338362) é o mesmo em Marina,
-Marcia, Gisele Nascimento, Ana Silva e Rayan Road (nova, `8669a6af-...`, criada 2026-09-17).
-A Rayan Road **não** foi desativada nem tocada: investigação só de leitura, decisão pendente com a Taina.
+Sinal usado pra reconhecer conta de teste: o `whatsapp_phone` (<TELEFONE_TESTE_EQUIPE>) é o mesmo em Marina,
+Marcia, aluna de teste GN, aluna de teste AS e aluno de teste RR (nova, `<USER_ID_TESTE_RR>`, criada 2026-09-17).
+A aluno de teste RR **não** foi desativada nem tocada: investigação só de leitura, decisão pendente com a Taina.

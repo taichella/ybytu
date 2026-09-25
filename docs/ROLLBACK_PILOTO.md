@@ -49,7 +49,7 @@ sobrecarregando o Groq):**
   com sugestão provisória do personal em `docs/CLASSIFICACAO_LOAD_TYPE.md`). Registrada no histórico com
   `migration repair --status applied` (`db push` não roda: 26 entradas antigas só-remotas).
 - Functions `ybytu-admin-trainings` e `ybytu-submit-plan-review` passaram a validar carga >= 0 antes de qualquer escrita.
-- UPDATE em 2 linhas de `training_plan_exercises` (plano de TESTE da Gisele, `tr_ai_0e9a64d9`): `load_kg` -1 e 3 viraram null.
+- UPDATE em 2 linhas de `training_plan_exercises` (plano de TESTE da aluna de teste GN, `tr_ai_0e9a64d9`): `load_kg` -1 e 3 viraram null.
 
 **Reverter a coluna (só se algo que a lê quebrar; nenhuma function a lê até a interface ser publicada):**
 ```sql
@@ -88,13 +88,13 @@ Commit `5e04168a`. Reverter: `git revert 5e04168a` + deploy de `ybytu-onboarding
 `ok` sem plano nenhum gerado.
 
 ### Limpeza dos alunos de teste (EXECUTADA em 2026-09-21 21:44 +02:00, opção (a))
-Removidas 11 contas de `auth.users` (10 alunos de teste + `contato+teste_ui_staff_20260919@ybytu.app`, staff revogado
+Removidas 11 contas de `auth.users` (10 alunos de teste + `<EMAIL_STAFF_TESTE_UI_0919>`, staff revogado
 sem perfil), 10 perfis, 20 planos de treino `tr_ai_` (17 de alunos + 3 órfãos de 04/09, 404 exercícios), 10 planos
 de nutrição `mp_ai_` (200 refeições), 8 tokens `/plano/<token>`, 5 pareceres, 29 linhas de `whatsapp_notifications`,
-sessões e refresh tokens. Ficaram as 3 contas da equipe (mymba.studio@gmail.com, contato+personal@ybytu.app,
+sessões e refresh tokens. Ficaram as 3 contas da equipe (<EMAIL_ADMIN>, contato+personal@ybytu.app,
 contato+nutri@ybytu.app), os 7 moldes `tr_201..207` (179 linhas) e os 300 planos de nutrição do catálogo, sem alteração
 (conferido por hash). Ficaram 19 linhas antigas de `whatsapp_notifications` com `user_id` nulo (envios de teste ao
-+33766338362 anteriores a 29/08; nenhuma tela de aluno as conta).
+<TELEFONE_TESTE_EQUIPE> anteriores a 29/08; nenhuma tela de aluno as conta).
 
 **Backup (contém HASH DE SENHA de `auth.users`; apagar quando o piloto estabilizar):**
 `E:\ybytu-backups\alunos_pre_limpeza_20260921_214330.json` — 597 KB, gerado em 2026-09-21 21:43 +02:00 via
@@ -136,7 +136,7 @@ Ver `docs/BACKUP.md` — proposta pronta (GitHub Action diária, criptografada c
 7 diários + 4 semanais), ainda **não agendada** (falta a Taina criar os secrets e uma rodada manual de teste).
 
 ### whatsapp_notifications órfãs removidas (2026-09-22)
-As 19 linhas com `user_id` nulo (envios de teste ao +33766338362, anteriores a 29/08, já órfãs desde a
+As 19 linhas com `user_id` nulo (envios de teste ao <TELEFONE_TESTE_EQUIPE>, anteriores a 29/08, já órfãs desde a
 limpeza de 21/09 — todas as linhas com `user_id` preenchido já tinham sido removidas junto com as contas)
 foram apagadas. `SELECT count(*) FROM whatsapp_notifications WHERE user_id IS NULL`: 19 antes, 0 depois;
 tabela inteira: 19 antes, 0 depois. Sem rollback: não há campo que preserve o texto original fora do
@@ -150,7 +150,7 @@ backup `alunos_pre_limpeza_20260921_214330.json`, que já continha estas 19 linh
 `.card, .day, .meal, .pcard, .mini, .stat, .diag { box-shadow: none !important; }` perto da linha 468.
 
 **Limpeza (executada 2026-09-22 18:44, `scripts/limpeza_alunos_teste_mvp_20260922.sql`):** removidas as 3 contas de
-teste do dia (`tainachella@gmail.com`, `loyedo4524@kingdais.com` "Teste A Aluno", `komofe3268@art2mart.com`
+teste do dia (`<EMAIL_PESSOAL_1>`, `<EMAIL_TESTE_B>` "Teste A Aluno", `<EMAIL_TESTE_C>`
 "Teste B Aluno"), 3 planos de treino + 3 de nutrição, 3 tokens, 9 notificações WhatsApp. Backup:
 `E:\ybytu-backups\alunos_pre_limpeza_20260922_184447.json` (108 KB, hash de senha, apagar quando o piloto
 estabilizar — ver regra na seção de 2026-09-21 acima; movido de C: pro mesmo motivo e na mesma checagem descrita

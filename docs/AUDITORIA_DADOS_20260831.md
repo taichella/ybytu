@@ -45,7 +45,7 @@ O único plano ainda quebrado é `51765395-ffd6-412a-bf9c-11f3a6e9ccd0` (`mp_ai_
 tocou planos de catálogo (`created_by_ai=false`). É uma anomalia isolada, de uma única
 chamada, achada e já registrada antes desta auditoria; não foi possível reproduzi-la
 gerando o plano de novo várias vezes no mesmo perfil. Está `is_active=false`, mas
-**ainda é o `current_meal_plan_id` da conta de teste** `386c4a52-99ca-4c13-be84-44be3ab45357`
+**ainda é o `current_meal_plan_id` da conta de teste** `<USER_ID_TESTE_AUDITORIA_0831>`
 (não é conta de aluno real).
 
 ```sql

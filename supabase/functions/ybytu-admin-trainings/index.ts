@@ -72,7 +72,7 @@ function sanitizePlan(data: Record<string, unknown>) {
 }
 
 // Carga (sets_detail[].load_kg) precisa ser null ("a definir") ou um número
-// finito >= 0. Achado 2026-09-19: o plano ativo da Gisele tinha load_kg = -1
+// finito >= 0. Achado 2026-09-19: o plano ativo da aluna de teste GN tinha load_kg = -1
 // gravado, porque este endpoint repassava sets_detail sem olhar (o caminho
 // load_updates de ybytu-submit-plan-review já validava, este não).
 // Roda ANTES de qualquer escrita, em create e update: replaceSlots apaga todos

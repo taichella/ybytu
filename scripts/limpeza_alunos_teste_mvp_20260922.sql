@@ -1,54 +1,66 @@
--- Limpeza dos 3 alunos de TESTE do dia do MVP (2026-09-22), depois da demonstração ao cliente.
--- Alvo: só as 3 contas abaixo, por id explícito (não "tudo que não é staff" -- a conta de
--- demonstração da Taina, criada com o WhatsApp real dela, NÃO entra e continua existindo).
---
--- Backup ANTES de rodar: C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260922_*.json
--- Restaurar: node scripts/restaurar_alunos_do_backup.mjs <backup.json> > restore.sql
---            npx supabase db query --linked -f restore.sql
+-- ============================================================================================
+-- REGISTRO HISTÓRICO -- NÃO EXECUTAR.
+-- Este script já foi executado em 2026-09-22 18:44 (3 contas de teste do MVP) e fica só como documento do que foi feito.
+-- Em 2026-09-25 os dados pessoais foram trocados por marcadores (<EMAIL_ADMIN>, <USER_ID_TESTE_A>,
+-- <EMAIL_PESSOAL_1>...): e-mails, UUIDs de conta e nomes. Os valores reais estão só nos backups
+-- fora do repositório (C:/Users/tahch/ybytu-backups/alunos_pre_limpeza_*.json).
+-- Com os marcadores o script NÃO é seguro: os filtros por e-mail/id não protegem mais nada.
+-- O CORPO INTEIRO ABAIXO ESTÁ COMENTADO (prefixo "--| ") de propósito: rodar com psql -f em modo
+-- padrão não para no primeiro erro, e um DELETE com marcador no lugar do e-mail real apagaria contas
+-- que o script original protegia. Pra ler o SQL original, ignore o prefixo "--| ".
+-- ============================================================================================
 
-create temp table _alvo on commit drop as
-  select id from auth.users where id in (
-    'd6ce1f3b-aaf8-403f-b890-d7f9fd095fc4', -- tainachella@gmail.com (Taina Chella, teste A)
-    'b82959b1-13f6-4160-86bb-8cde9ce13389', -- loyedo4524@kingdais.com (Teste A Aluno, = teste B)
-    'f7393db0-b0c9-469b-a58b-5ea8a750be7f'  -- komofe3268@art2mart.com (Teste B Aluno, = teste C)
-  );
+--| -- Limpeza dos 3 alunos de TESTE do dia do MVP (2026-09-22), depois da demonstração ao cliente.
+--| -- Alvo: só as 3 contas abaixo, por id explícito (não "tudo que não é staff" -- a conta de
+--| -- demonstração da Taina, criada com o WhatsApp real dela, NÃO entra e continua existindo).
+--| --
+--| -- Backup ANTES de rodar: C:\Users\tahch\ybytu-backups\alunos_pre_limpeza_20260922_*.json
+--| -- Restaurar: node scripts/restaurar_alunos_do_backup.mjs <backup.json> > restore.sql
+--| --            npx supabase db query --linked -f restore.sql
 
-do $guard$
-begin
-  if (select count(*) from _alvo) <> 3 then
-    raise exception 'ABORTADO: alvo tem % contas, esperado exatamente as 3 hardcoded', (select count(*) from _alvo);
-  end if;
-  if exists (select 1 from _alvo a join staff s on s.user_id = a.id) then
-    raise exception 'ABORTADO: alvo inclui conta de staff';
-  end if;
-end $guard$;
+--| create temp table _alvo on commit drop as
+--|   select id from auth.users where id in (
+--|     '<USER_ID_TESTE_A>', -- <EMAIL_PESSOAL_1> (teste A)
+--|     '<USER_ID_TESTE_B>', -- <EMAIL_TESTE_B> (Teste A Aluno, = teste B)
+--|     '<USER_ID_TESTE_C>'  -- <EMAIL_TESTE_C> (Teste B Aluno, = teste C)
+--|   );
 
-create temp table _tp on commit drop as
-  select id, training_plan_id from training_plans where id in (
-    '88965b08-c9e7-479d-9551-b1a289372f28', '1807e205-d273-4467-8612-2bea4a11bb5f', '95a23591-313b-4c98-991b-58dec20ed1d0');
-create temp table _mp on commit drop as
-  select id, meal_plan_id from meal_plans where id in (
-    '2e41e061-74bb-4b99-9a2c-b510d37d0925', '567f4372-eb86-4565-b479-e85d7558f634', '90ea9bab-95c4-4a3a-bf4d-80a1cdcf7382');
+--| do $guard$
+--| begin
+--|   if (select count(*) from _alvo) <> 3 then
+--|     raise exception 'ABORTADO: alvo tem % contas, esperado exatamente as 3 hardcoded', (select count(*) from _alvo);
+--|   end if;
+--|   if exists (select 1 from _alvo a join staff s on s.user_id = a.id) then
+--|     raise exception 'ABORTADO: alvo inclui conta de staff';
+--|   end if;
+--| end $guard$;
 
-do $guard2$
-begin
-  if (select count(*) from _tp) <> 3 or (select count(*) from _mp) <> 3 then
-    raise exception 'ABORTADO: esperava 3 planos de treino e 3 de nutricao, achou % e %', (select count(*) from _tp), (select count(*) from _mp);
-  end if;
-  if exists (select 1 from user_training_plans l where l.user_id in (select id from _alvo) and l.training_plan_id not in (select id from _tp)) then
-    raise exception 'ABORTADO: aluno ligado a plano de treino fora da lista hardcoded';
-  end if;
-  if exists (select 1 from user_meal_plans l where l.user_id in (select id from _alvo) and l.meal_plan_id not in (select id from _mp)) then
-    raise exception 'ABORTADO: aluno ligado a plano de nutricao fora da lista hardcoded';
-  end if;
-end $guard2$;
+--| create temp table _tp on commit drop as
+--|   select id, training_plan_id from training_plans where id in (
+--|     '88965b08-c9e7-479d-9551-b1a289372f28', '1807e205-d273-4467-8612-2bea4a11bb5f', '95a23591-313b-4c98-991b-58dec20ed1d0');
+--| create temp table _mp on commit drop as
+--|   select id, meal_plan_id from meal_plans where id in (
+--|     '2e41e061-74bb-4b99-9a2c-b510d37d0925', '567f4372-eb86-4565-b479-e85d7558f634', '90ea9bab-95c4-4a3a-bf4d-80a1cdcf7382');
 
-delete from whatsapp_notifications where user_id in (select id from _alvo);
-delete from profiles where id in (select id from _alvo);
-delete from user_training_profiles where user_id in (select id from _alvo);
-delete from training_plan_exercises where training_plan_id in (select training_plan_id from _tp);
-delete from training_plan_exercises_history where training_plan_id in (select training_plan_id from _tp) or changed_by in (select id from _alvo);
-delete from training_plans where id in (select id from _tp);
-delete from meal_plan_meals where meal_plan_id::text in (select id::text from _mp union select meal_plan_id::text from _mp);
-delete from meal_plans where id in (select id from _mp);
-delete from auth.users where id in (select id from _alvo);
+--| do $guard2$
+--| begin
+--|   if (select count(*) from _tp) <> 3 or (select count(*) from _mp) <> 3 then
+--|     raise exception 'ABORTADO: esperava 3 planos de treino e 3 de nutricao, achou % e %', (select count(*) from _tp), (select count(*) from _mp);
+--|   end if;
+--|   if exists (select 1 from user_training_plans l where l.user_id in (select id from _alvo) and l.training_plan_id not in (select id from _tp)) then
+--|     raise exception 'ABORTADO: aluno ligado a plano de treino fora da lista hardcoded';
+--|   end if;
+--|   if exists (select 1 from user_meal_plans l where l.user_id in (select id from _alvo) and l.meal_plan_id not in (select id from _mp)) then
+--|     raise exception 'ABORTADO: aluno ligado a plano de nutricao fora da lista hardcoded';
+--|   end if;
+--| end $guard2$;
+
+--| delete from whatsapp_notifications where user_id in (select id from _alvo);
+--| delete from profiles where id in (select id from _alvo);
+--| delete from user_training_profiles where user_id in (select id from _alvo);
+--| delete from training_plan_exercises where training_plan_id in (select training_plan_id from _tp);
+--| delete from training_plan_exercises_history where training_plan_id in (select training_plan_id from _tp) or changed_by in (select id from _alvo);
+--| delete from training_plans where id in (select id from _tp);
+--| delete from meal_plan_meals where meal_plan_id::text in (select id::text from _mp union select meal_plan_id::text from _mp);
+--| delete from meal_plans where id in (select id from _mp);
+--| delete from auth.users where id in (select id from _alvo);

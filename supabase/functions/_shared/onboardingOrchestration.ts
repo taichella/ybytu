@@ -5,7 +5,7 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 // ybytu-onboarding-retry-cron (retoma travados/falhos) e
 // ybytu-admin-retry-plan-generation (botão manual do staff). Um só lugar
 // escreve plan_generation_status/error/attempts -- antes disso cada chamador
-// tinha sua própria lógica, e o caso Rayan Road (2026-09-17) mostrou o custo:
+// tinha sua própria lógica, e o caso aluno de teste RR (2026-09-17) mostrou o custo:
 // um gate de 403 no gerador de nutrição nunca escrevia status nenhum, e o
 // treino (chamado depois) sobrescrevia com 'ok', escondendo a falha real.
 
@@ -80,7 +80,7 @@ async function invokeGeneratorInternal(
 
   const body = await res.json().catch(() => null)
 
-  // Confere as TRÊS coisas -- achado 2026-09-17 (caso Rayan Road): um fetch
+  // Confere as TRÊS coisas -- achado 2026-09-17 (caso aluno de teste RR): um fetch
   // não "rejeita" sozinho em 4xx/5xx, e um corpo success:false com HTTP 200
   // (ex: no_safe_meals) passa batido se só olhar res.ok. Nunca segue adiante
   // em silêncio em nenhum dos três casos.
@@ -117,11 +117,11 @@ export async function runGenerationAndVerify(
 
   // subscription_type_id lido do BANCO (já salvo pelo profile-save desta
   // mesma execução, ou de uma anterior) -- nunca mais confiar num valor local
-  // do client, que foi a causa raiz do caso Rayan Road (client sempre
+  // do client, que foi a causa raiz do caso aluno de teste RR (client sempre
   // assumia COMPLETE independente do que estava gravado).
   //
   // Assinatura NULL ou fora dos 3 planos conhecidos = 'failed', nunca 'ok'
-  // (achado 2026-09-21, conta Rayan Road de 17/09: com NULL, isMeal e
+  // (achado 2026-09-21, conta aluno de teste RR de 17/09: com NULL, isMeal e
   // isTraining davam false, nada era gerado, e a conferência abaixo passava
   // por vazio -- 'ok' sem plano nenhum exigido, invisível em FailedPlans).
   // 'ok' só vale depois de conferir que os planos EXIGIDOS existem, e sem
