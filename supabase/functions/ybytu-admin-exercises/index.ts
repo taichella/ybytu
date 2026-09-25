@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
-import { environmentTagForEquipment, ENVIRONMENT_TAG_LABEL_PTBR } from '../_shared/exerciseEnvironment.ts'
+import { environmentTagForEquipment, ENVIRONMENT_TAG_LABEL_PTBR, environmentsForEquipment, CARD_ENVIRONMENT_LABEL_PTBR } from '../_shared/exerciseEnvironment.ts'
 
 // CRUD da base curada de exercícios (dashboard pro). Toda leitura e escrita
 // passa por aqui -- o client nunca fala direto com a tabela `exercises`
@@ -42,9 +42,19 @@ const VALID_LOAD_TYPES = new Set(['bodyweight', 'weighted', 'machine', 'band'])
 // Tag de ambiente derivada (NÃO é coluna): mesma função que o gerador usa pra
 // filtrar o pool -- ver _shared/exerciseEnvironment.ts. Vazio = 'undefined',
 // nunca um valor presumido.
+// environments (2026-09-25): TODOS os ambientes em que o exercício cabe -- é o
+// que as telas mostram. environment_tag/environment_label_ptbr ficam só por
+// compatibilidade (nenhuma tela lê mais; remoção em docs/POS_PILOTO.md).
 function withEnvironmentTag(row: any) {
   const tag = environmentTagForEquipment(row?.exercise_equipments_ids)
-  return { ...row, environment_tag: tag, environment_label_ptbr: ENVIRONMENT_TAG_LABEL_PTBR[tag] }
+  const environments = environmentsForEquipment(row?.exercise_equipments_ids)
+  return {
+    ...row,
+    environment_tag: tag,
+    environment_label_ptbr: ENVIRONMENT_TAG_LABEL_PTBR[tag],
+    environments,
+    environments_label_ptbr: environments.map((e) => CARD_ENVIRONMENT_LABEL_PTBR[e]),
+  }
 }
 
 function sanitizeWrite(data: Record<string, unknown>) {

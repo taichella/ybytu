@@ -705,9 +705,13 @@ serve(async (req) => {
         ? supabase.from('exercise_levels').select('exercise_level_id').eq('id', profile.exercise_level_id).single()
         : Promise.resolve({ data: { exercise_level_id: 'beginner' }, error: null }),
 
+      // SEM fallback (2026-09-25): o ambiente decide o pool inteiro — cair em
+      // 'home_no_equipment' quando o id é nulo/inexistente/inativo daria plano
+      // de peso corporal a quem treina na academia, sem ninguém saber. Nulo,
+      // não encontrado ou is_active=false viram erro claro logo abaixo.
       profile.exercise_environment_id
-        ? supabase.from('exercise_environment').select('exercise_environment_id').eq('id', profile.exercise_environment_id).single()
-        : Promise.resolve({ data: { exercise_environment_id: 'home_no_equipment' }, error: null }),
+        ? supabase.from('exercise_environment').select('exercise_environment_id, is_active').eq('id', profile.exercise_environment_id).maybeSingle()
+        : Promise.resolve({ data: null, error: null }),
 
       profile.goals_ids?.length > 0
         ? supabase.from('goals').select('goal_id').in('id', profile.goals_ids)
@@ -727,7 +731,25 @@ serve(async (req) => {
     ])
 
     const levelSlug = levelRes.data?.exercise_level_id ?? 'beginner'
-    const environmentSlug = envRes.data?.exercise_environment_id ?? 'home_no_equipment'
+    const envProblem: { status: string; message: string } | null =
+      envRes.error
+        ? { status: 'environment_lookup_error', message: `environment_lookup_error: falha ao ler exercise_environment id=${profile.exercise_environment_id}: ${envRes.error.message}` }
+      : !profile.exercise_environment_id
+        ? { status: 'environment_missing', message: 'environment_missing: perfil sem exercise_environment_id (a pergunta é obrigatória no onboarding — dado perdido), plano não gerado' }
+      : !envRes.data
+        ? { status: 'environment_not_found', message: `environment_not_found: exercise_environment id=${profile.exercise_environment_id} não existe na tabela, plano não gerado` }
+      : envRes.data.is_active === false
+        ? { status: 'environment_inactive', message: `environment_inactive: ambiente '${envRes.data.exercise_environment_id}' (id=${profile.exercise_environment_id}) está desativado (exercise_environment.is_active=false), plano não gerado — ver docs/POS_PILOTO.md` }
+      : null
+    if (envProblem) {
+      await markPlanGenerationStatus(supabase, userId, 'failed', envProblem.message)
+      return new Response(JSON.stringify({
+        success: false,
+        status: envProblem.status,
+        message: envProblem.message,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    const environmentSlug: string = envRes.data.exercise_environment_id
     const goalSlugs = (goalsRes.data ?? []).map((g: any) => g.goal_id)
     const healthConditionSlugs = (healthRes.data ?? [])
       .map((h: any) => h.health_condition_id)

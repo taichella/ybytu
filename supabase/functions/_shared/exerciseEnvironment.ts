@@ -58,6 +58,32 @@ export const ENVIRONMENT_TAG_LABEL_PTBR: Record<ExerciseEnvironmentTag, string> 
   undefined: 'Ambiente não definido',
 }
 
+// Ambientes ativos que o card mostra, na ordem do onboarding. 'outdoors' fica
+// de fora: desativado em 2026-09-25 (exercise_environment.is_active=false) e,
+// quando ativo, admite exatamente o mesmo que home_no_equipment.
+export const CARD_ENVIRONMENTS = ['home_no_equipment', 'home_with_equipment', 'gym'] as const
+export type CardEnvironment = typeof CARD_ENVIRONMENTS[number]
+
+export const CARD_ENVIRONMENT_LABEL_PTBR: Record<CardEnvironment, string> = {
+  home_no_equipment: 'Casa sem equip.',
+  home_with_equipment: 'Casa com equip.',
+  gym: 'Academia',
+}
+
+// TODOS os ambientes em que o exercício cabe (2026-09-25: a tag única sugeria
+// exclusividade -- um exercício de peso corporal serve nos três). Sem regra
+// nova: é allowedEquipmentForEnvironment, a função do gerador, perguntada
+// ambiente a ambiente. Em "casa com equipamento" o aluno pode ter qualquer
+// item da whitelist, então pergunta-se com a whitelist inteira (o teto do que
+// o gerador aceitaria). Lista de equipamento vazia/nula = [] (não definido).
+export function environmentsForEquipment(equipmentIds: string[] | null | undefined): CardEnvironment[] {
+  if (!equipmentIds || equipmentIds.length === 0) return []
+  return CARD_ENVIRONMENTS.filter((env) => {
+    const allowed = allowedEquipmentForEnvironment(env, env === 'home_with_equipment' ? HOME_EQUIPMENT_WHITELIST : [])
+    return allowed === null || equipmentIds.every((e) => allowed.includes(e))
+  })
+}
+
 // Tag de UM exercício, pela mesma regra do gerador: o menor ambiente onde o
 // exercício passa no filtro. Lista de equipamento vazia/nula = 'undefined'
 // (o filtro do gerador aceitaria um array vazio em qualquer ambiente, o que

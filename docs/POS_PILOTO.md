@@ -117,3 +117,40 @@ Por decisão de precaução clínica, as seguintes condições foram classificad
 - **Depressão** (`ba1eb16d-6a89-40e3-8f61-071cfd7bf2a9` / `depression`): Provisoriamente em `['training', 'nutrition']`. Semelhante à ansiedade, fármacos antidepressivos têm impacto clínico direto em apetite, motilidade gastrointestinal e oscilação ponderal. Requer validação da nutricionista.
 - **Asma** (`10a8b1c6-3602-481b-923b-0cf6277b9bea` / `asthma`): Atualmente em `['training']`. Requer confirmação se a nutricionista precisa visualizar casos de asma (ex.: interação de sulfitos/aditivos ou broncoespasmo induzido por refluxo/alimentos).
 - **Problemas de Equilíbrio** (`b805a72f-d11c-41a8-8b03-b4e4ebf8983b` / `balance_issues`): Atualmente em `['training']`. Requer confirmação da nutricionista se há relevância metabólica/vestibular (ex.: labirintopatias associadas a sódio/cafeína/glicemia).
+
+## Ambiente "Ar livre" (outdoors) — DESATIVADO, não removido (2026-09-25)
+
+A opção saiu do onboarding mas continua na tabela e no código, pronta pra voltar.
+Migration `supabase/migrations/20260925120000_exercise_environment_is_active.sql`.
+
+- `exercise_environment.is_active` (boolean, default true); `outdoors` = false. Nenhum DELETE.
+  No momento da desativação: 0 perfis e 0 `training_plans` usavam `outdoors`.
+- Os dois onboardings (widget `OnboardingPreLaunch.html` e `ybytu-app` `Onboarding.js`) leem a
+  tabela com a chave pública: a policy única `exercise_environment_read_active` (anon +
+  authenticated, `USING (is_active)`) esconde a linha inativa — nenhum dos dois precisou de
+  mudança de código. As functions (service_role) continuam enxergando a linha: o rótulo de um
+  perfil antigo ainda aparece e o construtor de treino só mostra `outdoors` no seletor de
+  ambiente se um molde já o tiver marcado.
+- Gerador (`ybytu-generate-training-plan`): perfil com ambiente **inativo**, **inexistente** ou
+  **nulo** não gera plano — grava `plan_generation_status='failed'` com a causa em
+  `plan_generation_error` (`environment_inactive` / `environment_not_found` /
+  `environment_missing`). Antes disso os três casos caíam em silêncio em
+  `home_no_equipment` (plano de peso corporal pra quem treina na academia).
+- A regra de equipamento de `outdoors` (= peso do corpo, igual a casa sem equipamento)
+  continua em `supabase/functions/_shared/exerciseEnvironment.ts`.
+
+**Reativar** (sem deploy):
+```sql
+UPDATE exercise_environment SET is_active = true WHERE exercise_environment_id = 'outdoors';
+```
+Se reativar, decidir também se a tag de ambiente do card de exercícios deve mostrar
+"Ar livre": hoje `CARD_ENVIRONMENTS` (mesmo arquivo) lista só os 3 ambientes ativos.
+
+## `environment_tag` / `environment_label_ptbr` em ybytu-admin-exercises — remover
+
+Desde 2026-09-25 as telas (Exercícios lista/grade e card de inserir do construtor) usam
+`environments` / `environments_label_ptbr` (todos os ambientes em que o exercício cabe). Os
+campos antigos de tag única ficaram na resposta só por compatibilidade; **nenhuma tela os lê**
+(conferido por busca em `apps/ybytu-dashboard/src` e `apps/ybytu-app/src`). Remover de
+`withEnvironmentTag` (e `environmentTagForEquipment` / `ENVIRONMENT_TAG_LABEL_PTBR` de
+`_shared/exerciseEnvironment.ts`, se nada mais os usar) depois do piloto.

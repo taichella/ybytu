@@ -182,7 +182,9 @@ serve(async (req) => {
     if (action === 'lookups') {
       const [goals, environments, equipments, levels] = await Promise.all([
         supabase.from('goals').select('id, goal_id, applicable_to, name_ptbr'),
-        supabase.from('exercise_environment').select('id, exercise_environment_id, name_ptbr'),
+        // Inclui os inativos (is_active=false, ex: 'outdoors' desde 2026-09-25) pra
+        // um molde antigo ainda mostrar o nome; o construtor esconde-os no seletor.
+        supabase.from('exercise_environment').select('id, exercise_environment_id, name_ptbr, is_active'),
         supabase.from('exercise_equipments').select('id, exercise_equipment_id, name_ptbr'),
         supabase.from('exercise_levels').select('id, exercise_level_id, name_ptbr'),
       ])
