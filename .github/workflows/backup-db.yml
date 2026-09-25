@@ -18,7 +18,12 @@
 name: Backup do banco (proposta -- disparo manual)
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      simular_falha:
+        description: 'TESTE: falha de propósito logo no início, só pra conferir que o alerta (issue) abre. Não toca em secret nenhum.'
+        type: boolean
+        default: false
   # schedule:
   #   - cron: '0 2 * * *'  # ~03h/04h em Paris (varia com horário de verão), horario de pouco uso
 
@@ -32,14 +37,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Instala supabase CLI, age e aws-cli
+      - name: TESTE de alerta (só quando simular_falha = true)
+        if: ${{ inputs.simular_falha }}
+        run: |
+          echo "::error::Falha simulada de propósito pra testar o alerta -- nenhum dump foi feito."
+          exit 1
+
+      # age fixado numa versão (antes: releases/latest/download/age-v1.2.1-... -- quebraria
+      # assim que a última versão deixasse de ser 1.2.1; em 2026-09-25 a última já era v1.3.2).
+      # aws-cli: o runner ubuntu-latest já traz AWS CLI v2; não instalar pelo apt.
+      - name: Instala supabase CLI e age (aws-cli já vem no runner)
         run: |
           set -euo pipefail
-          curl -sSfL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | tar -xz -C /usr/local/bin supabase
-          curl -sSfL https://github.com/FiloSottile/age/releases/latest/download/age-v1.2.1-linux-amd64.tar.gz | tar -xz -C /tmp
+          curl -sSfL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz | sudo tar -xz -C /usr/local/bin supabase
+          curl -sSfL https://github.com/FiloSottile/age/releases/download/v1.3.2/age-v1.3.2-linux-amd64.tar.gz | tar -xz -C /tmp
           sudo mv /tmp/age/age /tmp/age/age-keygen /usr/local/bin/
-          sudo apt-get update -y && sudo apt-get install -y awscli
           supabase --version
+          age --version
+          aws --version
 
       - name: Dump schema (public + auth)
         run: supabase db dump --db-url "$SUPABASE_DB_URL" --schema public,auth -f schema.sql
@@ -65,6 +80,8 @@ jobs:
           tar -cf backup.tar schema.sql data.sql roles.sql
           tar -tf backup.tar | sort > /tmp/tar-listing.txt
           diff <(printf 'data.sql\nroles.sql\nschema.sql\n') /tmp/tar-listing.txt
+          # Tamanhos como anotação (legível pela API pública do repo) -- só bytes, sem conteúdo.
+          echo "::notice title=Dump::schema=$(stat -c%s schema.sql) data=$(stat -c%s data.sql) roles=$(stat -c%s roles.sql) tar=$(stat -c%s backup.tar) bytes"
 
       - name: Criptografa com age (só a chave PÚBLICA entra aqui)
         run: |
@@ -85,6 +102,7 @@ jobs:
           REMOTE_SIZE=$(aws s3api head-object --endpoint-url "$R2_ENDPOINT_URL" --bucket "$R2_BACKUP_BUCKET" --key "daily/$FILE" --query ContentLength --output text)
           LOCAL_SIZE=$(stat -c%s "$FILE")
           [ "$REMOTE_SIZE" = "$LOCAL_SIZE" ] || { echo "tamanho remoto ($REMOTE_SIZE) != local ($LOCAL_SIZE)"; exit 1; }
+          echo "::notice title=R2::daily/$FILE enviado; tamanho local=$LOCAL_SIZE remoto=$REMOTE_SIZE bytes (iguais)"
           # Domingo (ISO weekday 7) também promove pra weekly/, mesma cópia, sem gerar dump de novo.
           if [ "$(date -u +%u)" = "7" ]; then
             aws s3api copy-object --endpoint-url "$R2_ENDPOINT_URL" --bucket "$R2_BACKUP_BUCKET" \
