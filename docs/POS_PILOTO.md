@@ -154,3 +154,25 @@ campos antigos de tag única ficaram na resposta só por compatibilidade; **nenh
 (conferido por busca em `apps/ybytu-dashboard/src` e `apps/ybytu-app/src`). Remover de
 `withEnvironmentTag` (e `environmentTagForEquipment` / `ENVIRONMENT_TAG_LABEL_PTBR` de
 `_shared/exerciseEnvironment.ts`, se nada mais os usar) depois do piloto.
+
+## Dashboard — dívidas da revisão somente-leitura de 2026-09-25
+
+Achados do revisor (leitura de código) deixados conscientemente pra depois do piloto:
+
+- **Props órfãs de `UserPlan.jsx`**: `editable` e `onSaveLoads` não são passadas por nenhum
+  chamador (`UserPlanPage.jsx`, `SharedPlan.jsx`) — o botão "Salvar cargas", os inputs de carga
+  e `handleSaveLoads` nunca aparecem. Edição de carga hoje é só pelo construtor
+  (`TrainingPlanCreator`). Em 2026-09-25 `handleSaveLoads` ganhou mensagem de erro visível
+  (antes só mudava estado interno), mas o caminho inteiro deve ser removido — ou religado de
+  propósito — depois do piloto.
+- **Duplicação de helpers**: `COVER_GRADIENTS` em `MealPlans.jsx` e `Trainings.jsx`;
+  `GOAL_LABELS` em `UserDetail.jsx` e `UserPlan.jsx`; `initials()` em `Account.jsx`,
+  `ExerciseThumb.jsx`, `More.jsx`, `Sidebar.jsx`, `UserPlan.jsx` (+ variantes inline em
+  `UserDetail.jsx` e `Users.jsx`). Mover pra `src/lib/`.
+- **Botões fixos em 360px**: a toolbar do documento (`UserPlan.jsx`, `.toolbar` position:fixed
+  no canto superior direito) e o "Voltar" de `UserPlanPage.jsx` (fixed, canto superior esquerdo)
+  podem cobrir o topo do documento em telas estreitas; revisar posição/empilhamento.
+- **Usuários — controles escondidos pra religar**: os 4 filtros (assinatura, objetivo,
+  onboarding, adesão) e os botões Exportar/Convidar foram escondidos em 2026-09-25 porque não
+  faziam nada. Assinatura, objetivo e onboarding são filtráveis com dado que a lista já tem;
+  adesão depende de rastreio de treino/refeição concluído, que não existe.

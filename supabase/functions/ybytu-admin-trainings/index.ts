@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
+import { formatLoadPtbr } from '../_shared/loadDisplay.ts'
 
 // CRUD de `training_plans` + `training_plan_exercises` (dashboard pro).
 // Papel exigido: personal ou admin.
@@ -253,7 +254,12 @@ serve(async (req) => {
         },
         is_molde: MOLDE_IDS.has(plan.training_plan_id),
         users_count: usersCount ?? 0,
-        slots: (slots ?? []).map((s: any) => ({ ...s, exercise: exerciseByCode.get(s.exercise_id) ?? null })),
+        // load_display_ptbr (2026-09-25): mesmo texto de carga do documento do
+        // aluno/PDF (_shared/loadDisplay.ts), pra tela de detalhe do treino.
+        slots: (slots ?? []).map((s: any) => {
+          const exercise = exerciseByCode.get(s.exercise_id) ?? null
+          return { ...s, exercise, load_display_ptbr: formatLoadPtbr(exercise?.load_type, s.sets_detail) }
+        }),
       }, 200, corsHeaders)
     }
 
