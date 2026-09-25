@@ -5,6 +5,7 @@ import { exerciseService } from '../services/exerciseService.js';
 import ChipMultiSelect from './ChipMultiSelect.jsx';
 import ThemeToggle from './ThemeToggle';
 import ExerciseThumb from './ExerciseThumb.jsx';
+import EnvironmentTag from './EnvironmentTag.jsx';
 import { thumbSources } from '../lib/media.js';
 
 // exercises.load_type (2026-09-19): 'bodyweight' e 'band' não usam carga em kg,
@@ -556,7 +557,7 @@ export default function TrainingPlanCreator() {
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase' }}>Ambiente</label>
-              <ChipMultiSelect options={lookups?.exercise_environments ?? []} value={plan.exercise_environments_ids} onChange={(v) => setPlanField('exercise_environments_ids', v)} getValue={(e) => e.exercise_environment_id} getLabel={(e) => e.name_ptbr} />
+              <ChipMultiSelect options={(lookups?.exercise_environments ?? []).filter(e => e.is_active !== false || (plan.exercise_environments_ids ?? []).includes(e.exercise_environment_id))} value={plan.exercise_environments_ids} onChange={(v) => setPlanField('exercise_environments_ids', v)} getValue={(e) => e.exercise_environment_id} getLabel={(e) => e.name_ptbr} />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '6px', color: 'var(--muted)', textTransform: 'uppercase' }}>Equipamentos</label>
@@ -904,6 +905,7 @@ export default function TrainingPlanCreator() {
                         <span style={{ fontSize: '10.5px', color: 'var(--brand)', fontWeight: 600 }}>· {muscleNames.join(', ')}</span>
                       )}
                     </div>
+                    <div style={{ marginTop: '4px' }}><EnvironmentTag environments={ex.environments} labels={ex.environments_label_ptbr} small /></div>
                   </div>
                   <button
                     type="button"

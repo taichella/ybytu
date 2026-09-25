@@ -183,9 +183,10 @@ export default function Exercises() {
       // Lista: miniatura (60x42) com queda pro original; grade: original (card grande).
       thumbSources: thumbSources(ex.image_url),
       fullSources: fullSources(ex.image_url),
-      // Tag de ambiente vem PRONTA do servidor (mesma regra do gerador); ausente = "não definido".
-      envTag: ex.environment_tag,
-      envLabel: ex.environment_label_ptbr,
+      // Ambientes vêm PRONTOS do servidor (mesma regra do gerador), todos em que o
+      // exercício cabe; ausente = "não definido".
+      envs: ex.environments,
+      envLabels: ex.environments_label_ptbr,
     };
   };
 
@@ -297,7 +298,7 @@ export default function Exercises() {
                               <div>
                                 <p style={{ margin: 0, fontWeight: 700, fontSize: '14px' }}>{ex.name_ptbr}</p>
                                 <p style={{ margin: '2px 0 0', fontSize: '11px', color: 'var(--muted)', fontFamily: 'monospace' }}>{ex.exercise_id}</p>
-                                <div style={{ marginTop: '5px' }}><EnvironmentTag tag={d.envTag} label={d.envLabel} small /></div>
+                                <div style={{ marginTop: '5px' }}><EnvironmentTag environments={d.envs} labels={d.envLabels} small /></div>
                               </div>
                             </div>
                           </td>
@@ -393,7 +394,7 @@ export default function Exercises() {
                           <span style={{ display: 'inline-flex', padding: '3px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', flexShrink: 0, background: d.levelStyle.bg, color: d.levelStyle.color }}>{d.level}</span>
                         </div>
 
-                        <div style={{ marginBottom: '10px' }}><EnvironmentTag tag={d.envTag} label={d.envLabel} /></div>
+                        <div style={{ marginBottom: '10px' }}><EnvironmentTag environments={d.envs} labels={d.envLabels} /></div>
 
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
                           {d.groupsShown.map((g, i) => (
