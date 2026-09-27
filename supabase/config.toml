@@ -467,3 +467,18 @@ entrypoint = "./functions/ybytu-onboarding-complete/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/ybytu-onboarding-retry-cron/index.ts"
+
+# Login do app do aluno (me.ybytu.app): chamadas ANTES de existir sessão -- o
+# supabase-js manda a chave do app no Authorization, e chave sb_publishable_
+# não é JWT (o gateway rejeitaria com 401 antes do código rodar). A proteção é
+# no código: rate limit por IP e por identificador + resposta cega. A
+# ybytu-get-user-plan fica com verify_jwt padrão (true): é chamada com a sessão.
+[functions.ybytu-auth-request-otp]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-auth-request-otp/index.ts"
+
+[functions.ybytu-auth-verify-otp]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-auth-verify-otp/index.ts"
