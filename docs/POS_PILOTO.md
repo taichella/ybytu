@@ -274,12 +274,15 @@ Depois da virada (widget do WordPress desligado), num commit à parte:
 - tirar `https://dashboard.ybytu.app` (o painel já está em `pro.ybytu.app`; o próprio `cors.ts` já dizia que sai).
 Antes de remover, conferir que nada ainda chama as functions dessas origens (logs das functions / Referer).
 
-## Recuperação de senha do aluno não existe — rota /reset-password faltando (2026-09-27)
+## Recuperação de senha do aluno não existe (2026-09-27)
 
 O onboarding cria a conta com uma senha aleatória (`crypto.randomUUID()`), que não é guardada nem mostrada: **o aluno
-nunca soube a senha**. E não existe a rota `/reset-password` para onde um e-mail de recuperação levaria, então hoje o
-aluno não tem nenhum caminho próprio pra entrar na conta. Isso não afeta o piloto (o plano chega por link com token,
+nunca soube a senha**. A rota `/reset-password` existe, mas só no painel dos profissionais (`pro.ybytu.app`,
+`ForgotPassword.jsx` → `redirectTo: ${origin}/reset-password`): é o fluxo do staff, e um aluno que caísse ali acabaria
+no painel. Não há entrada de recuperação no onboarding nem no app do aluno, então hoje o aluno não tem nenhum caminho
+próprio pra entrar na conta. Isso não afeta o piloto (o plano chega por link com token,
 `/plano/<token>`, sem login), mas precisa estar resolvido antes de qualquer tela que exija login do aluno — o PWA em
 `me.ybytu.app` usa OTP por e-mail (`ybytu-auth-request-otp` / `-verify-otp`), o que pode tornar a senha desnecessária;
 decidir se o reset de senha ainda faz sentido ou se o login do aluno fica só por OTP. Na mesma decisão, revisar
-Auth → URL Configuration (Site URL / Redirect URLs) para os domínios novos (`onboarding.ybytu.app`, `me.ybytu.app`).
+Auth → URL Configuration (Site URL / Redirect URLs) para os domínios novos (`onboarding.ybytu.app`, `me.ybytu.app`),
+sem tirar `https://pro.ybytu.app/reset-password` (o reset do staff depende dela).
