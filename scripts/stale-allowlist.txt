@@ -18,5 +18,4 @@
 whatsapp-webhook                    84d8c459ff140ff2  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
 ybytu-admin-foods                   41ac8013f02f7258  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
 ybytu-campaign-stats                9564c5793139cda1  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
-ybytu-create-plan-share-token       f0241407a47d5012  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
 ybytu-generate-meal-plan            bf2c826f597a602a  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo

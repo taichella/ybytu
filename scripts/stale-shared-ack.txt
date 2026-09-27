@@ -21,4 +21,3 @@
 #
 # Hash: node scripts/check-stale-deploys.mjs --print-shared-hash <arquivo>
 _shared/cors.ts  eabc6814e61ee7f2  2026-09-27  except=ybytu-onboarding-complete,ybytu-notify-onboarding-received,ybytu-send-onboarding-email,ybytu-create-plan-share-token  +2 origens (onboarding.ybytu.app, me.ybytu.app) sem uso ate a virada do onboarding/entrega do PWA; so as 4 do onboarding precisam da lista nova antes da virada (commit 568512d4)
-_shared/planShareToken.ts  24c705d1bd05057c  2026-09-27  commit dc3539bc (2026-08-06) 2h depois do deploy do create-plan-share-token (deploy-entao-commit fora da janela de 1h); functions download + diff --strip-trailing-cr em 2026-09-27: conteudo deployado identico
