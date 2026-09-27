@@ -193,3 +193,29 @@ tentativas de 25/09 (um `.tar` de 0 byte e a pasta parcial `piloto-v1.0-20260925
 próprio workflow de backup restaura cada dump num Postgres descartável no runner do GitHub e confere as contagens
 antes de criptografar e enviar. O ponto de restauração `piloto-v1.0` passa a depender dessa primeira rodada
 testada, não de um restore local.
+
+## 2026-09-27 — Etapa 1 do app do aluno: migration `20260925170000_user_app_checkin_and_otps`
+
+Estado ANTES (conferido no banco): `completed_workouts` / `completed_meals` existiam com 0 linhas, RLS ligada e 4
+policies cada (`Users can select/insert/update/delete their own completed ...`); `auth_otps` e
+`find_user_by_identifier` não existiam; pg_cron 1.6.4 com 2 jobs (`ybytu-onboarding-retry-15min`,
+`ybytu-plan-review-reminder-hourly`). As policies novas `*_user_select` / `*_user_insert` repetem as existentes
+(mesma expressão) — redundantes, não conflitam. O GRANT da migration já existia (no-op).
+
+Rollback (apaga os check-ins gravados pelo app depois da aplicação e todos os códigos OTP):
+```sql
+SELECT cron.unschedule('cleanup_auth_otps_daily');
+DROP FUNCTION IF EXISTS public.find_user_by_identifier(text);
+DROP TABLE IF EXISTS public.auth_otps;
+DROP POLICY IF EXISTS "completed_workouts_user_select" ON public.completed_workouts;
+DROP POLICY IF EXISTS "completed_workouts_user_insert" ON public.completed_workouts;
+DROP POLICY IF EXISTS "completed_meals_user_select" ON public.completed_meals;
+DROP POLICY IF EXISTS "completed_meals_user_insert" ON public.completed_meals;
+DROP INDEX IF EXISTS public.completed_workouts_user_completed_at_idx;
+DROP INDEX IF EXISTS public.completed_meals_user_completed_at_idx;
+ALTER TABLE public.completed_workouts DROP COLUMN IF EXISTS training_plan_id, DROP COLUMN IF EXISTS day_number, DROP COLUMN IF EXISTS session_name;
+ALTER TABLE public.completed_meals DROP COLUMN IF EXISTS meal_plan_id, DROP COLUMN IF EXISTS day_order, DROP COLUMN IF EXISTS meal_order, DROP COLUMN IF EXISTS meal_name;
+```
+Depois: `npx supabase migration repair --status reverted 20260925170000 --linked`. As 3 functions do app
+(`ybytu-auth-request-otp`, `-verify-otp`, `ybytu-get-user-plan`) dependem disso — apagar antes com
+`npx supabase functions delete <nome>`.
