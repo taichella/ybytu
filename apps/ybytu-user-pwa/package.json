@@ -1,0 +1,22 @@
+{
+  "name": "ybytu-user-pwa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check:sync": "node ../../scripts/check-user-pwa-sync.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.111.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.3",
+    "vite": "^8.1.1"
+  }
+}

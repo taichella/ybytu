@@ -1,0 +1,517 @@
+/* ============================================================
+   Ybytu — PWA do Usuário (user) (Estilos Móveis 360px+)
+   Compatibilidade rigorosa com telas de 360px a 480px (e desktop centralizado)
+   ============================================================ */
+
+.user-pwa-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--yb-bg, #F8F9FA);
+  color: var(--yb-text, #1A202C);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+  font-family: var(--yb-font, 'Inter', system-ui, -apple-system, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header Móvel */
+.user-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--yb-surface, #FFFFFF);
+  border-bottom: 1px solid var(--yb-border, #E2E8F0);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.user-header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-greeting {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--yb-text, #1A202C);
+  line-height: 1.2;
+}
+
+.user-subdate {
+  font-size: 12px;
+  color: var(--yb-muted, #718096);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.user-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-icon-btn {
+  background: transparent;
+  border: 1px solid var(--yb-border, #E2E8F0);
+  border-radius: var(--yb-radius-md, 12px);
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--yb-muted, #718096);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.user-icon-btn:hover {
+  background: var(--yb-surface-2, #F1F5F9);
+  color: var(--yb-text, #1A202C);
+}
+
+/* Tabs de Navegação de Categoria */
+.user-tabs {
+  display: flex;
+  background: var(--yb-surface-2, #F1F5F9);
+  padding: 4px;
+  border-radius: var(--yb-radius-md, 12px);
+  margin: 14px 16px 8px;
+  gap: 4px;
+}
+
+.user-tab-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border: none;
+  background: transparent;
+  border-radius: var(--yb-radius-sm, 8px);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--yb-muted, #718096);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+}
+
+.user-tab-btn.active {
+  background: var(--yb-surface, #FFFFFF);
+  color: var(--yb-brand, #F55F16);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* Área de Conteúdo Principal */
+.user-main-content {
+  flex: 1;
+  padding: 8px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+/* Card Geral */
+.user-card {
+  background: var(--yb-surface, #FFFFFF);
+  border: 1px solid var(--yb-border, #E2E8F0);
+  border-radius: var(--yb-radius-lg, 18px);
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+/* Card do Treino / Resumo */
+.workout-summary-card {
+  background: linear-gradient(135deg, rgba(245, 95, 22, 0.08) 0%, rgba(245, 95, 22, 0.02) 100%);
+  border: 1px solid rgba(245, 95, 22, 0.2);
+  border-radius: var(--yb-radius-lg, 18px);
+  padding: 16px;
+}
+
+.workout-session-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--yb-brand, #F55F16);
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: var(--yb-radius-pill, 999px);
+  margin-bottom: 8px;
+}
+
+.workout-session-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--yb-text, #1A202C);
+  line-height: 1.3;
+  margin: 0 0 6px 0;
+}
+
+.workout-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--yb-muted, #718096);
+  font-weight: 600;
+}
+
+.workout-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Seletor de Dias de Treino */
+.day-selector-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin: -4px 0 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.day-selector-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.day-chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: var(--yb-radius-pill, 999px);
+  border: 1px solid var(--yb-border, #E2E8F0);
+  background: var(--yb-surface, #FFFFFF);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--yb-muted, #718096);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.day-chip.active {
+  background: var(--yb-brand, #F55F16);
+  border-color: var(--yb-brand, #F55F16);
+  color: #FFFFFF;
+}
+
+/* Item de Exercício na Lista */
+.exercise-item-card {
+  background: var(--yb-surface, #FFFFFF);
+  border: 1px solid var(--yb-border, #E2E8F0);
+  border-radius: var(--yb-radius-md, 12px);
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.exercise-thumb-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.exercise-play-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--yb-brand, #F55F16);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--yb-surface, #FFFFFF);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+.exercise-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.exercise-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--yb-text, #1A202C);
+  line-height: 1.25;
+  margin: 0 0 6px;
+  word-break: break-word;
+}
+
+.exercise-stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 12px;
+}
+
+.exercise-stat-tag {
+  background: var(--yb-surface-2, #F1F5F9);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: var(--yb-text, #1A202C);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.exercise-stat-tag.load {
+  background: rgba(245, 95, 22, 0.1);
+  color: var(--yb-brand-ink, #B4400A);
+  font-weight: 700;
+}
+
+.exercise-instructions {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--yb-muted, #718096);
+  line-height: 1.4;
+  border-top: 1px dashed var(--yb-border, #E2E8F0);
+  padding-top: 6px;
+}
+
+/* Card de Alerta de Cautela */
+.caution-alert-card {
+  background: rgba(217, 119, 6, 0.08);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  border-radius: var(--yb-radius-md, 12px);
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #92400E;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+/* Refeições */
+.meal-item-card {
+  background: var(--yb-surface, #FFFFFF);
+  border: 1px solid var(--yb-border, #E2E8F0);
+  border-radius: var(--yb-radius-lg, 18px);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.meal-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.meal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meal-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--yb-text, #1A202C);
+  margin: 0;
+}
+
+.meal-time-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--yb-muted, #718096);
+  background: var(--yb-surface-2, #F1F5F9);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.meal-foods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 1px solid var(--yb-border, #E2E8F0);
+  padding-top: 8px;
+}
+
+.meal-food-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.meal-food-name {
+  color: var(--yb-text, #1A202C);
+  font-weight: 500;
+}
+
+.meal-food-qty {
+  color: var(--yb-muted, #718096);
+  font-weight: 700;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+/* Botões de Check-in */
+.checkin-btn {
+  width: 100%;
+  border: none;
+  border-radius: var(--yb-radius-md, 12px);
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s ease;
+  min-height: 48px;
+  box-sizing: border-box;
+}
+
+.checkin-btn.primary {
+  background: var(--yb-brand, #F55F16);
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(245, 95, 22, 0.25);
+}
+
+.checkin-btn.primary:active {
+  transform: scale(0.98);
+}
+
+.checkin-btn.done {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  cursor: default;
+}
+
+.meal-checkin-btn {
+  background: transparent;
+  border: 1px solid var(--yb-border, #E2E8F0);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--yb-muted, #718096);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  transition: all 0.15s ease;
+  min-height: 36px;
+}
+
+.meal-checkin-btn.done {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+  border-color: rgba(22, 163, 74, 0.3);
+  cursor: default;
+}
+
+/* Modal de Vídeo */
+.video-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.video-modal-card {
+  width: 100%;
+  max-width: 440px;
+  background: #000000;
+  border-radius: var(--yb-radius-lg, 18px);
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.video-modal-header {
+  padding: 12px 16px;
+  background: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #FFFFFF;
+}
+
+.video-modal-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.video-modal-close {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+
+.video-player-frame {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  background: #000000;
+}
+
+/* Feedback de Erro Visível (HTTP 200 success:false ou 4xx/5xx) */
+.user-error-banner {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #DC2626;
+  border-radius: var(--yb-radius-md, 12px);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.user-error-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}

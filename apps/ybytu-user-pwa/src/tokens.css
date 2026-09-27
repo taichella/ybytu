@@ -1,0 +1,115 @@
+/* ============================================================
+   Ybytu — Design Tokens (Fonte Canônica: C:\ybytu-pwa-admin\tokens.css)
+   Painel administrativo (treino · nutrição · gestão)
+   Fonte única de verdade para cores, tipografia, espaço e raios.
+   Importe este arquivo e use os tokens via var(--token).
+   O tema é trocado em :root[data-theme="dark"].
+   ============================================================ */
+
+:root {
+  /* ---- Marca ---- */
+  --yb-brand:        #F55F16;   /* laranja Ybytu — ação primária, ativo, destaque */
+  --yb-brand-hover:  #FF7A3D;   /* hover de elementos da marca */
+  --yb-brand-ink:    #B4400A;   /* texto da marca sobre fundos claros (acessibilidade) */
+  --yb-brand-soft:   rgba(245,95,22,.10);  /* fundo suave / chips / ícones */
+
+  /* ---- Superfícies & texto (LIGHT) ---- */
+  --yb-bg:        #F8F9FA;   /* fundo da aplicação */
+  --yb-surface:   #FFFFFF;   /* cards, header, sidebar */
+  --yb-surface-2: #F1F5F9;   /* faixas, hover de linha, trilhos */
+  --yb-field:     #F8F9FA;   /* fundo de inputs */
+  --yb-border:    #E2E8F0;   /* divisórias e contornos */
+  --yb-text:      #1A202C;   /* texto principal */
+  --yb-muted:     #718096;   /* texto secundário / labels */
+  --yb-faint:     #94A3B8;   /* texto terciário / placeholder */
+
+  /* ---- Semânticas (status & dados) ---- */
+  --yb-success: #16A34A;
+  --yb-info:    #3B82F6;
+  --yb-warning: #D97706;
+  --yb-danger:  #EF4444;
+  --yb-purple:  #A855F7;
+
+  /* ---- Macros (nutrição) ---- */
+  --yb-macro-protein: #3B82F6;
+  --yb-macro-carb:    #F59E0B;
+  --yb-macro-fat:     #A855F7;
+
+  /* ---- Tipografia ---- */
+  --yb-font: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --yb-fs-display: 38px;  /* títulos de capa/hero — 900 */
+  --yb-fs-h1: 28px;       /* título de página — 900 / uppercase */
+  --yb-fs-h2: 21px;       /* título de seção — 900 */
+  --yb-fs-h3: 15px;       /* subtítulo de card — 900 / uppercase */
+  --yb-fs-body: 14px;     /* corpo — 400–600 */
+  --yb-fs-label: 12px;    /* rótulo — 800 / uppercase / .04em */
+  --yb-fs-caption: 12px;  /* legenda — 600 / muted */
+  --yb-lh: 1.6;
+
+  /* ---- Espaçamento (escala base 4px) ---- */
+  --yb-space-1: 6px;
+  --yb-space-2: 12px;
+  --yb-space-3: 18px;
+  --yb-space-4: 22px;
+  --yb-space-5: 28px;
+
+  /* ---- Raios ---- */
+  --yb-radius-sm: 8px;    /* chips, botões pequenos, swatches */
+  --yb-radius-md: 12px;   /* inputs, botões, ícones */
+  --yb-radius-lg: 18px;   /* cards, painéis, modais */
+  --yb-radius-pill: 999px;
+
+  /* ---- Elevação ---- */
+  --yb-shadow-card:    0 1px 3px rgba(0,0,0,.10);
+  --yb-shadow-brand:   0 4px 12px rgba(245,95,22,.25);
+  --yb-shadow-overlay: 0 12px 40px rgba(0,0,0,.28);
+
+  /* ---- Layout ---- */
+  --yb-sidebar-w: 260px;
+  --yb-header-h: 72px;
+  --yb-bottomnav-h: 64px;   /* + safe-area no mobile */
+  --yb-bp-mobile: 860px;    /* abaixo disto: bottom nav + 1 coluna */
+
+  /* Aliases para compatibilidade legada com estilos existentes */
+  --brand: var(--yb-brand);
+  --brand-hover: var(--yb-brand-hover);
+  --brand-soft: var(--yb-brand-soft);
+  --bg: var(--yb-bg);
+  --surface: var(--yb-surface);
+  --surface-2: var(--yb-surface-2);
+  --field: var(--yb-field);
+  --border: var(--yb-border);
+  --text: var(--yb-text);
+  --muted: var(--yb-muted);
+  --success: var(--yb-success);
+  --info: var(--yb-info);
+  --warning: var(--yb-warning);
+  --danger: var(--yb-danger);
+  --purple: var(--yb-purple);
+}
+
+/* ============================================================
+   Tema escuro — sobrescreve apenas superfícies/texto.
+   A marca e as cores semânticas permanecem constantes.
+   ============================================================ */
+:root[data-theme="dark"] {
+  --yb-bg:        #121212;
+  --yb-surface:   #1E1E1E;
+  --yb-surface-2: #2A2A2A;
+  --yb-field:     #161616;
+  --yb-border:    #333333;
+  --yb-text:      #DBD9D8;
+  --yb-muted:     #9C9C9C;
+  --yb-faint:     #6B7280;
+  --yb-brand-soft: rgba(245,95,22,.14);
+
+  /* Aliases para compatibilidade legada */
+  --bg: var(--yb-bg);
+  --surface: var(--yb-surface);
+  --surface-2: var(--yb-surface-2);
+  --field: var(--yb-field);
+  --border: var(--yb-border);
+  --text: var(--yb-text);
+  --muted: var(--yb-muted);
+  --brand-soft: var(--yb-brand-soft);
+}
