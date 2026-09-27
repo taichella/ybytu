@@ -260,3 +260,26 @@ Regras que valem pra qualquer agente neste repo:
   dedupe com `'true'` exato, então hoje o dedupe está ativo: `PHONE_ADMIN_TRAINER` e `PHONE_ADMIN_NUTRI` são o mesmo
   número, e o profissional recebe 1 mensagem por aluno (não 2). Remover o secret não muda nada (ausente = dedupe
   ligado). O toggle e o comentário em `ybytu-notify-plan-ready` podem sair quando entrar a nutri real, com número próprio.
+
+## CORS: tirar as origens antigas depois da virada do onboarding (2026-09-27)
+
+Em 2026-09-27 entraram `https://onboarding.ybytu.app` (onboarding saindo do WordPress, `apps/ybytu-onboarding`) e
+`https://me.ybytu.app` (PWA do aluno) em `ALLOWED_ORIGINS` (`supabase/functions/_shared/cors.ts`). Só commit, sem
+deploy geral: cada function pega a lista nova no próprio deploy (as 4 de onboarding quando o projeto novo for testado
+no domínio; as 3 do PWA na entrega do PWA). Redeployar as ~30 de uma vez foi descartado — o deploy manda o disco
+local, e qualquer diferença entre produção e `main` iria junto sem ninguém ver.
+
+Depois da virada (widget do WordPress desligado), num commit à parte:
+- tirar `https://ybytu.app` e `https://www.ybytu.app` (origem do widget congelado);
+- tirar `https://dashboard.ybytu.app` (o painel já está em `pro.ybytu.app`; o próprio `cors.ts` já dizia que sai).
+Antes de remover, conferir que nada ainda chama as functions dessas origens (logs das functions / Referer).
+
+## Recuperação de senha do aluno não existe — rota /reset-password faltando (2026-09-27)
+
+O onboarding cria a conta com uma senha aleatória (`crypto.randomUUID()`), que não é guardada nem mostrada: **o aluno
+nunca soube a senha**. E não existe a rota `/reset-password` para onde um e-mail de recuperação levaria, então hoje o
+aluno não tem nenhum caminho próprio pra entrar na conta. Isso não afeta o piloto (o plano chega por link com token,
+`/plano/<token>`, sem login), mas precisa estar resolvido antes de qualquer tela que exija login do aluno — o PWA em
+`me.ybytu.app` usa OTP por e-mail (`ybytu-auth-request-otp` / `-verify-otp`), o que pode tornar a senha desnecessária;
+decidir se o reset de senha ainda faz sentido ou se o login do aluno fica só por OTP. Na mesma decisão, revisar
+Auth → URL Configuration (Site URL / Redirect URLs) para os domínios novos (`onboarding.ybytu.app`, `me.ybytu.app`).

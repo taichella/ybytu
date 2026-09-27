@@ -4,6 +4,10 @@
 // (pro.ybytu.app -- migração de dashboard.ybytu.app em andamento 2026-08-05,
 // ver [[project_cors_www_origin_gap]]; dashboard.ybytu.app fica na lista até
 // o pro.ybytu.app estar estável, aí sai).
+// 2026-09-27: + onboarding.ybytu.app (onboarding saindo do WordPress, projeto
+// próprio em apps/ybytu-onboarding) e me.ybytu.app (PWA do aluno). ybytu.app e
+// www ficam enquanto o widget congelado do WordPress estiver no ar -- limpeza
+// registrada em docs/POS_PILOTO.md.
 // CORS só é aplicado por navegadores -- não afeta chamadas do app mobile
 // (Expo/React Native).
 const ALLOWED_ORIGINS = [
@@ -11,6 +15,8 @@ const ALLOWED_ORIGINS = [
   'https://www.ybytu.app',
   'https://pro.ybytu.app',
   'https://dashboard.ybytu.app',
+  'https://onboarding.ybytu.app',
+  'https://me.ybytu.app',
 ]
 
 export function corsHeadersFor(req: Request): Record<string, string> {
