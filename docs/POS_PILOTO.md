@@ -232,3 +232,31 @@ muda todos os hashes de commit, exige force-push e que toda cópia (inclusive a 
 seja clonada de novo; tags e referências a commits em docs (ex.: `201f30ca`) ficam inválidas.
 Privar sozinho não apaga o que já foi público (caches/arquivos externos), por isso a rotação do
 token vem antes e não depende desta limpeza.
+
+## Trabalho não commitado não tem rede de proteção (2026-09-27)
+
+O worktree é compartilhado entre agentes e a Taina. Em 2026-09-26/27 o agente do app do aluno renomeou `student` →
+`user` e apagou com `Remove-Item` as pastas antigas (`apps/ybytu-student-pwa`, `supabase/functions/ybytu-get-student-plan`,
+`scripts/check-student-pwa-sync.mjs`, `apps/ybytu-dashboard/src/components/student`). Nada se perdeu porque as versões
+novas existiam — mas nenhuma daquelas pastas tinha **um único commit** (conferido em todas as branches): se o conteúdo
+novo estivesse errado, não haveria como recuperar o antigo pelo git. `git checkout`/`Remove-Item`/`git clean` sobre
+arquivo nunca commitado é irreversível.
+
+Regras que valem pra qualquer agente neste repo:
+- Commitar (mesmo em branch própria, mesmo "WIP") antes de qualquer remoção, renomeação em massa ou `git checkout`
+  de arquivo — o commit é a rede; a branch pode ser descartada depois.
+- Antes de `git checkout -- <arquivo>` ou `git clean`, rodar `git status` e avisar quem mais pode ter mudanças ali
+  (foi o caso do `App.jsx` em 2026-09-25: confirmado antes que não havia trabalho não commitado de outro agente).
+- Commit sempre com caminho explícito (`git commit -- <arquivos>`): no worktree compartilhado, `git commit -a`
+  ou sem caminho leva mudança de outro agente junto (já aconteceu em 2026-09-19).
+
+## Secrets obsoletos no Supabase (investigado 2026-09-27, nada removido)
+
+- `SALVY_API_KEY`: nenhuma referência no código (functions de produção = git, conferido por `check-stale-deploys`).
+  Obsoleto desde a migração pra Meta Cloud API. Pode ser removido.
+- `GEMINI_API_KEY`: nenhuma referência no código — só comentários históricos da migração pra Groq (2026-08-27).
+  Pode ser removido; revogar também a chave no Google AI Studio.
+- `STAFF_PHONE_DEDUPE_DISABLED`: valor atual `false` (conferido pelo digest, sem ler o secret). O código só desliga o
+  dedupe com `'true'` exato, então hoje o dedupe está ativo: `PHONE_ADMIN_TRAINER` e `PHONE_ADMIN_NUTRI` são o mesmo
+  número, e o profissional recebe 1 mensagem por aluno (não 2). Remover o secret não muda nada (ausente = dedupe
+  ligado). O toggle e o comentário em `ybytu-notify-plan-ready` podem sair quando entrar a nutri real, com número próprio.
