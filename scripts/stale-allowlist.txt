@@ -1,16 +1,22 @@
-# Allowlist de falsos positivos CONFIRMADOS do check-stale-deploys.mjs.
-# Formato: <function> <hash-conteudo-normalizado-LF-16hex> <data-confirmacao> <motivo>
+# Allowlist de falsos positivos CONFIRMADOS de "STALE (propria)" do check-stale-deploys.mjs.
+# Formato: <function> <hash-conteudo-da-pasta-LF-16hex> <data-confirmacao> <motivo>
 #
-# A supressao so vale enquanto o hash bater com o conteudo ATUAL da function
-# (arquivos da pasta + _shared/ que ela importa, CRLF normalizado pra LF).
-# Mudou 1 byte que seja -> hash diverge -> STALE volta a aparecer. Nao existe
-# supressao por nome de function sozinho.
+# Responde SO a pergunta "a pasta da function tem commit mais novo que o deploy?".
+# O hash cobre todos os arquivos da pasta (CRLF normalizado pra LF) e NAO inclui
+# _shared/ -- mudanca em _shared/ e a outra pergunta, ver scripts/stale-shared-ack.txt.
+# A supressao so vale enquanto o hash bater com o conteudo ATUAL da pasta: mudou
+# 1 byte que seja -> hash diverge -> STALE volta a aparecer. Nao existe supressao
+# por nome de function sozinho. Entrada que nao suprime mais nada aparece como
+# OBSOLETO na saida do check -- pode remover.
 #
 # Recalcular hash: node scripts/check-stale-deploys.mjs --print-hash <function>
+# 2026-09-27: hashes recalculados no formato so-da-pasta (antes incluiam _shared/, e o
+# commit do CORS invalidou 4 de uma vez); ultimo commit de cada pasta e anterior a
+# 2026-09-17, entao o conteudo e o mesmo que foi confirmado naquela data.
+# Removidas: ybytu-notify-onboarding-received e ybytu-plan-review-reminder-cron
+# (redeployadas depois da confirmacao, nao suprimiam mais nada).
 whatsapp-webhook                    84d8c459ff140ff2  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
-ybytu-admin-foods                   d777de2461c831c0  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
-ybytu-campaign-stats                1fa90caa9baa93e1  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
-ybytu-create-plan-share-token       1fc927f1d9b63351  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
-ybytu-generate-meal-plan            36fd6687bde06abd  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
-ybytu-notify-onboarding-received    38c0575b39b3a8bc  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
-ybytu-plan-review-reminder-cron     ea1fe9a0ab660782  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-admin-foods                   41ac8013f02f7258  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-campaign-stats                9564c5793139cda1  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-create-plan-share-token       f0241407a47d5012  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo
+ybytu-generate-meal-plan            bf2c826f597a602a  2026-09-17  Caso 8 (CRLF) -- diff --strip-trailing-cr confirmou zero diferenca real de conteudo, so timestamp de deploy antigo

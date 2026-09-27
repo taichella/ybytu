@@ -1,0 +1,24 @@
+# Reconhecimento de mudanca em _shared/ CONSCIENTEMENTE nao deployada (check-stale-deploys.mjs).
+# Formato: <arquivo em _shared/> <hash-do-arquivo-LF-16hex> <data> [except=fn1,fn2,...] <motivo>
+#
+# Responde a pergunta "um arquivo de _shared/ que a function importa tem commit mais
+# novo que o deploy dela?". Sem reconhecimento, cada function afetada aparece como
+# "STALE via _shared/<arquivo>". Com reconhecimento valido, elas viram UMA linha de
+# resumo ("RECONHECIDO: N function(s) pendentes so por _shared/<arquivo>") e nao contam
+# como problema -- cada uma sai do resumo no proprio deploy natural.
+#
+# Regras (pra quem ler daqui a um mes):
+# - Vale pra UM arquivo, num conteudo EXATO: se o arquivo mudar de novo (1 byte), o hash
+#   diverge e todas as functions voltam a aparecer como STALE via _shared. Reconhecer de
+#   novo exige olhar a nova mudanca.
+# - Mudanca em _shared/ pode ser gap REAL (ex.: buildPlanPayload.ts sem deploy do
+#   get-plan-payload = Caso 9). So reconheca quando a mudanca e comprovadamente inofensiva
+#   pras functions que nao forem deployadas agora, e escreva o porque no motivo.
+# - except= lista as functions que PRECISAM do deploy: elas continuam aparecendo como STALE
+#   de proposito, pra ninguem esquecer. Sem espaco depois das virgulas.
+# - Quando nenhuma function depender mais do reconhecimento (todas deployadas depois do
+#   arquivo), a saida do check mostra OBSOLETO -- remova a linha.
+#
+# Hash: node scripts/check-stale-deploys.mjs --print-shared-hash <arquivo>
+_shared/cors.ts  eabc6814e61ee7f2  2026-09-27  except=ybytu-onboarding-complete,ybytu-notify-onboarding-received,ybytu-send-onboarding-email,ybytu-create-plan-share-token  +2 origens (onboarding.ybytu.app, me.ybytu.app) sem uso ate a virada do onboarding/entrega do PWA; so as 4 do onboarding precisam da lista nova antes da virada (commit 568512d4)
+_shared/planShareToken.ts  24c705d1bd05057c  2026-09-27  commit dc3539bc (2026-08-06) 2h depois do deploy do create-plan-share-token (deploy-entao-commit fora da janela de 1h); functions download + diff --strip-trailing-cr em 2026-09-27: conteudo deployado identico
