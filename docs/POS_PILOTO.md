@@ -286,3 +286,11 @@ próprio pra entrar na conta. Isso não afeta o piloto (o plano chega por link c
 decidir se o reset de senha ainda faz sentido ou se o login do aluno fica só por OTP. Na mesma decisão, revisar
 Auth → URL Configuration (Site URL / Redirect URLs) para os domínios novos (`onboarding.ybytu.app`, `me.ybytu.app`),
 sem tirar `https://pro.ybytu.app/reset-password` (o reset do staff depende dela).
+
+## Regra do check-stale-deploys: reconhecimento de `_shared/` não é atalho (2026-09-27)
+
+O `scripts/stale-shared-ack.txt` reconhece mudança em `_shared/` **por arquivo e por hash do conteúdo** — nunca por nome
+de function nem "todo `_shared/`". Mudança em `_shared/` sem deploy continua sendo aviso real (Caso 9: `buildPlanPayload.ts`
+sem deploy do `get-plan-payload` = produção rodando versão velha): só reconhecer mudança comprovadamente inofensiva, com o
+motivo escrito e `except=` pras functions que precisam do deploy. Se o ruído incomodar, a resposta é deployar, não afrouxar
+a regra. Detalhes no README (seção do check) e no cabeçalho do próprio arquivo.
