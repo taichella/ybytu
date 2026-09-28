@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { buildPlanPayload } from '../_shared/buildPlanPayload.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
+import { getPlanApproval } from '../_shared/planApproval.ts'
 
 // ============================================================================
 // EDGE FUNCTION: ybytu-get-user-plan
@@ -97,6 +98,19 @@ serve(async (req) => {
     }
 
     const userId = user.id
+
+    // 1b. Plano só é liberado depois do parecer de todos os profissionais exigidos
+    // (regra em _shared/planApproval.ts). Sem aprovação, NADA do plano sai daqui --
+    // 200 com awaiting_review pra o app mostrar a tela "Plano em Preparação".
+    const approval = await getPlanApproval(supabase, userId)
+    if (!approval.approved) {
+      return new Response(JSON.stringify({
+        awaiting_review: true,
+        pending_roles: approval.pendingRoles,
+      }), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
     // 2. Monta o payload completo reaproveitando buildPlanPayload.ts intacto
     const payload = await buildPlanPayload(supabase, userId, 'student')

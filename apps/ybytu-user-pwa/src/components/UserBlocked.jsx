@@ -45,7 +45,7 @@ export default function UserBlocked() {
         </h1>
 
         <p style={{ fontSize: '14px', color: 'var(--yb-muted, #718096)', lineHeight: 1.5, margin: '0 0 24px' }}>
-          A equipe pro de treinadores e nutricionistas está finalizando o planejamento individualizado da sua rotina. Assim que seu plano for liberado, ele aparecerá aqui automaticamente.
+          Nossa equipe de treinadores e nutricionistas está revisando o plano individualizado da sua rotina. Assim que ele for liberado, você recebe uma mensagem no WhatsApp e ele aparece aqui.
         </p>
 
         <div className="user-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

@@ -47,15 +47,21 @@ export default function UserToday() {
 
         if (cancelled) return;
 
+        // Em resposta não-2xx o supabase-js devolve data=null e o status HTTP só
+        // em error.context (Response) -- error.status não existe e a mensagem é
+        // genérica ("non-2xx status code"), então as checagens antigas nunca batiam.
+        const httpStatus = error?.context?.status;
+
         // Trata erro de autorização
-        if (error && (error.status === 401 || error.message?.includes('401'))) {
+        if (httpStatus === 401) {
           await supabase.auth.signOut();
           navigate('/login', { replace: true });
           return;
         }
 
-        // Trata plano não encontrado (404) -> tela de bloqueio
-        if (error && (error.status === 404 || error.message?.includes('404') || data?.error === 'plan_not_found')) {
+        // Plano não encontrado (404) ou ainda sem parecer dos profissionais
+        // (regra de aprovação no servidor) -> tela "Plano em Preparação"
+        if (httpStatus === 404 || data?.awaiting_review) {
           navigate('/bloqueio', { replace: true });
           return;
         }

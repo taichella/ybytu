@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { buildPlanPayload } from '../_shared/buildPlanPayload.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
+import { getPlanApproval } from '../_shared/planApproval.ts'
 
 // PORTA PÚBLICA — resolve um token de /plano/<token>, sem sessão nenhuma.
 // A lógica de montagem do payload em si mora em _shared/buildPlanPayload.ts,
@@ -60,6 +61,16 @@ serve(async (req) => {
     if (!tokenResult.ok) {
       return new Response(JSON.stringify({ error: tokenResult.reason }), {
         status: tokenResult.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Mesma regra do app (_shared/planApproval.ts): o token é criado no fim do
+    // onboarding, então quem tiver o link antes do parecer não pode ver o plano.
+    const approval = await getPlanApproval(supabase, tokenResult.userId)
+    if (!approval.approved) {
+      return new Response(JSON.stringify({ awaiting_review: true }), {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }

@@ -16,6 +16,8 @@ const REVIEW_ERROR_MESSAGES = {
   missing_user_id: 'Aluno não identificado.',
   user_has_no_active_training_plan: 'O aluno não tem plano de treino ativo.',
   training_plan_not_active_for_user: 'Este plano de treino não é mais o plano ativo do aluno — recarregue a página.',
+  user_has_no_active_meal_plan: 'O aluno não tem plano alimentar ativo.',
+  meal_plan_not_active_for_user: 'Este plano alimentar não é mais o plano ativo do aluno — recarregue a página.',
   internal_error: 'Erro interno no servidor.',
 };
 

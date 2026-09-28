@@ -42,6 +42,12 @@ export default function SharedPlan() {
         setStatus('error');
         return;
       }
+      // Sem parecer dos profissionais ainda (regra de aprovação no servidor) --
+      // o link é válido, só não mostra o plano antes da revisão.
+      if (data.awaiting_review) {
+        setStatus('awaiting_review');
+        return;
+      }
 
       setPayload(data);
       setStatus('ok');
@@ -71,6 +77,20 @@ export default function SharedPlan() {
         <h1 style={{ fontSize: '18px', fontWeight: 800, color: '#121826', margin: 0 }}>Link expirado ou inválido</h1>
         <p style={{ fontSize: '14px', color: '#697586', margin: 0, maxWidth: '360px' }}>
           Este link de acesso ao plano não está mais disponível. Fale com a gente para receber um novo.
+        </p>
+      </div>
+    );
+  }
+
+  if (status === 'awaiting_review') {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        gap: '10px', background: '#E9ECF1', fontFamily: "'Inter', sans-serif", padding: '24px', textAlign: 'center',
+      }}>
+        <h1 style={{ fontSize: '18px', fontWeight: 800, color: '#121826', margin: 0 }}>Seu plano está em revisão</h1>
+        <p style={{ fontSize: '14px', color: '#697586', margin: 0, maxWidth: '360px' }}>
+          Nossos profissionais estão revisando seu plano. Você recebe uma mensagem no WhatsApp assim que ele for liberado.
         </p>
       </div>
     );

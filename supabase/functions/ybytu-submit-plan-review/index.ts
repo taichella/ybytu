@@ -2,14 +2,18 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
+import { getCurrentPlanCodes, getPlanApproval } from '../_shared/planApproval.ts'
 
 // Grava o parecer profissional (personal ou nutricionista) sobre o plano de
 // um usuário -- um por (user_id, role), UPDATE se já existir (ver migration
 // 20260728145400). reviewer_name SEMPRE vem do registro de staff resolvido
 // pelo servidor, nunca do body (evita alguém assinar parecer com outro
-// nome). Quando o 2º parecer completa o par (personal + nutricionista),
-// dispara ybytu-send-user-whatsapp internamente (service_role) -- é isso
-// que avisa o usuário que o plano está pronto.
+// nome). O parecer fica amarrado ao PLANO revisado: o código do plano mandado
+// pelo dashboard precisa ser o plano ATIVO do aluno (senão o parecer valeria
+// pra um plano que o profissional não viu). Quando os pareceres exigidos pela
+// assinatura ficam todos aprovados (regra em _shared/planApproval.ts), dispara
+// ybytu-send-user-whatsapp internamente (service_role) -- é isso que avisa o
+// usuário que o plano está pronto, no mesmo momento em que o app libera o plano.
 //
 // PASSO 5 (2026-08-09, decisão da Taina) -- load_updates opcional no body:
 // edita sets_detail[].load_kg no PLANO DO ALUNO (training_plan_exercises),
@@ -86,6 +90,39 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'role_not_held_by_caller' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
+    }
+
+    // O parecer vale pro plano que o profissional revisou (2026-09-28): o código
+    // do plano no body precisa ser o plano ATIVO do aluno. Página aberta há
+    // tempo com um plano que foi refeito depois = parecer recusado, recarregar.
+    // O código gravado é o que o SERVIDOR confirmou, nunca o do body sem checar.
+    const currentPlans = await getCurrentPlanCodes(supabase, userId)
+    let reviewedTrainingCode: string | null = null
+    let reviewedMealCode: string | null = null
+    if (role === 'personal') {
+      if (!currentPlans.trainingPlanCode) {
+        return new Response(JSON.stringify({ error: 'user_has_no_active_training_plan' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      if (trainingPlanId !== currentPlans.trainingPlanCode) {
+        return new Response(JSON.stringify({ error: 'training_plan_not_active_for_user' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      reviewedTrainingCode = currentPlans.trainingPlanCode
+    } else {
+      if (!currentPlans.mealPlanCode) {
+        return new Response(JSON.stringify({ error: 'user_has_no_active_meal_plan' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      if (mealPlanId !== currentPlans.mealPlanCode) {
+        return new Response(JSON.stringify({ error: 'meal_plan_not_active_for_user' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      reviewedMealCode = currentPlans.mealPlanCode
     }
 
     const rawLoadUpdates = Array.isArray(body?.load_updates) ? body.load_updates : null
@@ -266,8 +303,8 @@ serve(async (req) => {
           reviewer_credential: reviewerCredential,
           note_ptbr: notePtbr,
           status: reviewStatus,
-          training_plan_id: trainingPlanId,
-          meal_plan_id: mealPlanId,
+          training_plan_id: reviewedTrainingCode,
+          meal_plan_id: reviewedMealCode,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id,role' },
@@ -275,22 +312,12 @@ serve(async (req) => {
 
     if (upsertError) throw new Error(`Upsert de plan_reviews falhou: ${upsertError.message}`)
 
-    const { data: reviews, error: reviewsError } = await supabase
-      .from('plan_reviews')
-      .select('role, status')
-      .eq('user_id', userId)
-
-    if (reviewsError) throw new Error(`Lookup de plan_reviews falhou: ${reviewsError.message}`)
-
-    const reviewedRoles = new Set((reviews ?? []).map((r) => r.role as string))
-    const bothReviewed = reviewedRoles.has('personal') && reviewedRoles.has('nutricionista')
-    // Só notifica o aluno quando os DOIS pareceres existem E nenhum pediu
-    // ajuste — antes desta coluna, "both_reviewed" já disparava o WhatsApp
-    // mesmo que um profissional tivesse reprovado o plano (status não
-    // existia). Pareceres antigos (status null) contam como aprovados pra
-    // não regredir o comportamento de quem já validou antes desta mudança.
-    const anyNeedsChanges = (reviews ?? []).some((r: any) => r.status === 'needs_changes')
-    const readyToNotify = bothReviewed && !anyNeedsChanges
+    // Avisa o aluno exatamente quando o app passa a liberar o plano: mesma regra
+    // (_shared/planApproval.ts) -- pareceres exigidos pela assinatura, todos
+    // 'approved', todos do plano ATIVO. Desde 2026-09-28 parecer com status null
+    // (anterior a 2026-08-27) não conta mais como aprovado.
+    const approval = await getPlanApproval(supabase, userId)
+    const readyToNotify = approval.approved
 
     if (readyToNotify) {
       const notifyResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/ybytu-send-user-whatsapp`, {
@@ -306,7 +333,7 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ ok: true, both_reviewed: bothReviewed, user_notified: readyToNotify }), {
+    return new Response(JSON.stringify({ ok: true, plan_approved: approval.approved, pending_roles: approval.pendingRoles, user_notified: readyToNotify }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
