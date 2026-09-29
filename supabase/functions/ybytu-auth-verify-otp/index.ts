@@ -40,9 +40,12 @@ interface PhoneValidation {
 }
 
 function parseAndValidatePhoneE164(raw: string): PhoneValidation {
+  const hasPlus = raw.trim().startsWith('+')
   const digits = raw.replace(/\D/g, '')
   let fullDigits = digits
-  if (digits.length === 10 || digits.length === 11) {
+
+  // Só assume Brasil (+55) se a entrada NÃO começou com '+' e possui 10 ou 11 dígitos nacionais
+  if (!hasPlus && (digits.length === 10 || digits.length === 11)) {
     fullDigits = '55' + digits
   }
 

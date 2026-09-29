@@ -37,6 +37,21 @@ async function sha256(text: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
+function generateSecureOtp(): string {
+  const buf = new Uint32Array(1)
+  // 4294800000 é o maior múltiplo de 900.000 abaixo de 2^32 (4.294.967.296).
+  // Rejeita números >= 4294800000 para eliminar qualquer viés de módulo (modulo bias),
+  // garantindo que todos os números de 100.000 a 999.999 tenham distribuição estritamente uniforme.
+  const maxSafe = 4294800000
+  let rand: number
+  do {
+    crypto.getRandomValues(buf)
+    rand = buf[0]
+  } while (rand >= maxSafe)
+
+  return (100000 + (rand % 900000)).toString()
+}
+
 interface PhoneValidation {
   valid: boolean
   e164: string        // formato "+5511987654321"
@@ -47,10 +62,14 @@ interface PhoneValidation {
 // Validação e normalização estrita de número em formato E.164:
 // - Mínimo 12 dígitos (55 + DDD(2) + 8 dígitos) e máximo 15 dígitos.
 // - Rejeita strings curtas ("abc", "1", números incompletos).
+// - SÓ assume Brasil (+55) se o número vier SEM o prefixo '+' internacional.
 function parseAndValidatePhoneE164(raw: string): PhoneValidation {
+  const hasPlus = raw.trim().startsWith('+')
   const digits = raw.replace(/\D/g, '')
   let fullDigits = digits
-  if (digits.length === 10 || digits.length === 11) {
+
+  // Só assume Brasil (+55) se a entrada NÃO começou com '+' e possui 10 ou 11 dígitos nacionais
+  if (!hasPlus && (digits.length === 10 || digits.length === 11)) {
     fullDigits = '55' + digits
   }
 
@@ -302,7 +321,7 @@ serve(async (req) => {
       .eq('is_used', false)
 
     // 6.2 Gera código de 6 dígitos numéricos e hash com salt (NUNCA gravado plano nem em logs)
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString()
+    const otpCode = generateSecureOtp()
     const otpSalt = Deno.env.get('INTERNAL_FUNCTION_SECRET') || 'ybytu-otp-salt'
     const codeHash = await sha256(`${otpCode}:${otpSalt}`)
 
