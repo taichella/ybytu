@@ -123,7 +123,7 @@ export default function UserToday() {
         return;
       }
 
-      const planId = String(payload?.training?.training_plan_id || payload?.training?.plan_id || 'active_plan');
+      const planId = payload?.training?.id || null;
       const dayNum = Number(activeDay.day_number);
       const sessionTitle = activeDay.title_ptbr || activeDay.region_label_ptbr || `Treino Dia ${dayNum}`;
 
@@ -160,7 +160,7 @@ export default function UserToday() {
         return;
       }
 
-      const mealPlanId = payload?.nutrition?.plan_id || payload?.nutrition?.meal_plan_id;
+      const mealPlanId = payload?.nutrition?.id || null;
       const mealName = meal.meal_name || meal.name || `Refeição ${meal.order}`;
 
       const { data: inserted, error: insertErr } = await supabase
