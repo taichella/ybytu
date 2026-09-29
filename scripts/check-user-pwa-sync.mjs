@@ -29,6 +29,11 @@ const PAIRS = [
     source: path.join(root, 'apps/ybytu-dashboard/src/lib/media.js'),
     target: path.join(root, 'apps/ybytu-user-pwa/src/lib/media.js'),
   },
+  {
+    name: 'phone.js',
+    source: path.join(root, 'apps/ybytu-onboarding/src/lib/phone.js'),
+    target: path.join(root, 'apps/ybytu-user-pwa/src/lib/phone.js'),
+  },
 ];
 
 let hasError = false;

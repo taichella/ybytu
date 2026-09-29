@@ -1,18 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import YbytuLogo from './YbytuLogo';
+import {
+  ALL_COUNTRIES,
+  getPhoneValidation,
+  getCountryPlaceholder,
+  AsYouType,
+} from '../lib/phone.js';
 import '../user.css';
 
 const WHATSAPP_SUPPORT_NUMBER = '5511955026812';
-
-function formatPhoneDisplay(raw) {
-  const digits = raw.replace(/\D/g, '').slice(0, 11);
-  if (!digits) return '';
-  if (digits.length <= 2) return `(${digits}`;
-  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-}
 
 export default function UserAuth() {
   const navigate = useNavigate();
@@ -21,6 +19,9 @@ export default function UserAuth() {
   const [step, setStep] = useState('request'); // 'request' | 'verify'
   const [method, setMethod] = useState('whatsapp'); // 'whatsapp' | 'email'
   const [phone, setPhone] = useState('');
+  const [countryIso, setCountryIso] = useState('BR');
+  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState('');
   const [email, setEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -32,6 +33,22 @@ export default function UserAuth() {
   const [resendCooldown, setResendCooldown] = useState(60);
 
   const otpInputRef = useRef(null);
+
+  const selectedCountry = useMemo(
+    () => ALL_COUNTRIES.find((c) => c.iso === countryIso) || ALL_COUNTRIES[0],
+    [countryIso]
+  );
+
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch.trim()) return ALL_COUNTRIES;
+    const q = countrySearch.toLowerCase().trim();
+    return ALL_COUNTRIES.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.dial.includes(q) ||
+        c.iso.toLowerCase().includes(q)
+    );
+  }, [countrySearch]);
 
   // Redireciona se o usuário já estiver autenticado
   useEffect(() => {
@@ -62,7 +79,9 @@ export default function UserAuth() {
   }, [step]);
 
   const handlePhoneChange = (e) => {
-    setPhone(formatPhoneDisplay(e.target.value));
+    const raw = e.target.value;
+    const formatted = new AsYouType(countryIso).input(raw);
+    setPhone(formatted);
     setErrorMessage(null);
   };
 
@@ -87,21 +106,26 @@ export default function UserAuth() {
     const activeMethod = overrideMethod || method;
     setErrorMessage(null);
 
-    const cleanDigits = phone.replace(/\D/g, '');
-    if (activeMethod === 'whatsapp' && cleanDigits.length < 10) {
-      setErrorMessage('Informe um número de telefone com DDD válido.');
-      return;
-    }
-    if (activeMethod === 'email' && (!email || !email.includes('@'))) {
-      setErrorMessage('Informe um e-mail válido.');
-      return;
+    let identifier = '';
+
+    if (activeMethod === 'whatsapp') {
+      const validation = getPhoneValidation(phone, countryIso);
+      if (validation.error || !validation.e164) {
+        setErrorMessage(validation.error || 'Informe um número de WhatsApp válido com código de área.');
+        return;
+      }
+      identifier = validation.e164;
+    } else {
+      if (!email || !email.includes('@')) {
+        setErrorMessage('Informe um e-mail válido.');
+        return;
+      }
+      identifier = email.trim().toLowerCase();
     }
 
     setLoading(true);
 
     try {
-      const identifier = activeMethod === 'whatsapp' ? `+55${cleanDigits}` : email.trim().toLowerCase();
-
       const { data, error } = await supabase.functions.invoke('ybytu-auth-request-otp', {
         body: { identifier, method: activeMethod },
       });
@@ -144,8 +168,13 @@ export default function UserAuth() {
     setLoading(true);
 
     try {
-      const cleanDigits = phone.replace(/\D/g, '');
-      const identifier = method === 'whatsapp' ? `+55${cleanDigits}` : email.trim().toLowerCase();
+      let identifier = '';
+      if (method === 'whatsapp') {
+        const validation = getPhoneValidation(phone, countryIso);
+        identifier = validation.e164 || phone;
+      } else {
+        identifier = email.trim().toLowerCase();
+      }
 
       const { data, error } = await supabase.functions.invoke('ybytu-auth-verify-otp', {
         body: { identifier, code },
@@ -226,25 +255,46 @@ export default function UserAuth() {
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--yb-muted, #718096)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   Seu WhatsApp
                 </label>
-                <input
-                  type="tel"
-                  inputMode="tel"
-                  placeholder="(11) 98765-4321"
-                  value={phone}
-                  onChange={handlePhoneChange}
-                  style={{
-                    width: '100%',
-                    padding: '12px 14px',
-                    borderRadius: 'var(--yb-radius-md, 12px)',
-                    border: '1px solid var(--yb-border, #E2E8F0)',
-                    background: 'var(--yb-field, #F8F9FA)',
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                  }}
-                  autoFocus
-                />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCountryPickerOpen(true);
+                      setCountrySearch('');
+                    }}
+                    className="country-btn"
+                    title="Alterar país / DDI"
+                  >
+                    <span className="country-flag">{selectedCountry?.flag || '🌐'}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--yb-text, #1A202C)' }}>
+                      {selectedCountry?.dial || '+55'}
+                    </span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--yb-muted)' }}>
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+
+                  <input
+                    type="tel"
+                    inputMode="tel"
+                    placeholder={getCountryPlaceholder(countryIso)}
+                    value={phone}
+                    onChange={handlePhoneChange}
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      padding: '12px 14px',
+                      borderRadius: 'var(--yb-radius-md, 12px)',
+                      border: '1px solid var(--yb-border, #E2E8F0)',
+                      background: 'var(--yb-field, #F8F9FA)',
+                      fontSize: '16px',
+                      fontWeight: 600,
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
+                    autoFocus
+                  />
+                </div>
               </div>
             ) : (
               <div>
@@ -414,6 +464,105 @@ export default function UserAuth() {
         </div>
 
       </div>
+
+      {/* Modal de Seleção de País / DDI */}
+      {countryPickerOpen && (
+        <div
+          className="country-modal-overlay"
+          onClick={() => {
+            setCountryPickerOpen(false);
+            setCountrySearch('');
+          }}
+        >
+          <div className="country-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="country-modal-header">
+              <div>
+                <h3 className="country-modal-title">Selecione o país</h3>
+                <p className="country-modal-subtitle">Código telefônico (DDI) para seu WhatsApp</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setCountryPickerOpen(false);
+                  setCountrySearch('');
+                }}
+                className="btn-modal-close"
+                aria-label="Fechar"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="country-modal-search">
+              <span className="search-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </span>
+              <input
+                type="text"
+                value={countrySearch}
+                onChange={(e) => setCountrySearch(e.target.value)}
+                placeholder="Buscar país ou código..."
+                className="search-input"
+                autoFocus
+              />
+              {countrySearch && (
+                <button
+                  type="button"
+                  onClick={() => setCountrySearch('')}
+                  className="btn-clear-search"
+                >
+                  LIMPAR
+                </button>
+              )}
+            </div>
+
+            <div className="country-modal-list">
+              {filteredCountries.length === 0 ? (
+                <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--yb-muted)', fontSize: '14px' }}>
+                  Nenhum país encontrado para "{countrySearch}"
+                </div>
+              ) : (
+                filteredCountries.map((c) => {
+                  const isSelected = c.iso === countryIso;
+                  return (
+                    <button
+                      type="button"
+                      key={c.iso}
+                      onClick={() => {
+                        setCountryIso(c.iso);
+                        setCountryPickerOpen(false);
+                        setCountrySearch('');
+                        if (phone) {
+                          try {
+                            const formatted = new AsYouType(c.iso).input(phone);
+                            setPhone(formatted);
+                          } catch (e) {}
+                        }
+                      }}
+                      className={`country-list-item ${isSelected ? 'selected' : ''}`}
+                    >
+                      <span className="country-flag">{c.flag}</span>
+                      <span className="c-name">{c.name}</span>
+                      <span className="c-dial">{c.dial}</span>
+                      {isSelected && (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F55F16" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
