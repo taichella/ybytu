@@ -64,8 +64,10 @@ BEGIN
     v_clean := '55' || v_clean;
   END IF;
 
-  -- Rejeita se não tiver tamanho E.164 válido (mínimo 12 dígitos, máximo 15)
-  IF length(v_clean) < 12 OR length(v_clean) > 15 THEN
+  -- Rejeita se não tiver tamanho E.164 válido:
+  -- com '+' aceita de 8 a 15 dígitos (+33 França e +1 EUA têm 11);
+  -- sem '+' mantém o mínimo de 12 (55 + DDD + número)
+  IF length(v_clean) < (CASE WHEN v_has_plus THEN 8 ELSE 12 END) OR length(v_clean) > 15 THEN
     RETURN;
   END IF;
 
@@ -80,6 +82,8 @@ BEGIN
       OR p.whatsapp_phone = v_clean
       OR (v_clean LIKE '55%' AND p.whatsapp_phone = substr(v_clean, 3))
     )
+  -- Mesmo telefone em mais de um perfil: vence o perfil mais recente
+  ORDER BY p.created_at DESC
   LIMIT 1;
 END;
 $$;

@@ -49,7 +49,10 @@ function parseAndValidatePhoneE164(raw: string): PhoneValidation {
     fullDigits = '55' + digits
   }
 
-  if (fullDigits.length < 12 || fullDigits.length > 15) {
+  // Com '+' aceita de 8 a 15 dígitos (+33 França e +1 EUA têm 11);
+  // sem '+' mantém o mínimo de 12 (55 + DDD + número)
+  const minDigits = hasPlus ? 8 : 12
+  if (fullDigits.length < minDigits || fullDigits.length > 15) {
     return { valid: false, e164: '', digits: '', candidates: [] }
   }
 
@@ -239,6 +242,9 @@ serve(async (req) => {
           .from('profiles')
           .select('id, whatsapp_phone')
           .in('whatsapp_phone', phoneVal.candidates)
+          // Mesmo telefone em mais de um perfil: vence o perfil mais recente
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle()
 
         if (profile) {
