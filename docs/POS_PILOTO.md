@@ -310,19 +310,46 @@ Estado medido (somente leitura, sem ler nenhuma chave secreta):
   (app pós-piloto, fixa no código).
 - **Functions**: 33 functions + `_shared` leem `SUPABASE_SERVICE_ROLE_KEY`; 1 lê `SUPABASE_ANON_KEY`
   (`ybytu-auth-verify-otp`). No runtime deste projeto, `SUPABASE_ANON_KEY` **já é a chave publishable** (digest do
-  secret = sha256 da publishable), ao contrário do que a documentação diz. É muito provável que
-  `SUPABASE_SERVICE_ROLE_KEY` também já seja a secret nova (mesma data de atualização; o comentário de
-  `_shared/internalAuth.ts` registra a troca de formato em 2026-08-05) — **não provado**, porque provar exige ler a chave.
+  secret = sha256 da publishable), ao contrário do que a documentação diz. `SUPABASE_SERVICE_ROLE_KEY` **também já é
+  a chave secret nova** (`default`) — **provado em 2026-09-30** por comparação de hash (digest do secret = sha256 da
+  secret nova: verdadeiro; = sha256 da `service_role` JWT antiga: falso), imprimindo só verdadeiro/falso, sem exibir
+  nem gravar valor. Nenhuma function depende da `service_role` antiga.
 - Fora das functions nada depende da chave de serviço: os 2 crons que chamam functions usam o
   `INTERNAL_FUNCTION_SECRET` (vault), o backup do GitHub usa `SUPABASE_DB_URL`, não há database webhooks.
 
 Ordem segura quando for fazer:
 
-1. Provar o formato de `SUPABASE_SERVICE_ROLE_KEY` no runtime (comparar o digest do secret com o sha256 de cada chave,
-   imprimindo só verdadeiro/falso). Se for a antiga, trocar antes o código para ler `SUPABASE_SECRET_KEYS`
-   (`JSON.parse(...)['default']`) — a mudança fica em 36 pontos, vale centralizar num helper em `_shared/`.
+1. ~~Provar o formato de `SUPABASE_SERVICE_ROLE_KEY` no runtime~~ — **feito em 2026-09-30: é a secret nova**, então
+   não é preciso trocar o código das functions para ler `SUPABASE_SECRET_KEYS`.
 2. Tirar a `anon` antiga de `apps/ybytu-app` (ou confirmar que o app não está publicado).
 3. No painel, conferir "last used" das chaves antigas; se zerado, **desativar** as antigas (é reversível: dá para
    religar na hora se algo quebrar). Testar login de staff, login do aluno por código, onboarding e um cron.
 4. Só depois disso fazer a rotação da chave secret que está pendente (criar uma nova, confirmar que o runtime das
    functions passou a usar a nova, apagar a velha). Desativar as antigas já invalida a `service_role` JWT.
+
+## Mesmo telefone em mais de um perfil: decidir antes de abrir para aluno real (medido 2026-09-30, nada implementado)
+
+Estado medido (somente leitura):
+
+- **Nada impede** o mesmo `profiles.whatsapp_phone` em vários perfis: não há índice único, constraint nem trigger sobre
+  a coluna, e nem o onboarding nem as functions conferem se o número já existe. A única unicidade é a do e-mail
+  (`auth.users`); `auth.users.phone` não é usado (0 linhas preenchidas).
+- Hoje: 4 perfis, 2 telefones distintos, **os 2 aparecem em 2 perfis cada** (contas de teste da Taina, de propósito —
+  é o único jeito de testar com um número só). **Não bloquear nem apagar durante o piloto.**
+- Login por WhatsApp (`find_user_by_identifier` + busca de reserva em `ybytu-auth-request-otp` / `-verify-otp`): com
+  telefone repetido, entra **no perfil mais recente** (`ORDER BY created_at DESC`, commit `930145c1`). Isso é atalho de
+  teste: com aluno real, o perfil mais antigo fica sem acesso por WhatsApp, em silêncio (só entra por e-mail).
+
+Opções para a virada:
+
+1. **Bloquear no cadastro** — simples, mas barra o caso legítimo de um casal/família que divide o mesmo WhatsApp, e a
+   mensagem de erro revela que o número já tem conta.
+2. **Permitir e avisar o staff** — não barra ninguém, mas sozinho não resolve o login: continua caindo em um perfil só.
+3. **Tratar no login** — o código vai para o WhatsApp; depois de validado, se o número tiver mais de um perfil, o app
+   mostra a lista ("Entrar como: Ana / João") e a pessoa escolhe.
+
+**Recomendação: 3, com o aviso da 2 como complemento** (uma marca "telefone compartilhado" no painel, só informativa).
+Quem divide o WhatsApp já divide o fator de login, então a escolha de conta depois do código não abre nada que o
+número compartilhado já não abrisse; e quem quiser acesso separado entra por e-mail. Ao implementar: trocar o
+desempate por `created_at` pela escolha de conta, e só listar os perfis **depois** do código validado (antes disso a
+resposta continua cega). Isso só entra na virada para cliente real — até lá o comportamento atual fica como está.
