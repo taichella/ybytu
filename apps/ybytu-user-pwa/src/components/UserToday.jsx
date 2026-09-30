@@ -21,6 +21,7 @@ export default function UserToday() {
   const [completedMeals, setCompletedMeals] = useState([]);
   const [checkingInWorkout, setCheckingInWorkout] = useState(false);
   const [checkingInMeal, setCheckingInMeal] = useState({});
+  const [checkinError, setCheckinError] = useState(null);
 
   // Modal de vídeo
   const [activeVideo, setActiveVideo] = useState(null); // { url, title }
@@ -115,6 +116,14 @@ export default function UserToday() {
   const handleCheckinWorkout = async () => {
     if (!activeDay || isWorkoutCompletedToday) return;
 
+    setCheckinError(null);
+
+    const planId = payload?.training?.id || null;
+    if (!planId) {
+      setCheckinError('Não foi possível identificar o plano de treino ativo para registrar o check-in. Atualize a página e tente novamente.');
+      return;
+    }
+
     setCheckingInWorkout(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -123,7 +132,6 @@ export default function UserToday() {
         return;
       }
 
-      const planId = payload?.training?.id || null;
       const dayNum = Number(activeDay.day_number);
       const sessionTitle = activeDay.title_ptbr || activeDay.region_label_ptbr || `Treino Dia ${dayNum}`;
 
@@ -142,7 +150,7 @@ export default function UserToday() {
 
       setCompletedWorkouts(prev => [inserted, ...prev]);
     } catch (err) {
-      alert(`Erro ao registrar check-in: ${err?.message || 'Tente novamente.'}`);
+      setCheckinError(`Erro ao registrar check-in: ${err?.message || 'Tente novamente.'}`);
     } finally {
       setCheckingInWorkout(false);
     }
@@ -151,6 +159,14 @@ export default function UserToday() {
   // Check-in de Refeição
   const handleCheckinMeal = async (meal, dayOrder) => {
     const mealKey = `${dayOrder}_${meal.order}`;
+    setCheckinError(null);
+
+    const mealPlanId = payload?.nutrition?.id || null;
+    if (!mealPlanId) {
+      setCheckinError('Não foi possível identificar o plano alimentar ativo para registrar a refeição. Atualize a página e tente novamente.');
+      return;
+    }
+
     setCheckingInMeal(prev => ({ ...prev, [mealKey]: true }));
 
     try {
@@ -160,7 +176,6 @@ export default function UserToday() {
         return;
       }
 
-      const mealPlanId = payload?.nutrition?.id || null;
       const mealName = meal.meal_name || meal.name || `Refeição ${meal.order}`;
 
       const { data: inserted, error: insertErr } = await supabase
@@ -179,7 +194,7 @@ export default function UserToday() {
 
       setCompletedMeals(prev => [inserted, ...prev]);
     } catch (err) {
-      alert(`Erro ao marcar refeição: ${err?.message || 'Tente novamente.'}`);
+      setCheckinError(`Erro ao marcar refeição: ${err?.message || 'Tente novamente.'}`);
     } finally {
       setCheckingInMeal(prev => ({ ...prev, [mealKey]: false }));
     }
@@ -279,14 +294,14 @@ export default function UserToday() {
         <button
           type="button"
           className={`user-tab-btn ${activeTab === 'training' ? 'active' : ''}`}
-          onClick={() => setActiveTab('training')}
+          onClick={() => { setActiveTab('training'); setCheckinError(null); }}
         >
           <span aria-hidden="true">🏋️</span> Treino de Hoje
         </button>
         <button
           type="button"
           className={`user-tab-btn ${activeTab === 'nutrition' ? 'active' : ''}`}
-          onClick={() => setActiveTab('nutrition')}
+          onClick={() => { setActiveTab('nutrition'); setCheckinError(null); }}
         >
           <span aria-hidden="true">🥗</span> Alimentação
         </button>
@@ -294,6 +309,26 @@ export default function UserToday() {
 
       {/* CONTEÚDO DA ABA SELECIONADA */}
       <main className="user-main-content">
+        {/* Banner de Erro Visível de Check-in */}
+        {checkinError && (
+          <div className="user-error-banner" role="alert" style={{ marginBottom: '16px' }}>
+            <svg className="user-error-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span style={{ flex: 1 }}>{checkinError}</span>
+            <button
+              type="button"
+              onClick={() => setCheckinError(null)}
+              style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: '0 4px', fontSize: '14px', fontWeight: 'bold' }}
+              title="Fechar"
+              aria-label="Fechar mensagem de erro"
+            >
+              ✕
+            </button>
+          </div>
+        )}
         
         {/* -------------------- ABA 1: TREINO -------------------- */}
         {activeTab === 'training' && (
