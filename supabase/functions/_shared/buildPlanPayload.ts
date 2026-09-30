@@ -304,7 +304,7 @@ async function buildTrainingSection(
 
   const { data: planRow, error: planErr } = await supabase
     .from('training_plans')
-    .select('training_plan_id, name_ptbr, created_at, caution_warnings, skipped_slots, is_active, ai_filled_slots, deterministic_fallback_slots')
+    .select('id, training_plan_id, name_ptbr, created_at, caution_warnings, skipped_slots, is_active, ai_filled_slots, deterministic_fallback_slots')
     .eq('id', profile.current_training_plan_id)
     .maybeSingle()
   if (planErr) throw new Error(`Lookup do training_plan falhou: ${planErr.message}`)
@@ -514,6 +514,9 @@ async function buildTrainingSection(
     dayCount: days.length,
     issuedAt: planRow.created_at ? new Date(planRow.created_at) : null,
     section: {
+      // uuid de training_plans.id -- o app do aluno grava em
+      // completed_workouts.training_plan_id (uuid com FK) no check-in.
+      id: planRow.id,
       // slug (tr_ai_xxx) do plano ATIVO deste aluno — passo 5: o front manda
       // de volta como training_plan_id em load_updates pra checagem de
       // posse no servidor (ver ybytu-submit-plan-review).
@@ -619,7 +622,7 @@ async function buildNutritionSection(
 
   const { data: planRow, error: planErr } = await supabase
     .from('meal_plans')
-    .select('meal_plan_id, name_ptbr, calories, meals_per_day, days_per_week, created_at, is_active, ai_filled_slots, deterministic_fallback_slots')
+    .select('id, meal_plan_id, name_ptbr, calories, meals_per_day, days_per_week, created_at, is_active, ai_filled_slots, deterministic_fallback_slots')
     .eq('id', profile.current_meal_plan_id)
     .maybeSingle()
   if (planErr) throw new Error(`Lookup do meal_plan falhou: ${planErr.message}`)
@@ -775,6 +778,8 @@ async function buildNutritionSection(
     menuDayCount: menus.length,
     issuedAt: planRow.created_at ? new Date(planRow.created_at) : null,
     section: {
+      // uuid de meal_plans.id -- o app do aluno grava no check-in de refeição.
+      id: planRow.id,
       preference_ptbr: preferencePtbr,
       // Slug (mp_ai_xxx) -- plan_reviews.meal_plan_id tem FK pra
       // meal_plans.meal_plan_id (texto), igual training_plan_id do lado
