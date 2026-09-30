@@ -294,3 +294,35 @@ de function nem "todo `_shared/`". Mudança em `_shared/` sem deploy continua se
 sem deploy do `get-plan-payload` = produção rodando versão velha): só reconhecer mudança comprovadamente inofensiva, com o
 motivo escrito e `except=` pras functions que precisam do deploy. Se o ruído incomodar, a resposta é deployar, não afrouxar
 a regra. Detalhes no README (seção do check) e no cabeçalho do próprio arquivo.
+
+## Chaves de API do Supabase: as antigas (`anon` / `service_role`) saem até o fim de 2026 (investigado 2026-09-30, nada trocado)
+
+A Supabase marca as chaves JWT antigas como "Deprecated". A documentação diz "by the end of 2026"; o cronograma público
+(discussion #29260) diz "Late 2026, TBC — your app will break". **Não há dia marcado**; conferir a data no painel
+(Settings → API Keys) e nos e-mails mensais de aviso.
+
+Estado medido (somente leitura, sem ler nenhuma chave secreta):
+
+- Chaves antigas **ainda ligadas**: a `anon` JWT (emitida 2026-03-19) responde 200 na API.
+- Existe **1 chave publishable** (`default`) e pelo menos 1 chave secret (`SUPABASE_SECRET_KEYS` existe no runtime).
+- **O que é público já usa a chave nova**: dashboard, onboarding, PWA (bundles publicados conferidos) e o widget do
+  WordPress (`apps/OnboardingPreLaunch.html`). Único lugar com a `anon` antiga: `apps/ybytu-app/src/lib/supabase.js`
+  (app pós-piloto, fixa no código).
+- **Functions**: 33 functions + `_shared` leem `SUPABASE_SERVICE_ROLE_KEY`; 1 lê `SUPABASE_ANON_KEY`
+  (`ybytu-auth-verify-otp`). No runtime deste projeto, `SUPABASE_ANON_KEY` **já é a chave publishable** (digest do
+  secret = sha256 da publishable), ao contrário do que a documentação diz. É muito provável que
+  `SUPABASE_SERVICE_ROLE_KEY` também já seja a secret nova (mesma data de atualização; o comentário de
+  `_shared/internalAuth.ts` registra a troca de formato em 2026-08-05) — **não provado**, porque provar exige ler a chave.
+- Fora das functions nada depende da chave de serviço: os 2 crons que chamam functions usam o
+  `INTERNAL_FUNCTION_SECRET` (vault), o backup do GitHub usa `SUPABASE_DB_URL`, não há database webhooks.
+
+Ordem segura quando for fazer:
+
+1. Provar o formato de `SUPABASE_SERVICE_ROLE_KEY` no runtime (comparar o digest do secret com o sha256 de cada chave,
+   imprimindo só verdadeiro/falso). Se for a antiga, trocar antes o código para ler `SUPABASE_SECRET_KEYS`
+   (`JSON.parse(...)['default']`) — a mudança fica em 36 pontos, vale centralizar num helper em `_shared/`.
+2. Tirar a `anon` antiga de `apps/ybytu-app` (ou confirmar que o app não está publicado).
+3. No painel, conferir "last used" das chaves antigas; se zerado, **desativar** as antigas (é reversível: dá para
+   religar na hora se algo quebrar). Testar login de staff, login do aluno por código, onboarding e um cron.
+4. Só depois disso fazer a rotação da chave secret que está pendente (criar uma nova, confirmar que o runtime das
+   functions passou a usar a nova, apagar a velha). Desativar as antigas já invalida a `service_role` JWT.
