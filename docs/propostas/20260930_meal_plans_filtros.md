@@ -7,47 +7,31 @@
 
 ---
 
-## 1. Respostas aos Dois Pontos Levantados
+## 1. Análise dos Dados e Confirmações do Banco
 
-### Ponto 1: `goals_ids` é JSONB (Compatibilidade de Tipos)
-* **Comportamento do `supabase-js`**: Em colunas `jsonb`, o PostgREST converte arrays JSON diretamente para arrays nativos do JavaScript (por isso `Array.isArray(p.goals_ids)` já funciona na linha 90 de `MealPlans.jsx`).
-* **Blindagem implementada**: Para garantir imunidade total contra dados legados ou strings duplamente escapadas (ex.: `"[\"emagrecimento\"]"` ou `"hipertrofia"`), incluímos o helper `normalizeGoalsIds`:
-  ```javascript
-  function normalizeGoalsIds(raw) {
-    if (!raw) return [];
-    if (Array.isArray(raw)) return raw;
-    if (typeof raw === 'string') {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed;
-        return [parsed];
-      } catch {
-        return raw.split(',').map((s) => s.trim()).filter(Boolean);
-      }
-    }
-    return [];
-  }
-  ```
-  Isso garante que o filtro nunca quebre nem retorne vazio por variação de tipo.
+### 1.1. `goals_ids` armazena SLUGS (`goal_id`), não UUIDs
+* **Estrutura confirmada**: Todas as 304 linhas de `meal_plans` no banco guardam arrays JSON com o **slug** do objetivo (ex.: `["weight_loss"]`, `["conditioning"]`), **nunca o UUID**.
+* **Como comparar**: O filtro compara diretamente com `g.goal_id` (o slug de `lookups.goals`), e o `<select>` tem `value={g.goal_id}`. Comparar com `g.id` (uuid) devolveria sempre vazio.
+* **Tipo de dado**: Como confirmado, todas as linhas são arrays JSON válidos e o `supabase-js` entrega como array JavaScript nativo. O uso de `Array.isArray(p.goals_ids)` e `includes(goalFilter)` é estritamente seguro e idiomático.
 
-### Ponto 2: `is_active` em 300 dos 304 Planos (Vale manter o filtro de status?)
-* **Análise dos dados**: 300 planos são ativos e apenas 4 estão desativados. Entre "Todos" e "Ativos", a diferença visual é quase imperceptível (304 vs 300).
-* **Veredito**: **Sim, vale manter**, porque a função primária do filtro aqui não é separar 50/50, mas sim permitir que o nutricionista ou admin consiga **localizar imediatamente os 4 planos inativos** sem precisar rolar 304 cards.
-* **Ajuste de design**: Em vez de dar destaque excessivo, o filtro de status fica como uma opção simples no cabeçalho de filtros (`Todos`, `Ativos`, `Inativos`).
+### 1.2. `is_active` em 300 dos 304 Planos (Filtro de Status)
+* **Utilidade**: A função do filtro de status não é separar 50/50, mas permitir que o staff consiga **isolar imediatamente os 4 planos inativos** arquivados, sem precisar varrer visualmente 304 cards.
+* **Implementação**: Mantido como um seletor simples e discreto (`Todos`, `Ativos`, `Inativos`).
 
 ---
 
 ## 2. Filtros Confirmados com Base no Banco de Dados
 
-1. **Busca Textual**: Busca em `p.name_ptbr` e em `p.meal_plan_id` (código `mp_...`).
-2. **Objetivos**: Dropdown dinâmico derivado de `lookups.goals`, com opção extra `"Sem objetivo"` para planos sem amarração.
-3. **Calorias**: Faixas calibradas conforme a distribuição real das dietas:
+1. **Busca Textual**: Busca tanto em `p.name_ptbr` quanto em `p.meal_plan_id` (código `mp_...`).
+2. **Objetivo (Slug `goal_id`)**: Dropdown populado por `lookups.goals` com `value={g.goal_id}`, mais a opção `"Sem objetivo"`.
+3. **Calorias**: Faixas baseadas na distribuição real dos planos no banco:
    - `< 1800 kcal` (déficit calórico)
-   - `1800 a 2400 kcal` (faixa de manutenção / moderado)
+   - `1800 a 2400 kcal` (manutenção / moderado)
    - `> 2400 kcal` (superávit / hipertrofia)
-4. **Refeições por Dia**: Pílulas/seletor gerado a partir dos valores que realmente existem no banco (`[...new Set(plans.map(p => p.meals_per_day).filter(Boolean))].sort()`). Dessa forma, nunca exibe uma opção vazia.
-5. **Origem IA**: `Todos` | `Somente IA` | `Manuais / Molde`.
-6. **Contador e Limpeza**: Indicador `Exibindo X de Y planos` e botão `Limpar filtros` ativo quando houver filtros aplicados.
+4. **Refeições por Dia**: Opções derivadas dinamicamente dos próprios planos carregados (`availableMealsPerDay`), impedindo opções com 0 resultados.
+5. **Status**: `Todos` | `Ativos` | `Inativos`.
+6. **Origem IA**: `Todos` | `Somente IA` | `Manuais / Molde`.
+7. **Contador e Limpeza**: Indicador `Exibindo X de Y planos` e botão `Limpar filtros`.
 
 ---
 
@@ -56,35 +40,16 @@
 ```diff
 --- a/apps/ybytu-dashboard/src/components/MealPlans.jsx
 +++ b/apps/ybytu-dashboard/src/components/MealPlans.jsx
-@@ -14,7 +14,25 @@ const COVER_GRADIENTS = [
- 
-+function normalizeGoalsIds(raw) {
-+  if (!raw) return [];
-+  if (Array.isArray(raw)) return raw;
-+  if (typeof raw === 'string') {
-+    try {
-+      const parsed = JSON.parse(raw);
-+      if (Array.isArray(parsed)) return parsed;
-+      return [parsed];
-+    } catch {
-+      return raw.split(',').map((s) => s.trim()).filter(Boolean);
-+    }
-+  }
-+  return [];
-+}
-+
- export default function MealPlans() {
+@@ -16,3 +16,7 @@ export default function MealPlans() {
    const [search, setSearch] = useState('');
 -  const [aiFilter, setAiFilter] = useState(false);
 +  const [aiFilter, setAiFilter] = useState('all'); // 'all' | 'ai' | 'manual'
-+  const [goalFilter, setGoalFilter] = useState('all');
++  const [goalFilter, setGoalFilter] = useState('all'); // 'all' | slug do goal_id | 'sem_objetivo'
 +  const [caloricRange, setCaloricRange] = useState('all'); // 'all' | '<1800' | '1800-2400' | '>2400'
 +  const [mealsFilter, setMealsFilter] = useState('all');
 +  const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'active' | 'inactive'
    const [plans, setPlans] = useState([]);
-   const [lookups, setLookups] = useState(null);
-   const [loading, setLoading] = useState(true);
-@@ -51,10 +69,45 @@ export default function MealPlans() {
+@@ -51,8 +55,42 @@ export default function MealPlans() {
  
 +  // Opções dinâmicas de refeições/dia presentes nos dados reais
 +  const availableMealsPerDay = useMemo(() => {
@@ -104,8 +69,9 @@
 +    if (statusFilter === 'inactive' && p.is_active) return false;
 +    if (mealsFilter !== 'all' && Number(p.meals_per_day) !== Number(mealsFilter)) return false;
 +
++    // goals_ids guarda slugs (ex: ["weight_loss"]), compara com goal_id
 +    if (goalFilter !== 'all') {
-+      const planGoals = normalizeGoalsIds(p.goals_ids);
++      const planGoals = Array.isArray(p.goals_ids) ? p.goals_ids : [];
 +      if (goalFilter === 'sem_objetivo' && planGoals.length > 0) return false;
 +      if (goalFilter !== 'sem_objetivo' && !planGoals.includes(goalFilter)) return false;
 +    }
@@ -134,7 +100,7 @@
 +    setCaloricRange('all');
 +    setMealsFilter('all');
 +  };
-@@ -78,10 +131,70 @@ export default function MealPlans() {
+@@ -78,10 +116,68 @@ export default function MealPlans() {
            </div>
  
 -          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--muted)', fontWeight: 600, cursor: 'pointer', marginBottom: '18px' }}>
@@ -143,7 +109,7 @@
 -          </label>
 +          {/* Barra de Filtros com Dados Reais */}
 +          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', marginBottom: '20px', padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px' }}>
-+            {/* Objetivo */}
++            {/* Objetivo (compara slug goal_id) */}
 +            <select value={goalFilter} onChange={(e) => setGoalFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '9px', background: 'var(--field)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', outline: 'none' }}>
 +              <option value="all">Todos os Objetivos</option>
 +              {(lookups?.goals ?? []).map(g => (
@@ -187,7 +153,7 @@
 +            {hasActiveFilters && (
 +              <button
 +                type="button"
-+                onClick={clearFilters}
+                onClick={clearFilters}
 +                style={{ background: 'none', border: 'none', color: 'var(--brand)', fontSize: '12px', fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 10px' }}
 +              >
 +                Limpar filtros
@@ -204,6 +170,6 @@
 
 ## 4. Validação
 
-1. **Busca Combinada**: Testar busca textual com nome (ex: `Hipertrofia`) e código (`mp_001`).
-2. **Isolamento de Inativos**: Selecionar `Inativos` no dropdown de status deve exibir imediatamente apenas os 4 planos desativados da base.
-3. **Imunidade a Arrays/Strings JSONB**: `normalizeGoalsIds` previne qualquer exceção ou falha em planos com `goals_ids` malformado ou nulo.
+1. **Busca Textual**: Buscar por nome (ex.: `Emagrecimento`) e por código (`mp_001`).
+2. **Filtro de Objetivo**: Filtrar por cada objetivo (ex.: `weight_loss`) deve listar apenas planos que contenham o respectivo slug em `goals_ids`.
+3. **Isolar os 4 Inativos**: Ao escolher `Inativos` no dropdown de status, a lista filtra imediatamente para os 4 planos arquivados.

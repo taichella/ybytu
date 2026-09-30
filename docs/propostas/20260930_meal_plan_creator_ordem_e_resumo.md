@@ -16,9 +16,8 @@
 
 2. **Configurações Recolhidas e Barra de Resumo Compacta**:
    - `MealPlanCreator` começava com `settings = true`, ocupando grande espaço vertical no topo da tela e sem nenhuma barra de resumo quando fechado.
-   - **Solução**: Iniciar com `settings = isNew` (recolhido em planos existentes) e exibir uma barra de resumo compacta idêntica à do `TrainingPlanCreator`:
-     - Exibe: *Objetivos · Metas calóricas · Refeições/dia · Dias/sem · Preferência alimentar*.
-     - Botão `Editar ▼` para expandir suavemente.
+   - **Solução**: Iniciar com `settings = isNew` (recolhido em planos existentes) e exibir uma barra de resumo compacta idêntica à do `TrainingPlanCreator`.
+   - **Resolução de Rótulos em PT-BR**: Como `plan.goals_ids` e `plan.dietary_preference` guardam **slugs** (`goal_id` e `dietary_preference_id`), criamos `goalMap` e `prefMap` indexados pelos slugs. Dessa forma, a barra exibe sempre os nomes legíveis em português (*"Objetivos: Emagrecimento · Pref: Onívoro"*), **nunca os slugs crus** (`weight_loss`, `omnivore`).
 
 ---
 
@@ -36,23 +35,38 @@
    const [plan, setPlan] = useState(EMPTY_PLAN);
    const [slotsByDay, setSlotsByDay] = useState({});
    const [lookups, setLookups] = useState(null);
-@@ -88,6 +88,32 @@ export default function MealPlanCreator() {
+@@ -88,6 +88,43 @@ export default function MealPlanCreator() {
  
    const mealTypeName = (code) => (lookups?.meal_types ?? []).find((mt) => mt.meal_type_id === code)?.name_ptbr ?? code;
  
++  // Mapas indexados pelo SLUG (goal_id e dietary_preference_id) para exibir nome em PT-BR
++  const goalMap = useMemo(() => {
++    const map = new Map();
++    (lookups?.goals ?? []).forEach((g) => map.set(g.goal_id, g.name_ptbr));
++    return map;
++  }, [lookups]);
++
++  const prefMap = useMemo(() => {
++    const map = new Map();
++    (lookups?.dietary_preferences ?? []).forEach((p) => map.set(p.dietary_preference_id, p.name_ptbr));
++    return map;
++  }, [lookups]);
++
 +  const planSettingsSummary = useMemo(() => {
 +    const parts = [];
-+    const goals = (plan.goals_ids ?? []).map(g => (lookups?.goals ?? []).find(gl => gl.goal_id === g)?.name_ptbr || g).filter(Boolean);
++    const goals = (Array.isArray(plan.goals_ids) ? plan.goals_ids : [])
++      .map((g) => goalMap.get(g) || g)
++      .filter(Boolean);
 +    if (goals.length > 0) parts.push(`Objetivos: ${goals.join(', ')}`);
 +    if (plan.calories) parts.push(`${plan.calories} kcal/dia`);
 +    if (plan.meals_per_day) parts.push(`${plan.meals_per_day} ref/dia`);
 +    if (plan.days_per_week) parts.push(`${plan.days_per_week} dias/sem`);
 +    if (plan.dietary_preference) {
-+      const pref = (lookups?.dietary_preferences ?? []).find(p => p.dietary_preference_id === plan.dietary_preference);
-+      if (pref) parts.push(`Pref: ${pref.name_ptbr}`);
++      const prefName = prefMap.get(plan.dietary_preference) || plan.dietary_preference;
++      parts.push(`Pref: ${prefName}`);
 +    }
 +    return parts.length > 0 ? parts.join(' · ') : 'Nenhuma configuração preenchida';
-+  }, [plan, lookups]);
++  }, [plan, goalMap, prefMap]);
 +
 +  const moveSlot = (fromIndex, toIndex) => {
 +    setSlotsByDay((prev) => {
@@ -70,7 +84,7 @@
    const addMealToDay = (meal) => {
      setSlotsByDay((prev) => {
        const list = prev[day] ?? [];
-@@ -207,6 +233,18 @@ export default function MealPlanCreator() {
+@@ -207,6 +244,18 @@ export default function MealPlanCreator() {
              </div>
            </div>
          </div>
@@ -89,7 +103,7 @@
        )}
  
        <div style={{ flexShrink: 0, background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '0 28px', display: 'flex', alignItems: 'center', gap: '6px', overflowX: 'auto' }}>
-@@ -255,6 +293,24 @@ export default function MealPlanCreator() {
+@@ -255,6 +304,24 @@ export default function MealPlanCreator() {
                      <p style={{ margin: 0, fontWeight: 700, fontSize: '14px' }}>{s.meal?.name_ptbr}</p>
                      <p style={{ margin: '1px 0 0', fontSize: '11px', color: 'var(--muted)' }}>{mealTypeName(s.meal_type_id)} · {s.meal?.calories ?? 0} kcal</p>
                    </div>
@@ -122,6 +136,6 @@
 
 ## 3. Validação
 
-1. **Reordenação de Refeições**: Ao clicar em ▲ ou ▼, os itens mudam de posição vertical imediatamente. O total diário de calorias e macros na lateral permanece idêntico (a soma não é alterada).
-2. **Salvamento**: `allSlots` mapeia `meal_order: i + 1`. A ordem resultante é persistida diretamente em `meal_plan_meals`.
-3. **Resumo das Configurações**: Ao carregar um plano existente, a barra fina de resumo é exibida. Clicar nela abre as opções completas.
+1. **Reordenação de Refeições**: Os botões ▲ e ▼ trocam as refeições de posição visualmente e recalibram `meal_order: idx + 1`.
+2. **Resumo das Configurações**: Utiliza `goalMap` e `prefMap` indexados pelos slugs de `goal_id` e `dietary_preference_id`. O resumo exibe sempre nomes em português legíveis, sem expor slugs crus.
+3. **Persistência**: Ao salvar, `meal_order` reflete a nova ordem sequencial no banco.
