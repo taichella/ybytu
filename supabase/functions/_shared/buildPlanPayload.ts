@@ -743,6 +743,9 @@ async function buildNutritionSection(
       }))
 
       return {
+        // meal_plan_meals.meal_order -- o app do aluno grava em
+        // completed_meals.meal_order no check-in de refeição.
+        meal_order: row.meal_order,
         name_ptbr: mealTypeNameBySlug.get(row.meal_type_id) ?? row.meal_type_id,
         time_ptbr: mealTimesByOrder.get(row.meal_order) ?? null,
         kcal: meal ? Math.round(Number(meal.calories)) : null,
