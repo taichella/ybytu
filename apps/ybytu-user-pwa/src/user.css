@@ -324,14 +324,18 @@
 
 .meal-header-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .meal-title-wrap {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  flex: 1;
+  min-width: 140px;
 }
 
 .meal-name {

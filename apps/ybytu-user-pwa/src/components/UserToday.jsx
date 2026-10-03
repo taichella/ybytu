@@ -7,18 +7,30 @@ import YbytuLogo from './YbytuLogo';
 import UserVideoModal from './UserVideoModal';
 import '../user.css';
 
-export default function UserToday() {
+const MEAL_ICONS = {
+  'Café da manhã': '🥞',
+  'Lanche': '🍎',
+  'Lanche da manhã': '🍎',
+  'Lanche da tarde': '🥪',
+  'Almoço': '🥗',
+  'Janta': '🍽️',
+  'Jantar': '🍽️',
+  'Ceia': '🌙',
+};
+
+export default function UserToday({ mockPayload = null } = {}) {
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!mockPayload);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [payload, setPayload] = useState(null);
+  const [payload, setPayload] = useState(mockPayload);
   const [activeTab, setActiveTab] = useState('training'); // 'training' | 'nutrition'
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
+  const [selectedMenuIdx, setSelectedMenuIdx] = useState(0);
 
   // Status de check-in de hoje
-  const [completedWorkouts, setCompletedWorkouts] = useState([]);
-  const [completedMeals, setCompletedMeals] = useState([]);
+  const [completedWorkouts, setCompletedWorkouts] = useState(mockPayload?.activity_today?.completed_workouts || []);
+  const [completedMeals, setCompletedMeals] = useState(mockPayload?.activity_today?.completed_meals || []);
   const [checkingInWorkout, setCheckingInWorkout] = useState(false);
   const [checkingInMeal, setCheckingInMeal] = useState({});
   const [checkinError, setCheckinError] = useState(null);
@@ -28,6 +40,7 @@ export default function UserToday() {
 
   // 1. Carrega plano do usuário autenticado
   useEffect(() => {
+    if (mockPayload) return;
     let cancelled = false;
 
     async function loadPlan() {
@@ -98,6 +111,13 @@ export default function UserToday() {
 
   const activeDay = trainingDays[selectedDayIdx] || trainingDays[0] || null;
 
+  // Lista de cardápios de nutrição
+  const nutritionMenus = useMemo(() => {
+    return payload?.nutrition?.menus || [];
+  }, [payload]);
+
+  const activeMenu = nutritionMenus[selectedMenuIdx] || nutritionMenus[0] || null;
+
   // Verifica se o dia atual já teve check-in realizado hoje
   const isWorkoutCompletedToday = useMemo(() => {
     if (!activeDay) return false;
@@ -158,7 +178,7 @@ export default function UserToday() {
 
   // Check-in de Refeição
   const handleCheckinMeal = async (meal, dayOrder) => {
-    const mealKey = `${dayOrder}_${meal.order}`;
+    const mealKey = `${dayOrder}_${meal.meal_order}`;
     setCheckinError(null);
 
     const mealPlanId = payload?.nutrition?.id || null;
@@ -176,7 +196,7 @@ export default function UserToday() {
         return;
       }
 
-      const mealName = meal.meal_name || meal.name || `Refeição ${meal.order}`;
+      const mealName = meal.meal_name_ptbr || meal.name_ptbr || `Refeição ${meal.meal_order}`;
 
       const { data: inserted, error: insertErr } = await supabase
         .from('completed_meals')
@@ -184,7 +204,7 @@ export default function UserToday() {
           user_id: user.id,
           meal_plan_id: mealPlanId,
           day_order: Number(dayOrder),
-          meal_order: Number(meal.order),
+          meal_order: Number(meal.meal_order),
           meal_name: mealName,
         })
         .select('id, day_order, meal_order, meal_name, completed_at')
@@ -211,19 +231,18 @@ export default function UserToday() {
     return now.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
   }, []);
 
-  // Regra de Carga estrita (nunca 0 kg, 'a definir' se vazio)
+  // Regra de Carga estrita (lê load_display_ptbr do servidor: '12,5 kg' | 'Peso corporal' | 'Elástico' | 'a definir')
   const renderExerciseLoad = (ex) => {
-    if (ex.load_type === 'bodyweight') {
-      return <span className="exercise-stat-tag">Peso corporal</span>;
-    }
-    if (ex.load_type === 'band') {
-      return <span className="exercise-stat-tag">Elástico</span>;
-    }
-    const val = ex.load_kg || ex.load;
-    if (val && Number(val) > 0) {
-      return <span className="exercise-stat-tag load">{val} kg</span>;
-    }
-    return <span className="exercise-stat-tag load">Carga a definir</span>;
+    const text = ex.load_display_ptbr || (
+      ex.load_type === 'bodyweight' ? 'Peso corporal' :
+      ex.load_type === 'band' ? 'Elástico' : 'Carga a definir'
+    );
+    const isSpecial = ex.load_type === 'bodyweight' || ex.load_type === 'band';
+    return (
+      <span className={`exercise-stat-tag ${isSpecial ? '' : 'load'}`}>
+        {text === 'a definir' ? 'Carga a definir' : text}
+      </span>
+    );
   };
 
   if (loading) {
@@ -385,34 +404,30 @@ export default function UserToday() {
                 )}
 
                 {/* Avisos de Cautela do Dia */}
-                {activeDay?.caution_warnings && activeDay.caution_warnings.length > 0 && (
+                {activeDay?.adapted_note_ptbr && (
                   <div className="caution-alert-card">
                     <span style={{ fontSize: '15px' }} aria-hidden="true">⚠️</span>
-                    <div>
-                      {activeDay.caution_warnings.map((c, i) => (
-                        <div key={i}>{typeof c === 'string' ? c : c.mensagem}</div>
-                      ))}
-                    </div>
+                    <div>{activeDay.adapted_note_ptbr}</div>
                   </div>
                 )}
 
                 {/* Nota de Slot Pulado (Mensagem amigável para o usuário) */}
-                {activeDay?.skipped_note && (
+                {activeDay?.skipped_note_ptbr && (
                   <div className="caution-alert-card" style={{ background: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.25)', color: '#1D4ED8' }}>
                     <span aria-hidden="true">ℹ️</span>
-                    <div>{activeDay.skipped_note}</div>
+                    <div>{activeDay.skipped_note_ptbr}</div>
                   </div>
                 )}
 
                 {/* Lista de Exercícios */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {activeDay?.exercises?.map((ex, idx) => (
-                    <article key={ex.exercise_id || idx} className="exercise-item-card">
+                    <article key={ex.id || ex.order || idx} className="exercise-item-card">
                       
                       {/* Miniatura com fallback seguro */}
                       <div className="exercise-thumb-wrap">
                         <ExerciseThumb
-                          sources={thumbSources(ex.image_url)}
+                          sources={[ex.image_thumb_url, ex.image_url, ...thumbSources(ex.image_url)].filter(Boolean)}
                           label={ex.name_ptbr}
                           width={54}
                           height={54}
@@ -439,10 +454,10 @@ export default function UserToday() {
                         
                         <div className="exercise-stats-grid">
                           <span className="exercise-stat-tag">
-                            {ex.sets} séries × {ex.reps}
+                            {ex.sets} séries × {ex.reps_ptbr || ex.reps}
                           </span>
                           
-                          {/* Carga conforme load_type */}
+                          {/* Carga conforme load_type e load_display_ptbr */}
                           {renderExerciseLoad(ex)}
 
                           {ex.rest_seconds > 0 && (
@@ -501,117 +516,179 @@ export default function UserToday() {
         {/* -------------------- ABA 2: NUTRIÇÃO -------------------- */}
         {activeTab === 'nutrition' && (
           <>
-            {!payload?.nutrition?.days || payload.nutrition.days.length === 0 ? (
+            {nutritionMenus.length === 0 ? (
               <div className="user-card" style={{ textAlign: 'center', color: 'var(--yb-muted, #718096)' }}>
                 Nenhum plano alimentar cadastrado no momento.
               </div>
             ) : (
               <>
-                {payload.nutrition.days.map((menuDay, dIdx) => (
-                  <div key={menuDay.day_order || dIdx} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    
-                    {/* Meta Diária de Calorias e Macros se informada */}
-                    {menuDay.macros && (
-                      <div className="user-card" style={{ padding: '12px 14px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--yb-muted, #718096)', letterSpacing: '0.04em' }}>
-                          Metas Diárias
+                {/* Meta Diária de Calorias e Macros do Plano (lida uma vez só fora da lista) */}
+                {(payload?.nutrition?.daily_kcal_target || payload?.nutrition?.macro_distribution) && (
+                  <div className="user-card" style={{ padding: '12px 14px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', color: 'var(--yb-muted, #718096)', letterSpacing: '0.04em' }}>
+                      Metas Diárias
+                    </span>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
+                      {payload.nutrition.daily_kcal_target && (
+                        <span className="exercise-stat-tag">⚡ {payload.nutrition.daily_kcal_target} kcal</span>
+                      )}
+                      {payload.nutrition.macro_distribution?.protein_g > 0 && (
+                        <span className="exercise-stat-tag" style={{ color: 'var(--yb-macro-protein, #3B82F6)' }}>
+                          🥩 {payload.nutrition.macro_distribution.protein_g}g prot
                         </span>
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '6px', flexWrap: 'wrap' }}>
-                          {menuDay.calories && (
-                            <span className="exercise-stat-tag">⚡ {menuDay.calories} kcal</span>
-                          )}
-                          {menuDay.macros.protein_g && (
-                            <span className="exercise-stat-tag" style={{ color: 'var(--yb-macro-protein, #3B82F6)' }}>
-                              🥩 {menuDay.macros.protein_g}g prot
-                            </span>
-                          )}
-                          {menuDay.macros.carb_g && (
-                            <span className="exercise-stat-tag" style={{ color: 'var(--yb-macro-carb, #F59E0B)' }}>
-                              🍞 {menuDay.macros.carb_g}g carb
-                            </span>
-                          )}
-                          {menuDay.macros.fat_g && (
-                            <span className="exercise-stat-tag" style={{ color: 'var(--yb-macro-fat, #A855F7)' }}>
-                              🥑 {menuDay.macros.fat_g}g gord
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                      )}
+                      {payload.nutrition.macro_distribution?.carb_g > 0 && (
+                        <span className="exercise-stat-tag" style={{ color: 'var(--yb-macro-carb, #F59E0B)' }}>
+                          🍞 {payload.nutrition.macro_distribution.carb_g}g carb
+                        </span>
+                      )}
+                      {payload.nutrition.macro_distribution?.fat_g > 0 && (
+                        <span className="exercise-stat-tag" style={{ color: 'var(--yb-macro-fat, #A855F7)' }}>
+                          🥑 {payload.nutrition.macro_distribution.fat_g}g gord
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-                    {/* Lista de Refeições */}
-                    {menuDay.meals?.map((meal) => {
-                      const mealDoneMatch = completedMeals.find(
-                        cm => Number(cm.day_order) === Number(menuDay.day_order) && Number(cm.meal_order) === Number(meal.order)
-                      );
-                      const isMealDone = !!mealDoneMatch;
-                      const doneTime = mealDoneMatch?.completed_at
-                        ? new Date(mealDoneMatch.completed_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-                        : null;
+                {/* Seletor de Cardápios (permite alternar entre os menus disponíveis) */}
+                {nutritionMenus.length > 1 && (
+                  <div className="day-selector-scroll">
+                    {nutritionMenus.map((m, idx) => (
+                      <button
+                        key={m.menu_day}
+                        type="button"
+                        className={`day-chip ${selectedMenuIdx === idx ? 'active' : ''}`}
+                        onClick={() => setSelectedMenuIdx(idx)}
+                      >
+                        Cardápio {m.menu_day}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-                      const mealKey = `${menuDay.day_order}_${meal.order}`;
-                      const isSaving = checkingInMeal[mealKey];
+                {/* Resumo do Cardápio Selecionado */}
+                {activeMenu && (
+                  <div className="workout-summary-card" style={{ background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.08) 0%, rgba(22, 163, 74, 0.02) 100%)', borderColor: 'rgba(22, 163, 74, 0.2)' }}>
+                    <span className="workout-session-badge" style={{ background: '#16a34a' }}>
+                      Cardápio {activeMenu.menu_day}
+                    </span>
+                    <h2 className="workout-session-title">
+                      {payload.nutrition.name_ptbr || `Cardápio Dia ${activeMenu.menu_day}`}
+                    </h2>
+                    <div className="workout-meta-row">
+                      {activeMenu.meals && (
+                        <span className="workout-meta-item">
+                          🥗 {activeMenu.meals.length} refeições
+                        </span>
+                      )}
+                      {payload.nutrition.preference_ptbr && (
+                        <span className="workout-meta-item">
+                          🌱 {payload.nutrition.preference_ptbr}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-                      return (
-                        <article key={meal.order} className="meal-item-card">
-                          
-                          <div className="meal-header-row">
-                            <div className="meal-title-wrap">
-                              <h3 className="meal-name">{meal.meal_name || meal.name}</h3>
+                {/* Lista de Refeições do Cardápio Ativo */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {activeMenu?.meals?.map((meal) => {
+                    const mealDoneMatch = completedMeals.find(
+                      cm => Number(cm.day_order) === Number(activeMenu.menu_day) && Number(cm.meal_order) === Number(meal.meal_order)
+                    );
+                    const isMealDone = !!mealDoneMatch;
+                    const doneTime = mealDoneMatch?.completed_at
+                      ? new Date(mealDoneMatch.completed_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                      : null;
+
+                    const mealKey = `${activeMenu.menu_day}_${meal.meal_order}`;
+                    const isSaving = checkingInMeal[mealKey];
+
+                    return (
+                      <article key={meal.meal_order} className="meal-item-card">
+                        
+                        <div className="meal-header-row">
+                          <div className="meal-title-wrap">
+                            <span style={{ fontSize: '18px', lineHeight: 1 }} aria-hidden="true">
+                              {MEAL_ICONS[meal.name_ptbr] || '🍽️'}
+                            </span>
+                            <div>
+                              <h3 className="meal-name">
+                                {meal.name_ptbr || meal.meal_name_ptbr || `Refeição ${meal.meal_order}`}
+                              </h3>
+                              {meal.meal_name_ptbr && meal.name_ptbr && meal.meal_name_ptbr !== meal.name_ptbr && (
+                                <span style={{ display: 'block', fontSize: '13px', fontWeight: 500, color: 'var(--yb-muted, #718096)', marginTop: '2px' }}>
+                                  {meal.meal_name_ptbr}
+                                </span>
+                              )}
                             </div>
-                            {meal.scheduled_time && (
-                              <span className="meal-time-badge">{meal.scheduled_time}</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            {meal.kcal && (
+                              <span className="exercise-stat-tag" style={{ fontSize: '11px' }}>
+                                {meal.kcal} kcal
+                              </span>
+                            )}
+                            {meal.time_ptbr && (
+                              <span className="meal-time-badge">{meal.time_ptbr}</span>
                             )}
                           </div>
+                        </div>
 
-                          {/* Alimentos da Refeição */}
+                        {/* Ingredientes da Refeição */}
+                        {meal.ingredients && meal.ingredients.length > 0 && (
                           <div className="meal-foods-list">
-                            {meal.foods?.map((f, fIdx) => (
-                              <div key={fIdx} className="meal-food-row">
-                                <span className="meal-food-name">{f.food_name || f.name}</span>
-                                <span className="meal-food-qty">
-                                  {f.quantity} {f.unit}
-                                </span>
+                            {meal.ingredients.map((ing, ingIdx) => (
+                              <div key={ingIdx} className="meal-food-row">
+                                <span className="meal-food-name">{ing.name_ptbr || '—'}</span>
+                                <span className="meal-food-qty">{ing.quantity_ptbr}</span>
                               </div>
                             ))}
                           </div>
+                        )}
 
-                          {/* Check-in Individual da Refeição */}
-                          <div style={{ marginTop: '4px' }}>
-                            {isMealDone ? (
-                              <span className="meal-checkin-btn done">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                Refeição feita{doneTime ? ` às ${doneTime}` : ''}
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                className="meal-checkin-btn"
-                                disabled={isSaving}
-                                onClick={() => handleCheckinMeal(meal, menuDay.day_order)}
-                              >
-                                {isSaving ? (
-                                  'Salvando…'
-                                ) : (
-                                  <>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                      <circle cx="12" cy="12" r="10"></circle>
-                                    </svg>
-                                    Marcar como realizada
-                                  </>
-                                )}
-                              </button>
-                            )}
+                        {/* Modo de preparo se houver */}
+                        {meal.prep_ptbr && (
+                          <div className="exercise-instructions" style={{ marginTop: '2px' }}>
+                            <strong>Preparo:</strong> {meal.prep_ptbr}
                           </div>
+                        )}
 
-                        </article>
-                      );
-                    })}
+                        {/* Check-in Individual da Refeição */}
+                        <div style={{ marginTop: '4px' }}>
+                          {isMealDone ? (
+                            <span className="meal-checkin-btn done">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                              Refeição feita{doneTime ? ` às ${doneTime}` : ''}
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              className="meal-checkin-btn"
+                              disabled={isSaving}
+                              onClick={() => handleCheckinMeal(meal, activeMenu.menu_day)}
+                            >
+                              {isSaving ? (
+                                'Salvando…'
+                              ) : (
+                                <>
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                  </svg>
+                                  Marcar como realizada
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
 
-                  </div>
-                ))}
+                      </article>
+                    );
+                  })}
+                </div>
               </>
             )}
           </>
