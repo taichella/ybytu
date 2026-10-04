@@ -31,12 +31,13 @@
     --info: #3b82f6;
     --info-soft: rgba(59, 130, 246, 0.10);
     --warning: #d97706;
+    --warning-soft: rgba(217, 119, 6, 0.10);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0B0F17;
+    background: #090D16;
     color: #E2E8F0;
     padding: 32px;
     -webkit-font-smoothing: antialiased;
@@ -47,18 +48,18 @@
     display: flex;
     gap: 36px;
     align-items: flex-start;
-    min-width: 2050px;
+    min-width: 3050px;
   }
 
   /* Specification Card */
   .spec-panel {
-    width: 380px;
-    background: #131B2E;
-    border: 1px solid #1E293B;
+    width: 410px;
+    background: #111827;
+    border: 1px solid #1F2937;
     border-radius: 24px;
     padding: 26px;
     color: #CBD5E1;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     position: sticky;
     top: 32px;
   }
@@ -96,7 +97,7 @@
   .spec-rule {
     display: flex;
     gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     font-size: 13px;
     line-height: 1.5;
   }
@@ -115,7 +116,18 @@
     font-size: 13px;
   }
 
-  /* Phone Mockup Wrapper */
+  .spec-alert {
+    background: rgba(245, 95, 22, 0.08);
+    border: 1px solid rgba(245, 95, 22, 0.25);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    color: #FED7AA;
+    line-height: 1.5;
+    margin: 16px 0;
+  }
+
+  /* Phone Mockup Frame Wrapper */
   .frame-wrap {
     display: flex;
     flex-direction: column;
@@ -151,7 +163,7 @@
 
   .screen {
     width: 360px;
-    height: 780px;
+    height: 790px;
     background: var(--bg);
     border-radius: 36px;
     overflow-y: auto;
@@ -299,7 +311,7 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   .workout-title {
@@ -364,21 +376,6 @@
     background: linear-gradient(90deg, #16a34a, #22c55e);
   }
 
-  /* Auto-Completion Celebration Banner */
-  .celebration-banner {
-    background: rgba(22, 163, 74, 0.10);
-    border: 1.5px solid rgba(22, 163, 74, 0.3);
-    border-radius: 14px;
-    padding: 12px 14px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    color: var(--success-ink);
-    font-size: 12.5px;
-    font-weight: 700;
-    line-height: 1.4;
-  }
-
   /* Exercise Item Card */
   .exercise-card {
     background: var(--surface);
@@ -389,12 +386,12 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    transition: border-color 0.2s, background 0.2s;
+    transition: all 0.2s ease;
   }
 
   .exercise-card.checked {
-    border-color: rgba(22, 163, 74, 0.35);
-    background: #FAFCF9;
+    border-color: rgba(22, 163, 74, 0.4);
+    background: #F8FCF8;
   }
 
   .exercise-top-row {
@@ -443,12 +440,6 @@
     position: relative;
   }
 
-  .exercise-thumb-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
   .exercise-meta-col {
     flex: 1;
     min-width: 0;
@@ -466,7 +457,7 @@
   }
 
   .exercise-card.checked .exercise-order-title {
-    color: #2D3748;
+    color: #1F2937;
   }
 
   .exercise-tags-row {
@@ -479,22 +470,30 @@
 
   .tag-pill {
     background: var(--surface-2);
-    padding: 2.5px 7px;
+    padding: 3px 8px;
     border-radius: 6px;
     font-weight: 600;
     color: var(--text);
   }
 
-  .tag-pill.load {
-    background: rgba(245, 95, 22, 0.10);
-    color: var(--brand-ink);
+  /* Distinção Rigorosa de Linguagem */
+  .tag-pill.prescribed {
+    background: rgba(100, 116, 139, 0.12);
+    color: #334155;
     font-weight: 700;
   }
 
-  .tag-pill.logged {
-    background: rgba(22, 163, 74, 0.12);
-    color: #15803d;
+  .tag-pill.user-logged {
+    background: rgba(22, 163, 74, 0.14);
+    color: #14532D;
     font-weight: 800;
+    border: 1px solid rgba(22, 163, 74, 0.3);
+  }
+
+  .tag-pill.pending-load {
+    background: rgba(245, 95, 22, 0.10);
+    color: var(--brand-ink);
+    font-weight: 700;
   }
 
   /* Link ▶ Ver Vídeo */
@@ -502,7 +501,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    margin-top: 5px;
+    margin-top: 6px;
     font-size: 11.5px;
     font-weight: 800;
     color: var(--brand);
@@ -514,21 +513,21 @@
   .load-drawer-toggle {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     font-size: 11.5px;
     font-weight: 700;
     color: #475569;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 2px 0;
-    margin-top: 2px;
+    padding: 3px 0;
+    margin-top: 4px;
   }
   .load-drawer-toggle:hover { color: var(--brand); }
 
   .load-input-panel {
     background: #F8FAFC;
-    border: 1px solid #CBD5E1;
+    border: 1.5px solid #CBD5E1;
     border-radius: 12px;
     padding: 10px 12px;
     margin-top: 4px;
@@ -541,9 +540,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--muted);
+    font-size: 11.5px;
   }
 
   .load-stepper-row {
@@ -559,7 +556,7 @@
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
     cursor: pointer;
     display: flex;
@@ -583,12 +580,89 @@
   }
 
   .load-helper-note {
-    font-size: 10.5px;
+    font-size: 11px;
     color: #64748B;
-    line-height: 1.35;
+    line-height: 1.4;
   }
 
-  /* Bottom Actions & Completion Button */
+  /* Carimbo temporal do Aluno */
+  .completed-time-tag {
+    font-size: 11px;
+    color: #15803d;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  /* Auto-Completion Celebration Banner */
+  .celebration-banner {
+    background: rgba(22, 163, 74, 0.12);
+    border: 1.5px solid rgba(22, 163, 74, 0.35);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: var(--success-ink);
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  /* Modal / Diálogo de Segunda Sessão */
+  .confirm-dialog-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    padding: 16px;
+  }
+
+  .confirm-sheet {
+    width: 100%;
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+  }
+
+  /* Toast de Desfazer */
+  .undo-toast-bar {
+    position: sticky;
+    bottom: 8px;
+    background: #1E293B;
+    color: #FFFFFF;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    z-index: 40;
+    margin-top: auto;
+  }
+
+  .undo-toast-btn {
+    background: none;
+    border: none;
+    color: #38BDF8;
+    font-weight: 800;
+    font-size: 12.5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+  }
+
+  /* Bottom Actions */
   .bottom-action-wrap {
     margin-top: 8px;
     display: flex;
@@ -611,28 +685,12 @@
     justify-content: center;
     gap: 8px;
     box-shadow: 0 4px 14px rgba(245, 95, 22, 0.28);
-    transition: all 0.15s ease;
   }
 
   .workout-complete-btn.done {
     background: var(--success);
     box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25);
     cursor: default;
-  }
-
-  .workout-complete-btn:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-  }
-
-  .completed-time-tag {
-    font-size: 11px;
-    color: #15803d;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 4px;
   }
 </style>
 </helmet>
@@ -653,59 +711,68 @@
       Marcação por Exercício
     </h1>
     <p class="spec-desc">
-      Evolução do PWA (360px) permitindo ao aluno marcar o cumprimento exercício a exercício ou concluir o treino inteiro de uma vez, sem a fricção de preenchimento série por série.
+      Evolução da tela do aluno (360px) com checklist granular, persistência imune a edições no construtor de treino, separação de linguagem e auto-fechamento inteligente.
     </p>
+
+    <!-- ALERTA ARQUITETURAL CRÍTICO -->
+    <div class="spec-alert">
+      <strong style="display:block;margin-bottom:4px;color:#F97316;">⚠️ Regra de Banco: Chave Estável</strong>
+      O construtor apaga e recria todas as linhas de exercício ao salvar (o UUID do slot muda). A marcação se prende à tupla <strong>(plano + dia + exercício)</strong>, e <em>nunca</em> ao UUID efêmero da linha. Se o personal editar o treino ao meio-dia, o histórico do aluno continua intacto.
+    </div>
 
     <div class="spec-rule">
       <span class="spec-rule-icon">1</span>
       <div>
-        <strong style="color:#FFFFFF;">Caixa de marcar por exercício:</strong>
-        <p style="margin:2px 0 0;color:#94A3B8;">Área de toque confortável (34×34px) com feedback verde tátil imediato.</p>
+        <strong style="color:#FFFFFF;">Cartão Marcado vs Não Marcado:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Caixa de 34×34px ergonômica. Ao marcar, ganha fundo verde suave (<code>#F8FCF8</code>), borda verde, checkmark branco e carimbo com hora de conclusão.</p>
       </div>
     </div>
 
     <div class="spec-rule">
       <span class="spec-rule-icon">2</span>
       <div>
-        <strong style="color:#FFFFFF;">Contador de progresso "3/6":</strong>
-        <p style="margin:2px 0 0;color:#94A3B8;">Exibido no card de resumo da sessão, acompanhado de barra de progresso suave.</p>
+        <strong style="color:#FFFFFF;">Contador de Progresso "3/6" no Topo:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Integrado ao card resumo da sessão ativa (acima da lista de exercícios), com barra de progresso viva e numeração <strong>"3/6"</strong> visível o tempo todo.</p>
       </div>
     </div>
 
     <div class="spec-rule">
       <span class="spec-rule-icon">3</span>
       <div>
-        <strong style="color:#FFFFFF;">Auto-registro ao marcar o 6º:</strong>
-        <p style="margin:2px 0 0;color:#94A3B8;">Ao concluir o último exercício pendente, o treino do dia é gravado automaticamente em <code>completed_workouts</code> com celebração visual.</p>
+        <strong style="color:#FFFFFF;">Carga Usada (Opcional, Lado a Lado):</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Apenas em exercícios com peso. Vem pré-preenchido com o último registro do aluno. Mostra comparação explícita: <em>"Prescrito: 12 kg"</em> vs <em>"Última usada: 14 kg"</em> com botões de ajuste rápido (±0,5 / ±1).</p>
       </div>
     </div>
 
     <div class="spec-rule">
       <span class="spec-rule-icon">4</span>
       <div>
-        <strong style="color:#FFFFFF;">Botão global preservado:</strong>
-        <p style="margin:2px 0 0;color:#94A3B8;">O botão "Concluir Treino de Hoje" permanece para quem prefere não tocar em cada card.</p>
+        <strong style="color:#FFFFFF;">Auto-Fechamento (6/6) & 2ª Sessão Hoje:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Ao marcar o 6º exercício, grava imediatamente em <code>completed_workouts</code>. Se o aluno já treinou hoje, exibe diálogo de confirmação (sem bloqueio) antes de consolidar a 2ª sessão.</p>
       </div>
     </div>
 
     <div class="spec-rule">
       <span class="spec-rule-icon">5</span>
       <div>
-        <strong style="color:#FFFFFF;">Carga usada opcional:</strong>
-        <p style="margin:2px 0 0;color:#94A3B8;">Exercícios com peso ganham gaveta retrátil pré-preenchida com o último registro ("usei 22,5 kg"). Nunca obrigatória.</p>
+        <strong style="color:#FFFFFF;">Desmarcar: 1 Toque + Toast "Desfazer":</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">
+          <strong>Exercícios 1 a 5:</strong> 1 toque desmarca na hora + toast de 4s na base com <em>"Desfazer"</em>. Evita fadiga de confirmação e atrito com mão suada na academia.<br>
+          <strong>6º exercício (fechamento):</strong> Confirmação em modal (<em>"Deseja reabrir este treino?"</em>) pois reabre sessão já gravada.
+        </p>
       </div>
     </div>
 
     <div class="spec-rule">
-      <span class="spec-rule-icon" style="background:rgba(239,68,68,0.15);color:#EF4444;">✕</span>
+      <span class="spec-rule-icon">6</span>
       <div>
-        <strong style="color:#FFFFFF;">Sem anotação série por série:</strong>
-        <p style="margin:2px 0 0;color:#94A3B8;">Decisão explícita de produto: anotar repetições série a série na academia dispersa e atrapalha o ritmo do aluno.</p>
+        <strong style="color:#FFFFFF;">Linguagem Estrita e Desacoplada:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Nunca misturar prescrição com execução. Sempre <em>"Prescrito: X kg"</em> versus <em>"✓ Registrado por você: Y kg"</em> e <em>"Concluído por você às HH:MM"</em>.</p>
       </div>
     </div>
 
-    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #1E293B;font-size:12px;color:#64748B;">
-      Largura base: <strong>360px viewport</strong> · Tokens oficiais Ybytu
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid #1F2937;font-size:12px;color:#64748B;">
+      Viewport: <strong>360px</strong> · Tipografia: <strong>Inter</strong> · Tokens Oficiais Ybytu
     </div>
   </aside>
 
@@ -746,7 +813,7 @@
           <div class="split-chip">Dia 3 · Core</div>
         </div>
 
-        <!-- Session Summary with 0/6 Progress -->
+        <!-- Session Summary com Contador 0/6 -->
         <div class="workout-summary-card">
           <div class="workout-header-row">
             <div>
@@ -762,7 +829,7 @@
           <div class="progress-box">
             <div class="progress-label-row">
               <span style="font-weight:700;color:var(--muted);">Progresso da sessão</span>
-              <span class="progress-counter-tag">0 de 6</span>
+              <span class="progress-counter-tag">0/6</span>
             </div>
             <div class="progress-track">
               <div class="progress-bar-fill" style="width: 0%;"></div>
@@ -770,71 +837,61 @@
           </div>
         </div>
 
-        <!-- Exercise 1: Não marcado -->
+        <!-- Exercício A: Pendente (com peso) -->
         <article class="exercise-card">
           <div class="exercise-top-row">
-            <div class="exercise-check-hit" title="Marcar como realizado" aria-label="Marcar exercício A">
-              <!-- unchecked circle -->
-            </div>
-            <div class="exercise-thumb-wrap">
-              <span style="font-size:16px;">🏋️</span>
-            </div>
+            <div class="exercise-check-hit" title="Marcar exercício A"></div>
+            <div class="exercise-thumb-wrap"><span>🏋️</span></div>
             <div class="exercise-meta-col">
               <div class="exercise-order-title">
-                <span style="color:var(--brand);font-weight:900;">A</span> Supino Reto Barra
+                <span style="color:var(--brand);font-weight:900;">A</span> Supino Reto com Barra
               </div>
               <div class="exercise-tags-row">
-                <span class="tag-pill">4 séries × 10-12</span>
-                <span class="tag-pill load">20 kg</span>
+                <span class="tag-pill prescribed">Prescrito: 4 séries × 10-12</span>
+                <span class="tag-pill pending-load">Prescrito: 20 kg</span>
                 <span class="tag-pill">60s descanso</span>
               </div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
                 <a class="vid-link">▶ Ver vídeo</a>
-                <button class="load-drawer-toggle">Anotar carga (20 kg) ▾</button>
+                <button class="load-drawer-toggle">Anotar carga usada (20 kg) ▾</button>
               </div>
             </div>
           </div>
         </article>
 
-        <!-- Exercise 2: Não marcado -->
+        <!-- Exercício B: Pendente (com peso) -->
         <article class="exercise-card">
           <div class="exercise-top-row">
-            <div class="exercise-check-hit" title="Marcar como realizado">
-            </div>
-            <div class="exercise-thumb-wrap">
-              <span style="font-size:16px;">💪</span>
-            </div>
+            <div class="exercise-check-hit" title="Marcar exercício B"></div>
+            <div class="exercise-thumb-wrap"><span>💪</span></div>
             <div class="exercise-meta-col">
               <div class="exercise-order-title">
-                <span style="color:var(--brand);font-weight:900;">B</span> Puxada Alta Pulley
+                <span style="color:var(--brand);font-weight:900;">B</span> Puxada Alta no Pulley
               </div>
               <div class="exercise-tags-row">
-                <span class="tag-pill">3 séries × 12</span>
-                <span class="tag-pill load">35 kg</span>
+                <span class="tag-pill prescribed">Prescrito: 3 séries × 12</span>
+                <span class="tag-pill pending-load">Prescrito: 35 kg</span>
                 <span class="tag-pill">60s descanso</span>
               </div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
                 <a class="vid-link">▶ Ver vídeo</a>
-                <button class="load-drawer-toggle">Anotar carga (35 kg) ▾</button>
+                <button class="load-drawer-toggle">Anotar carga usada (35 kg) ▾</button>
               </div>
             </div>
           </div>
         </article>
 
-        <!-- Exercise 3: Não marcado (Corpo livre) -->
+        <!-- Exercício C: Pendente (peso corporal - sem botão de carga) -->
         <article class="exercise-card">
           <div class="exercise-top-row">
-            <div class="exercise-check-hit" title="Marcar como realizado">
-            </div>
-            <div class="exercise-thumb-wrap">
-              <span style="font-size:16px;">🤸</span>
-            </div>
+            <div class="exercise-check-hit" title="Marcar exercício C"></div>
+            <div class="exercise-thumb-wrap"><span>🤸</span></div>
             <div class="exercise-meta-col">
               <div class="exercise-order-title">
                 <span style="color:var(--brand);font-weight:900;">C</span> Flexão de Braços
               </div>
               <div class="exercise-tags-row">
-                <span class="tag-pill">3 séries × 15</span>
+                <span class="tag-pill prescribed">Prescrito: 3 séries × 15</span>
                 <span class="tag-pill" style="background:#E2E8F0;font-weight:700;">Peso corporal</span>
                 <span class="tag-pill">45s descanso</span>
               </div>
@@ -843,7 +900,7 @@
           </div>
         </article>
 
-        <!-- Global Action Button (Preservado) -->
+        <!-- Botão global inferior preservado -->
         <div class="bottom-action-wrap">
           <button type="button" class="workout-complete-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -852,25 +909,24 @@
             Concluir Treino de Hoje
           </button>
           <p style="text-align:center;font-size:11px;color:var(--muted);margin:0;">
-            Você pode marcar um a um ou concluir todos de uma vez.
+            Opção para quem não quer marcar exercício por exercício.
           </p>
         </div>
       </div>
     </div></div>
   </div>
 
-  <!-- ================= TELA 2: EXERCÍCIOS MARCADOS (PROGRESSO 3/6) ================= -->
+  <!-- ================= TELA 2: EXERCÍCIO MARCADO (PROGRESSO 3/6) ================= -->
   <div class="frame-wrap">
     <div class="frame-title">
       <span class="step-pill" style="background:var(--brand);">Estado 2</span>
-      Em Andamento: Marcado ("3/6")
+      Marcado ("3/6" com Linguagem Separada)
     </div>
 
     <div class="phone"><div class="screen">
       <div class="notch"></div>
       <div class="status-bar"><span>09:58</span><span>●●● 4G 98%</span></div>
 
-      <!-- Header -->
       <header class="user-header">
         <div>
           <h2 class="user-greeting">Olá, Mariana!</h2>
@@ -881,7 +937,6 @@
         </div>
       </header>
 
-      <!-- Tabs -->
       <div class="user-tabs-bar">
         <button class="user-tab-btn active"><span>🏋️</span> Treino de Hoje</button>
         <button class="user-tab-btn"><span>🥗</span> Alimentação</button>
@@ -907,10 +962,11 @@
             </div>
           </div>
 
+          <!-- Onde fica o contador de progresso -->
           <div class="progress-box">
             <div class="progress-label-row">
-              <span style="font-weight:700;color:var(--text);">3 de 6 realizados</span>
-              <span class="progress-counter-tag">50%</span>
+              <span style="font-weight:700;color:var(--text);">Progresso da sessão</span>
+              <span class="progress-counter-tag" style="font-size:14px;font-weight:900;">3/6 · 50%</span>
             </div>
             <div class="progress-track">
               <div class="progress-bar-fill" style="width: 50%;"></div>
@@ -918,34 +974,32 @@
           </div>
         </div>
 
-        <!-- Exercise 1: MARCADO COM SUCESSO -->
+        <!-- Exercício A: MARCADO (Carga igual à prescrita) -->
         <article class="exercise-card checked">
           <div class="exercise-top-row">
-            <div class="exercise-check-hit checked" title="Concluído">
+            <div class="exercise-check-hit checked" title="Toque para desmarcar">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
-            <div class="exercise-thumb-wrap">
-              <span style="font-size:16px;">🏋️</span>
-            </div>
+            <div class="exercise-thumb-wrap"><span>🏋️</span></div>
             <div class="exercise-meta-col">
               <div class="exercise-order-title">
-                <span style="color:#15803d;font-weight:900;">A</span> Supino Reto Barra
+                <span style="color:#15803d;font-weight:900;">A</span> Supino Reto com Barra
               </div>
               <div class="exercise-tags-row">
-                <span class="tag-pill">4 séries × 10-12</span>
-                <span class="tag-pill logged">✓ 20 kg usado</span>
+                <span class="tag-pill prescribed">Prescrito: 20 kg</span>
+                <span class="tag-pill user-logged">✓ Registrado por você: 20 kg</span>
               </div>
               <div class="completed-time-tag">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Realizado às 09:47
+                Concluído por você às 09:47
               </div>
             </div>
           </div>
         </article>
 
-        <!-- Exercise 2: MARCADO COM SUCESSO -->
+        <!-- Exercício B: MARCADO (Carga superada pelo aluno) -->
         <article class="exercise-card checked">
           <div class="exercise-top-row">
             <div class="exercise-check-hit checked">
@@ -953,46 +1007,37 @@
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             </div>
-            <div class="exercise-thumb-wrap">
-              <span style="font-size:16px;">💪</span>
-            </div>
+            <div class="exercise-thumb-wrap"><span>💪</span></div>
             <div class="exercise-meta-col">
               <div class="exercise-order-title">
-                <span style="color:#15803d;font-weight:900;">B</span> Puxada Alta Pulley
+                <span style="color:#15803d;font-weight:900;">B</span> Puxada Alta no Pulley
               </div>
               <div class="exercise-tags-row">
-                <span class="tag-pill">3 séries × 12</span>
-                <span class="tag-pill logged">✓ 35 kg usado</span>
+                <span class="tag-pill prescribed">Prescrito: 35 kg</span>
+                <span class="tag-pill user-logged" style="background:#DCFCE7;">✓ Registrado por você: 37,5 kg</span>
               </div>
               <div class="completed-time-tag">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Realizado às 09:54
+                Concluído por você às 09:54
               </div>
             </div>
           </div>
         </article>
 
-        <!-- Exercise 3: PENDENTE -->
+        <!-- Exercício C: PENDENTE -->
         <article class="exercise-card">
           <div class="exercise-top-row">
-            <div class="exercise-check-hit" title="Marcar como realizado">
-            </div>
-            <div class="exercise-thumb-wrap">
-              <span style="font-size:16px;">🤸</span>
-            </div>
+            <div class="exercise-check-hit"></div>
+            <div class="exercise-thumb-wrap"><span>🤸</span></div>
             <div class="exercise-meta-col">
               <div class="exercise-order-title">
-                <span style="color:var(--brand);font-weight:900;">C</span> Elevação Lateral
+                <span style="color:var(--brand);font-weight:900;">C</span> Flexão de Braços
               </div>
               <div class="exercise-tags-row">
-                <span class="tag-pill">3 séries × 12-15</span>
-                <span class="tag-pill load">8 kg</span>
-                <span class="tag-pill">45s descanso</span>
+                <span class="tag-pill prescribed">Prescrito: 3 séries × 15</span>
+                <span class="tag-pill">Peso corporal</span>
               </div>
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
-                <a class="vid-link">▶ Ver vídeo</a>
-                <button class="load-drawer-toggle">Ajustar carga (8 kg) ▾</button>
-              </div>
+              <a class="vid-link">▶ Ver vídeo</a>
             </div>
           </div>
         </article>
@@ -1010,7 +1055,7 @@
   <div class="frame-wrap">
     <div class="frame-title">
       <span class="step-pill" style="background:#2563EB;">Estado 3</span>
-      Ajuste Opcional de Carga Aberto
+      Ajuste Opcional de Carga (Lado a Lado)
     </div>
 
     <div class="phone"><div class="screen">
@@ -1038,44 +1083,46 @@
           <div class="split-chip">Dia 2 · Inferior</div>
         </div>
 
-        <!-- Exercise com Gaveta de Carga Aberta -->
+        <!-- Exercício D com Gaveta de Carga Aberta -->
         <article class="exercise-card" style="border-color:var(--brand);box-shadow:0 4px 16px rgba(245,95,22,0.12);">
           <div class="exercise-top-row">
-            <div class="exercise-check-hit" title="Marcar após definir carga">
-            </div>
-            <div class="exercise-thumb-wrap">
-              <span style="font-size:16px;">🏋️</span>
-            </div>
+            <div class="exercise-check-hit" title="Marcar após ajustar"></div>
+            <div class="exercise-thumb-wrap"><span>🏋️</span></div>
             <div class="exercise-meta-col">
               <div class="exercise-order-title">
-                <span style="color:var(--brand);font-weight:900;">D</span> Desenvolvimento Halteres
+                <span style="color:var(--brand);font-weight:900;">D</span> Desenvolvimento com Halteres
               </div>
               <div class="exercise-tags-row">
-                <span class="tag-pill">3 séries × 10</span>
-                <span class="tag-pill load">Plano: 12 kg</span>
-                <span class="tag-pill">60s descanso</span>
+                <span class="tag-pill prescribed">Prescrito: 3 séries × 10</span>
+                <span class="tag-pill pending-load">Prescrito: 12 kg</span>
               </div>
               <a class="vid-link">▶ Ver vídeo</a>
             </div>
           </div>
 
-          <!-- GAVETA DE CARGA REAL USADA (OPCIONAL) -->
+          <!-- GAVETA DE CARGA USADA (LADO A LADO COM A PRESCRIÇÃO) -->
           <div class="load-input-panel">
             <div class="load-input-header">
-              <span>Carga usada nesta sessão:</span>
+              <span style="font-weight:800;color:#334155;">Carga usada neste treino:</span>
               <span style="color:var(--brand);font-weight:800;font-size:10.5px;text-transform:uppercase;">Opcional</span>
             </div>
 
+            <!-- Comparativo visual imediato -->
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:6px 10px;font-size:11.5px;">
+              <span style="color:#64748B;">Prescrito pelo personal: <strong style="color:#1E293B;">12 kg</strong></span>
+              <span style="color:var(--brand);font-weight:700;">Última usada: 14 kg</span>
+            </div>
+
             <div class="load-stepper-row">
-              <button type="button" class="stepper-btn" title="Diminuir 1 kg">–1</button>
-              <button type="button" class="stepper-btn" title="Diminuir 0.5 kg">–0,5</button>
+              <button type="button" class="stepper-btn">–1</button>
+              <button type="button" class="stepper-btn">–0,5</button>
               <input type="text" class="load-display-input" value="14 kg" readonly>
-              <button type="button" class="stepper-btn" title="Aumentar 0.5 kg">+0,5</button>
-              <button type="button" class="stepper-btn" title="Aumentar 1 kg">+1</button>
+              <button type="button" class="stepper-btn">+0,5</button>
+              <button type="button" class="stepper-btn">+1</button>
             </div>
 
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;">
-              <span class="load-helper-note">Pré-preenchido com última carga registrada.</span>
+              <span class="load-helper-note">Já vem preenchido com seu último registro.</span>
               <button type="button" style="padding:6px 12px;border-radius:8px;background:var(--brand);color:#fff;border:none;font-size:11.5px;font-weight:800;cursor:pointer;">
                 Confirmar 14 kg
               </button>
@@ -1083,16 +1130,16 @@
           </div>
         </article>
 
-        <!-- Outro exercício fechado -->
+        <!-- Exercício fechado seguinte -->
         <article class="exercise-card">
           <div class="exercise-top-row">
             <div class="exercise-check-hit"></div>
-            <div class="exercise-thumb-wrap"><span style="font-size:16px;">💪</span></div>
+            <div class="exercise-thumb-wrap"><span>💪</span></div>
             <div class="exercise-meta-col">
-              <div class="exercise-order-title"><span style="color:var(--brand);font-weight:900;">E</span> Tríceps Corda</div>
+              <div class="exercise-order-title"><span style="color:var(--brand);font-weight:900;">E</span> Tríceps Corda na Polia</div>
               <div class="exercise-tags-row">
-                <span class="tag-pill">3 séries × 12</span>
-                <span class="tag-pill load">25 kg</span>
+                <span class="tag-pill prescribed">Prescrito: 3 séries × 12</span>
+                <span class="tag-pill pending-load">Prescrito: 25 kg</span>
               </div>
               <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
                 <a class="vid-link">▶ Ver vídeo</a>
@@ -1101,21 +1148,15 @@
             </div>
           </div>
         </article>
-
-        <div class="bottom-action-wrap">
-          <button type="button" class="workout-complete-btn" style="background:#334155;">
-            Concluir treino inteiro agora
-          </button>
-        </div>
       </div>
     </div></div>
   </div>
 
-  <!-- ================= TELA 4: SESSÃO COMPLETA (6/6 AUTO-REGISTRADA) ================= -->
+  <!-- ================= TELA 4A: SESSÃO FECHA SOZINHA (6/6) ================= -->
   <div class="frame-wrap">
     <div class="frame-title">
-      <span class="step-pill" style="background:var(--success);">Estado 4</span>
-      Sessão Completa ("6/6" Gravada)
+      <span class="step-pill" style="background:var(--success);">Estado 4A</span>
+      Auto-Fechamento (6/6 Concluído e Gravado)
     </div>
 
     <div class="phone"><div class="screen">
@@ -1141,7 +1182,6 @@
         <div class="split-chips-scroll">
           <div class="split-chip active">Dia 1 · Superior</div>
           <div class="split-chip">Dia 2 · Inferior</div>
-          <div class="split-chip">Dia 3 · Core</div>
         </div>
 
         <!-- Banner comemorativo de auto-registro -->
@@ -1149,7 +1189,7 @@
           <span style="font-size:22px;">🎉</span>
           <div>
             <div>Treino concluído com sucesso!</div>
-            <div style="font-size:11px;opacity:0.85;font-weight:500;">
+            <div style="font-size:11px;opacity:0.88;font-weight:500;">
               Sessão gravada automaticamente em <code>completed_workouts</code>.
             </div>
           </div>
@@ -1173,7 +1213,7 @@
           <div class="progress-box">
             <div class="progress-label-row">
               <span style="font-weight:800;color:#15803d;">Todos os 6 exercícios concluídos</span>
-              <span class="progress-counter-tag full">6/6</span>
+              <span class="progress-counter-tag full" style="font-size:14px;font-weight:900;">6/6 · 100%</span>
             </div>
             <div class="progress-track">
               <div class="progress-bar-fill success" style="width: 100%;"></div>
@@ -1181,43 +1221,22 @@
           </div>
         </div>
 
-        <!-- Exercise 1 (Concluído) -->
+        <!-- Exercício F (O 6º que acabou de fechar o treino) -->
         <article class="exercise-card checked">
           <div class="exercise-top-row">
             <div class="exercise-check-hit checked">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <div class="exercise-thumb-wrap"><span style="font-size:16px;">🏋️</span></div>
-            <div class="exercise-meta-col">
-              <div class="exercise-order-title"><span style="color:#15803d;font-weight:900;">A</span> Supino Reto Barra</div>
-              <div class="exercise-tags-row">
-                <span class="tag-pill">4 séries × 10-12</span>
-                <span class="tag-pill logged">✓ 20 kg</span>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- Exercise 6 (O último que acabou de ser marcado) -->
-        <article class="exercise-card checked">
-          <div class="exercise-top-row">
-            <div class="exercise-check-hit checked">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            </div>
-            <div class="exercise-thumb-wrap"><span style="font-size:16px;">⏱</span></div>
+            <div class="exercise-thumb-wrap"><span>⏱</span></div>
             <div class="exercise-meta-col">
               <div class="exercise-order-title"><span style="color:#15803d;font-weight:900;">F</span> Prancha Isométrica</div>
               <div class="exercise-tags-row">
-                <span class="tag-pill">3 séries × 45s</span>
-                <span class="tag-pill logged">✓ Concluído</span>
+                <span class="tag-pill prescribed">Prescrito: 3 séries × 45s</span>
+                <span class="tag-pill user-logged">✓ Concluído</span>
               </div>
               <div class="completed-time-tag">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Marcado às 10:34 (fechou o treino)
+                Marcado por você às 10:34 (fechou o treino)
               </div>
             </div>
           </div>
@@ -1226,14 +1245,181 @@
         <!-- Botão Final Verde de Sucesso -->
         <div class="bottom-action-wrap">
           <div class="workout-complete-btn done">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             Treino concluído hoje às 10:35!
           </div>
-          <p style="text-align:center;font-size:11px;color:#15803d;margin:0;font-weight:600;">
-            ✓ Registrado automaticamente ao marcar o 6º exercício.
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ================= TELA 4B: AVISO DE 2ª SESSÃO NO DIA ================= -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:#D97706;">Estado 4B</span>
+      Aviso de 2ª Sessão no Dia (Diálogo de Confirmação)
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>10:35</span><span>●●● 4G 92%</span></div>
+
+      <header class="user-header">
+        <div>
+          <h2 class="user-greeting">Olá, Mariana!</h2>
+          <div class="user-date">dom., 4 de out.</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;">
+          MS
+        </div>
+      </header>
+
+      <div class="user-tabs-bar">
+        <button class="user-tab-btn active"><span>🏋️</span> Treino de Hoje</button>
+        <button class="user-tab-btn"><span>🥗</span> Alimentação</button>
+      </div>
+
+      <div class="app-body">
+        <div class="split-chips-scroll">
+          <div class="split-chip active">Dia 1 · Superior</div>
+          <div class="split-chip">Dia 2 · Inferior</div>
+        </div>
+
+        <div class="workout-summary-card">
+          <div class="workout-header-row">
+            <div>
+              <div class="workout-title">Superior · Força & Hipertrofia</div>
+              <div class="workout-meta-line" style="margin-top:4px;">
+                <span>⏱ 48 min</span>
+                <span>🔥 340 kcal</span>
+              </div>
+            </div>
+          </div>
+          <div class="progress-box">
+            <div class="progress-label-row">
+              <span style="font-weight:800;color:var(--text);">6 de 6 marcados</span>
+              <span class="progress-counter-tag full">6/6</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill success" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercício F sendo marcado -->
+        <article class="exercise-card checked">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit checked">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="exercise-thumb-wrap"><span>⏱</span></div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title"><span style="color:#15803d;font-weight:900;">F</span> Prancha Isométrica</div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill prescribed">Prescrito: 3 séries × 45s</span>
+                <span class="tag-pill user-logged">✓ Concluído</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- BOTTOM SHEET: SEGUNDA SESSÃO NO MESMO DIA (VISÍVEL) -->
+      <div class="confirm-dialog-overlay" style="display:flex;">
+        <div class="confirm-sheet">
+          <div style="width:42px;height:42px;border-radius:12px;background:var(--warning-soft);color:var(--warning);display:flex;align-items:center;justify-content:center;margin-bottom:12px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h3 style="font-size:16.5px;font-weight:900;margin-bottom:6px;color:var(--text);letter-spacing:-0.01em;">Segunda sessão hoje</h3>
+          <p style="font-size:13px;color:#475569;line-height:1.5;margin-bottom:18px;">
+            Você já concluiu um treino hoje. Deseja registrar este segundo treino no seu histórico?
           </p>
+          <div style="display:flex;gap:10px;">
+            <button type="button" style="flex:1;padding:13px;border-radius:12px;border:1px solid var(--border-strong);background:var(--surface);font-weight:700;font-size:13.5px;color:#334155;cursor:pointer;">Cancelar</button>
+            <button type="button" style="flex:1;padding:13px;border-radius:12px;border:none;background:var(--brand);color:#fff;font-weight:800;font-size:13.5px;cursor:pointer;box-shadow:0 3px 10px rgba(245,95,22,0.3);">Sim, registrar</button>
+          </div>
+        </div>
+      </div>
+
+    </div></div>
+  </div>
+
+  <!-- ================= TELA 5: PROPOSTA DE DESMARCAÇÃO (JUSTIFICADA) ================= -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:#7C3AED;">Estado 5</span>
+      Proposta de Desmarcação & Feedback
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>10:14</span><span>●●● 4G 96%</span></div>
+
+      <header class="user-header">
+        <div>
+          <h2 class="user-greeting">Olá, Mariana!</h2>
+          <div class="user-date">dom., 4 de out.</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;">
+          MS
+        </div>
+      </header>
+
+      <div class="user-tabs-bar">
+        <button class="user-tab-btn active"><span>🏋️</span> Treino de Hoje</button>
+        <button class="user-tab-btn"><span>🥗</span> Alimentação</button>
+      </div>
+
+      <div class="app-body" style="justify-content:space-between;">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <!-- Card de Explicação da Proposta UX -->
+          <div style="background:rgba(124,58,237,0.08);border:1.5px solid rgba(124,58,237,0.25);border-radius:14px;padding:12px 14px;font-size:12px;color:#4C1D95;line-height:1.45;">
+            <strong style="display:block;margin-bottom:2px;color:#5B21B6;">Decisão de UX: Desmarcar com 1 Toque</strong>
+            Em exercícios intermediários, 1 toque desmarca imediatamente sem modal. A proteção contra toques acidentais é feita pelo Toast na base.
+          </div>
+
+          <!-- Exercício B acabou de ser desmarcado -->
+          <article class="exercise-card" style="border-style:dashed;">
+            <div class="exercise-top-row">
+              <div class="exercise-check-hit" style="border-color:#94A3B8;">
+                <!-- Desmarcado -->
+              </div>
+              <div class="exercise-thumb-wrap"><span>💪</span></div>
+              <div class="exercise-meta-col">
+                <div class="exercise-order-title" style="color:#64748B;">
+                  <span style="color:#94A3B8;font-weight:900;">B</span> Puxada Alta no Pulley
+                </div>
+                <div class="exercise-tags-row">
+                  <span class="tag-pill prescribed">Prescrito: 35 kg</span>
+                  <span class="tag-pill" style="color:#64748B;">Desmarcado</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Exercício C permanece concluído -->
+          <article class="exercise-card checked">
+            <div class="exercise-top-row">
+              <div class="exercise-check-hit checked">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="exercise-thumb-wrap"><span>🤸</span></div>
+              <div class="exercise-meta-col">
+                <div class="exercise-order-title"><span style="color:#15803d;font-weight:900;">C</span> Flexão de Braços</div>
+                <div class="exercise-tags-row">
+                  <span class="tag-pill user-logged">✓ Concluído</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Toast Não-Intrusivo na Base com botão Desfazer -->
+        <div class="undo-toast-bar">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span>Exercício B desmarcado</span>
+          </div>
+          <button type="button" class="undo-toast-btn">Desfazer</button>
         </div>
       </div>
     </div></div>
