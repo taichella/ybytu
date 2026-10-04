@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ybytu — Design: Marcação por Exercício no PWA (360px)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #F55F16;
+    --brand-hover: #FF7A3D;
+    --brand-soft: rgba(245, 95, 22, 0.10);
+    --brand-ink: #B4400A;
+    --bg: #F8F9FA;
+    --surface: #FFFFFF;
+    --surface-2: #F1F5F9;
+    --border: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --text: #1A202C;
+    --muted: #718096;
+    --field: #F8F9FA;
+    --success: #16a34a;
+    --success-soft: rgba(22, 163, 74, 0.12);
+    --success-ink: #14532d;
+    --info: #3b82f6;
+    --info-soft: rgba(59, 130, 246, 0.10);
+    --warning: #d97706;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0B0F17;
+    color: #E2E8F0;
+    padding: 32px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Canvas Layout */
+  .canvas-wrap {
+    display: flex;
+    gap: 36px;
+    align-items: flex-start;
+    min-width: 2050px;
+  }
+
+  /* Specification Card */
+  .spec-panel {
+    width: 380px;
+    background: #131B2E;
+    border: 1px solid #1E293B;
+    border-radius: 24px;
+    padding: 26px;
+    color: #CBD5E1;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    position: sticky;
+    top: 32px;
+  }
+
+  .spec-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .spec-badge {
+    background: var(--brand-soft);
+    color: var(--brand);
+    border: 1px solid rgba(245, 95, 22, 0.25);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .spec-desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #94A3B8;
+    margin-bottom: 20px;
+  }
+
+  .spec-rule {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .spec-rule-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(245, 95, 22, 0.15);
+    color: var(--brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 900;
+    font-size: 13px;
+  }
+
+  /* Phone Mockup Wrapper */
+  .frame-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .frame-title {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94A3B8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .frame-title .step-pill {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 900;
+    color: #FFFFFF;
+  }
+
+  .phone {
+    width: 384px;
+    background: #020617;
+    border-radius: 46px;
+    padding: 12px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .screen {
+    width: 360px;
+    height: 780px;
+    background: var(--bg);
+    border-radius: 36px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', sans-serif;
+  }
+  .screen::-webkit-scrollbar { display: none; }
+
+  /* Device Chrome */
+  .notch {
+    position: sticky;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 116px;
+    height: 26px;
+    background: #020617;
+    border-radius: 0 0 16px 16px;
+    z-index: 50;
+    margin: 0 auto;
+  }
+
+  .status-bar {
+    height: 38px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 22px 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1A202C;
+    flex-shrink: 0;
+  }
+
+  /* PWA App Header */
+  .user-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .user-greeting {
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--text);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .user-date {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Main Tab Selector */
+  .user-tabs-bar {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 18px;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .user-tab-btn {
+    padding: 12px 4px 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--muted);
+    background: none;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .user-tab-btn.active {
+    color: var(--brand);
+    border-bottom-color: var(--brand);
+  }
+
+  /* Scrollable Body Content */
+  .app-body {
+    flex: 1;
+    padding: 14px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Split Day Selector Chips */
+  .split-chips-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .split-chips-scroll::-webkit-scrollbar { display: none; }
+
+  .split-chip {
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .split-chip.active {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(245, 95, 22, 0.25);
+  }
+
+  /* Workout Summary Card with Progress Counter */
+  .workout-summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .workout-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .workout-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.25;
+  }
+
+  .workout-meta-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  /* Progress Counter "3/6" */
+  .progress-box {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .progress-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .progress-counter-tag {
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--brand);
+    font-feature-settings: "tnum";
+    letter-spacing: -0.01em;
+  }
+
+  .progress-counter-tag.full {
+    color: var(--success);
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 7px;
+    background: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #F55F16, #FF7A3D);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+
+  .progress-bar-fill.success {
+    background: linear-gradient(90deg, #16a34a, #22c55e);
+  }
+
+  /* Auto-Completion Celebration Banner */
+  .celebration-banner {
+    background: rgba(22, 163, 74, 0.10);
+    border: 1.5px solid rgba(22, 163, 74, 0.3);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: var(--success-ink);
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  /* Exercise Item Card */
+  .exercise-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 12px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .exercise-card.checked {
+    border-color: rgba(22, 163, 74, 0.35);
+    background: #FAFCF9;
+  }
+
+  .exercise-top-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Ergonomic Touch Checkbox */
+  .exercise-check-hit {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    border: 2px solid var(--border-strong);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-top: 2px;
+  }
+
+  .exercise-check-hit.checked {
+    background: var(--success);
+    border-color: var(--success);
+    color: #FFFFFF;
+    box-shadow: 0 2px 6px rgba(22, 163, 74, 0.35);
+  }
+
+  .exercise-thumb-wrap {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--muted);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .exercise-thumb-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .exercise-meta-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .exercise-order-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .exercise-card.checked .exercise-order-title {
+    color: #2D3748;
+  }
+
+  .exercise-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    font-size: 11.5px;
+  }
+
+  .tag-pill {
+    background: var(--surface-2);
+    padding: 2.5px 7px;
+    border-radius: 6px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .tag-pill.load {
+    background: rgba(245, 95, 22, 0.10);
+    color: var(--brand-ink);
+    font-weight: 700;
+  }
+
+  .tag-pill.logged {
+    background: rgba(22, 163, 74, 0.12);
+    color: #15803d;
+    font-weight: 800;
+  }
+
+  /* Link ▶ Ver Vídeo */
+  .vid-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 5px;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--brand);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  /* Optional Load Input Drawer */
+  .load-drawer-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #475569;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 0;
+    margin-top: 2px;
+  }
+  .load-drawer-toggle:hover { color: var(--brand); }
+
+  .load-input-panel {
+    background: #F8FAFC;
+    border: 1px solid #CBD5E1;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .load-input-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .load-stepper-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stepper-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stepper-btn:hover { border-color: var(--brand); color: var(--brand); }
+
+  .load-display-input {
+    flex: 1;
+    height: 36px;
+    background: var(--surface);
+    border: 1.5px solid var(--brand);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--text);
+    font-family: inherit;
+    outline: none;
+  }
+
+  .load-helper-note {
+    font-size: 10.5px;
+    color: #64748B;
+    line-height: 1.35;
+  }
+
+  /* Bottom Actions & Completion Button */
+  .bottom-action-wrap {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .workout-complete-btn {
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    background: var(--brand);
+    color: #FFFFFF;
+    font-size: 14.5px;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(245, 95, 22, 0.28);
+    transition: all 0.15s ease;
+  }
+
+  .workout-complete-btn.done {
+    background: var(--success);
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25);
+    cursor: default;
+  }
+
+  .workout-complete-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  .completed-time-tag {
+    font-size: 11px;
+    color: #15803d;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+  }
+</style>
+</helmet>
+
+<div class="canvas-wrap">
+
+  <!-- ================= PAINEL DE ESPECIFICAÇÃO DE DESIGN ================= -->
+  <aside class="spec-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span class="spec-badge">Especificação Aprovada</span>
+      <span style="font-size:11px;font-weight:700;color:#64748B;">Etapa 2 · Aluno</span>
+    </div>
+    <h1 class="spec-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      Marcação por Exercício
+    </h1>
+    <p class="spec-desc">
+      Evolução do PWA (360px) permitindo ao aluno marcar o cumprimento exercício a exercício ou concluir o treino inteiro de uma vez, sem a fricção de preenchimento série por série.
+    </p>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">1</span>
+      <div>
+        <strong style="color:#FFFFFF;">Caixa de marcar por exercício:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Área de toque confortável (34×34px) com feedback verde tátil imediato.</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">2</span>
+      <div>
+        <strong style="color:#FFFFFF;">Contador de progresso "3/6":</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Exibido no card de resumo da sessão, acompanhado de barra de progresso suave.</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">3</span>
+      <div>
+        <strong style="color:#FFFFFF;">Auto-registro ao marcar o 6º:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Ao concluir o último exercício pendente, o treino do dia é gravado automaticamente em <code>completed_workouts</code> com celebração visual.</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">4</span>
+      <div>
+        <strong style="color:#FFFFFF;">Botão global preservado:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">O botão "Concluir Treino de Hoje" permanece para quem prefere não tocar em cada card.</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">5</span>
+      <div>
+        <strong style="color:#FFFFFF;">Carga usada opcional:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Exercícios com peso ganham gaveta retrátil pré-preenchida com o último registro ("usei 22,5 kg"). Nunca obrigatória.</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon" style="background:rgba(239,68,68,0.15);color:#EF4444;">✕</span>
+      <div>
+        <strong style="color:#FFFFFF;">Sem anotação série por série:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Decisão explícita de produto: anotar repetições série a série na academia dispersa e atrapalha o ritmo do aluno.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #1E293B;font-size:12px;color:#64748B;">
+      Largura base: <strong>360px viewport</strong> · Tokens oficiais Ybytu
+    </div>
+  </aside>
+
+  <!-- ================= TELA 1: EXERCÍCIO NÃO MARCADO (ESTADO INICIAL 0/6) ================= -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:#475569;">Estado 1</span>
+      Exercício Não Marcado (Início 0/6)
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>09:41</span><span>●●● 4G 100%</span></div>
+
+      <!-- App Header -->
+      <header class="user-header">
+        <div>
+          <h2 class="user-greeting">Olá, Mariana!</h2>
+          <div class="user-date">dom., 4 de out.</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;">
+          MS
+        </div>
+      </header>
+
+      <!-- Tabs -->
+      <div class="user-tabs-bar">
+        <button class="user-tab-btn active"><span>🏋️</span> Treino de Hoje</button>
+        <button class="user-tab-btn"><span>🥗</span> Alimentação</button>
+      </div>
+
+      <!-- Body -->
+      <div class="app-body">
+        <!-- Split selector -->
+        <div class="split-chips-scroll">
+          <div class="split-chip active">Dia 1 · Superior</div>
+          <div class="split-chip">Dia 2 · Inferior</div>
+          <div class="split-chip">Dia 3 · Core</div>
+        </div>
+
+        <!-- Session Summary with 0/6 Progress -->
+        <div class="workout-summary-card">
+          <div class="workout-header-row">
+            <div>
+              <div class="workout-title">Superior · Força & Hipertrofia</div>
+              <div class="workout-meta-line" style="margin-top:4px;">
+                <span>⏱ ~50 min</span>
+                <span>🔥 ~340 kcal</span>
+                <span>🏋️ 6 exercícios</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-box">
+            <div class="progress-label-row">
+              <span style="font-weight:700;color:var(--muted);">Progresso da sessão</span>
+              <span class="progress-counter-tag">0 de 6</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise 1: Não marcado -->
+        <article class="exercise-card">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit" title="Marcar como realizado" aria-label="Marcar exercício A">
+              <!-- unchecked circle -->
+            </div>
+            <div class="exercise-thumb-wrap">
+              <span style="font-size:16px;">🏋️</span>
+            </div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title">
+                <span style="color:var(--brand);font-weight:900;">A</span> Supino Reto Barra
+              </div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">4 séries × 10-12</span>
+                <span class="tag-pill load">20 kg</span>
+                <span class="tag-pill">60s descanso</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+                <a class="vid-link">▶ Ver vídeo</a>
+                <button class="load-drawer-toggle">Anotar carga (20 kg) ▾</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Exercise 2: Não marcado -->
+        <article class="exercise-card">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit" title="Marcar como realizado">
+            </div>
+            <div class="exercise-thumb-wrap">
+              <span style="font-size:16px;">💪</span>
+            </div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title">
+                <span style="color:var(--brand);font-weight:900;">B</span> Puxada Alta Pulley
+              </div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">3 séries × 12</span>
+                <span class="tag-pill load">35 kg</span>
+                <span class="tag-pill">60s descanso</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+                <a class="vid-link">▶ Ver vídeo</a>
+                <button class="load-drawer-toggle">Anotar carga (35 kg) ▾</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Exercise 3: Não marcado (Corpo livre) -->
+        <article class="exercise-card">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit" title="Marcar como realizado">
+            </div>
+            <div class="exercise-thumb-wrap">
+              <span style="font-size:16px;">🤸</span>
+            </div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title">
+                <span style="color:var(--brand);font-weight:900;">C</span> Flexão de Braços
+              </div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">3 séries × 15</span>
+                <span class="tag-pill" style="background:#E2E8F0;font-weight:700;">Peso corporal</span>
+                <span class="tag-pill">45s descanso</span>
+              </div>
+              <a class="vid-link">▶ Ver vídeo</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Global Action Button (Preservado) -->
+        <div class="bottom-action-wrap">
+          <button type="button" class="workout-complete-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Concluir Treino de Hoje
+          </button>
+          <p style="text-align:center;font-size:11px;color:var(--muted);margin:0;">
+            Você pode marcar um a um ou concluir todos de uma vez.
+          </p>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ================= TELA 2: EXERCÍCIOS MARCADOS (PROGRESSO 3/6) ================= -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:var(--brand);">Estado 2</span>
+      Em Andamento: Marcado ("3/6")
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>09:58</span><span>●●● 4G 98%</span></div>
+
+      <!-- Header -->
+      <header class="user-header">
+        <div>
+          <h2 class="user-greeting">Olá, Mariana!</h2>
+          <div class="user-date">dom., 4 de out.</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;">
+          MS
+        </div>
+      </header>
+
+      <!-- Tabs -->
+      <div class="user-tabs-bar">
+        <button class="user-tab-btn active"><span>🏋️</span> Treino de Hoje</button>
+        <button class="user-tab-btn"><span>🥗</span> Alimentação</button>
+      </div>
+
+      <div class="app-body">
+        <div class="split-chips-scroll">
+          <div class="split-chip active">Dia 1 · Superior</div>
+          <div class="split-chip">Dia 2 · Inferior</div>
+          <div class="split-chip">Dia 3 · Core</div>
+        </div>
+
+        <!-- Summary Card: 3/6 -->
+        <div class="workout-summary-card">
+          <div class="workout-header-row">
+            <div>
+              <div class="workout-title">Superior · Força & Hipertrofia</div>
+              <div class="workout-meta-line" style="margin-top:4px;">
+                <span>⏱ ~50 min</span>
+                <span>🔥 ~340 kcal</span>
+                <span>🏋️ 6 exercícios</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-box">
+            <div class="progress-label-row">
+              <span style="font-weight:700;color:var(--text);">3 de 6 realizados</span>
+              <span class="progress-counter-tag">50%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill" style="width: 50%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise 1: MARCADO COM SUCESSO -->
+        <article class="exercise-card checked">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit checked" title="Concluído">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="exercise-thumb-wrap">
+              <span style="font-size:16px;">🏋️</span>
+            </div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title">
+                <span style="color:#15803d;font-weight:900;">A</span> Supino Reto Barra
+              </div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">4 séries × 10-12</span>
+                <span class="tag-pill logged">✓ 20 kg usado</span>
+              </div>
+              <div class="completed-time-tag">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Realizado às 09:47
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Exercise 2: MARCADO COM SUCESSO -->
+        <article class="exercise-card checked">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit checked">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="exercise-thumb-wrap">
+              <span style="font-size:16px;">💪</span>
+            </div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title">
+                <span style="color:#15803d;font-weight:900;">B</span> Puxada Alta Pulley
+              </div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">3 séries × 12</span>
+                <span class="tag-pill logged">✓ 35 kg usado</span>
+              </div>
+              <div class="completed-time-tag">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Realizado às 09:54
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Exercise 3: PENDENTE -->
+        <article class="exercise-card">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit" title="Marcar como realizado">
+            </div>
+            <div class="exercise-thumb-wrap">
+              <span style="font-size:16px;">🤸</span>
+            </div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title">
+                <span style="color:var(--brand);font-weight:900;">C</span> Elevação Lateral
+              </div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">3 séries × 12-15</span>
+                <span class="tag-pill load">8 kg</span>
+                <span class="tag-pill">45s descanso</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+                <a class="vid-link">▶ Ver vídeo</a>
+                <button class="load-drawer-toggle">Ajustar carga (8 kg) ▾</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <div class="bottom-action-wrap">
+          <button type="button" class="workout-complete-btn" style="background:#334155;">
+            Concluir treino inteiro agora (3 restantes)
+          </button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ================= TELA 3: CAMPO DE CARGA ABERTO ================= -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:#2563EB;">Estado 3</span>
+      Ajuste Opcional de Carga Aberto
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>10:12</span><span>●●● 4G 95%</span></div>
+
+      <header class="user-header">
+        <div>
+          <h2 class="user-greeting">Olá, Mariana!</h2>
+          <div class="user-date">dom., 4 de out.</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;">
+          MS
+        </div>
+      </header>
+
+      <div class="user-tabs-bar">
+        <button class="user-tab-btn active"><span>🏋️</span> Treino de Hoje</button>
+        <button class="user-tab-btn"><span>🥗</span> Alimentação</button>
+      </div>
+
+      <div class="app-body">
+        <div class="split-chips-scroll">
+          <div class="split-chip active">Dia 1 · Superior</div>
+          <div class="split-chip">Dia 2 · Inferior</div>
+        </div>
+
+        <!-- Exercise com Gaveta de Carga Aberta -->
+        <article class="exercise-card" style="border-color:var(--brand);box-shadow:0 4px 16px rgba(245,95,22,0.12);">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit" title="Marcar após definir carga">
+            </div>
+            <div class="exercise-thumb-wrap">
+              <span style="font-size:16px;">🏋️</span>
+            </div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title">
+                <span style="color:var(--brand);font-weight:900;">D</span> Desenvolvimento Halteres
+              </div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">3 séries × 10</span>
+                <span class="tag-pill load">Plano: 12 kg</span>
+                <span class="tag-pill">60s descanso</span>
+              </div>
+              <a class="vid-link">▶ Ver vídeo</a>
+            </div>
+          </div>
+
+          <!-- GAVETA DE CARGA REAL USADA (OPCIONAL) -->
+          <div class="load-input-panel">
+            <div class="load-input-header">
+              <span>Carga usada nesta sessão:</span>
+              <span style="color:var(--brand);font-weight:800;font-size:10.5px;text-transform:uppercase;">Opcional</span>
+            </div>
+
+            <div class="load-stepper-row">
+              <button type="button" class="stepper-btn" title="Diminuir 1 kg">–1</button>
+              <button type="button" class="stepper-btn" title="Diminuir 0.5 kg">–0,5</button>
+              <input type="text" class="load-display-input" value="14 kg" readonly>
+              <button type="button" class="stepper-btn" title="Aumentar 0.5 kg">+0,5</button>
+              <button type="button" class="stepper-btn" title="Aumentar 1 kg">+1</button>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px;">
+              <span class="load-helper-note">Pré-preenchido com última carga registrada.</span>
+              <button type="button" style="padding:6px 12px;border-radius:8px;background:var(--brand);color:#fff;border:none;font-size:11.5px;font-weight:800;cursor:pointer;">
+                Confirmar 14 kg
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Outro exercício fechado -->
+        <article class="exercise-card">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit"></div>
+            <div class="exercise-thumb-wrap"><span style="font-size:16px;">💪</span></div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title"><span style="color:var(--brand);font-weight:900;">E</span> Tríceps Corda</div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">3 séries × 12</span>
+                <span class="tag-pill load">25 kg</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">
+                <a class="vid-link">▶ Ver vídeo</a>
+                <button class="load-drawer-toggle">Anotar carga (25 kg) ▾</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <div class="bottom-action-wrap">
+          <button type="button" class="workout-complete-btn" style="background:#334155;">
+            Concluir treino inteiro agora
+          </button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ================= TELA 4: SESSÃO COMPLETA (6/6 AUTO-REGISTRADA) ================= -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:var(--success);">Estado 4</span>
+      Sessão Completa ("6/6" Gravada)
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar"><span>10:35</span><span>●●● 4G 92%</span></div>
+
+      <header class="user-header">
+        <div>
+          <h2 class="user-greeting">Olá, Mariana!</h2>
+          <div class="user-date">dom., 4 de out.</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;">
+          MS
+        </div>
+      </header>
+
+      <div class="user-tabs-bar">
+        <button class="user-tab-btn active"><span>🏋️</span> Treino de Hoje</button>
+        <button class="user-tab-btn"><span>🥗</span> Alimentação</button>
+      </div>
+
+      <div class="app-body">
+        <div class="split-chips-scroll">
+          <div class="split-chip active">Dia 1 · Superior</div>
+          <div class="split-chip">Dia 2 · Inferior</div>
+          <div class="split-chip">Dia 3 · Core</div>
+        </div>
+
+        <!-- Banner comemorativo de auto-registro -->
+        <div class="celebration-banner">
+          <span style="font-size:22px;">🎉</span>
+          <div>
+            <div>Treino concluído com sucesso!</div>
+            <div style="font-size:11px;opacity:0.85;font-weight:500;">
+              Sessão gravada automaticamente em <code>completed_workouts</code>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Card: 6/6 100% -->
+        <div class="workout-summary-card" style="border-color:rgba(22,163,74,0.3);">
+          <div class="workout-header-row">
+            <div>
+              <div class="workout-title">Superior · Força & Hipertrofia</div>
+              <div class="workout-meta-line" style="margin-top:4px;">
+                <span>⏱ 48 min realizados</span>
+                <span>🔥 340 kcal</span>
+              </div>
+            </div>
+            <span style="background:rgba(22,163,74,0.15);color:#15803d;padding:4px 9px;border-radius:8px;font-size:11px;font-weight:900;">
+              ✓ 100%
+            </span>
+          </div>
+
+          <div class="progress-box">
+            <div class="progress-label-row">
+              <span style="font-weight:800;color:#15803d;">Todos os 6 exercícios concluídos</span>
+              <span class="progress-counter-tag full">6/6</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar-fill success" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise 1 (Concluído) -->
+        <article class="exercise-card checked">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit checked">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="exercise-thumb-wrap"><span style="font-size:16px;">🏋️</span></div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title"><span style="color:#15803d;font-weight:900;">A</span> Supino Reto Barra</div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">4 séries × 10-12</span>
+                <span class="tag-pill logged">✓ 20 kg</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Exercise 6 (O último que acabou de ser marcado) -->
+        <article class="exercise-card checked">
+          <div class="exercise-top-row">
+            <div class="exercise-check-hit checked">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="exercise-thumb-wrap"><span style="font-size:16px;">⏱</span></div>
+            <div class="exercise-meta-col">
+              <div class="exercise-order-title"><span style="color:#15803d;font-weight:900;">F</span> Prancha Isométrica</div>
+              <div class="exercise-tags-row">
+                <span class="tag-pill">3 séries × 45s</span>
+                <span class="tag-pill logged">✓ Concluído</span>
+              </div>
+              <div class="completed-time-tag">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Marcado às 10:34 (fechou o treino)
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Botão Final Verde de Sucesso -->
+        <div class="bottom-action-wrap">
+          <div class="workout-complete-btn done">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Treino concluído hoje às 10:35!
+          </div>
+          <p style="text-align:center;font-size:11px;color:#15803d;margin:0;font-weight:600;">
+            ✓ Registrado automaticamente ao marcar o 6º exercício.
+          </p>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
