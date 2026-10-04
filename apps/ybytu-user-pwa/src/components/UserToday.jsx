@@ -55,7 +55,7 @@ export default function UserToday({ mockPayload = null } = {}) {
     if (!mockPayload) return 0;
     const days = mockPayload.training?.days || [];
     const workouts = mockPayload.activity_today?.completed_workouts || [];
-    const lastDay = workouts[0]?.day_number;
+    const lastDay = mockPayload.last_completed_workout?.day_number ?? workouts[0]?.day_number;
     return calculateNextDayIndex(days, lastDay);
   }, [mockPayload]);
 
@@ -127,9 +127,15 @@ export default function UserToday({ mockPayload = null } = {}) {
         setCompletedMeals(data.activity_today?.completed_meals || []);
 
         // Define o dia padrão ao abrir: o PRÓXIMO dia depois do último concluído
-        let lastCompletedDay = todayWorkouts[0]?.day_number;
+        // 1. Prioriza o campo direto do backend quando disponibilizado
+        let lastCompletedDay = data.last_completed_workout?.day_number;
 
-        // Se nenhum treino foi concluído hoje, busca o último treino histórico no banco
+        // 2. Se o campo acima não estiver presente, verifica treinos concluídos hoje
+        if (lastCompletedDay == null) {
+          lastCompletedDay = todayWorkouts[0]?.day_number;
+        }
+
+        // 3. Fallback de contingência: consulta direta ao banco enquanto o campo não existe no backend
         if (lastCompletedDay == null && session?.user?.id) {
           try {
             const { data: lastWk } = await supabase
