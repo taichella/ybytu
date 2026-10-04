@@ -4,6 +4,7 @@ import { invokeFunction } from '../services/apiClient.js';
 import { StaffContext } from '../lib/staffContextCore';
 import ThemeToggle from './ThemeToggle';
 import UserLimitationsList from './UserLimitationsList';
+import UserActivityFeed from './UserActivityFeed';
 
 const VALID_TABS = new Set(['overview', 'health', 'plans', 'activity']);
 
@@ -761,13 +762,7 @@ export default function UserDetail() {
 
 
           {/* ===== TAB: ATIVIDADE & ADESÃO ===== */}
-          {tab === 'activity' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', padding: '22px', textAlign: 'center' }}>
-                 <p style={{ color: 'var(--muted)', fontSize: '14px' }}>Dados de atividade não disponíveis.</p>
-              </section>
-            </div>
-          )}
+          {tab === 'activity' && <UserActivityFeed userId={id} />}
 
 
         </div>

@@ -382,3 +382,21 @@ miniaturas.
 
 Os 5 exercícios do plano de teste da Taina (ex_001, ex_002, ex_093, ex_095, ex_107) estão sendo resolvidos à parte
 em `scripts/video_url_plano_teste_r2_20261004.sql`.
+
+## Faixa de status de adesão ("abaixo do combinado") — ideia a validar com o personal (2026-10-04)
+
+A primeira versão do `UserActivityFeed.jsx` (outro agente, antes do commit) tinha uma faixa no topo da aba
+Atividade & adesão que classificava o aluno pelo intervalo desde o último treino registrado, cruzado com
+`training_days_per_week`:
+
+- 3 dias/semana: normal até 3 dias sem registro, alerta a partir de 7;
+- 4 dias/semana: normal até 2, alerta a partir de 6;
+- 5 ou mais: normal até 2, alerta a partir de 5;
+- sem meta cadastrada: assumia 4.
+
+**Ficou de fora** porque essas faixas foram inventadas, ninguém validou com o personal, e a faixa não está no
+`UsuarioDetalhe.dc.html`. A aba aplicada segue o desenho (mapa de calor + duas listas).
+
+Para validar com o personal: (1) quantos dias sem registro já é motivo de atenção, por frequência combinada;
+(2) se o alerta deve contar dias corridos ou sessões perdidas na semana; (3) se "sem registro" no app deve aparecer
+como alerta, já que o aluno pode treinar sem marcar. Se aprovado, a faixa entra no desenho antes do código.
