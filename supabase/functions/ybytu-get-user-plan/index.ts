@@ -131,7 +131,11 @@ serve(async (req) => {
     const rawTimezone = url.searchParams.get('timezone')?.trim() || undefined
     const todayStartIso = getStartOfDayInTimezone(rawTimezone)
 
-    const [workoutsRes, mealsRes] = await Promise.all([
+    // Último treino concluído NESTE plano (qualquer data) -- o app abre no dia
+    // seguinte a ele. Filtrado pelo plano ativo pra um plano novo recomeçar no Dia 1.
+    const trainingPlanUuid = (payload.training as { id?: string } | null)?.id ?? null
+
+    const [workoutsRes, mealsRes, lastWorkoutRes] = await Promise.all([
       supabase
         .from('completed_workouts')
         .select('id, day_number, session_name, completed_at')
@@ -144,6 +148,16 @@ serve(async (req) => {
         .eq('user_id', userId)
         .gte('completed_at', todayStartIso)
         .order('completed_at', { ascending: false }),
+      trainingPlanUuid
+        ? supabase
+          .from('completed_workouts')
+          .select('day_number, completed_at')
+          .eq('user_id', userId)
+          .eq('training_plan_id', trainingPlanUuid)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        : Promise.resolve({ data: null }),
     ])
 
     // 4. Retorna o plano do usuário integrado com seu progresso de hoje
@@ -153,6 +167,7 @@ serve(async (req) => {
         completed_workouts: workoutsRes.data ?? [],
         completed_meals: mealsRes.data ?? [],
       },
+      last_completed_workout: lastWorkoutRes.data ?? null,
     }
 
     return new Response(JSON.stringify(responsePayload), {
