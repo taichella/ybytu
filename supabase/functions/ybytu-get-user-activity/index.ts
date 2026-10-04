@@ -59,20 +59,26 @@ serve(async (req) => {
     // de qualquer limite fixo e cortaria o começo do mapa.
     const windowStart = new Date(Date.now() - 84 * 24 * 60 * 60 * 1000).toISOString()
 
-    // 2. Treinos registrados pelo aluno nas últimas 12 semanas
+    // 2. Treinos registrados pelo aluno nas últimas 12 semanas.
+    // exercise_count é gravado pelo banco NO MOMENTO do check-in (trigger da
+    // migration 20261004120000) -- nunca recontar no plano atual: salvar o plano
+    // apaga e recria as linhas de exercício, e a conta mudaria em silêncio.
     const { data: workoutRows, error: wError } = await supabase
       .from('completed_workouts')
-      .select('id, completed_at, training_plan_id, day_number, session_name')
+      .select('id, completed_at, training_plan_id, day_number, session_name, exercise_count')
       .eq('user_id', userId)
       .gte('completed_at', windowStart)
       .order('completed_at', { ascending: false })
 
     if (wError) throw wError
 
-    // 3. Refeições registradas pelo aluno nas últimas 12 semanas
+    // 3. Refeições registradas pelo aluno nas últimas 12 semanas.
+    // meal_id e calories_consumed também são gravados no check-in (mesma
+    // migration). NÃO buscar o prato pela posição (day_order/meal_order) no
+    // cardápio atual: editar o cardápio troca o prato daquela posição.
     const { data: mealRows, error: mError } = await supabase
       .from('completed_meals')
-      .select('id, completed_at, meal_plan_id, day_order, meal_order, meal_name')
+      .select('id, completed_at, meal_plan_id, day_order, meal_order, meal_name, meal_id, calories_consumed')
       .eq('user_id', userId)
       .gte('completed_at', windowStart)
       .order('completed_at', { ascending: false })
@@ -80,58 +86,29 @@ serve(async (req) => {
 
     if (mError) throw mError
 
-    // 3b. Nº de exercícios de cada sessão ("6 exercícios" na lista do desenho).
-    // training_plan_exercises é por SLUG (training_plans.training_plan_id), o
-    // check-in grava o uuid (training_plans.id) -- mesma landmine do buildPlanPayload.
-    const exerciseCountByPlanDay = new Map<string, number>()
-    const workoutPlanUuids = [...new Set((workoutRows ?? []).map((w) => w.training_plan_id).filter(Boolean))]
-    if (workoutPlanUuids.length) {
-      const { data: planRows, error: pError } = await supabase
-        .from('training_plans')
-        .select('id, training_plan_id')
-        .in('id', workoutPlanUuids)
-      if (pError) throw pError
-      const uuidBySlug = new Map((planRows ?? []).map((p) => [p.training_plan_id, p.id]))
-      if (uuidBySlug.size) {
-        const { data: tpeRows, error: tpeError } = await supabase
-          .from('training_plan_exercises')
-          .select('training_plan_id, day_number')
-          .in('training_plan_id', [...uuidBySlug.keys()])
-        if (tpeError) throw tpeError
-        for (const r of tpeRows ?? []) {
-          const key = `${uuidBySlug.get(r.training_plan_id)}_${r.day_number}`
-          exerciseCountByPlanDay.set(key, (exerciseCountByPlanDay.get(key) ?? 0) + 1)
-        }
+    // 3b. Tipo da refeição (ícone na lista), pelo PRATO gravado (meals.meal_type),
+    // não pela posição no cardápio.
+    const mealTypeByMealId = new Map<string, string>()
+    const mealTypeNameBySlug = new Map<string, string>()
+    const mealIds = [...new Set((mealRows ?? []).map((m) => m.meal_id).filter(Boolean))]
+    if (mealIds.length) {
+      const { data: mealCatalog, error: mcError } = await supabase
+        .from('meals')
+        .select('id, meal_type')
+        .in('id', mealIds)
+      if (mcError) throw mcError
+      for (const m of mealCatalog ?? []) if (m.meal_type) mealTypeByMealId.set(m.id, m.meal_type)
+      const typeIds = [...new Set(mealTypeByMealId.values())]
+      if (typeIds.length) {
+        const { data: typeRows, error: tError } = await supabase
+          .from('meal_types')
+          .select('meal_type_id, name_ptbr')
+          .in('meal_type_id', typeIds)
+        if (tError) throw tError
+        for (const t of typeRows ?? []) mealTypeNameBySlug.set(t.meal_type_id, t.name_ptbr)
       }
     }
 
-    // 3c. kcal e tipo de cada refeição registrada ("520 kcal consumidas" no desenho).
-    // Landmine INVERSA do lado nutrição: meal_plan_meals.meal_plan_id e .meal_id
-    // são TEXT guardando uuid (meal_plans.id / meals.id), não slug.
-    const slotByKey = new Map<string, { meal_type_id: string; meal_id: string }>()
-    const kcalByMealId = new Map<string, number | null>()
-    const mealTypeNameBySlug = new Map<string, string>()
-    const mealPlanUuids = [...new Set((mealRows ?? []).map((m) => m.meal_plan_id).filter(Boolean))]
-    if (mealPlanUuids.length) {
-      const { data: slotRows, error: sError } = await supabase
-        .from('meal_plan_meals')
-        .select('meal_plan_id, day_order, meal_order, meal_type_id, meal_id')
-        .in('meal_plan_id', mealPlanUuids)
-      if (sError) throw sError
-      for (const s of slotRows ?? []) {
-        slotByKey.set(`${s.meal_plan_id}_${s.day_order}_${s.meal_order}`, s)
-      }
-      const mealIds = [...new Set((slotRows ?? []).map((s) => s.meal_id).filter(Boolean))]
-      const typeIds = [...new Set((slotRows ?? []).map((s) => s.meal_type_id).filter(Boolean))]
-      const [mealsRes, typesRes] = await Promise.all([
-        mealIds.length ? supabase.from('meals').select('id, calories').in('id', mealIds) : Promise.resolve({ data: [], error: null }),
-        typeIds.length ? supabase.from('meal_types').select('meal_type_id, name_ptbr').in('meal_type_id', typeIds) : Promise.resolve({ data: [], error: null }),
-      ])
-      if (mealsRes.error) throw mealsRes.error
-      if (typesRes.error) throw typesRes.error
-      for (const m of mealsRes.data ?? []) kcalByMealId.set(m.id, m.calories != null ? Math.round(Number(m.calories)) : null)
-      for (const t of typesRes.data ?? []) mealTypeNameBySlug.set(t.meal_type_id, t.name_ptbr)
-    }
 
     // 4. Último acesso ao app (auth.users via admin API)
     let lastSignInAt = null
@@ -148,16 +125,15 @@ serve(async (req) => {
 
     const workouts = (workoutRows ?? []).map((w) => ({
       ...w,
-      exercise_count: w.training_plan_id ? (exerciseCountByPlanDay.get(`${w.training_plan_id}_${w.day_number}`) ?? null) : null,
       is_current_plan: w.training_plan_id ? w.training_plan_id === profile.current_training_plan_id : null,
     }))
 
     const meals = (mealRows ?? []).map((m) => {
-      const slot = slotByKey.get(`${m.meal_plan_id}_${m.day_order}_${m.meal_order}`)
+      const mealType = m.meal_id ? mealTypeByMealId.get(m.meal_id) : undefined
       return {
         ...m,
-        kcal: slot ? (kcalByMealId.get(slot.meal_id) ?? null) : null,
-        meal_type_ptbr: slot ? (mealTypeNameBySlug.get(slot.meal_type_id) ?? null) : null,
+        kcal: m.calories_consumed ?? null,
+        meal_type_ptbr: mealType ? (mealTypeNameBySlug.get(mealType) ?? null) : null,
         is_current_plan: m.meal_plan_id ? m.meal_plan_id === profile.current_meal_plan_id : null,
       }
     })
