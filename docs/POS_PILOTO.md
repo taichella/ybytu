@@ -400,3 +400,14 @@ Atividade & adesão que classificava o aluno pelo intervalo desde o último trei
 Para validar com o personal: (1) quantos dias sem registro já é motivo de atenção, por frequência combinada;
 (2) se o alerta deve contar dias corridos ou sessões perdidas na semana; (3) se "sem registro" no app deve aparecer
 como alerta, já que o aluno pode treinar sem marcar. Se aprovado, a faixa entra no desenho antes do código.
+
+## Aviso de carga registrada muito acima da prescrita — ideia a validar com o personal (2026-10-04)
+
+Com o check-in por exercício (aprovado, ainda não construído), o aluno poderá registrar a carga que usou, campo
+opcional, só em exercício com peso. **Decisão da Taina (2026-10-04): a carga registrada é informação, não passa por
+validação do profissional.** Na tela, sempre como "registrado pelo aluno", nunca misturada com a carga prescrita;
+quem muda o plano continua sendo o profissional, ajustando a prescrição no construtor.
+
+Ideia para levar ao personal junto com a faixa de adesão acima: um **sinal** (não validação) quando a carga registrada
+fica muito longe da prescrita. Perguntas: (1) a partir de quanto avisar (ex.: 50% acima? também abaixo?); (2) em uma
+sessão ou só se repetir; (3) onde aparece (feed de atividade, card do exercício no construtor, ou os dois).
