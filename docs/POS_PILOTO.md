@@ -353,3 +353,32 @@ Quem divide o WhatsApp já divide o fator de login, então a escolha de conta de
 número compartilhado já não abrisse; e quem quiser acesso separado entra por e-mail. Ao implementar: trocar o
 desempate por `created_at` pela escolha de conta, e só listar os perfis **depois** do código validado (antes disso a
 resposta continua cega). Isso só entra na virada para cliente real — até lá o comportamento atual fica como está.
+
+## Vídeos e imagens de exercício: decisão do personal parada desde setembro (medido 2026-10-04) — BLOQUEIO DE PRODUTO
+
+**Não é bloqueio técnico.** A migração Drive → R2 de 2026-09-08 aplicou só os 185 exercícios que casaram sem dúvida
+(`scripts/video_url_migra_r2_20260908.sql`). O resto foi para
+`docs/APROVACAO_PERSONAL_VIDEOS_R2_20260908.md`, que está **com todas as caixas de decisão em branco** desde
+então. Enquanto ele não for respondido:
+
+- **98 exercícios** continuam com link do Google Drive em `video_url`. No PWA o vídeo não toca (a tag `<video>`
+  recebe uma página HTML do Drive); no `/plano/` abre em aba nova e funciona.
+- **8 exercícios** têm `video_url` vazio.
+- **109 exercícios** têm `image_url` vazio: a capa/miniatura só é gerada a partir do vídeo confirmado no R2
+  (`scripts/gen-r2-thumbs.sh`), então as imagens dependem da mesma decisão.
+
+Os arquivos de quase todos **já estão no bucket** (os candidatos testados respondem 200 `video/mp4`) — falta
+escolher qual versão vai para qual exercício, porque há várias versões do mesmo vídeo e exercícios que
+compartilhavam o mesmo arquivo do Drive. Depois da escolha, o conserto é um UPDATE de `video_url` + gerar as
+miniaturas.
+
+**Ambíguos — têm candidato no R2, falta escolher (89):** ex_001 Agachamento livre · ex_002 Avanço (afundo) com peso corporal · ex_007 Leg press · ex_013 Wall ball · ex_015 Box step-up com peso · ex_018 Agachamento isométrico (cadeirinha) · ex_025 Agachamento com elástico (miniband) · ex_026 Avanço com halteres · ex_028 Leg Press 45° · ex_031 Avanço com step  no Smith Machine · ex_033 Back Squat · ex_045 Agachamento livre · ex_046 Avanço (afundo) · ex_048 Avanço com halteres · ex_050 Cadeira flexora · ex_051 Agachamento com barra · ex_053 Avanço unilateral Smith · ex_054 Kettlebell swing · ex_055 Deadlift com barra olímpica · ex_056 Step-up no box com peso · ex_058 Agachamento isométrico (cadeirinha) · ex_060 Avanço reverso · ex_061 Ponte unilateral com perna elevada · ex_063 Agachamento com miniband nos joelhos · ex_065 Romanian Deadlift com halteres · ex_066 Stiff com halteres · ex_067 Deadlift unilateral com halter · ex_069 Deadlift tradicional com barra · ex_070 Romanian Deadlift com barra · ex_071 Stiff com barra · ex_072 Sumô Deadlift com barra · ex_073 Ponte de glúteos unilateral · ex_074 Good morning com peso corporal · ex_075 Stiff com halteres · ex_078 Mesa flexora · ex_079 Stiff com barra · ex_080 Levantamento terra romeno · ex_081 Cadeira flexora · ex_082 Kettlebell swing · ex_083 Deadlift com barra olímpica · ex_085 Avanço reverso com halteres · ex_086 Deadlift unilateral com halteres · ex_087 Mesa flexora · ex_089 Good morning com barra · ex_090 Peso morto romeno com halteres · ex_093 Elevação de panturrilha no chão · ex_095 Elevação de panturrilha com halteres · ex_098 Panturrilha no leg press 45 · ex_101 Panturrilha no Leg Press · ex_103 Pular corda · ex_107 Prancha frontal · ex_108 Prancha lateral · ex_110 Prancha com miniband · ex_117 Mountain climber crossbody · ex_118 Prancha com toque no ombro · ex_120 Prancha com elevação de perna · ex_121 Hollow hold (posição de barco) · ex_124 Prancha com elástico · ex_125 Sit-up com as pernas elevadas · ex_126 Sit-up com as pernas elevadas com peso · ex_128 Joelho no peito na barra · ex_135 Prancha frontal · ex_136 Prancha lateral · ex_139 Hollow hold · ex_140 Prancha com miniband · ex_145 Knee raise pendurado · ex_147 Prancha com elevação alternada de pernas · ex_148 Prancha com toque nos ombros · ex_152 Prancha com toque de ombro · ex_169 Face pull no cross · ex_176 Flexão declinada (pés elevados) · ex_184 Supino declinado com barra · ex_191 Supino declinado com barra · ex_194 Flexão de braço com pegada fechada · ex_214 Rosca spider com halteres · ex_216 Flexão de braço com pegada fechada · ex_224 Flexão declinada com pegada estreita · ex_235 Superman · ex_237 Good morning com peso corporal · ex_245 Deadlift (levantamento terra) · ex_250 Y-W-T Raise no chão · ex_267 Pular corda · ex_270 Elíptico · ex_277 Salto de corda simples · ex_283 Box Jump · ex_284 Box Jump Over · ex_287 High knees (elevação rápida dos joelhos) · ex_288 Escalador crossbody · ex_291 Kettlebell swing (ou com halter)
+
+**Nome quase igual — confirmar assistindo (2):** ex_039 Box Squat Unilateral com halteres · ex_141 Rollout com roda abdominal
+
+**Sem nenhum arquivo no R2 — gravar ou ficar sem vídeo (7):** ex_113 Abdominal na máquina · ex_132 Abdominal declinado no banco com peso · ex_166 Face pull com elástico · ex_219 Extensão de tríceps com elástico · ex_225 Extensão de tríceps apoiado na parede · ex_234 Extensão de tríceps na polia alta com barra reta · ex_255 Face Pull com elástico
+
+**video_url vazio (8):** ex_096 Elevação de panturrilha em pé na máquina (sem candidato) · ex_099 Corrida no lugar em ponta dos pés · ex_170 Elevação frontal com anilha · ex_215 Rosca na polia com barra reta (pegada supinada) · ex_236 Bird dog · ex_251 Remada com elástico (pegada fechada) · ex_271 Treino intervalado na escada · ex_285 Wall Ball
+
+Os 5 exercícios do plano de teste da Taina (ex_001, ex_002, ex_093, ex_095, ex_107) estão sendo resolvidos à parte
+em `scripts/video_url_plano_teste_r2_20261004.sql`.
