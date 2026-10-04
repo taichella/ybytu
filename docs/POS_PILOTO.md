@@ -411,3 +411,36 @@ quem muda o plano continua sendo o profissional, ajustando a prescrição no con
 Ideia para levar ao personal junto com a faixa de adesão acima: um **sinal** (não validação) quando a carga registrada
 fica muito longe da prescrita. Perguntas: (1) a partir de quanto avisar (ex.: 50% acima? também abaixo?); (2) em uma
 sessão ou só se repetir; (3) onde aparece (feed de atividade, card do exercício no construtor, ou os dois).
+
+## ⚠️ RISCO — Plano de aluno não tem histórico de edição: ninguém sabe o que mudou nem quando (medido 2026-10-04)
+
+**Num produto de saúde com parecer profissional assinado, isto é rastreabilidade, não detalhe técnico.**
+
+O que o código faz hoje:
+
+- Salvar um plano no construtor **apaga e recria todas as linhas** (`replaceSlots` em `ybytu-admin-trainings`,
+  `meal_plan_meals` em `ybytu-admin-meal-plans`). Nada do estado anterior fica guardado.
+- Só os **modelos fixos** (`tr_201`–`tr_207`) gravam o estado anterior, em `training_plan_exercises_history`. Plano de
+  aluno, de treino ou de nutrição, não grava nada.
+- **O parecer não é reaberto por edição.** `plan_reviews` guarda o código do plano (`_shared/planApproval.ts`) e
+  editar mantém o mesmo código; nem `ybytu-admin-trainings` nem `ybytu-admin-meal-plans` tocam em `plan_reviews`.
+  Resultado: um plano editado depois do parecer continua "aprovado", e não há como saber o que o profissional aprovou
+  de fato.
+- Pontos que escrevem nas linhas do plano: `ybytu-admin-trainings`, `ybytu-admin-meal-plans`,
+  `ybytu-submit-plan-review` (`load_updates`, carga), `ybytu-generate-training-plan`, `ybytu-generate-meal-plan`.
+
+Mitigação parcial: com a migration `20261004120000`, os check-ins do aluno gravam o que foi feito no momento (prato,
+kcal, nº de exercícios), então o histórico do aluno deixa de mudar com uma edição. Mas o plano em si continua sem
+histórico.
+
+Opções, da menor para a maior:
+
+| Opção | O que responde | Estimativa |
+|---|---|---|
+| A. Registro "quem salvou e quando" (tabela de log: plano, tipo, quem, quando, nº de itens antes/depois) | Quem mexeu e quando. **Não** responde o que mudou. | ~0,5 dia |
+| B. Versão completa a cada save (cópia JSON de todas as linhas antes de sobrescrever, com quem/quando) — estende para planos de aluno o mecanismo que já existe para os modelos | Quem, quando **e** o plano exato em qualquer data; permite ligar cada parecer à versão que ele aprovou | ~1 dia sem tela; +1–2 dias para uma tela "histórico de versões" com diferenças |
+| C. Histórico por linha (triggers em cada tabela) | O mesmo que B, mais granular | ~1,5–2 dias + tela; o save por "apaga tudo e recria" gera muito ruído de linha a linha |
+
+**Recomendação: B**, mais a decisão de produto que ela abre: **editar um plano já aprovado deve reabrir o parecer?**
+(ou pelo menos marcar "editado depois do parecer"). Sem isso, a versão guardada mostra o que mudou, mas o aluno
+continua vendo um plano "aprovado" que o profissional nunca viu.
