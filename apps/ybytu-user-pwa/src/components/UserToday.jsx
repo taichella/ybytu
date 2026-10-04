@@ -127,32 +127,11 @@ export default function UserToday({ mockPayload = null } = {}) {
         setCompletedMeals(data.activity_today?.completed_meals || []);
 
         // Define o dia padrão ao abrir: o PRÓXIMO dia depois do último concluído
-        // 1. Prioriza o campo direto do backend quando disponibilizado
-        let lastCompletedDay = data.last_completed_workout?.day_number;
-
-        // 2. Se o campo acima não estiver presente, verifica treinos concluídos hoje
-        if (lastCompletedDay == null) {
-          lastCompletedDay = todayWorkouts[0]?.day_number;
-        }
-
-        // 3. Fallback de contingência: consulta direta ao banco enquanto o campo não existe no backend
-        if (lastCompletedDay == null && session?.user?.id) {
-          try {
-            const { data: lastWk } = await supabase
-              .from('completed_workouts')
-              .select('day_number')
-              .eq('user_id', session.user.id)
-              .order('completed_at', { ascending: false })
-              .limit(1)
-              .maybeSingle();
-
-            if (lastWk?.day_number != null) {
-              lastCompletedDay = lastWk.day_number;
-            }
-          } catch (e) {
-            // Silencioso em caso de falha de rede/permissão na consulta auxiliar
-          }
-        }
+        // Ordem estrita de precedência:
+        // 1. data.last_completed_workout?.day_number (último treino concluído no plano ativo)
+        // 2. todayWorkouts[0]?.day_number (se concluído hoje)
+        // 3. Fallback: null -> calculateNextDayIndex retorna 0 (Dia 1, indicando plano novo)
+        const lastCompletedDay = data.last_completed_workout?.day_number ?? todayWorkouts[0]?.day_number ?? null;
 
         const days = data.training?.days || [];
         const nextDayIdx = calculateNextDayIndex(days, lastCompletedDay);
