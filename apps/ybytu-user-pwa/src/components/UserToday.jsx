@@ -18,6 +18,31 @@ const MEAL_ICONS = {
   'Ceia': '🌙',
 };
 
+/**
+ * Calcula o índice do próximo dia a exibir ao abrir a tela.
+ * Regra do produto: O dia padrão ao abrir é o PRÓXIMO dia depois do último concluído.
+ * Ninguém treina a mesma sessão duas vezes. Concluído o dia 3, abre no 4;
+ * concluído o último do plano, volta ao 1 (índice 0).
+ */
+function calculateNextDayIndex(days, lastCompletedDayNumber) {
+  if (!days || days.length === 0) return 0;
+  if (lastCompletedDayNumber == null) return 0;
+
+  const lastNum = Number(lastCompletedDayNumber);
+  const foundIdx = days.findIndex(d => Number(d.day_number) === lastNum);
+
+  if (foundIdx !== -1) {
+    return (foundIdx + 1) % days.length;
+  }
+
+  const nextDayIdx = days.findIndex(d => Number(d.day_number) > lastNum);
+  if (nextDayIdx !== -1) {
+    return nextDayIdx;
+  }
+
+  return 0;
+}
+
 export default function UserToday({ mockPayload = null } = {}) {
   const navigate = useNavigate();
 
@@ -25,7 +50,16 @@ export default function UserToday({ mockPayload = null } = {}) {
   const [errorMessage, setErrorMessage] = useState(null);
   const [payload, setPayload] = useState(mockPayload);
   const [activeTab, setActiveTab] = useState('training'); // 'training' | 'nutrition'
-  const [selectedDayIdx, setSelectedDayIdx] = useState(0);
+
+  const initialDayIdx = useMemo(() => {
+    if (!mockPayload) return 0;
+    const days = mockPayload.training?.days || [];
+    const workouts = mockPayload.activity_today?.completed_workouts || [];
+    const lastDay = workouts[0]?.day_number;
+    return calculateNextDayIndex(days, lastDay);
+  }, [mockPayload]);
+
+  const [selectedDayIdx, setSelectedDayIdx] = useState(initialDayIdx);
   const [selectedMenuIdx, setSelectedMenuIdx] = useState(0);
 
   // Status de check-in de hoje
@@ -88,8 +122,35 @@ export default function UserToday({ mockPayload = null } = {}) {
         }
 
         setPayload(data);
-        setCompletedWorkouts(data.activity_today?.completed_workouts || []);
+        const todayWorkouts = data.activity_today?.completed_workouts || [];
+        setCompletedWorkouts(todayWorkouts);
         setCompletedMeals(data.activity_today?.completed_meals || []);
+
+        // Define o dia padrão ao abrir: o PRÓXIMO dia depois do último concluído
+        let lastCompletedDay = todayWorkouts[0]?.day_number;
+
+        // Se nenhum treino foi concluído hoje, busca o último treino histórico no banco
+        if (lastCompletedDay == null && session?.user?.id) {
+          try {
+            const { data: lastWk } = await supabase
+              .from('completed_workouts')
+              .select('day_number')
+              .eq('user_id', session.user.id)
+              .order('completed_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (lastWk?.day_number != null) {
+              lastCompletedDay = lastWk.day_number;
+            }
+          } catch (e) {
+            // Silencioso em caso de falha de rede/permissão na consulta auxiliar
+          }
+        }
+
+        const days = data.training?.days || [];
+        const nextDayIdx = calculateNextDayIndex(days, lastCompletedDay);
+        setSelectedDayIdx(nextDayIdx);
 
       } catch (err) {
         if (!cancelled) {
@@ -137,6 +198,14 @@ export default function UserToday({ mockPayload = null } = {}) {
     if (!activeDay || isWorkoutCompletedToday) return;
 
     setCheckinError(null);
+
+    // Se o aluno já concluiu qualquer treino hoje, solicita confirmação amigável antes de registrar outra sessão
+    if (completedWorkouts.length > 0) {
+      const confirmAnother = window.confirm('Você já concluiu um treino hoje, deseja registrar outro?');
+      if (!confirmAnother) {
+        return;
+      }
+    }
 
     const planId = payload?.training?.id || null;
     if (!planId) {
@@ -472,6 +541,18 @@ export default function UserToday({ mockPayload = null } = {}) {
                           <div className="exercise-instructions">
                             {ex.instruction_ptbr}
                           </div>
+                        )}
+
+                        {/* Botão de vídeo visível com rótulo "▶ Ver vídeo" como no Dashboard */}
+                        {ex.video_url && (
+                          <button
+                            type="button"
+                            className="exercise-video-btn"
+                            onClick={() => setActiveVideo({ url: ex.video_url, title: ex.name_ptbr })}
+                            aria-label={`Ver vídeo de ${ex.name_ptbr}`}
+                          >
+                            <span aria-hidden="true" style={{ fontSize: '10px' }}>▶</span> Ver vídeo
+                          </button>
                         )}
                       </div>
 
