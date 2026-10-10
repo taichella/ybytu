@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { readFunctionError } from '../lib/functionError';
 import YbytuLogo from './YbytuLogo';
 import {
   ALL_COUNTRIES,
@@ -130,12 +131,16 @@ export default function UserAuth() {
         body: { identifier, method: activeMethod },
       });
 
-      // Trata erros de function (HTTP != 2xx) e erros com HTTP 200 { success: false }
+      // Trata erros de function (HTTP != 2xx) e erros com HTTP 200 { success: false }.
+      // Em não-2xx o motivo real ({ error, message }) só existe no corpo da
+      // resposta -- readFunctionError lê; error.message é sempre genérico.
       if (error || (data && data.success === false)) {
-        let msg = data?.message || data?.error || error?.message || 'Falha ao solicitar código. Tente novamente.';
-        
-        // Se a mensagem indicar falha no envio do WhatsApp
-        if (data?.error === 'whatsapp_send_failed' || (error && error.message?.includes('502'))) {
+        const { body, httpStatus } = error ? await readFunctionError(error) : { body: null, httpStatus: null };
+        const info = body || data;
+        let msg = info?.message || 'Falha ao solicitar código. Tente novamente.';
+
+        // Falha no envio do WhatsApp (502): oferece o e-mail
+        if (info?.error === 'whatsapp_send_failed' || httpStatus === 502) {
           setWhatsappFailed(true);
           msg = 'Não foi possível entregar o código pelo WhatsApp. Experimente solicitar por e-mail.';
         }
@@ -182,8 +187,9 @@ export default function UserAuth() {
 
       // Trata erros com HTTP 200 success: false ou códigos de erro HTTP
       if (error || (data && data.success === false)) {
-        const msg = data?.message || data?.error || error?.message || 'Código inválido ou expirado.';
-        setErrorMessage(msg);
+        const { body } = error ? await readFunctionError(error) : { body: null };
+        const info = body || data;
+        setErrorMessage(info?.message || 'Não foi possível validar o código. Tente novamente.');
         return;
       }
 
