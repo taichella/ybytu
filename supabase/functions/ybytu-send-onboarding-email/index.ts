@@ -223,6 +223,22 @@ serve(async (req) => {
 
     const resendBody = await resendResponse.json().catch(() => null)
 
+    // Registro em email_notifications (2026-10-11), igual aos outros envios
+    // por e-mail: uma falha aqui entra no alerta de hora em hora. Envio direto
+    // (não _shared/email.ts) só por causa do reply_to.
+    try {
+      await supabase.from('email_notifications').insert({
+        user_id: userId,
+        kind: 'user_onboarding_received',
+        to_email: email,
+        status: resendResponse.ok ? 'sent' : 'failed',
+        provider_id: resendBody?.id ?? null,
+        error: resendResponse.ok ? null : `resend_${resendResponse.status}: ${resendBody?.message ?? resendBody?.name ?? 'sem detalhe'}`,
+      })
+    } catch (logErr) {
+      console.error('Falha ao gravar log em email_notifications:', logErr)
+    }
+
     if (!resendResponse.ok) {
       console.error('Erro retornado pelo Resend:', resendResponse.status, JSON.stringify(resendBody))
       return new Response(JSON.stringify({ error: `resend_error_${resendResponse.status}` }), {

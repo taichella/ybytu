@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { pendingReviewsService } from '../services/pendingReviewsService.js';
 import { campaignStatsService } from '../services/campaignStatsService.js';
+import { StaffContext } from '../lib/staffContextCore';
 
 export default function Campaign() {
+  const staff = useContext(StaffContext);
+  const isAdmin = staff?.roles?.includes('admin');
   const [pending, setPending] = useState([]);
   const [pendingLoading, setPendingLoading] = useState(true);
   const [pendingError, setPendingError] = useState(null);
@@ -134,6 +137,12 @@ export default function Campaign() {
               <p style={{ margin: 0, fontWeight: 800, fontSize: '14px' }}>Ver planos que falharam</p>
               <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Lista com o motivo real do erro e botão de tentar de novo</p>
             </Link>
+            {isAdmin && (
+              <Link to="/campaign/email-alerts" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '18px', textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                <p style={{ margin: 0, fontWeight: 800, fontSize: '14px' }}>Envio de e-mails</p>
+                <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Falhas do Resend e alunos com plano aprovado sem o link</p>
+              </Link>
+            )}
             <Link to="/campaign/invite-staff" style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', padding: '18px', textDecoration: 'none', color: 'inherit', display: 'block' }}>
               <p style={{ margin: 0, fontWeight: 800, fontSize: '14px' }}>Convidar profissional</p>
               <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>Gera o link de convite (personal/nutricionista/admin)</p>

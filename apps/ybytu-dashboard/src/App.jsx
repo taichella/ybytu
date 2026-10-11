@@ -32,6 +32,7 @@ const Account = lazy(() => import('./components/Account'));
 const Tags = lazy(() => import('./components/Tags'));
 const SharedPlan = lazy(() => import('./components/SharedPlan'));
 const FailedPlans = lazy(() => import('./components/FailedPlans'));
+const EmailAlerts = lazy(() => import('./components/EmailAlerts'));
 const InviteStaff = lazy(() => import('./components/InviteStaff'));
 const More = lazy(() => import('./components/More'));
 
@@ -66,6 +67,8 @@ function App() {
 
             <Route element={<ProtectedRoute allowedRoles={['admin']} fallback="/dashboard" />}>
               <Route path="/campaign/invite-staff" element={<InviteStaff />} />
+              {/* Admin-only: mostra e-mail de aluno e de staff (2026-10-11). */}
+              <Route path="/campaign/email-alerts" element={<EmailAlerts />} />
             </Route>
 
             {/* Rotas de Treino (Admin ou Personal) */}

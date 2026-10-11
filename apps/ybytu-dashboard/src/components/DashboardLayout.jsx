@@ -1,9 +1,46 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import MobileNav from './MobileNav';
 import { supabase } from '../lib/supabase';
 import { StaffProvider } from '../lib/StaffContext';
+import { emailHealthService } from '../services/emailHealthService.js';
+
+const EMAIL_HEALTH_REFRESH_MS = 5 * 60_000;
+
+// Banner vermelho de falha de e-mail (2026-10-11): o e-mail é o caminho
+// crítico com o WhatsApp fora, e uma falha do Resend não pode ficar
+// invisível como ficou a do WhatsApp. Só para admin (a function exige o
+// papel). Erro ao consultar não mostra banner -- não é a falha que ele vigia.
+function EmailHealthBanner() {
+  const [health, setHealth] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => emailHealthService.get()
+      .then((data) => { if (!cancelled) setHealth(data); })
+      .catch(() => {});
+    load();
+    const timer = setInterval(load, EMAIL_HEALTH_REFRESH_MS);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, []);
+
+  const failures = health?.recent_failures?.length ?? 0;
+  const students = health?.students_without_link?.length ?? 0;
+  if (!health || (!health.open_alert && failures === 0 && students === 0)) return null;
+
+  const parts = [];
+  if (failures) parts.push(`${failures} envio(s) de e-mail com falha nas últimas ${health.failure_window_hours}h`);
+  if (students) parts.push(`${students} aluno(s) com plano aprovado sem o link`);
+  if (parts.length === 0) parts.push('incidente de e-mail ainda aberto, aguardando a próxima verificação');
+
+  return (
+    <div role="alert" style={{ background: '#dc2626', color: '#fff', padding: '10px 16px', fontSize: '13px', fontWeight: 700, display: 'flex', gap: '12px', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+      <span>⚠️ Falha no envio de e-mails: {parts.join(' e ')}.</span>
+      <Link to="/campaign/email-alerts" style={{ color: '#fff', textDecoration: 'underline', whiteSpace: 'nowrap' }}>Ver detalhes</Link>
+    </div>
+  );
+}
 
 // Guard real das rotas do painel. Antes disso não havia checagem nenhuma
 // aqui (era só <Sidebar/><Outlet/><MobileNav/> — o comentário "rotas
@@ -63,6 +100,7 @@ export default function DashboardLayout() {
       <div className="yb-shell" style={{ display: 'flex', height: '100vh', width: '100%', overflow: 'hidden', background: 'var(--bg)', color: 'var(--text)' }}>
         <Sidebar />
         <div className="yb-main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+          {staff?.roles?.includes('admin') && <EmailHealthBanner />}
           <Outlet />
         </div>
         <MobileNav />

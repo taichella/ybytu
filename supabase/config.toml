@@ -437,6 +437,14 @@ enabled = true
 verify_jwt = false
 entrypoint = "./functions/ybytu-plan-review-reminder-cron/index.ts"
 
+# Cron de saúde do e-mail (2026-10-11): pg_cron chama com INTERNAL_FUNCTION_SECRET,
+# não um JWT -- mesma razão do reminder-cron acima. Autenticação real dentro
+# da function (isInternalServiceCall).
+[functions.ybytu-email-health-cron]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-email-health-cron/index.ts"
+
 # Mesma razão das 3 acima: além do JWT normal do aluno, estas duas aceitam
 # uma chamada interna (ybytu-admin-retry-plan-generation) com
 # INTERNAL_FUNCTION_SECRET no Authorization -- não é um JWT, o gateway

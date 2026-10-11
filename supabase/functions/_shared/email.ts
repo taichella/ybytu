@@ -19,12 +19,16 @@ export type EmailKind =
   | 'staff_review_pending'
   | 'staff_review_reminder'
   | 'admin_new_onboarding'
+  | 'user_login_code'
+  | 'user_onboarding_received'
+  | 'admin_email_alert'
 
 export async function sendEmail(
   supabase: SupabaseClient,
-  params: { userId: string | null; kind: EmailKind; to: string; subject: string; html: string },
+  // from: remetente diferente do padrão (ex. o código de login sai de auth@).
+  params: { userId: string | null; kind: EmailKind; to: string; subject: string; html: string; from?: string },
 ): Promise<{ ok: boolean; error?: string; providerId?: string }> {
-  const result = await doSend(params.to, params.subject, params.html)
+  const result = await doSend(params.from ?? EMAIL_FROM, params.to, params.subject, params.html)
 
   try {
     await supabase.from('email_notifications').insert({
@@ -43,7 +47,7 @@ export async function sendEmail(
   return result
 }
 
-async function doSend(to: string, subject: string, html: string): Promise<{ ok: boolean; error?: string; providerId?: string }> {
+async function doSend(from: string, to: string, subject: string, html: string): Promise<{ ok: boolean; error?: string; providerId?: string }> {
   const apiKey = Deno.env.get('RESEND_API_KEY')
   if (!apiKey) return { ok: false, error: 'missing_resend_api_key' }
   if (!to) return { ok: false, error: 'missing_recipient' }
@@ -52,7 +56,7 @@ async function doSend(to: string, subject: string, html: string): Promise<{ ok: 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: EMAIL_FROM, to: [to], subject, html }),
+      body: JSON.stringify({ from, to: [to], subject, html }),
     })
     const body = await res.json().catch(() => null)
     if (!res.ok) return { ok: false, error: `resend_${res.status}: ${body?.message ?? body?.name ?? 'sem detalhe'}` }

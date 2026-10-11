@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendWhatsAppTemplate } from '../_shared/whatsapp.ts'
+import { sendEmail } from '../_shared/email.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
 
 // ============================================================================
@@ -407,26 +408,17 @@ serve(async (req) => {
           </div>
         `
 
-        const resendRes = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${resendApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: 'Ybytu <auth@send.ybytu.app>',
-            to: [targetEmail],
-            subject: `Seu código de acesso: ${otpCode}`,
-            html: emailHtml,
-          }),
-        }).catch((err) => {
-          console.error('Falha de rede ao chamar Resend:', err)
-          return null
+        // Via _shared/email.ts (2026-10-11): o envio fica em email_notifications
+        // e uma falha entra no alerta de hora em hora. A resposta ao app
+        // continua cega (mesmo payload com ou sem falha).
+        await sendEmail(supabase, {
+          userId: targetUserId,
+          kind: 'user_login_code',
+          to: targetEmail,
+          from: 'Ybytu <auth@send.ybytu.app>',
+          subject: `Seu código de acesso: ${otpCode}`,
+          html: emailHtml,
         })
-
-        if (!resendRes || !resendRes.ok) {
-          console.error('Erro ao enviar e-mail via Resend:', resendRes ? await resendRes.text() : 'network_error')
-        }
       } else {
         console.warn('RESEND_API_KEY não configurada para envio de OTP por e-mail.')
       }
