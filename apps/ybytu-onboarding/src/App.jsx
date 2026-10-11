@@ -21,6 +21,44 @@ import {
   getCountryPlaceholder,
 } from './lib/phone.js';
 
+// Ordem das opções das listas vindas do banco (decisão da Taina, 2026-10-11):
+// "Nenhuma"/"Nenhum" primeiro, "Outra"/"Outra limitação"/"Outros" em segundo,
+// o restante em ordem alfabética (pt-BR, sem diferenciar acento/maiúscula).
+// Substitui a ordem por sort_order. Rótulos do banco têm espaço sobrando nas
+// pontas (" Como de tudo"), por isso o trim.
+function optionRank(label) {
+  const l = label.trim().toLowerCase();
+  if (l.startsWith('nenhum')) return 0;
+  if (l.startsWith('outr')) return 1;
+  return 2;
+}
+function sortCatalogOptions(options) {
+  return [...options].sort((a, b) => {
+    const la = String(a.name_ptbr || '');
+    const lb = String(b.name_ptbr || '');
+    return optionRank(la) - optionRank(lb) || la.trim().localeCompare(lb.trim(), 'pt-BR', { sensitivity: 'base' });
+  });
+}
+
+// Exceção (mesma decisão): perguntas que são ESCALA não vão para a ordem
+// alfabética. activity_levels já vem na ordem natural pelo sort_order;
+// exercise_levels tem sort_order fora de ordem no banco (Iniciante, Avançado,
+// Intermediário), então a ordem vai explícita aqui.
+const SCALE_ORDER = {
+  activity_levels: null, // mantém sort_order (Sedentário → Muito Ativo)
+  exercise_levels: ['iniciante', 'intermediário', 'avançado'],
+};
+function orderOptionsForTable(table, options) {
+  if (!(table in SCALE_ORDER)) return sortCatalogOptions(options);
+  const order = SCALE_ORDER[table];
+  if (!order) return options;
+  const pos = (o) => {
+    const i = order.indexOf(String(o.name_ptbr || '').trim().toLowerCase());
+    return i === -1 ? order.length : i;
+  };
+  return [...options].sort((a, b) => pos(a) - pos(b));
+}
+
 const SUBSCRIPTION_PLANS = {
   TRAINING: '3a5ccc00-77ed-4b87-8e83-bc35be63a862',
   MEAL: '7458939c-ed4b-4a16-960e-b647f94e6a9b',
@@ -385,7 +423,7 @@ export default function App() {
                   (o) => !REDUNDANT_WITH_PREFERENCE.includes(String(o.name_ptbr || '').trim().toLowerCase())
                 );
               }
-              return { ...step, options: mapped };
+              return { ...step, options: orderOptionsForTable(step.table, mapped) };
             }
             return step;
           })
