@@ -1,7 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { resolveR2Media } from '../lib/media';
 
 export default function UserVideoModal({ videoUrl, title, onClose }) {
+  // Falha ao carregar/decodificar (ex.: vídeo 4K que o celular não decodifica,
+  // link de Drive): sem isso o <video> fica uma tela preta, sem explicação.
+  const [failed, setFailed] = useState(false);
+
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape') onClose();
@@ -31,16 +35,23 @@ export default function UserVideoModal({ videoUrl, title, onClose }) {
             </svg>
           </button>
         </div>
-        <video
-          src={fullUrl}
-          className="video-player-frame"
-          controls
-          playsInline
-          autoPlay
-          muted
-        >
-          Seu navegador não suporta a reprodução deste vídeo.
-        </video>
+        {failed ? (
+          <div className="video-modal-error" role="alert">
+            Não foi possível reproduzir este vídeo neste aparelho. Siga a instrução escrita do exercício.
+          </div>
+        ) : (
+          <video
+            src={fullUrl}
+            className="video-player-frame"
+            controls
+            playsInline
+            onError={() => setFailed(true)}
+            autoPlay
+            muted
+          >
+            Seu navegador não suporta a reprodução deste vídeo.
+          </video>
+        )}
       </div>
     </div>
   );

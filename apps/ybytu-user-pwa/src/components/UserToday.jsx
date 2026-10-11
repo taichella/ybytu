@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { thumbSources } from '../lib/media';
+import { readFunctionError } from '../lib/functionError';
 import ExerciseThumb from './ExerciseThumb';
 import YbytuLogo from './YbytuLogo';
 import UserVideoModal from './UserVideoModal';
@@ -41,6 +42,32 @@ function calculateNextDayIndex(days, lastCompletedDayNumber) {
   }
 
   return 0;
+}
+
+/**
+ * Traduz o erro de um check-in (insert direto no banco via PostgREST) para o
+ * aluno. Antes, a tela mostrava o texto cru do banco ("JWT expired",
+ * "new row violates row-level security policy", "meal_slot_not_found").
+ * kind 'session_expired' -> quem chama manda para o login.
+ */
+function describeCheckinError(err) {
+  const code = err?.code || '';
+  const message = err?.message || '';
+  if (code === 'PGRST301' || code === 'PGRST303' || /jwt/i.test(message)) {
+    return { kind: 'session_expired', text: 'Sua sessão expirou. Entre de novo para registrar.' };
+  }
+  // Trigger da migration 20261004120000: a posição não existe mais no cardápio
+  // (o plano foi editado com a tela aberta).
+  if (message.includes('meal_slot_not_found')) {
+    return { kind: 'plan_changed', text: 'Seu cardápio foi atualizado, recarregue a página.' };
+  }
+  if (code === '42501') {
+    return { kind: 'forbidden', text: 'Não foi possível registrar neste plano. Recarregue a página; se continuar, fale com o suporte.' };
+  }
+  if (err instanceof TypeError || /failed to fetch|network/i.test(message)) {
+    return { kind: 'network', text: 'Sem conexão com o servidor. Confira sua internet e tente de novo.' };
+  }
+  return { kind: 'unknown', text: 'Não foi possível registrar agora. Tente de novo em instantes.' };
 }
 
 export default function UserToday({ mockPayload = null } = {}) {
@@ -116,8 +143,12 @@ export default function UserToday({ mockPayload = null } = {}) {
 
         // Trata qualquer erro (mesmo com HTTP 200 e success: false)
         if (error || !data || data.success === false || data.error) {
-          const msg = data?.message || data?.error || error?.message || 'Não foi possível carregar seu plano no momento.';
-          setErrorMessage(msg);
+          // Não-2xx: o motivo ({ error, message }) está no corpo da resposta;
+          // error.message é sempre o genérico "non-2xx" (mesmo conserto do login).
+          const { body } = error ? await readFunctionError(error) : { body: null };
+          if (cancelled) return;
+          const info = body || data;
+          setErrorMessage(info?.message || 'Não foi possível carregar seu plano no momento. Tente novamente em instantes.');
           return;
         }
 
@@ -224,7 +255,13 @@ export default function UserToday({ mockPayload = null } = {}) {
 
       setCompletedWorkouts(prev => [inserted, ...prev]);
     } catch (err) {
-      setCheckinError(`Erro ao registrar check-in: ${err?.message || 'Tente novamente.'}`);
+      const { kind, text } = describeCheckinError(err);
+      if (kind === 'session_expired') {
+        await supabase.auth.signOut();
+        navigate('/login', { replace: true });
+        return;
+      }
+      setCheckinError(`Treino não registrado. ${text}`);
     } finally {
       setCheckingInWorkout(false);
     }
@@ -268,7 +305,13 @@ export default function UserToday({ mockPayload = null } = {}) {
 
       setCompletedMeals(prev => [inserted, ...prev]);
     } catch (err) {
-      setCheckinError(`Erro ao marcar refeição: ${err?.message || 'Tente novamente.'}`);
+      const { kind, text } = describeCheckinError(err);
+      if (kind === 'session_expired') {
+        await supabase.auth.signOut();
+        navigate('/login', { replace: true });
+        return;
+      }
+      setCheckinError(kind === 'plan_changed' ? text : `Refeição não registrada. ${text}`);
     } finally {
       setCheckingInMeal(prev => ({ ...prev, [mealKey]: false }));
     }

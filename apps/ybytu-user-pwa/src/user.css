@@ -524,6 +524,14 @@
   background: #000000;
 }
 
+.video-modal-error {
+  padding: 32px 20px;
+  color: #FFFFFF;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
 /* Feedback de Erro Visível (HTTP 200 success:false ou 4xx/5xx) */
 .user-error-banner {
   background: rgba(239, 68, 68, 0.1);
