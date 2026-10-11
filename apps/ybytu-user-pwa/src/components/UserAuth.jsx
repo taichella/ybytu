@@ -13,12 +13,19 @@ import '../user.css';
 
 const WHATSAPP_SUPPORT_NUMBER = '5511955026812';
 
+// Login por código no WhatsApp DESLIGADO (2026-10-11, decisão da Taina): a Meta
+// aceita o envio mas não entrega (131042, conta com pagamento pendente), então o
+// aluno ficava esperando um código que nunca chega. E-mail (Resend) vira o único
+// caminho na tela. O fluxo de WhatsApp continua no código; para religar, true.
+// O link de suporte no rodapé (wa.me) é conversa humana, não depende da API.
+const WHATSAPP_LOGIN_ENABLED = false;
+
 export default function UserAuth() {
   const navigate = useNavigate();
 
   // Estados do fluxo
   const [step, setStep] = useState('request'); // 'request' | 'verify'
-  const [method, setMethod] = useState('whatsapp'); // 'whatsapp' | 'email'
+  const [method, setMethod] = useState(WHATSAPP_LOGIN_ENABLED ? 'whatsapp' : 'email'); // 'whatsapp' | 'email'
   const [phone, setPhone] = useState('');
   const [countryIso, setCountryIso] = useState('BR');
   const [countryPickerOpen, setCountryPickerOpen] = useState(false);
@@ -350,7 +357,7 @@ export default function UserAuth() {
             </button>
 
             {/* Alternância de método (WhatsApp vs E-mail) */}
-            <div style={{ textAlign: 'center', paddingTop: '4px' }}>
+            {WHATSAPP_LOGIN_ENABLED && <div style={{ textAlign: 'center', paddingTop: '4px' }}>
               {method === 'whatsapp' ? (
                 <button
                   type="button"
@@ -368,7 +375,7 @@ export default function UserAuth() {
                   Voltar e receber pelo WhatsApp
                 </button>
               )}
-            </div>
+            </div>}
           </div>
         )}
 
@@ -440,7 +447,7 @@ export default function UserAuth() {
                 onClick={() => { setStep('request'); setErrorMessage(null); }}
                 style={{ background: 'transparent', border: 'none', color: 'var(--yb-muted, #718096)', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
               >
-                Trocar número ou e-mail
+                {WHATSAPP_LOGIN_ENABLED ? 'Trocar número ou e-mail' : 'Trocar e-mail'}
               </button>
             </div>
           </div>
