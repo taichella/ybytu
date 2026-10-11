@@ -19,7 +19,6 @@ import {
   parsePhoneNumberFromString,
   getPhoneValidation,
   getCountryPlaceholder,
-  maskPhone,
 } from './lib/phone.js';
 
 const SUBSCRIPTION_PLANS = {
@@ -681,19 +680,21 @@ export default function App() {
             </div>
 
             <div className="conf-whatsapp-recap">
-              <div className="label">Vamos te avisar pelo WhatsApp</div>
+              {/* 2026-10-11: o link do plano vai por e-mail (WhatsApp fora do caminho
+                  crítico, ver docs/POS_PILOTO.md). O telefone continua obrigatório. */}
+              <div className="label">Vamos te enviar o link do plano por e-mail</div>
               <div className="phone-row">
-                <span>{maskPhone(finished.whatsappPhone)}</span>
+                <span>{finished.email}</span>
                 <span>·</span>
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-                    `Olá, sou ${finished.firstName} -- o número de WhatsApp que cadastrei está errado, poderiam me ajudar a corrigir?`
+                    `Olá, sou ${finished.firstName} -- o e-mail que cadastrei está errado, poderiam me ajudar a corrigir?`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="fix-link"
                 >
-                  Número errado? Fale com a gente
+                  E-mail errado? Fale com a gente
                 </a>
               </div>
             </div>
@@ -709,8 +710,7 @@ export default function App() {
               <div style={{ fontWeight: 700, color: 'var(--yb-text)', marginBottom: '4px' }}>
                 Não recebeu o link dentro do prazo?
               </div>
-              Confira se o número do WhatsApp está correto acima
-              {finished.emailSent ? ' e olhe sua caixa de spam no e-mail' : ''}. Se ainda assim não chegar, fale com a gente pelo WhatsApp abaixo.
+              Confira se o e-mail está correto acima e olhe sua caixa de spam. Se ainda assim não chegar, fale com a gente pelo WhatsApp abaixo.
             </div>
 
             <button type="button" onClick={openTeamWhatsApp} className="btn-team-wa">
@@ -806,7 +806,7 @@ export default function App() {
                       if (!answers.whatsapp_phone || !answers.whatsapp_phone.trim()) {
                         return (
                           <div className="phone-feedback neutral">
-                            Informe seu DDD e número de celular para receber o plano por WhatsApp.
+                            Informe seu DDD e número de celular.
                           </div>
                         );
                       }
@@ -835,7 +835,7 @@ export default function App() {
                       }
                       return (
                         <div className="phone-feedback neutral">
-                          Informe seu DDD e número de celular para receber o plano por WhatsApp.
+                          Informe seu DDD e número de celular.
                         </div>
                       );
                     })()}

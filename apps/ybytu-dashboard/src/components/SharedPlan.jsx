@@ -90,7 +90,7 @@ export default function SharedPlan() {
       }}>
         <h1 style={{ fontSize: '18px', fontWeight: 800, color: '#121826', margin: 0 }}>Seu plano está em revisão</h1>
         <p style={{ fontSize: '14px', color: '#697586', margin: 0, maxWidth: '360px' }}>
-          Nossos profissionais estão revisando seu plano. Você recebe uma mensagem no WhatsApp assim que ele for liberado.
+          Nossos profissionais estão revisando seu plano. Você recebe o link por e-mail assim que ele for liberado.
         </p>
       </div>
     );

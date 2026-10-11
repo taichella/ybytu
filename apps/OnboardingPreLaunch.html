@@ -959,11 +959,11 @@
               </div>
 
               <div className="border-t border-borderColor pt-5 mb-4">
-                <p className="m-0 mb-1 text-xs text-textMuted font-bold uppercase tracking-wide">Vamos te avisar pelo WhatsApp</p>
+                <p className="m-0 mb-1 text-xs text-textMuted font-bold uppercase tracking-wide">Vamos te enviar o link do plano por e-mail</p>
                 <p className="m-0 text-sm">
-                  {maskPhone(finished.whatsappPhone)}
+                  {finished.email}
                   {' · '}
-                  <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Olá, sou ${finished.firstName} -- o número de WhatsApp que cadastrei está errado, poderiam me ajudar a corrigir?`)}`} target="_blank" rel="noopener" className="text-brand font-bold no-underline">Número errado? Fale com a gente</a>
+                  <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Olá, sou ${finished.firstName} -- o e-mail que cadastrei está errado, poderiam me ajudar a corrigir?`)}`} target="_blank" rel="noopener" className="text-brand font-bold no-underline">E-mail errado? Fale com a gente</a>
                 </p>
               </div>
 
@@ -974,7 +974,7 @@
               <div className="bg-surface rounded-xl px-4 py-3">
                 <p className="m-0 mb-1 text-sm font-bold">Não recebeu o link dentro do prazo?</p>
                 <p className="m-0 text-sm text-textMuted leading-relaxed">
-                  Confira se o número do WhatsApp está correto acima{finished.emailSent ? ' e olhe sua caixa de spam no e-mail' : ''}. Se ainda assim não chegar, fale com a gente pelo WhatsApp da equipe abaixo.
+                  Confira se o e-mail está correto acima e olhe sua caixa de spam. Se ainda assim não chegar, fale com a gente pelo WhatsApp da equipe abaixo.
                 </p>
               </div>
             </div>
@@ -1062,7 +1062,7 @@
                         if (!answers.whatsapp_phone || !answers.whatsapp_phone.trim()) {
                           return (
                             <p className="text-textMuted text-xs mt-1.5 mb-0">
-                              Informe seu DDD e número de celular para receber o plano por WhatsApp.
+                              Informe seu DDD e número de celular.
                             </p>
                           );
                         }
@@ -1085,7 +1085,7 @@
                         }
                         return (
                           <p className="text-textMuted text-xs mt-1.5 mb-0">
-                            Informe seu DDD e número de celular para receber o plano por WhatsApp.
+                            Informe seu DDD e número de celular.
                           </p>
                         );
                       })()}

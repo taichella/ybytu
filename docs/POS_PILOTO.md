@@ -444,3 +444,37 @@ Opções, da menor para a maior:
 **Recomendação: B**, mais a decisão de produto que ela abre: **editar um plano já aprovado deve reabrir o parecer?**
 (ou pelo menos marcar "editado depois do parecer"). Sem isso, a versão guardada mostra o que mudou, mas o aluno
 continua vendo um plano "aprovado" que o profissional nunca viu.
+
+## 🔴 WhatsApp FORA por decisão — e-mail é o caminho crítico (decisão da Taina, 2026-10-11)
+
+**Por quê:** a conta da Meta ficou dias sem entregar e ninguém soube. O token deu `401` em algum momento entre 03/10
+(último envio com sucesso) e 10/10. Com o token novo, a Meta aceita o envio mas não entrega (`131042`, conta do WhatsApp
+Business com pagamento pendente, só visível no `delivery_status` do webhook). Nada no fluxo depende do WhatsApp que o
+e-mail não resolva.
+
+**O que o WhatsApp fazia e o que faz agora:**
+
+| Mensagem | Template Meta | Agora |
+|---|---|---|
+| Código de login do app | `ybytu_auth_otp` | Login só por e-mail (`WHATSAPP_LOGIN_ENABLED=false` em `apps/ybytu-user-pwa/src/components/UserAuth.jsx`) |
+| "Recebemos seu perfil" (aluno) | `WHATSAPP_TEMPLATE_USER_ONBOARDING_RECEIVED` | Já coberto pelo e-mail 03 (`ybytu-send-onboarding-email`) |
+| Novo aluno (vendas, `PHONE_ADMIN_SALE`) | `WHATSAPP_TEMPLATE_STAFF_NEW_ONBOARDING` | E-mail aos admins (`ybytu-notify-onboarding-received`) |
+| Parecer pendente + lembrete após 12h (`PHONE_ADMIN_TRAINER` / `PHONE_ADMIN_NUTRI`) | `WHATSAPP_TEMPLATE_STAFF_PLAN_READY` | E-mail (template 09) às contas de staff com o papel (`ybytu-notify-plan-ready`) |
+| Plano pronto + link (aluno) | `WHATSAPP_TEMPLATE_USER_PLAN_READY` | E-mail (template 04) com o link `/plano/<token>` (`ybytu-submit-plan-review` → `_shared/planReadyEmail.ts`) |
+
+Todo envio por e-mail fica em `email_notifications` (migration `20261011120000`). Os textos que prometiam WhatsApp ao
+aluno (e-mail 03, onboardings, "Plano em Preparação" do PWA, `/plano/` em revisão) dizem "você recebe o link por e-mail".
+O telefone continua obrigatório no onboarding: é o canal de volta.
+
+**⚠️ Destinatários provisórios:** os avisos ao staff vão para as contas de staff existentes, `contato+personal@ybytu.app` e
+`contato+nutri@ybytu.app` ("Personal Teste" / "Nutricionista Teste"). A Taina vai trocar pelos profissionais reais.
+
+**Para religar o WhatsApp:**
+1. Quitar o saldo pendente no Billing da conta WhatsApp Business (Meta Business → Faturamento) e conferir o cartão.
+2. Testar a entrega de verdade: um envio com `delivery_status = 'delivered'` em `whatsapp_notifications` (não basta
+   `status = 'sent'`, que só diz que a Meta aceitou).
+3. `WHATSAPP_ENABLED = true` em `supabase/functions/_shared/whatsapp.ts` e redeploy de `ybytu-submit-plan-review`,
+   `ybytu-notify-plan-ready` e `ybytu-notify-onboarding-received`. O e-mail continua junto (idempotência separada:
+   `user_plan_email_sent_at` vs `user_notified_ready_at`).
+4. Login: `WHATSAPP_LOGIN_ENABLED = true` no `UserAuth.jsx` e push do PWA.
+5. Antes de religar, ter o alerta de falha de entrega do WhatsApp (olhando `delivery_status`), senão repete o silêncio.
