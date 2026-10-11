@@ -2,7 +2,29 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
-import { sendWhatsAppTemplate } from '../_shared/whatsapp.ts'
+import { sendWhatsAppTemplate, WHATSAPP_ENABLED } from '../_shared/whatsapp.ts'
+import { escapeHtml, renderTemplate, sendEmail, staffRecipientsForRole } from '../_shared/email.ts'
+import { REVIEW_PENDING_HTML } from '../_shared/emailTemplates.ts'
+
+// Desde 2026-10-11 o aviso vai por E-MAIL para as contas de staff ativas com o
+// papel pendente (staff_roles), no lugar do WhatsApp para o número fixo por
+// papel (PHONE_ADMIN_*), que só roda com WHATSAPP_ENABLED. Mesma regra de
+// quando avisar: 'initial' uma vez, 'reminder' uma vez depois de 12h (o cron
+// decide). Template emails/09, com texto próprio para cada modo.
+const REVIEW_BASE_URL = 'https://pro.ybytu.app/review/'
+const MODULE_LABEL: Record<string, string> = { personal: 'Treino', nutricionista: 'Nutrição' }
+const EMAIL_TEXT = {
+  initial: {
+    headline: 'Plano de aluno aguarda sua validação',
+    intro: 'Um novo plano individualizado foi montado e está aguardando a sua revisão e o seu parecer.',
+    subject: (student: string) => `Novo plano aguardando seu parecer: ${student}`,
+  },
+  reminder: {
+    headline: 'Lembrete: plano aguardando seu parecer',
+    intro: 'Este plano foi montado há mais de 12 horas e ainda aguarda o seu parecer. O aluno só recebe o link do plano depois da aprovação.',
+    subject: (student: string) => `Lembrete: o plano de ${student} aguarda seu parecer`,
+  },
+}
 
 // Avisa os profissionais (personal/nutricionista) que ainda faltam dar
 // parecer num plano recém-gerado. Duas formas de chamar:
@@ -96,8 +118,41 @@ serve(async (req) => {
       })
     }
 
-    const templateId = Deno.env.get('WHATSAPP_TEMPLATE_STAFF_PLAN_READY') ?? ''
     const notifiedRoles: string[] = []
+
+    // E-mail: um por pessoa -- quem tem os dois papéis pendentes recebe um só,
+    // com os dois módulos.
+    const studentName = profile.full_name ?? 'aluno(a)'
+    const byEmail = new Map<string, { fullName: string; roles: string[] }>()
+    for (const role of missingRoles) {
+      for (const r of await staffRecipientsForRole(supabase, role as 'personal' | 'nutricionista')) {
+        const entry = byEmail.get(r.email) ?? { fullName: r.fullName, roles: [] }
+        entry.roles.push(role)
+        byEmail.set(r.email, entry)
+      }
+    }
+    if (byEmail.size === 0) console.error(`Nenhum staff ativo com os papéis ${missingRoles.join(', ')}: aviso de parecer não enviado`)
+    const text = EMAIL_TEXT[mode]
+    for (const [email, { fullName, roles }] of byEmail) {
+      const html = renderTemplate(REVIEW_PENDING_HTML, {
+        reviewer_name: escapeHtml(fullName || 'profissional'),
+        headline: text.headline,
+        intro: text.intro,
+        student_name: escapeHtml(studentName),
+        pending_module: roles.map((r) => MODULE_LABEL[r]).join(' e '),
+        review_link: `${REVIEW_BASE_URL}${userId}`,
+      })
+      const result = await sendEmail(supabase, {
+        userId,
+        kind: mode === 'initial' ? 'staff_review_pending' : 'staff_review_reminder',
+        to: email,
+        subject: text.subject(studentName),
+        html,
+      })
+      if (result.ok) for (const r of roles) if (!notifiedRoles.includes(r)) notifiedRoles.push(r)
+    }
+
+    const templateId = Deno.env.get('WHATSAPP_TEMPLATE_STAFF_PLAN_READY') ?? ''
     // No pilot, PHONE_ADMIN_TRAINER e PHONE_ADMIN_NUTRI são o MESMO número
     // (a Taina cobre os dois papéis) -- sem dedupe, o profissional recebia o
     // mesmo template 2x seguidas (uma por papel pendente), parecendo bug de
@@ -112,7 +167,7 @@ serve(async (req) => {
     const dedupeDisabled = Deno.env.get('STAFF_PHONE_DEDUPE_DISABLED') === 'true'
     const notifiedPhones = new Set<string>()
 
-    for (const role of missingRoles) {
+    for (const role of WHATSAPP_ENABLED ? missingRoles : []) {
       const phone = Deno.env.get(ROLE_PHONE_ENV[role]) ?? ''
       if (!phone) {
         console.error(`Telefone não configurado pro papel ${role} (${ROLE_PHONE_ENV[role]})`)
@@ -133,7 +188,7 @@ serve(async (req) => {
       // /review/, o comentário estava desatualizado, nunca houve bug.
       const result = await sendWhatsAppTemplate(supabase, userId, phone, templateId, [profile.full_name ?? 'aluno(a)'], userId)
       if (result.ok) {
-        notifiedRoles.push(role)
+        if (!notifiedRoles.includes(role)) notifiedRoles.push(role)
         notifiedPhones.add(phone)
       } else console.error(`Falha ao notificar ${role}:`, result.error)
     }

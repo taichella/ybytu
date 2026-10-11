@@ -46,3 +46,26 @@ if [ "$SOURCE_NORM" != "$EMBEDDED_NORM" ]; then
 fi
 
 echo "OK: $SOURCE e o HTML embutido em $FUNCTION_FILE são idênticos."
+
+# Templates das notificações por e-mail (2026-10-11): ficam juntos em
+# _shared/emailTemplates.ts, um bloco por template, com a const na mesma linha
+# do backtick de abertura (`export const NOME = \`<!DOCTYPE ...`).
+SHARED_FILE="supabase/functions/_shared/emailTemplates.ts"
+check_shared_template() {
+  local source="$1" marker="$2"
+  if [ ! -f "$source" ]; then echo "ERRO: $source não existe." >&2; exit 1; fi
+  local embedded
+  embedded=$(awk "/\/\/ ${marker}_START/{flag=1; next} /\/\/ ${marker}_END/{flag=0} flag" "$SHARED_FILE" \
+    | sed -e '1s/^export const [A-Z_]* = `//' -e '$s/`$//')
+  local source_norm embedded_norm
+  source_norm=$(tr -d '\r' < "$source")
+  embedded_norm=$(printf '%s' "$embedded" | tr -d '\r')
+  if [ "$source_norm" != "$embedded_norm" ]; then
+    echo "BLOQUEADO: $source e o bloco $marker em $SHARED_FILE divergem." >&2
+    diff <(printf '%s' "$source_norm") <(printf '%s' "$embedded_norm") >&2 || true
+    exit 1
+  fi
+  echo "OK: $source e o bloco $marker em $SHARED_FILE são idênticos."
+}
+check_shared_template "emails/04-entrega-do-plano.html" "TEMPLATE_04"
+check_shared_template "emails/09-plano-aluno-a-validar.html" "TEMPLATE_09"

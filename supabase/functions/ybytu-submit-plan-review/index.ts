@@ -3,6 +3,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { getCurrentPlanCodes, getPlanApproval } from '../_shared/planApproval.ts'
+import { WHATSAPP_ENABLED } from '../_shared/whatsapp.ts'
+import { sendPlanReadyEmail } from '../_shared/planReadyEmail.ts'
 
 // Grava o parecer profissional (personal ou nutricionista) sobre o plano de
 // um usuário -- um por (user_id, role), UPDATE se já existir (ver migration
@@ -318,8 +320,21 @@ serve(async (req) => {
     // (anterior a 2026-08-27) não conta mais como aprovado.
     const approval = await getPlanApproval(supabase, userId)
     const readyToNotify = approval.approved
+    let userNotified = false
 
+    // Link do plano por e-mail -- caminho único desde 2026-10-11 (WhatsApp
+    // fora, ver _shared/whatsapp.ts). Falha de envio não derruba o parecer (já
+    // gravado): fica em email_notifications como 'failed' para o alerta.
     if (readyToNotify) {
+      try {
+        const emailResult = await sendPlanReadyEmail(supabase, userId, approval.requiredRoles)
+        userNotified = emailResult.ok && !emailResult.skipped
+      } catch (emailErr) {
+        console.error('Falha ao enviar e-mail de plano pronto:', emailErr)
+      }
+    }
+
+    if (readyToNotify && WHATSAPP_ENABLED) {
       const notifyResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/ybytu-send-user-whatsapp`, {
         method: 'POST',
         headers: {
@@ -333,7 +348,7 @@ serve(async (req) => {
       }
     }
 
-    return new Response(JSON.stringify({ ok: true, plan_approved: approval.approved, pending_roles: approval.pendingRoles, user_notified: readyToNotify }), {
+    return new Response(JSON.stringify({ ok: true, plan_approved: approval.approved, pending_roles: approval.pendingRoles, user_notified: userNotified }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {

@@ -1,5 +1,14 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// WhatsApp FORA do caminho crítico (decisão da Taina, 2026-10-11): a conta da
+// Meta ficou dias sem entregar (token 401 entre 03/10 e 10/10, depois 131042
+// pagamento pendente) sem ninguém saber. As notificações (plano pronto, parecer
+// pendente, novo aluno) vão por e-mail (_shared/email.ts); com isto false as
+// functions pulam o envio por WhatsApp sem apagar o código. Para religar ver
+// docs/POS_PILOTO.md ("WhatsApp fora por decisão"). O login por código no
+// WhatsApp é desligado à parte, no PWA (WHATSAPP_LOGIN_ENABLED em UserAuth.jsx).
+export const WHATSAPP_ENABLED = false
+
 // Envio de WhatsApp via Cloud API da Meta (não Salvy — a Salvy só fornece o
 // número virtual; o envio de fato é direto pro Graph API do WhatsApp
 // Business). Confirmado com o suporte da Salvy em 2026-08-06. Sempre por
