@@ -401,6 +401,17 @@ Para validar com o personal: (1) quantos dias sem registro já é motivo de aten
 (2) se o alerta deve contar dias corridos ou sessões perdidas na semana; (3) se "sem registro" no app deve aparecer
 como alerta, já que o aluno pode treinar sem marcar. Se aprovado, a faixa entra no desenho antes do código.
 
+## Dias com algum registro de refeição nos últimos 7 — ideia a validar com a nutricionista (2026-10-15)
+
+Par da faixa de adesão do treino acima. Se a nutricionista quiser um sinal de adesão alimentar no dashboard, a versão
+honesta é **quantos dos últimos 7 dias tiveram pelo menos uma refeição registrada** — não "refeições feitas de N" nem
+comparação com a meta de kcal, que ficaram fora por decisão (ver docs/PRINCIPIOS_DE_PRODUTO.md, "Dia sem registro não é
+dia sem comer").
+
+Para validar com a nutricionista: (1) se o sinal ajuda a decidir algo ou só gera ruído; (2) a partir de quantos dias sem
+registro vale atenção; (3) onde aparece (aba Atividade, lista de alunos ou os dois). Se aprovado, entra no desenho
+antes do código.
+
 ## Aviso de carga registrada muito acima da prescrita — ideia a validar com o personal (2026-10-04)
 
 Com o check-in por exercício (aprovado, ainda não construído), o aluno poderá registrar a carga que usou, campo

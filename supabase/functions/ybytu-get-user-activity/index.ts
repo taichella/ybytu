@@ -43,7 +43,7 @@ serve(async (req) => {
     // 1. Perfil para cruzar plano ativo e frequência combinada
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, current_training_plan_id, current_meal_plan_id, training_days_per_week')
+      .select('id, current_training_plan_id, current_meal_plan_id, training_days_per_week, timezone')
       .eq('id', userId)
       .maybeSingle()
 
@@ -78,7 +78,7 @@ serve(async (req) => {
     // cardápio atual: editar o cardápio troca o prato daquela posição.
     const { data: mealRows, error: mError } = await supabase
       .from('completed_meals')
-      .select('id, completed_at, meal_plan_id, day_order, meal_order, meal_name, meal_id, calories_consumed')
+      .select('id, completed_at, meal_plan_id, day_order, meal_order, meal_name, meal_id, calories_consumed, meals_planned')
       .eq('user_id', userId)
       .gte('completed_at', windowStart)
       .order('completed_at', { ascending: false })
@@ -138,7 +138,36 @@ serve(async (req) => {
       }
     })
 
-    return new Response(JSON.stringify({ summary, workouts, meals }), {
+    // Refeições agrupadas por DATA no fuso do aluno (2026-10-15). O "dia
+    // alimentar" é só esse agrupamento -- não existe registro de "dia
+    // concluído" (docs/PRINCIPIOS_DE_PRODUTO.md: dia sem registro não é dia
+    // sem comer). Só vêm os dias COM registro; a tela mostra os outros como
+    // "sem registros". planned = refeições do dia do cardápio no momento do
+    // registro (meals_planned; null nos registros antigos); se o aluno usou
+    // dias de cardápio diferentes na mesma data, vale o maior. kcal é só a
+    // soma do que foi registrado -- nunca comparar com a meta (decisão da
+    // Taina 2026-10-15).
+    let tz = 'America/Sao_Paulo'
+    if (profile.timezone) {
+      try {
+        new Intl.DateTimeFormat('en-US', { timeZone: profile.timezone })
+        tz = profile.timezone
+      } catch { /* fuso inválido: padrão */ }
+    }
+    const localDate = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' })
+    const dayMap = new Map<string, { date: string; registered: number; planned: number | null; kcal_registered: number; meal_ids: string[] }>()
+    for (const m of meals) {
+      const date = localDate.format(new Date(m.completed_at))
+      const d = dayMap.get(date) ?? { date, registered: 0, planned: null, kcal_registered: 0, meal_ids: [] }
+      d.registered += 1
+      if (m.meals_planned != null) d.planned = Math.max(d.planned ?? 0, m.meals_planned)
+      if (m.kcal != null) d.kcal_registered += Number(m.kcal)
+      d.meal_ids.push(m.id)
+      dayMap.set(date, d)
+    }
+    const meal_days = [...dayMap.values()].sort((a, b) => b.date.localeCompare(a.date))
+
+    return new Response(JSON.stringify({ summary, workouts, meals, meal_days, timezone: tz }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 
