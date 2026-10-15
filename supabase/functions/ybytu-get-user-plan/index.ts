@@ -136,7 +136,9 @@ serve(async (req) => {
     const trainingPlanUuid = (payload.training as { id?: string } | null)?.id ?? null
 
     // Marcação por exercício (2026-10-15, designs/AlunoTreinoCheckin.dc.html):
-    // marcações da sessão ABERTA neste plano (workout_id nulo) e a última carga
+    // marcações deste plano que estão na sessão ABERTA (workout_id nulo, de
+    // qualquer data) ou num treino fechado HOJE (para mostrar o ✓ e permitir
+    // reabrir, até 3h -- reopen_workout_session), e a última carga
     // que o aluno usou em cada exercício do plano (qualquer plano/data), para o
     // campo de carga vir preenchido.
     const planExerciseIds = [...new Set(
@@ -172,10 +174,10 @@ serve(async (req) => {
       trainingPlanUuid
         ? supabase
           .from('completed_exercises')
-          .select('id, day_number, exercise_id, load_kg, completed_at')
+          .select('id, day_number, exercise_id, load_kg, completed_at, workout_id')
           .eq('user_id', userId)
           .eq('training_plan_id', trainingPlanUuid)
-          .is('workout_id', null)
+          .or(`workout_id.is.null,completed_at.gte.${todayStartIso}`)
           .order('completed_at', { ascending: true })
         : Promise.resolve({ data: [] }),
       planExerciseIds.length
@@ -204,7 +206,7 @@ serve(async (req) => {
         completed_meals: mealsRes.data ?? [],
       },
       last_completed_workout: lastWorkoutRes.data ?? null,
-      open_exercise_marks: openMarksRes.data ?? [],
+      exercise_marks: openMarksRes.data ?? [],
       last_exercise_loads: lastLoads,
     }
 

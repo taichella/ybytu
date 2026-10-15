@@ -6,6 +6,8 @@ import { readFunctionError } from '../lib/functionError';
 import ExerciseThumb from './ExerciseThumb';
 import YbytuLogo from './YbytuLogo';
 import UserVideoModal from './UserVideoModal';
+import { useExerciseCheckin, SessionProgress, ExerciseCheckinCard, CheckinDialog, UndoToast } from './ExerciseCheckin';
+import { describeCheckinError } from '../lib/checkinErrors';
 import '../user.css';
 
 const MEAL_ICONS = {
@@ -78,32 +80,6 @@ function matchMealCheckins(meals, completedMeals, dayOrder) {
   return result;
 }
 
-/**
- * Traduz o erro de um check-in (insert direto no banco via PostgREST) para o
- * aluno. Antes, a tela mostrava o texto cru do banco ("JWT expired",
- * "new row violates row-level security policy", "meal_slot_not_found").
- * kind 'session_expired' -> quem chama manda para o login.
- */
-function describeCheckinError(err) {
-  const code = err?.code || '';
-  const message = err?.message || '';
-  if (code === 'PGRST301' || code === 'PGRST303' || /jwt/i.test(message)) {
-    return { kind: 'session_expired', text: 'Sua sessão expirou. Entre de novo para registrar.' };
-  }
-  // Trigger da migration 20261004120000: a posição não existe mais no cardápio
-  // (o plano foi editado com a tela aberta).
-  if (message.includes('meal_slot_not_found')) {
-    return { kind: 'plan_changed', text: 'Seu cardápio foi atualizado, recarregue a página.' };
-  }
-  if (code === '42501') {
-    return { kind: 'forbidden', text: 'Não foi possível registrar neste plano. Recarregue a página; se continuar, fale com o suporte.' };
-  }
-  if (err instanceof TypeError || /failed to fetch|network/i.test(message)) {
-    return { kind: 'network', text: 'Sem conexão com o servidor. Confira sua internet e tente de novo.' };
-  }
-  return { kind: 'unknown', text: 'Não foi possível registrar agora. Tente de novo em instantes.' };
-}
-
 export default function UserToday({ mockPayload = null } = {}) {
   const navigate = useNavigate();
 
@@ -126,7 +102,6 @@ export default function UserToday({ mockPayload = null } = {}) {
   // Status de check-in de hoje
   const [completedWorkouts, setCompletedWorkouts] = useState(mockPayload?.activity_today?.completed_workouts || []);
   const [completedMeals, setCompletedMeals] = useState(mockPayload?.activity_today?.completed_meals || []);
-  const [checkingInWorkout, setCheckingInWorkout] = useState(false);
   const [checkingInMeal, setCheckingInMeal] = useState({});
   const [checkinError, setCheckinError] = useState(null);
 
@@ -243,62 +218,30 @@ export default function UserToday({ mockPayload = null } = {}) {
     return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   }, [completedWorkouts, activeDay]);
 
-  // Check-in do Treino
-  const handleCheckinWorkout = async () => {
+  // Check-in do treino: marcação por exercício + "Concluir treino" (2026-10-15).
+  // As duas fecham a sessão pela mesma função do banco (close_workout_session),
+  // que liga as marcações abertas ao treino gravado. O aviso de 2ª sessão no
+  // dia virou diálogo do app (antes era window.confirm).
+  const checkin = useExerciseCheckin({
+    payload,
+    activeDay,
+    completedWorkouts,
+    setCompletedWorkouts,
+    onError: (text) => setCheckinError(`Treino não registrado. ${text}`),
+    onSessionExpired: async () => {
+      await supabase.auth.signOut();
+      navigate('/login', { replace: true });
+    },
+  });
+
+  const handleCheckinWorkout = () => {
     if (!activeDay || isWorkoutCompletedToday) return;
-
     setCheckinError(null);
-
-    // Se o aluno já concluiu qualquer treino hoje, solicita confirmação amigável antes de registrar outra sessão
-    if (completedWorkouts.length > 0) {
-      const confirmAnother = window.confirm('Você já concluiu um treino hoje, deseja registrar outro?');
-      if (!confirmAnother) {
-        return;
-      }
-    }
-
-    const planId = payload?.training?.id || null;
-    if (!planId) {
+    if (!payload?.training?.id) {
       setCheckinError('Não foi possível identificar o plano de treino ativo para registrar o check-in. Atualize a página e tente novamente.');
       return;
     }
-
-    setCheckingInWorkout(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/login');
-        return;
-      }
-
-      const dayNum = Number(activeDay.day_number);
-      const sessionTitle = activeDay.title_ptbr || activeDay.region_label_ptbr || `Treino Dia ${dayNum}`;
-
-      const { data: inserted, error: insertErr } = await supabase
-        .from('completed_workouts')
-        .insert({
-          user_id: user.id,
-          training_plan_id: planId,
-          day_number: dayNum,
-          session_name: sessionTitle,
-        })
-        .select('id, day_number, session_name, completed_at')
-        .single();
-
-      if (insertErr) throw insertErr;
-
-      setCompletedWorkouts(prev => [inserted, ...prev]);
-    } catch (err) {
-      const { kind, text } = describeCheckinError(err);
-      if (kind === 'session_expired') {
-        await supabase.auth.signOut();
-        navigate('/login', { replace: true });
-        return;
-      }
-      setCheckinError(`Treino não registrado. ${text}`);
-    } finally {
-      setCheckingInWorkout(false);
-    }
+    checkin.closeSession();
   };
 
   // Check-in de Refeição
@@ -531,6 +474,7 @@ export default function UserToday({ mockPayload = null } = {}) {
                         </span>
                       )}
                     </div>
+                    <SessionProgress markedCount={checkin.markedCount} total={checkin.total} />
                   </div>
                 )}
 
@@ -553,77 +497,56 @@ export default function UserToday({ mockPayload = null } = {}) {
                 {/* Lista de Exercícios */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {activeDay?.exercises?.map((ex, idx) => (
-                    <article key={ex.id || ex.order || idx} className="exercise-item-card">
-                      
-                      {/* Miniatura com fallback seguro */}
-                      <div className="exercise-thumb-wrap">
-                        <ExerciseThumb
-                          sources={[ex.image_thumb_url, ex.image_url, ...thumbSources(ex.image_url)].filter(Boolean)}
-                          label={ex.name_ptbr}
-                          width={54}
-                          height={54}
-                          radius={10}
-                        />
-                        {ex.video_url && (
-                          <button
-                            type="button"
-                            className="exercise-play-badge"
-                            onClick={() => setActiveVideo({ url: ex.video_url, title: ex.name_ptbr })}
-                            title="Assistir execução"
-                            aria-label={`Assistir execução do exercício ${ex.name_ptbr}`}
-                          >
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Informações de Execução */}
-                      <div className="exercise-info">
-                        <h3 className="exercise-name">{ex.name_ptbr}</h3>
-                        
-                        <div className="exercise-stats-grid">
-                          <span className="exercise-stat-tag">
-                            {ex.sets} séries × {ex.reps_ptbr || ex.reps}
-                          </span>
-                          
-                          {/* Carga conforme load_type e load_display_ptbr */}
-                          {renderExerciseLoad(ex)}
-
-                          {ex.rest_seconds > 0 && (
-                            <span className="exercise-stat-tag">
-                              {ex.rest_seconds}s descanso
-                            </span>
+                    <ExerciseCheckinCard
+                      key={ex.exercise_id || ex.id || idx}
+                      ex={ex}
+                      checkin={checkin}
+                      onVideo={() => setActiveVideo({ url: ex.video_url, title: ex.name_ptbr })}
+                      renderLoad={renderExerciseLoad}
+                      thumb={(
+                        <div className="exercise-thumb-wrap">
+                          <ExerciseThumb
+                            sources={[ex.image_thumb_url, ex.image_url, ...thumbSources(ex.image_url)].filter(Boolean)}
+                            label={ex.name_ptbr}
+                            width={50}
+                            height={50}
+                            radius={10}
+                          />
+                          {ex.video_url && (
+                            <button
+                              type="button"
+                              className="exercise-play-badge"
+                              onClick={() => setActiveVideo({ url: ex.video_url, title: ex.name_ptbr })}
+                              title="Assistir execução"
+                              aria-label={`Assistir execução do exercício ${ex.name_ptbr}`}
+                            >
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                              </svg>
+                            </button>
                           )}
                         </div>
-
-                        {/* Instrução se disponível */}
-                        {ex.instruction_ptbr && (
-                          <div className="exercise-instructions">
-                            {ex.instruction_ptbr}
-                          </div>
-                        )}
-
-                        {/* Botão de vídeo visível com rótulo "▶ Ver vídeo" como no Dashboard */}
-                        {ex.video_url && (
-                          <button
-                            type="button"
-                            className="exercise-video-btn"
-                            onClick={() => setActiveVideo({ url: ex.video_url, title: ex.name_ptbr })}
-                            aria-label={`Ver vídeo de ${ex.name_ptbr}`}
-                          >
-                            <span aria-hidden="true" style={{ fontSize: '10px' }}>▶</span> Ver vídeo
-                          </button>
-                        )}
-                      </div>
-
-                    </article>
+                      )}
+                    />
                   ))}
                 </div>
 
                 {/* BOTÃO DE CHECK-IN DO TREINO */}
                 <div style={{ marginTop: '8px' }}>
+                  {isWorkoutCompletedToday && checkin.closed && (
+                    <div className="ck-done-banner" style={{ marginBottom: '10px' }}>
+                      <span aria-hidden="true" style={{ fontSize: '20px' }}>🎉</span>
+                      <div>
+                        Treino concluído e gravado no seu histórico.
+                        <div style={{ fontWeight: 600, fontSize: '12px', marginTop: '2px' }}>
+                          {checkin.markedCount === checkin.total
+                            ? `Todos os ${checkin.total} exercícios concluídos`
+                            : `${checkin.markedCount} de ${checkin.total} exercícios marcados`}
+                          {checkin.durationMin ? ` · ⏱ ${checkin.durationMin} min realizados` : ''}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {isWorkoutCompletedToday ? (
                     <div className="checkin-btn done">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -635,20 +558,27 @@ export default function UserToday({ mockPayload = null } = {}) {
                     <button
                       type="button"
                       className="checkin-btn primary"
-                      disabled={checkingInWorkout}
+                      disabled={checkin.busy}
                       onClick={handleCheckinWorkout}
                     >
-                      {checkingInWorkout ? (
+                      {checkin.busy ? (
                         'Registrando…'
                       ) : (
                         <>
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
                           </svg>
-                          Concluir Treino de Hoje
+                          {checkin.markedCount > 0
+                            ? `Concluir treino inteiro agora (${checkin.total - checkin.markedCount} ${checkin.total - checkin.markedCount === 1 ? 'restante' : 'restantes'})`
+                            : 'Concluir Treino de Hoje'}
                         </>
                       )}
                     </button>
+                  )}
+                  {!isWorkoutCompletedToday && checkin.markedCount === 0 && (
+                    <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: 'var(--yb-muted, #718096)', textAlign: 'center' }}>
+                      Opção para quem não quer marcar exercício por exercício.
+                    </p>
                   )}
                 </div>
               </>
@@ -838,6 +768,9 @@ export default function UserToday({ mockPayload = null } = {}) {
       </main>
 
       {/* Modal de Vídeo R2 */}
+      <CheckinDialog dialog={checkin.dialog} onClose={checkin.closeDialog} />
+      <UndoToast toast={checkin.toast} />
+
       {activeVideo && (
         <UserVideoModal
           videoUrl={activeVideo.url}
