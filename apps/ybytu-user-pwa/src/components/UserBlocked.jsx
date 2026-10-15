@@ -18,14 +18,14 @@ export default function UserBlocked() {
   };
 
   return (
-    <div className="user-pwa-container" style={{ justifyContent: 'center', padding: '24px 16px' }}>
+    <div className="user-pwa-container" style={{ justifyContent: 'center', padding: '24px 20px 40px' }}>
       <div style={{ maxWidth: '380px', width: '100%', margin: '0 auto', textAlign: 'center' }}>
         
-        {/* Ícone de status */}
-        <div style={{ display: 'inline-flex', marginBottom: '16px' }}>
+        {/* Ícone de Status do Protótipo */}
+        <div style={{ display: 'inline-flex', marginBottom: '20px' }}>
           <div style={{
-            width: '64px',
-            height: '64px',
+            width: '68px',
+            height: '68px',
             borderRadius: '50%',
             background: 'var(--yb-brand-soft, rgba(245,95,22,.10))',
             color: 'var(--yb-brand, #F55F16)',
@@ -33,19 +33,37 @@ export default function UserBlocked() {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
           </div>
         </div>
 
-        <h1 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 8px', color: 'var(--yb-text, #1A202C)' }}>
+        <p className="user-kicker" style={{ marginBottom: '6px' }}>
+          Status do Plano
+        </p>
+
+        <h1 style={{
+          fontSize: '22px',
+          fontWeight: 900,
+          margin: '0 0 10px',
+          color: 'var(--yb-text, #1A202C)',
+          textTransform: 'uppercase',
+          letterSpacing: '-0.02em',
+          lineHeight: 1.15,
+        }}>
           Plano em Preparação
         </h1>
 
-        <p style={{ fontSize: '14px', color: 'var(--yb-muted, #718096)', lineHeight: 1.5, margin: '0 0 24px' }}>
-          Nossa equipe de treinadores e nutricionistas está revisando o plano individualizado da sua rotina. Assim que ele for liberado, você recebe o link por e-mail e ele aparece aqui.
+        <p style={{
+          fontSize: '14px',
+          color: 'var(--yb-muted, #718096)',
+          lineHeight: 1.55,
+          fontWeight: 600,
+          margin: '0 0 24px',
+        }}>
+          Nossa equipe de treinadores e nutricionistas está revisando sua rotina individualizada. Assim que tudo for aprovado, você receberá um aviso por e-mail e o plano será liberado aqui.
         </p>
 
         <div className="user-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -64,9 +82,21 @@ export default function UserBlocked() {
 
           <button
             type="button"
-            className="user-tab-btn"
             onClick={handleRetry}
-            style={{ background: 'var(--yb-surface-2, #F1F5F9)', color: 'var(--yb-text, #1A202C)' }}
+            style={{
+              width: '100%',
+              background: 'var(--yb-surface-2, #F1F5F9)',
+              color: 'var(--yb-text, #1A202C)',
+              border: '1px solid var(--yb-border, #E2E8F0)',
+              borderRadius: 'var(--yb-radius-btn, 14px)',
+              padding: '15px 16px',
+              fontSize: '13.5px',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.02em',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
           >
             Verificar se o plano já está pronto
           </button>
@@ -81,12 +111,12 @@ export default function UserBlocked() {
               border: 'none',
               color: 'var(--yb-muted, #718096)',
               fontSize: '13px',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: 'pointer',
               padding: '8px',
             }}
           >
-            Sair da conta
+            ← Sair da conta
           </button>
         </div>
 

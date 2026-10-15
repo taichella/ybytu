@@ -3,6 +3,62 @@
    Compatibilidade rigorosa com telas de 360px a 480px (e desktop centralizado)
    ============================================================ */
 
+/* ============================================================
+   Extensões de Design Tokens — Exclusivas do PWA do Aluno
+   NOTA: Estes tokens são extensões específicas da interface do aluno
+   (me.ybytu.app) derivadas do protótipo oficial de design.
+   Ficam isolados no user.css para não afetar o painel administrativo nem
+   gerar conflitos com check-user-pwa-sync.mjs enquanto equipes trabalham
+   em paralelo. Se algum dia forem compartilhados com o dashboard,
+   devem ser promovidos simultaneamente para apps/ybytu-dashboard/src/tokens.css
+   e apps/ybytu-user-pwa/src/tokens.css mantendo o check sincronizado.
+   ============================================================ */
+
+:root {
+  /* Raios refinados do protótipo */
+  --yb-radius-btn: 14px;
+  --yb-radius-input: 14px;
+  --yb-radius-card: 18px;
+  --yb-radius-card-lg: 20px;
+  --yb-radius-chip: 8px;
+
+  /* Sombras de destaque do protótipo */
+  --yb-shadow-glow: 0 8px 22px rgba(245, 95, 22, 0.30);
+  --yb-shadow-glow-active: 0 4px 14px rgba(245, 95, 22, 0.22);
+  --yb-shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.05);
+
+  /* Tipografia & Tracking esportivo do protótipo */
+  --yb-letter-spacing-tight: -0.02em;
+  --yb-letter-spacing-kicker: 0.08em;
+  --yb-fs-kicker: 11px;
+  --yb-fw-black: 900;
+  --yb-fw-heavy: 800;
+
+  /* Gradientes da Marca */
+  --yb-brand-gradient: linear-gradient(135deg, #F55F16, #FF7A3D);
+  --yb-dark-gradient: linear-gradient(140deg, #2A2A2A, #101010);
+}
+
+:root[data-theme="dark"] {
+  --yb-shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --yb-shadow-glow: 0 8px 26px rgba(245, 95, 22, 0.35);
+}
+
+/* Micro-animações discretas (rápidas para o contexto de treino na academia) */
+@keyframes ybFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ybUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ybSpin {
+  to { transform: rotate(360deg); }
+}
+
 .user-pwa-container {
   width: 100%;
   max-width: 480px;
@@ -17,6 +73,7 @@
   box-sizing: border-box;
   font-family: var(--yb-font, 'Inter', system-ui, -apple-system, sans-serif);
   -webkit-font-smoothing: antialiased;
+  animation: ybFade 0.2s ease-out both;
 }
 
 /* Header Móvel */
@@ -82,7 +139,7 @@
   display: flex;
   background: var(--yb-surface-2, #F1F5F9);
   padding: 4px;
-  border-radius: var(--yb-radius-md, 12px);
+  border-radius: var(--yb-radius-btn, 14px);
   margin: 14px 16px 8px;
   gap: 4px;
 }
@@ -92,9 +149,11 @@
   padding: 10px 8px;
   border: none;
   background: transparent;
-  border-radius: var(--yb-radius-sm, 8px);
-  font-size: 13px;
-  font-weight: 700;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--yb-muted, #718096);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -108,7 +167,7 @@
 .user-tab-btn.active {
   background: var(--yb-surface, #FFFFFF);
   color: var(--yb-brand, #F55F16);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 /* Área de Conteúdo Principal */
@@ -125,9 +184,9 @@
 .user-card {
   background: var(--yb-surface, #FFFFFF);
   border: 1px solid var(--yb-border, #E2E8F0);
-  border-radius: var(--yb-radius-lg, 18px);
-  padding: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-radius: var(--yb-radius-card, 18px);
+  padding: 18px 16px;
+  box-shadow: var(--yb-shadow-card, 0 1px 3px rgba(0, 0, 0, 0.04));
   box-sizing: border-box;
 }
 
@@ -218,13 +277,14 @@
 .exercise-item-card {
   background: var(--yb-surface, #FFFFFF);
   border: 1px solid var(--yb-border, #E2E8F0);
-  border-radius: var(--yb-radius-md, 12px);
-  padding: 12px;
+  border-radius: 16px;
+  padding: 14px 12px;
   display: flex;
   gap: 12px;
   align-items: flex-start;
   box-sizing: border-box;
   position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .exercise-thumb-wrap {
@@ -406,32 +466,38 @@
   font-size: 12px;
 }
 
-/* Botões de Check-in */
+/* Botões de Check-in e Ação Primária */
 .checkin-btn {
   width: 100%;
   border: none;
-  border-radius: var(--yb-radius-md, 12px);
-  padding: 14px 16px;
+  border-radius: var(--yb-radius-btn, 14px);
+  padding: 16px 18px;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: var(--yb-fw-black, 900);
+  letter-spacing: var(--yb-letter-spacing-tight, -0.02em);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 9px;
   transition: all 0.15s ease;
-  min-height: 48px;
+  min-height: 50px;
   box-sizing: border-box;
 }
 
 .checkin-btn.primary {
   background: var(--yb-brand, #F55F16);
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(245, 95, 22, 0.25);
+  box-shadow: var(--yb-shadow-glow, 0 8px 22px rgba(245, 95, 22, 0.30));
+}
+
+.checkin-btn.primary:hover {
+  background: var(--yb-brand-hover, #FF7A3D);
 }
 
 .checkin-btn.primary:active {
   transform: scale(0.98);
+  box-shadow: var(--yb-shadow-glow-active, 0 4px 14px rgba(245, 95, 22, 0.22));
 }
 
 .checkin-btn.done {
@@ -439,6 +505,44 @@
   color: #15803d;
   border: 1px solid rgba(22, 163, 74, 0.25);
   cursor: default;
+}
+
+/* Avatar Monograma do Aluno */
+.user-avatar-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--yb-brand-gradient, linear-gradient(135deg, #F55F16, #FF7A3D));
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(245, 95, 22, 0.25);
+  letter-spacing: -0.02em;
+}
+
+/* Kicker Header do Aluno */
+.user-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--yb-muted, #718096);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.user-name-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--yb-text, #1A202C);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  margin: 2px 0 0;
+  line-height: 1.2;
 }
 
 .meal-checkin-btn {

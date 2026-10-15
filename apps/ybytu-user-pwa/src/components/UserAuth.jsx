@@ -230,22 +230,38 @@ export default function UserAuth() {
   const secondsLeft = (countdown % 60).toString().padStart(2, '0');
 
   return (
-    <div className="user-pwa-container" style={{ justifyContent: 'center', padding: '24px 16px' }}>
+    <div className="user-pwa-container" style={{ justifyContent: 'center', padding: '24px 20px 40px' }}>
       <div style={{ maxWidth: '380px', width: '100%', margin: '0 auto' }}>
         
-        {/* Cabeçalho de Identidade */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{ display: 'inline-block', marginBottom: '12px' }}>
-            <YbytuLogo size={48} showText={true} />
+        {/* Cabeçalho de Identidade — Estilo Oficial do Protótipo */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '32px', textAlign: 'center' }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '66px',
+            height: '66px',
+            borderRadius: '20px',
+            background: 'var(--yb-brand, #F55F16)',
+            color: '#FFFFFF',
+            boxShadow: 'var(--yb-shadow-glow, 0 8px 22px rgba(245,95,22,.30))',
+          }}>
+            <svg viewBox="119 94 275 323" style={{ width: '36px', height: 'auto' }} fill="currentColor">
+              <path d="M256.5 94V151.633L341.5 199.817H341.462V267.839L394 250.881V229.584V199.817V171.951L256.5 94Z"></path>
+              <path d="M119 199.817V229.584V250.881L171.538 267.839V199.817H171.5L256.5 151.633V94L119 171.951V199.817Z"></path>
+              <path d="M119.153 277.633C118.789 279.803 119.153 321.189 119.153 321.189L170.253 341.142V385.774L256.5 416.981L341.999 385.774V340.778L394 323.359V277.633L307.216 309.935V352.396L256.5 373.08L207.202 356.391L206.838 309.935L119.153 277.633Z"></path>
+            </svg>
+          </span>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 900, letterSpacing: '-0.02em', textTransform: 'uppercase', color: 'var(--yb-text, #1A202C)' }}>
+              Ybytu
+            </h1>
+            <p style={{ margin: '6px 0 0', fontSize: '14px', color: 'var(--yb-muted, #718096)', fontWeight: 600 }}>
+              {step === 'request'
+                ? 'Sua evolução começa agora.'
+                : 'Digite o código de 6 dígitos enviado para você'}
+            </p>
           </div>
-          <h1 style={{ fontSize: '20px', fontWeight: 800, margin: '8px 0 4px', color: 'var(--yb-text, #1A202C)' }}>
-            Acessar sua Conta
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--yb-muted, #718096)', margin: 0 }}>
-            {step === 'request'
-              ? 'Acesse sua ficha de treino e plano alimentar'
-              : 'Digite o código de 6 dígitos enviado para você'}
-          </p>
         </div>
 
         {/* Banner de Erro Visível */}
@@ -265,7 +281,7 @@ export default function UserAuth() {
           <div className="user-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {method === 'whatsapp' ? (
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--yb-muted, #718096)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: 'var(--yb-muted, #718096)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   Seu WhatsApp
                 </label>
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -296,11 +312,11 @@ export default function UserAuth() {
                     style={{
                       flex: 1,
                       minWidth: 0,
-                      padding: '12px 14px',
-                      borderRadius: 'var(--yb-radius-md, 12px)',
+                      padding: '14px 16px',
+                      borderRadius: 'var(--yb-radius-input, 14px)',
                       border: '1px solid var(--yb-border, #E2E8F0)',
                       background: 'var(--yb-field, #F8F9FA)',
-                      fontSize: '16px',
+                      fontSize: '15px',
                       fontWeight: 600,
                       boxSizing: 'border-box',
                       outline: 'none',
@@ -311,28 +327,37 @@ export default function UserAuth() {
               </div>
             ) : (
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--yb-muted, #718096)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: 'var(--yb-muted, #718096)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   Seu E-mail Cadastrado
                 </label>
-                <input
-                  type="email"
-                  inputMode="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={handleEmailChange}
-                  style={{
-                    width: '100%',
-                    padding: '12px 14px',
-                    borderRadius: 'var(--yb-radius-md, 12px)',
-                    border: '1px solid var(--yb-border, #E2E8F0)',
-                    background: 'var(--yb-field, #F8F9FA)',
-                    fontSize: '15px',
-                    fontWeight: 600,
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                  }}
-                  autoFocus
-                />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <span style={{ position: 'absolute', left: '16px', display: 'flex', color: 'var(--yb-muted, #718096)', pointerEvents: 'none' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                      <path d="m2 7 10 6 10-6"></path>
+                    </svg>
+                  </span>
+                  <input
+                    type="email"
+                    inputMode="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={handleEmailChange}
+                    style={{
+                      width: '100%',
+                      padding: '16px 16px 16px 46px',
+                      borderRadius: 'var(--yb-radius-input, 14px)',
+                      border: '1px solid var(--yb-border, #E2E8F0)',
+                      background: 'var(--yb-field, #F8F9FA)',
+                      color: 'var(--yb-text, #1A202C)',
+                      fontSize: '15px',
+                      fontWeight: 600,
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
+                    autoFocus
+                  />
+                </div>
               </div>
             )}
 
@@ -349,10 +374,15 @@ export default function UserAuth() {
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                   </svg>
-                  Receber código no WhatsApp
+                  RECEBER CÓDIGO NO WHATSAPP
                 </>
               ) : (
-                'Receber código por e-mail'
+                <>
+                  RECEBER CÓDIGO POR E-MAIL
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M13 5l7 7-7 7"></path>
+                  </svg>
+                </>
               )}
             </button>
 
@@ -362,7 +392,7 @@ export default function UserAuth() {
                 <button
                   type="button"
                   onClick={() => { setMethod('email'); setErrorMessage(null); }}
-                  style={{ background: 'transparent', border: 'none', color: 'var(--yb-brand, #F55F16)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: '6px' }}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--yb-brand, #F55F16)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', padding: '6px' }}
                 >
                   {whatsappFailed ? 'Tentar receber código por e-mail' : 'Não tem WhatsApp? Entrar por e-mail'}
                 </button>
@@ -370,7 +400,7 @@ export default function UserAuth() {
                 <button
                   type="button"
                   onClick={() => { setMethod('whatsapp'); setErrorMessage(null); }}
-                  style={{ background: 'transparent', border: 'none', color: 'var(--yb-brand, #F55F16)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: '6px' }}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--yb-brand, #F55F16)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', padding: '6px' }}
                 >
                   Voltar e receber pelo WhatsApp
                 </button>
@@ -381,11 +411,14 @@ export default function UserAuth() {
 
         {/* ETAPA 2: VERIFICAÇÃO DO CÓDIGO */}
         {step === 'verify' && (
-          <div className="user-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="user-card" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <div style={{ textAlign: 'center' }}>
-              <span style={{ fontSize: '13px', color: 'var(--yb-muted, #718096)' }}>
-                Enviado para {method === 'whatsapp' ? phone : email}
-              </span>
+              <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--yb-brand, #F55F16)' }}>
+                Código Enviado
+              </p>
+              <p style={{ margin: '4px 0 0', fontSize: '13.5px', color: 'var(--yb-muted, #718096)', fontWeight: 600 }}>
+                Verifique a caixa de entrada de <strong>{method === 'whatsapp' ? phone : email}</strong>
+              </p>
             </div>
 
             <div>
@@ -400,16 +433,18 @@ export default function UserAuth() {
                 onChange={handleOtpChange}
                 style={{
                   width: '100%',
-                  padding: '14px',
-                  borderRadius: 'var(--yb-radius-md, 12px)',
+                  padding: '16px',
+                  borderRadius: 'var(--yb-radius-input, 14px)',
                   border: '2px solid var(--yb-brand, #F55F16)',
                   background: 'var(--yb-field, #F8F9FA)',
+                  color: 'var(--yb-text, #1A202C)',
                   fontSize: '26px',
-                  fontWeight: 800,
+                  fontWeight: 900,
                   letterSpacing: '10px',
                   textAlign: 'center',
                   boxSizing: 'border-box',
                   outline: 'none',
+                  fontVariantNumeric: 'tabular-nums',
                 }}
               />
             </div>
@@ -420,12 +455,21 @@ export default function UserAuth() {
               disabled={loading || otpCode.length !== 6}
               onClick={() => verifyOtpCode(otpCode)}
             >
-              {loading ? 'Validando…' : 'Entrar no Aplicativo'}
+              {loading ? (
+                'Validando…'
+              ) : (
+                <>
+                  ENTRAR NO APLICATIVO
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M13 5l7 7-7 7"></path>
+                  </svg>
+                </>
+              )}
             </button>
 
             {/* Expiração e Reenvio */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'var(--yb-muted, #718096)', borderTop: '1px solid var(--yb-border, #E2E8F0)', paddingTop: '10px' }}>
-              <span>Expira em {minutesLeft}:{secondsLeft}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'var(--yb-muted, #718096)', borderTop: '1px solid var(--yb-border, #E2E8F0)', paddingTop: '12px' }}>
+              <span>Expira em <strong>{minutesLeft}:{secondsLeft}</strong></span>
 
               {resendCooldown > 0 ? (
                 <span>Reenviar em {resendCooldown}s</span>
@@ -434,7 +478,7 @@ export default function UserAuth() {
                   type="button"
                   onClick={() => handleRequestOtp()}
                   disabled={loading}
-                  style={{ background: 'transparent', border: 'none', color: 'var(--yb-brand, #F55F16)', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                  style={{ background: 'transparent', border: 'none', color: 'var(--yb-brand, #F55F16)', fontWeight: 800, cursor: 'pointer', padding: 0 }}
                 >
                   Reenviar código
                 </button>
@@ -445,9 +489,9 @@ export default function UserAuth() {
               <button
                 type="button"
                 onClick={() => { setStep('request'); setErrorMessage(null); }}
-                style={{ background: 'transparent', border: 'none', color: 'var(--yb-muted, #718096)', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--yb-muted, #718096)', fontSize: '12.5px', fontWeight: 600, cursor: 'pointer' }}
               >
-                {WHATSAPP_LOGIN_ENABLED ? 'Trocar número ou e-mail' : 'Trocar e-mail'}
+                {WHATSAPP_LOGIN_ENABLED ? '← Trocar número ou e-mail' : '← Trocar e-mail'}
               </button>
             </div>
           </div>
