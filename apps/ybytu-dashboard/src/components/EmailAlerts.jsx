@@ -39,6 +39,7 @@ export default function EmailAlerts() {
 
   const failures = data?.recent_failures ?? [];
   const students = data?.students_without_link ?? [];
+  const crons = data?.cron_failures ?? [];
 
   return (
     <>
@@ -67,6 +68,27 @@ export default function EmailAlerts() {
                 <p style={{ fontSize: '13px', fontWeight: 700, color: '#dc2626' }}>
                   Incidente aberto desde {formatDate(data.open_alert.opened_at)} (última verificação {formatDate(data.open_alert.last_seen_at)}).
                 </p>
+              )}
+
+              {crons.length > 0 && (
+                <>
+                  <h2 style={{ fontSize: '16px', fontWeight: 900, margin: '24px 0 12px', color: '#dc2626' }}>
+                    Tarefas automáticas recusadas nas últimas {data.cron_failure_window_hours}h ({crons.length})
+                  </h2>
+                  <p style={{ color: 'var(--muted)', fontSize: '13px', marginTop: 0 }}>
+                    O servidor recusou a tarefa (401/403): em geral o segredo interno do cron não bate com o das functions. Enquanto isso, a tarefa não roda.
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {crons.map((c) => (
+                      <div key={c.cron} style={card}>
+                        <p style={{ margin: 0, fontWeight: 800, fontSize: '14px' }}>{c.cron}</p>
+                        <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+                          {c.count} recusa(s) · última em {formatDate(c.last_at)} · HTTP {c.status_code}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
 
               <h2 style={{ fontSize: '16px', fontWeight: 900, margin: '24px 0 12px' }}>

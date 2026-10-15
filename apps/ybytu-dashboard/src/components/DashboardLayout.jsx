@@ -27,16 +27,19 @@ function EmailHealthBanner() {
 
   const failures = health?.recent_failures?.length ?? 0;
   const students = health?.students_without_link?.length ?? 0;
-  if (!health || (!health.open_alert && failures === 0 && students === 0)) return null;
+  const crons = health?.cron_failures?.length ?? 0;
+  if (!health || (!health.open_alert && failures === 0 && students === 0 && crons === 0)) return null;
 
   const parts = [];
   if (failures) parts.push(`${failures} envio(s) de e-mail com falha nas últimas ${health.failure_window_hours}h`);
   if (students) parts.push(`${students} aluno(s) com plano aprovado sem o link`);
+  // Cron recusado (401/403): o próprio vigia pode estar parado (achado 2026-10-11).
+  if (crons) parts.push(`${crons} tarefa(s) automática(s) sendo recusada(s) nas últimas ${health.cron_failure_window_hours}h`);
   if (parts.length === 0) parts.push('incidente de e-mail ainda aberto, aguardando a próxima verificação');
 
   return (
     <div role="alert" style={{ background: '#dc2626', color: '#fff', padding: '10px 16px', fontSize: '13px', fontWeight: 700, display: 'flex', gap: '12px', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-      <span>⚠️ Falha no envio de e-mails: {parts.join(' e ')}.</span>
+      <span>⚠️ {crons && !failures && !students ? 'Falha nas tarefas automáticas' : 'Falha no envio de e-mails'}: {parts.join(' e ')}.</span>
       <Link to="/campaign/email-alerts" style={{ color: '#fff', textDecoration: 'underline', whiteSpace: 'nowrap' }}>Ver detalhes</Link>
     </div>
   );
