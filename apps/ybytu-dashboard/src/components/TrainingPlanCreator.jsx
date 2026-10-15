@@ -7,6 +7,8 @@ import ThemeToggle from './ThemeToggle';
 import ExerciseThumb from './ExerciseThumb.jsx';
 import EnvironmentTag from './EnvironmentTag.jsx';
 import { thumbSources } from '../lib/media.js';
+import { DragGrip, MoveArrows } from './ReorderControls';
+import { moveInList } from '../lib/moveInList';
 
 // exercises.load_type (2026-09-19): 'bodyweight' e 'band' não usam carga em kg,
 // então o campo de carga some pra esses exercícios. Tipo ausente (resposta de
@@ -282,6 +284,16 @@ export default function TrainingPlanCreator() {
         [day]: [...list, { uniqueId: `s${nextUid.current++}`, exercise_id: ex.exercise_id, exercise: ex, sets: 3, reps: 10, rest_seconds: 60, load_kg: '', order_within_day: list.length + 1 }],
       };
     });
+  };
+
+  // Reordenar (2026-10-15): a ordem gravada é a posição (handleSave manda
+  // order_within_day = índice + 1). Alça no computador, ▲▼ no celular.
+  const [dragFrom, setDragFrom] = useState(null);
+  const moveSlot = (from, to) => {
+    setSlotsByDay((prev) => ({
+      ...prev,
+      [day]: moveInList(prev[day] ?? [], from, to).map((s, idx) => ({ ...s, order_within_day: idx + 1 })),
+    }));
   };
 
   const removeSlot = (uniqueId) => {
@@ -963,8 +975,14 @@ export default function TrainingPlanCreator() {
             {/* LISTA DE SLOTS DO DIA */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {currentSlots.map((s, i) => (
-                <div key={s.uniqueId} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '14px', overflow: 'hidden' }}>
+                <div
+                  key={s.uniqueId}
+                  onDragOver={(e) => { if (dragFrom !== null) e.preventDefault(); }}
+                  onDrop={(e) => { e.preventDefault(); if (dragFrom !== null) moveSlot(dragFrom, i); setDragFrom(null); }}
+                  style={{ background: 'var(--surface)', border: dragFrom !== null && dragFrom !== i ? '1px dashed var(--brand)' : '1px solid var(--border)', borderRadius: '14px', overflow: 'hidden', opacity: dragFrom === i ? 0.5 : 1 }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', borderBottom: '1px solid var(--border)', background: 'var(--field)' }}>
+                    <DragGrip index={i} onDragStart={setDragFrom} onDragEnd={() => setDragFrom(null)} label={s.exercise?.name_ptbr ?? 'exercício'} />
                     <span style={{ width: '26px', height: '26px', borderRadius: '7px', background: 'var(--brand)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '12px', flexShrink: 0 }}>
                       {String.fromCharCode(65 + i)}
                     </span>
@@ -974,6 +992,7 @@ export default function TrainingPlanCreator() {
                         {s.exercise?.name_ptbr ?? s.exercise_id}
                       </p>
                     </div>
+                    <MoveArrows index={i} count={currentSlots.length} onMove={moveSlot} label={s.exercise?.name_ptbr ?? 'exercício'} />
                     <button
                       type="button"
                       onClick={() => removeSlot(s.uniqueId)}
