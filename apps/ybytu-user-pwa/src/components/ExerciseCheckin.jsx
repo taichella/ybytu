@@ -378,3 +378,41 @@ export function UndoToast({ toast }) {
     </div>
   );
 }
+
+// Aviso de treino fechado pelo sistema na virada do dia (2026-10-15): o aluno
+// deixou a sessão aberta e, ao abrir o app no dia seguinte, vê o que
+// aconteceu. Some com "Entendi" (lembrado neste aparelho; se o armazenamento
+// falhar, o aviso só volta a aparecer, nada quebra).
+const SEEN_KEY = 'ybytu_seen_auto_closed_workouts';
+
+function readSeen() {
+  try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'); } catch { return []; }
+}
+
+export function AutoClosedNotice({ workouts }) {
+  const [seen, setSeen] = useState(readSeen);
+  const pending = (workouts || []).filter(w => !seen.includes(w.id));
+  if (pending.length === 0) return null;
+  const w = pending[0];
+  const when = new Date(w.completed_at).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' });
+  const dismiss = () => {
+    const next = [...seen, ...pending.map(p => p.id)];
+    setSeen(next);
+    try { localStorage.setItem(SEEN_KEY, JSON.stringify(next.slice(-50))); } catch { /* sem armazenamento: tudo bem */ }
+  };
+  return (
+    <div className="ck-done-banner" role="status" style={{ background: 'rgba(59, 130, 246, 0.08)', borderColor: 'rgba(59, 130, 246, 0.3)', color: '#1E3A8A', alignItems: 'flex-start', marginBottom: '12px' }}>
+      <span aria-hidden="true" style={{ fontSize: '18px' }}>🌙</span>
+      <div style={{ flex: 1 }}>
+        Seu treino de {when} ({w.session_name || `Dia ${w.day_number}`}) ficou em andamento e foi encerrado na virada do dia
+        {w.exercises_done != null && w.exercise_count ? ` com ${w.exercises_done} de ${w.exercise_count} exercícios` : ''}.
+        <div style={{ fontWeight: 600, fontSize: '12px', marginTop: '4px' }}>
+          Ele está no seu histórico como treino parcial. Hoje a marcação começa do zero.
+        </div>
+        <button type="button" onClick={dismiss} style={{ marginTop: '8px', background: 'none', border: 'none', padding: 0, color: '#1D4ED8', fontWeight: 800, fontSize: '12.5px', cursor: 'pointer' }}>
+          Entendi
+        </button>
+      </div>
+    </div>
+  );
+}

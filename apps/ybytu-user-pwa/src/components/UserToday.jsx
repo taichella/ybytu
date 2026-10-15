@@ -6,7 +6,7 @@ import { readFunctionError } from '../lib/functionError';
 import ExerciseThumb from './ExerciseThumb';
 import YbytuLogo from './YbytuLogo';
 import UserVideoModal from './UserVideoModal';
-import { useExerciseCheckin, SessionProgress, ExerciseCheckinCard, CheckinDialog, UndoToast } from './ExerciseCheckin';
+import { useExerciseCheckin, SessionProgress, ExerciseCheckinCard, CheckinDialog, UndoToast, AutoClosedNotice } from './ExerciseCheckin';
 import { describeCheckinError } from '../lib/checkinErrors';
 import '../user.css';
 
@@ -447,6 +447,8 @@ export default function UserToday({ mockPayload = null } = {}) {
                     ))}
                   </div>
                 )}
+
+                <AutoClosedNotice workouts={payload?.auto_closed_workouts} />
 
                 {/* Resumo da Sessão */}
                 {activeDay && (

@@ -168,7 +168,12 @@ export default function UserActivityFeed({ userId }) {
                   <p style={{ margin: 0, fontSize: '13px', fontWeight: 700 }}>{w.session_name || `Treino · Dia ${w.day_number ?? '—'}`}</p>
                   <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
                     {[
-                      w.exercise_count ? `${w.exercise_count} exercícios` : null,
+                      // Marcação por exercício (2026-10-15): 'N de M' quando o aluno marcou
+                      // exercício por exercício; parcial fechado pelo sistema na virada do dia.
+                      w.exercises_done != null && w.exercise_count
+                        ? `${w.exercises_done} de ${w.exercise_count} exercícios`
+                        : (w.exercise_count ? `${w.exercise_count} exercícios` : null),
+                      w.auto_closed ? 'parcial · encerrado na virada do dia' : null,
                       w.day_number != null ? `Dia ${w.day_number}` : null,
                       w.is_current_plan === false ? 'plano anterior' : null,
                     ].filter(Boolean).join(' · ')}

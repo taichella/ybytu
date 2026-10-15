@@ -65,7 +65,7 @@ serve(async (req) => {
     // apaga e recria as linhas de exercício, e a conta mudaria em silêncio.
     const { data: workoutRows, error: wError } = await supabase
       .from('completed_workouts')
-      .select('id, completed_at, training_plan_id, day_number, session_name, exercise_count')
+      .select('id, completed_at, training_plan_id, day_number, session_name, exercise_count, exercises_done, auto_closed')
       .eq('user_id', userId)
       .gte('completed_at', windowStart)
       .order('completed_at', { ascending: false })

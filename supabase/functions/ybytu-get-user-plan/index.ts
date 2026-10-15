@@ -131,6 +131,25 @@ serve(async (req) => {
     const rawTimezone = url.searchParams.get('timezone')?.trim() || undefined
     const todayStartIso = getStartOfDayInTimezone(rawTimezone)
 
+    // Fechamento na virada do dia (2026-10-15, migration 20261015160000):
+    // grava o fuso do aparelho no perfil (é por ele que a "virada" é medida,
+    // também pelo cron de hora em hora) e fecha como parcial a sessão de
+    // marcação por exercício que ficou aberta de um dia anterior -- assim o
+    // aluno nunca vê a sessão de ontem pela metade.
+    let validTimezone: string | null = null
+    if (rawTimezone) {
+      try {
+        new Intl.DateTimeFormat('en-US', { timeZone: rawTimezone })
+        validTimezone = rawTimezone
+      } catch { /* fuso inválido: mantém o que estiver salvo */ }
+    }
+    if (validTimezone) {
+      const { error: tzErr } = await supabase.from('profiles').update({ timezone: validTimezone }).eq('id', userId).or(`timezone.is.null,timezone.neq.${validTimezone}`)
+      if (tzErr) console.error('Falha ao gravar timezone:', tzErr.message)
+    }
+    const { error: autoCloseErr } = await supabase.rpc('auto_close_stale_exercise_sessions', { p_user: userId })
+    if (autoCloseErr) console.error('Falha no fechamento automático de sessão:', autoCloseErr.message)
+
     // Último treino concluído NESTE plano (qualquer data) -- o app abre no dia
     // seguinte a ele. Filtrado pelo plano ativo pra um plano novo recomeçar no Dia 1.
     const trainingPlanUuid = (payload.training as { id?: string } | null)?.id ?? null
@@ -148,7 +167,7 @@ serve(async (req) => {
         .filter((id): id is string => !!id),
     )]
 
-    const [workoutsRes, mealsRes, lastWorkoutRes, openMarksRes, loadsRes] = await Promise.all([
+    const [workoutsRes, mealsRes, lastWorkoutRes, openMarksRes, loadsRes, autoClosedRes] = await Promise.all([
       supabase
         .from('completed_workouts')
         .select('id, day_number, session_name, completed_at')
@@ -190,6 +209,15 @@ serve(async (req) => {
           .order('completed_at', { ascending: false })
           .limit(500)
         : Promise.resolve({ data: [] }),
+      // Treinos fechados pelo sistema nas últimas 48h: o app avisa o aluno
+      // ("seu treino de ontem foi encerrado com 3 de 6 exercícios").
+      supabase
+        .from('completed_workouts')
+        .select('id, day_number, session_name, exercise_count, exercises_done, completed_at')
+        .eq('user_id', userId)
+        .eq('auto_closed', true)
+        .gte('completed_at', new Date(Date.now() - 48 * 3600_000).toISOString())
+        .order('completed_at', { ascending: false }),
     ])
 
     // Mais recente por exercício (a lista já vem do mais novo para o mais velho).
@@ -208,6 +236,7 @@ serve(async (req) => {
       last_completed_workout: lastWorkoutRes.data ?? null,
       exercise_marks: openMarksRes.data ?? [],
       last_exercise_loads: lastLoads,
+      auto_closed_workouts: autoClosedRes.data ?? [],
     }
 
     return new Response(JSON.stringify(responsePayload), {
