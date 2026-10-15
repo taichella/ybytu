@@ -421,6 +421,10 @@ async function buildTrainingSection(
         // load_updates[].training_plan_exercise_id pra editar carga. Ver
         // [[project_plan_creators_schema_debt]].
         id: (slot as any).id ?? null,
+        // Chave estável do exercício (exercises.exercise_id) -- é por ela que o
+        // app marca exercício por exercício (completed_exercises, 2026-10-15):
+        // o id da linha acima muda a cada save do construtor.
+        exercise_id: slot.exercise_id ?? null,
         order: String.fromCharCode(65 + idx), // A, B, C...
         name_ptbr: ex?.name_ptbr ?? null,
         instruction_ptbr: ex?.instruction_ptbr ?? null,

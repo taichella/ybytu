@@ -135,7 +135,18 @@ serve(async (req) => {
     // seguinte a ele. Filtrado pelo plano ativo pra um plano novo recomeçar no Dia 1.
     const trainingPlanUuid = (payload.training as { id?: string } | null)?.id ?? null
 
-    const [workoutsRes, mealsRes, lastWorkoutRes] = await Promise.all([
+    // Marcação por exercício (2026-10-15, designs/AlunoTreinoCheckin.dc.html):
+    // marcações da sessão ABERTA neste plano (workout_id nulo) e a última carga
+    // que o aluno usou em cada exercício do plano (qualquer plano/data), para o
+    // campo de carga vir preenchido.
+    const planExerciseIds = [...new Set(
+      ((payload.training as { days?: Array<{ exercises?: Array<{ exercise_id?: string | null }> }> } | null)?.days ?? [])
+        .flatMap((d) => d.exercises ?? [])
+        .map((e) => e.exercise_id)
+        .filter((id): id is string => !!id),
+    )]
+
+    const [workoutsRes, mealsRes, lastWorkoutRes, openMarksRes, loadsRes] = await Promise.all([
       supabase
         .from('completed_workouts')
         .select('id, day_number, session_name, completed_at')
@@ -158,7 +169,32 @@ serve(async (req) => {
           .limit(1)
           .maybeSingle()
         : Promise.resolve({ data: null }),
+      trainingPlanUuid
+        ? supabase
+          .from('completed_exercises')
+          .select('id, day_number, exercise_id, load_kg, completed_at')
+          .eq('user_id', userId)
+          .eq('training_plan_id', trainingPlanUuid)
+          .is('workout_id', null)
+          .order('completed_at', { ascending: true })
+        : Promise.resolve({ data: [] }),
+      planExerciseIds.length
+        ? supabase
+          .from('completed_exercises')
+          .select('exercise_id, load_kg, completed_at')
+          .eq('user_id', userId)
+          .in('exercise_id', planExerciseIds)
+          .not('load_kg', 'is', null)
+          .order('completed_at', { ascending: false })
+          .limit(500)
+        : Promise.resolve({ data: [] }),
     ])
+
+    // Mais recente por exercício (a lista já vem do mais novo para o mais velho).
+    const lastLoads: Record<string, { load_kg: number; completed_at: string }> = {}
+    for (const row of (loadsRes.data ?? []) as Array<{ exercise_id: string; load_kg: number; completed_at: string }>) {
+      if (!(row.exercise_id in lastLoads)) lastLoads[row.exercise_id] = { load_kg: Number(row.load_kg), completed_at: row.completed_at }
+    }
 
     // 4. Retorna o plano do usuário integrado com seu progresso de hoje
     const responsePayload = {
@@ -168,6 +204,8 @@ serve(async (req) => {
         completed_meals: mealsRes.data ?? [],
       },
       last_completed_workout: lastWorkoutRes.data ?? null,
+      open_exercise_marks: openMarksRes.data ?? [],
+      last_exercise_loads: lastLoads,
     }
 
     return new Response(JSON.stringify(responsePayload), {
