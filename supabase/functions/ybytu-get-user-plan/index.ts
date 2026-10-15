@@ -144,7 +144,7 @@ serve(async (req) => {
         .order('completed_at', { ascending: false }),
       supabase
         .from('completed_meals')
-        .select('id, day_order, meal_order, meal_name, completed_at')
+        .select('id, day_order, meal_order, meal_name, meal_id, completed_at')
         .eq('user_id', userId)
         .gte('completed_at', todayStartIso)
         .order('completed_at', { ascending: false }),

@@ -45,6 +45,40 @@ function calculateNextDayIndex(days, lastCompletedDayNumber) {
 }
 
 /**
+ * Casa os check-ins de refeição de HOJE com as refeições do cardápio de um dia
+ * pelo PRATO (meal_id), não pela posição (2026-10-15): se a nutricionista
+ * reordenar ou editar o cardápio durante o dia, o ✓ continua no prato que o
+ * aluno comeu. Prato repetido no mesmo dia: cada check-in marca um só lugar,
+ * preferindo a mesma posição. Check-in antigo sem meal_id (antes de
+ * 2026-10-04) cai na posição, como antes.
+ * Devolve Map meal_order -> check-in.
+ */
+function matchMealCheckins(meals, completedMeals, dayOrder) {
+  const result = new Map();
+  const sameDay = completedMeals.filter(cm => Number(cm.day_order) === Number(dayOrder));
+  const used = new Set();
+  const claim = (cm, meal) => { result.set(Number(meal.meal_order), cm); used.add(cm.id); };
+  // 1. mesmo prato na mesma posição
+  for (const cm of sameDay) {
+    const meal = meals.find(m => cm.meal_id && m.meal_id === cm.meal_id && Number(m.meal_order) === Number(cm.meal_order));
+    if (meal && !result.has(Number(meal.meal_order))) claim(cm, meal);
+  }
+  // 2. mesmo prato em outra posição (cardápio reordenado)
+  for (const cm of sameDay) {
+    if (used.has(cm.id) || !cm.meal_id) continue;
+    const meal = meals.find(m => m.meal_id === cm.meal_id && !result.has(Number(m.meal_order)));
+    if (meal) claim(cm, meal);
+  }
+  // 3. check-in antigo, sem prato gravado: posição
+  for (const cm of sameDay) {
+    if (used.has(cm.id) || cm.meal_id) continue;
+    const meal = meals.find(m => Number(m.meal_order) === Number(cm.meal_order) && !result.has(Number(m.meal_order)));
+    if (meal) claim(cm, meal);
+  }
+  return result;
+}
+
+/**
  * Traduz o erro de um check-in (insert direto no banco via PostgREST) para o
  * aluno. Antes, a tela mostrava o texto cru do banco ("JWT expired",
  * "new row violates row-level security policy", "meal_slot_not_found").
@@ -298,7 +332,7 @@ export default function UserToday({ mockPayload = null } = {}) {
           meal_order: Number(meal.meal_order),
           meal_name: mealName,
         })
-        .select('id, day_order, meal_order, meal_name, completed_at')
+        .select('id, day_order, meal_order, meal_name, meal_id, completed_at')
         .single();
 
       if (insertErr) throw insertErr;
@@ -702,10 +736,8 @@ export default function UserToday({ mockPayload = null } = {}) {
 
                 {/* Lista de Refeições do Cardápio Ativo */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {activeMenu?.meals?.map((meal) => {
-                    const mealDoneMatch = completedMeals.find(
-                      cm => Number(cm.day_order) === Number(activeMenu.menu_day) && Number(cm.meal_order) === Number(meal.meal_order)
-                    );
+                  {activeMenu?.meals?.map((meal, _i, dayMeals) => {
+                    const mealDoneMatch = matchMealCheckins(dayMeals, completedMeals, activeMenu.menu_day).get(Number(meal.meal_order));
                     const isMealDone = !!mealDoneMatch;
                     const doneTime = mealDoneMatch?.completed_at
                       ? new Date(mealDoneMatch.completed_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })

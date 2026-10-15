@@ -746,6 +746,11 @@ async function buildNutritionSection(
         // meal_plan_meals.meal_order -- o app do aluno grava em
         // completed_meals.meal_order no check-in de refeição.
         meal_order: row.meal_order,
+        // uuid do prato (meals.id) -- o app casa o check-in de hoje pelo prato
+        // (completed_meals.meal_id, gravado no check-in desde 2026-10-04), não
+        // pela posição: reordenar/editar o cardápio no meio do dia não pode
+        // mover o ✓ para outro prato (2026-10-15).
+        meal_id: row.meal_id ?? null,
         name_ptbr: mealTypeNameBySlug.get(row.meal_type_id) ?? row.meal_type_id,
         time_ptbr: mealTimesByOrder.get(row.meal_order) ?? null,
         kcal: meal ? Math.round(Number(meal.calories)) : null,
