@@ -37,6 +37,27 @@ function calculateNextDayIndex(days, lastCompletedDayNumber) {
 }
 
 /**
+ * Dia que a aba de treino abre (2026-10-16, decisão da Taina), em ordem:
+ * 1. sessão em andamento (marcação por exercício aberta) -> o dia dela;
+ * 2. treino concluído HOJE -> o dia dele, para o aluno ver os próprios ✓ e as
+ *    cargas logo depois de treinar;
+ * 3. senão, o PRÓXIMO dia depois do último concluído (regra de 2026-10-04).
+ * No dia seguinte a regra 3 assume sozinha: o treino de ontem não está em
+ * activity_today.
+ */
+function chooseDefaultDayIndex(data) {
+  const days = data?.training?.days || [];
+  const indexOfDay = (dayNumber) => days.findIndex(d => Number(d.day_number) === Number(dayNumber));
+  const openMarks = (data?.exercise_marks || []).filter(m => !m.workout_id)
+    .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
+  if (openMarks.length && indexOfDay(openMarks[0].day_number) !== -1) return indexOfDay(openMarks[0].day_number);
+  const today = (data?.activity_today?.completed_workouts || [])
+    .slice().sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
+  if (today.length && indexOfDay(today[0].day_number) !== -1) return indexOfDay(today[0].day_number);
+  return calculateNextDayIndex(days, data?.last_completed_workout?.day_number ?? null);
+}
+
+/**
  * Casa os check-ins de refeição de HOJE com as refeições do cardápio de um dia
  * pelo PRATO (meal_id), não pela posição (2026-10-15): se a nutricionista
  * reordenar ou editar o cardápio durante o dia, o ✓ continua no prato que o
@@ -80,10 +101,7 @@ export default function UserToday({ mockPayload = null } = {}) {
 
   const initialDayIdx = useMemo(() => {
     if (!mockPayload) return 0;
-    const days = mockPayload.training?.days || [];
-    const workouts = mockPayload.activity_today?.completed_workouts || [];
-    const lastDay = mockPayload.last_completed_workout?.day_number ?? workouts[0]?.day_number;
-    return calculateNextDayIndex(days, lastDay);
+    return chooseDefaultDayIndex(mockPayload);
   }, [mockPayload]);
 
   const [selectedDayIdx, setSelectedDayIdx] = useState(initialDayIdx);
@@ -162,16 +180,9 @@ export default function UserToday({ mockPayload = null } = {}) {
         setCompletedWorkouts(todayWorkouts);
         setCompletedMeals(data.activity_today?.completed_meals || []);
 
-        // Define o dia padrão ao abrir: o PRÓXIMO dia depois do último concluído
-        // Ordem estrita de precedência:
-        // 1. data.last_completed_workout?.day_number (último treino concluído no plano ativo)
-        // 2. todayWorkouts[0]?.day_number (se concluído hoje)
-        // 3. Fallback: null -> calculateNextDayIndex retorna 0 (Dia 1, indicando plano novo)
-        const lastCompletedDay = data.last_completed_workout?.day_number ?? todayWorkouts[0]?.day_number ?? null;
-
-        const days = data.training?.days || [];
-        const nextDayIdx = calculateNextDayIndex(days, lastCompletedDay);
-        setSelectedDayIdx(nextDayIdx);
+        // Dia padrão ao abrir: sessão em andamento > treino feito hoje >
+        // próximo depois do último concluído (chooseDefaultDayIndex).
+        setSelectedDayIdx(chooseDefaultDayIndex(data));
 
       } catch (err) {
         if (!cancelled) {
