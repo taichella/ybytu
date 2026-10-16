@@ -724,6 +724,21 @@ export default function UserToday({ mockPayload = null } = {}) {
                     fat_g: acc.fat_g + (Number(m.macros?.fat_g) || 0),
                   }), { protein_g: 0, carb_g: 0, fat_g: 0 });
                   macros.protein_g = Math.round(macros.protein_g); macros.carb_g = Math.round(macros.carb_g); macros.fat_g = Math.round(macros.fat_g);
+                  // Calorias aproximadas DESTE cardápio (soma das refeições) no lugar
+                  // do título (2026-10-17, item 5). A meta do plano (calories) saiu do
+                  // card: difere da soma do cardápio (ex.: 1.525 x 1.370) e os dois
+                  // números juntos se contradiziam.
+                  const menuKcal = Math.round((activeMenu.meals || []).reduce((acc, m) => acc + (Number(m.kcal) || 0), 0));
+                  // "Registrado hoje" (2026-10-17, item 4): soma dos macros das refeições
+                  // REGISTRADAS hoje (de qualquer cardápio, pelo prato), em texto, sem
+                  // barra e sem comparar com o cardápio -- uma barra que enche diria
+                  // "falta" (docs/PRINCIPIOS_DE_PRODUTO.md, princípio 1).
+                  const macrosByMealId = new Map(nutritionMenus.flatMap(mn => (mn.meals || []).filter(m => m.meal_id).map(m => [m.meal_id, m.macros])));
+                  const registeredMacros = completedMeals.reduce((acc, cm) => {
+                    const mm = cm.meal_id ? macrosByMealId.get(cm.meal_id) : null;
+                    if (!mm) return acc;
+                    return { n: acc.n + 1, protein_g: acc.protein_g + (Number(mm.protein_g) || 0), carb_g: acc.carb_g + (Number(mm.carb_g) || 0), fat_g: acc.fat_g + (Number(mm.fat_g) || 0) };
+                  }, { n: 0, protein_g: 0, carb_g: 0, fat_g: 0 });
                   return (
                     <>
                       <div className="workout-summary-card" style={{ background: 'linear-gradient(140deg, rgba(5, 150, 105, 0.07) 0%, rgba(5, 150, 105, 0.02) 100%)', borderColor: 'rgba(5, 150, 105, 0.20)' }}>
@@ -731,9 +746,10 @@ export default function UserToday({ mockPayload = null } = {}) {
                           Cardápio {activeMenu.menu_day}
                         </span>
                         <h2 className="workout-session-title">
-                          {payload.nutrition.name_ptbr || `Cardápio Dia ${activeMenu.menu_day}`}
+                          {menuKcal > 0 ? `~${menuKcal.toLocaleString('pt-BR')} kcal` : (payload.nutrition.name_ptbr || `Cardápio ${activeMenu.menu_day}`)}
+                          {menuKcal > 0 && <span style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'var(--yb-muted, #718096)', marginTop: '2px' }}>aproximadas neste cardápio</span>}
                         </h2>
-                        {(payload.nutrition.daily_kcal_target || macros) && (() => {
+                        {(() => {
                           const totalG = (macros?.protein_g || 0) + (macros?.carb_g || 0) + (macros?.fat_g || 0);
                           const pctProt = totalG > 0 ? Math.round((macros.protein_g / totalG) * 100) : 0;
                           const pctCarb = totalG > 0 ? Math.round((macros.carb_g / totalG) * 100) : 0;
@@ -741,7 +757,6 @@ export default function UserToday({ mockPayload = null } = {}) {
                           return (
                             <>
                               <div className="ck-meal-macros">
-                                {payload.nutrition.daily_kcal_target && <span className="ck-pill">⚡ {payload.nutrition.daily_kcal_target} kcal</span>}
                                 {macros?.protein_g > 0 && <span className="ck-pill" style={{ color: '#2563EB' }}>🥩 {macros.protein_g}g prot</span>}
                                 {macros?.carb_g > 0 && <span className="ck-pill" style={{ color: '#D97706' }}>🍞 {macros.carb_g}g carb</span>}
                                 {macros?.fat_g > 0 && <span className="ck-pill" style={{ color: '#7C3AED' }}>🥑 {macros.fat_g}g gord</span>}
@@ -758,6 +773,11 @@ export default function UserToday({ mockPayload = null } = {}) {
                                     <div className="macro-bar-fill fat" style={{ width: `${pctFat}%` }} />
                                   </div>
                                 </div>
+                              )}
+                              {registeredMacros.n > 0 && (
+                                <p className="ck-registered-macros" style={{ margin: '8px 0 0', fontSize: '12px', fontWeight: 700, color: 'var(--yb-muted, #718096)' }}>
+                                  Registrado hoje: {Math.round(registeredMacros.protein_g)}g prot · {Math.round(registeredMacros.carb_g)}g carb · {Math.round(registeredMacros.fat_g)}g gord
+                                </p>
                               )}
                             </>
                           );
