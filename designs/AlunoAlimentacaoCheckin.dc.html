@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ybytu — Design: Cardápio do Dia & Acompanhamento Alimentar (App e Dashboard)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand: #F55F16;
+    --brand-hover: #FF7A3D;
+    --brand-soft: rgba(245, 95, 22, 0.10);
+    --brand-ink: #B4400A;
+    --bg: #F8F9FA;
+    --surface: #FFFFFF;
+    --surface-2: #F1F5F9;
+    --border: #E2E8F0;
+    --border-strong: #CBD5E1;
+    --text: #1A202C;
+    --muted: #718096;
+    --field: #F8F9FA;
+    --success: #16a34a;
+    --success-soft: rgba(22, 163, 74, 0.12);
+    --nutrition-accent: #059669;
+    --nutrition-soft: rgba(5, 150, 105, 0.10);
+    --nutrition-ink: #065F46;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #090D16;
+    color: #E2E8F0;
+    padding: 32px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Canvas Layout */
+  .canvas-wrap {
+    display: flex;
+    gap: 36px;
+    align-items: flex-start;
+    min-width: 3200px;
+  }
+
+  /* Specification Panel */
+  .spec-panel {
+    width: 440px;
+    background: #111827;
+    border: 1px solid #1F2937;
+    border-radius: 24px;
+    padding: 26px;
+    color: #CBD5E1;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    position: sticky;
+    top: 32px;
+    flex-shrink: 0;
+  }
+
+  .spec-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .spec-badge {
+    background: var(--nutrition-soft);
+    color: #34D399;
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .spec-desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #94A3B8;
+    margin-bottom: 20px;
+  }
+
+  .spec-rule {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .spec-rule-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34D399;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 900;
+    font-size: 13px;
+  }
+
+  .spec-alert {
+    background: rgba(5, 150, 105, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 12.5px;
+    color: #A7F3D0;
+    line-height: 1.55;
+    margin: 18px 0;
+  }
+
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    font-size: 12px;
+  }
+
+  .spec-table th, .spec-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #1F2937;
+    text-align: left;
+  }
+
+  .spec-table th {
+    color: #94A3B8;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  /* Phone Mockup Frame Wrapper */
+  .frame-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .frame-title {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94A3B8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .frame-title .step-pill {
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 900;
+    color: #FFFFFF;
+  }
+
+  .phone {
+    width: 384px;
+    background: #020617;
+    border-radius: 46px;
+    padding: 12px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .screen {
+    width: 360px;
+    min-height: 740px;
+    background: var(--bg);
+    border-radius: 36px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    color: var(--text);
+    position: relative;
+  }
+
+  /* Device Chrome */
+  .notch {
+    position: sticky;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 116px;
+    height: 26px;
+    background: #020617;
+    border-radius: 0 0 16px 16px;
+    z-index: 50;
+    margin: 0 auto;
+  }
+
+  .status-bar {
+    height: 38px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 22px 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1A202C;
+    flex-shrink: 0;
+  }
+
+  /* PWA Header */
+  .user-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .user-greeting {
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--text);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .user-date {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  /* Main Tab Selector (Treino vs Alimentação) */
+  .user-tabs-bar {
+    display: flex;
+    background: var(--surface-2);
+    padding: 4px;
+    border-radius: 14px;
+    margin: 12px 16px 6px;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .user-tab-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    min-height: 40px;
+  }
+
+  .user-tab-btn.active {
+    background: var(--surface);
+    color: #059669;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Scrollable Body Content */
+  .app-body {
+    flex: 1;
+    padding: 12px 16px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Menu Chips */
+  .menu-chips-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .menu-chips-scroll::-webkit-scrollbar { display: none; }
+
+  .menu-chip {
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    cursor: pointer;
+  }
+
+  .menu-chip.active {
+    background: #059669;
+    border-color: #059669;
+    color: #FFFFFF;
+    box-shadow: 0 3px 10px rgba(5, 150, 105, 0.35);
+  }
+
+  .menu-chip.suggested {
+    border: 1.5px dashed #059669;
+    background: rgba(5, 150, 105, 0.06);
+    color: #065F46;
+  }
+
+  /* Nutrition Summary Card */
+  .nutrition-summary-card {
+    background: linear-gradient(140deg, rgba(5, 150, 105, 0.07) 0%, rgba(5, 150, 105, 0.02) 100%);
+    border: 1.5px solid rgba(5, 150, 105, 0.20);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 4px 18px rgba(5, 150, 105, 0.05);
+  }
+
+  .nutrition-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .nutrition-title {
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  /* Metas Diárias (sem comparar com o que foi comido) */
+  .macros-grid {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .macro-pill {
+    padding: 4px 9px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    color: var(--text);
+  }
+
+  /* Barra de Proporção de Macros (Prescrição Estática do Cardápio) */
+  .macro-proportion-track {
+    display: flex;
+    height: 7px;
+    width: 100%;
+    background-color: var(--surface-2);
+    border-radius: 999px;
+    overflow: hidden;
+    gap: 2px;
+    margin-top: 6px;
+  }
+
+  .macro-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+
+  .macro-bar-fill.protein { background-color: #2563EB; }
+  .macro-bar-fill.carb { background-color: #D97706; }
+  .macro-bar-fill.fat { background-color: #7C3AED; }
+
+  /* Contador com Bolinhas (SEM fração, SEM porcentagem) */
+  .meal-tracker-box {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(5, 150, 105, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .meal-counter-text {
+    font-size: 13.5px;
+    font-weight: 900;
+    color: #065F46;
+    letter-spacing: -0.01em;
+  }
+
+  .meal-dots-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .meal-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+
+  .meal-dot.filled {
+    background: #059669;
+    box-shadow: 0 1px 4px rgba(5, 150, 105, 0.4);
+  }
+
+  .meal-dot.empty {
+    background: #FFFFFF;
+    border: 2px solid #CBD5E1;
+  }
+
+  /* Discrete Notice when All Registered */
+  .all-registered-notice {
+    background: rgba(5, 150, 105, 0.10);
+    border: 1px solid rgba(5, 150, 105, 0.25);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #065F46;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Informative Continuity Banner */
+  .continuity-notice {
+    background: rgba(59, 130, 246, 0.08);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1E40AF;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.45;
+  }
+
+  /* Meal Item Card (PADRONIZADO COM O TREINO) */
+  .meal-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.2s ease;
+  }
+
+  .meal-card.registered {
+    border-color: rgba(22, 163, 74, 0.45);
+    background: #F8FCF8;
+  }
+
+  /* Top Row: [ Ícone 48px ] [ Meta flex:1 ] [ Checkbox 34px à direita ] */
+  .meal-top-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .meal-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .meal-meta-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meal-title-line {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  .meal-dish-line {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-top: -1px;
+  }
+
+  /* Resolução da disputa de espaço: horário e kcal na linha de chips */
+  .meal-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-top: 2px;
+  }
+
+  .meal-time-tag {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--muted);
+    background: var(--surface-2);
+    padding: 2.5px 8px;
+    border-radius: 999px;
+    font-feature-settings: "tnum";
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .tag-pill {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    background: var(--surface-2);
+    padding: 2.5px 7px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .tag-pill.logged {
+    background: rgba(22, 163, 74, 0.14);
+    color: #14532D;
+    font-weight: 800;
+    border: 1px solid rgba(22, 163, 74, 0.3);
+  }
+
+  .tag-pill.from-other-menu {
+    background: rgba(59, 130, 246, 0.12);
+    color: #1E40AF;
+    font-weight: 800;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+  }
+
+  /* Caixa Ergonômica de 34×34px à DIREITA */
+  .meal-check-hit {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    border: 2px solid var(--border-strong);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    margin-top: 2px;
+    padding: 0;
+  }
+
+  .meal-check-hit.checked {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #FFFFFF;
+    box-shadow: 0 2px 6px rgba(22, 163, 74, 0.35);
+  }
+
+  .meal-foods-box {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12.5px;
+  }
+
+  .food-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    border-bottom: 1px dashed rgba(226, 232, 240, 0.6);
+    padding-bottom: 3px;
+  }
+  .food-line:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .f-name { color: var(--text); font-weight: 600; }
+  .f-qty { color: var(--muted); font-weight: 600; white-space: nowrap; font-size: 12px; }
+
+  .meal-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .btn-unmark-link {
+    background: none;
+    border: none;
+    color: #64748B;
+    font-weight: 700;
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+
+  .btn-register-link {
+    background: none;
+    border: none;
+    color: #059669;
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+
+  /* ============================================================
+     ESTILOS DO DASHBOARD (PAINEL DA EQUIPE)
+     ============================================================ */
+  .dash-panel-wrap {
+    width: 680px;
+    background: #FFFFFF;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    color: var(--text);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .dash-panel-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #FAFAFA;
+  }
+
+  .dash-panel-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+
+  .dash-day-row {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s ease;
+  }
+
+  .dash-day-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .dash-day-summary:hover { background: var(--surface-2); }
+
+  .dash-day-date {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-day-meta {
+    font-size: 12.5px;
+    color: var(--muted);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-day-chevron {
+    width: 18px;
+    height: 18px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    transition: transform 0.2s ease;
+  }
+
+  .dash-day-details {
+    background: #F8FAFC;
+    padding: 12px 22px 16px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dash-group-header {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #475569;
+    padding: 4px 0 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dash-meal-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    font-size: 12.5px;
+  }
+
+  .dash-meal-item-name {
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dash-meal-item-meta {
+    font-size: 11.5px;
+    color: var(--muted);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dash-day-empty {
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #94A3B8;
+    background: #FAFAFA;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+</style>
+</helmet>
+
+<div class="canvas-wrap">
+
+  <!-- ============================================================
+       PAINEL DE ESPECIFICAÇÃO & PRINCÍPIOS DE DESIGN
+       ============================================================ -->
+  <aside class="spec-panel">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <span class="spec-badge">Especificação Aprovada</span>
+      <span style="font-size:11px;font-weight:700;color:#64748B;">Briefing 2026-10-16</span>
+    </div>
+    
+    <h1 class="spec-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+        <line x1="6" y1="1" x2="6" y2="4"></line>
+        <line x1="10" y1="1" x2="10" y2="4"></line>
+        <line x1="14" y1="1" x2="14" y2="4"></line>
+      </svg>
+      Cardápio do Dia & Caixa à Direita
+    </h1>
+    
+    <p class="spec-desc">
+      O aluno <strong>escolhe qual cardápio do plano vai seguir hoje</strong> e registra refeições contra ele. Escolher é intenção; concluir seria afirmação. Padronização completa da anatomia do cartão com caixa ergonômica de 34px à direita.
+    </p>
+
+    <!-- ALERTA DE PRINCÍPIO DE PRODUTO -->
+    <div class="spec-alert">
+      <strong style="display:block;margin-bottom:4px;color:#34D399;">✓ Resolução da Disputa de Espaço no Cabeçalho</strong>
+      Ao posicionar a caixa de 34×34px à <strong>direita</strong> (alcance do polegar), o cabeçalho não comporta título, horário e calorias na mesma linha em 360px. <strong>Solução aprovada:</strong> horário (<code>⏰ ~08:00</code>), calorias (<code>⚡ ~420 kcal</code>) e proteínas (<code>🥩 28g prot</code>) foram organizados na <strong>linha de chips logo abaixo do título</strong>, replicando exatamente a estrutura de tags do treino.
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">1</span>
+      <div>
+        <strong style="color:#FFFFFF;">Sugestão vs Escolha (Princípio 3):</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Ao abrir sem escolha, o app sugere o próximo cardápio da sequência (<em>"Sugerido para hoje: Cardápio 3"</em>). A sugestão não é escolha: a escolha só se torna dado do aluno ao tocar no cardápio ou registrar a 1ª refeição.</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">2</span>
+      <div>
+        <strong style="color:#FFFFFF;">Troca Livre no Meio do Dia:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Permitida a qualquer momento, sem diálogo de bloqueio. Refeições já registradas de outro cardápio continuam válidas e somadas ao total do dia.</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">3</span>
+      <div>
+        <strong style="color:#FFFFFF;">Contador e Bolinhas:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">O contador exibe <em>"N refeições registradas hoje"</em> (todas as do dia). As bolinhas mostram as refeições planejadas no cardápio ativo hoje (preenchidas ou vazias).</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">4</span>
+      <div>
+        <strong style="color:#FFFFFF;">Tudo Registrado: Discreto e Sem Fechamento:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Aviso discreto <em>"Você registrou todas as refeições de hoje."</em> Não existe botão de encerrar o dia alimentar nem cálculo de porcentagem.</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">5</span>
+      <div>
+        <strong style="color:#FFFFFF;">Dashboard na Aba Atividade:</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">Linha por dia no formato <em>"Cardápio 3 · 3 de 5 refeições registradas · 1.240 kcal registradas"</em>. Em caso de troca, lista agrupada por cardápio ao expandir.</p>
+      </div>
+    </div>
+
+    <div class="spec-rule">
+      <span class="spec-rule-icon">6</span>
+      <div>
+        <strong style="color:#FFFFFF;">Distribuição do Cardápio (Prescrição Estática):</strong>
+        <p style="margin:2px 0 0;color:#94A3B8;">A barra calcula a soma das refeições do <strong>cardápio em tela</strong> (não a média do plano). <strong>NUNCA muda conforme o aluno registra refeições</strong> (não é progresso de consumo). Exibida estritamente em gramas (ex: <em>145g prot · 230g carb · 65g gord</em>), sem símbolo de <code>%</code> e com rótulo <em>"Distribuição do cardápio"</em> (nunca "meta").</p>
+      </div>
+    </div>
+
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>Elemento</th>
+          <th>Treino</th>
+          <th>Alimentação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:#FFF;font-weight:700;">Caixa de Marcação</td>
+          <td>34×34px à <strong>direita</strong></td>
+          <td>34×34px à <strong>direita</strong></td>
+        </tr>
+        <tr>
+          <td style="color:#FFF;font-weight:700;">Âncora Visual (Esquerda)</td>
+          <td>Thumbnail 50×50px</td>
+          <td>Ícone Emoji 48×48px</td>
+        </tr>
+        <tr>
+          <td style="color:#FFF;font-weight:700;">Metas / Tags</td>
+          <td>Séries, Carga, Descanso</td>
+          <td>Horário, Kcal, Proteínas</td>
+        </tr>
+        <tr>
+          <td style="color:#FFF;font-weight:700;">Barra de Macros</td>
+          <td>Não aplicável</td>
+          <td>Distribuição estática em gramas (sem %)</td>
+        </tr>
+        <tr>
+          <td style="color:#FFF;font-weight:700;">Encerramento</td>
+          <td>Auto-fecha na 6ª marcação</td>
+          <td>Sem fechamento (zera à meia-noite)</td>
+        </tr>
+      </tbody>
+    </table>
+  </aside>
+
+  <!-- ============================================================
+       MOCKUP 1: APP DO ALUNO (360px) — AO ABRIR (SUGESTÃO)
+       Sem escolha feita hoje. App sugere Cardápio 3.
+       ============================================================ -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:#475569;">APP · 360PX</span>
+      1. Ao Abrir: Sugestão (Sem Escolha Feita)
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span>08:10</span>
+        <span style="display:flex;gap:4px;align-items:center;">●●● 🔋</span>
+      </div>
+
+      <header class="user-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F55F16,#FF7A3D);color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;">
+            M
+          </div>
+          <div>
+            <h2 class="user-greeting">Olá, Mariana!</h2>
+            <div class="user-date">Sexta-feira, 16 de Outubro</div>
+          </div>
+        </div>
+      </header>
+
+      <nav class="user-tabs-bar">
+        <button type="button" class="user-tab-btn"><span>🏋️</span> Treino de Hoje</button>
+        <button type="button" class="user-tab-btn active"><span>🥗</span> Alimentação</button>
+      </nav>
+
+      <main class="app-body">
+        <!-- Seletor de Cardápios (com sugestão) -->
+        <div class="menu-chips-scroll">
+          <button type="button" class="menu-chip">Cardápio 1</button>
+          <button type="button" class="menu-chip">Cardápio 2</button>
+          <button type="button" class="menu-chip suggested">Cardápio 3 · Sugerido</button>
+          <button type="button" class="menu-chip">Cardápio 4</button>
+        </div>
+
+        <!-- Resumo do Cardápio: Sugestão explícita -->
+        <div class="nutrition-summary-card">
+          <div class="nutrition-header-row">
+            <div>
+              <span style="background:rgba(217, 119, 6, 0.12);color:#B45309;border:1px solid rgba(217,119,6,0.3);font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;">
+                Sugerido para hoje
+              </span>
+              <h3 class="nutrition-title" style="margin-top:6px;">Cardápio 3 · Rotina Ativa</h3>
+            </div>
+          </div>
+
+          <div class="macros-grid">
+            <span class="macro-pill">⚡ 2.150 kcal</span>
+            <span class="macro-pill" style="color:#2563EB;">🥩 145g prot</span>
+            <span class="macro-pill" style="color:#D97706;">🍞 230g carb</span>
+            <span class="macro-pill" style="color:#7C3AED;">🥑 65g gord</span>
+          </div>
+
+          <div class="macro-distribution-section" style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px;">
+              <span>Distribuição do cardápio</span>
+              <span>145g · 230g · 65g</span>
+            </div>
+            <div class="macro-proportion-track" aria-hidden="true" title="Distribuição do cardápio: 145g prot · 230g carb · 65g gord">
+              <div class="macro-bar-fill protein" style="width:33%;"></div>
+              <div class="macro-bar-fill carb" style="width:52%;"></div>
+              <div class="macro-bar-fill fat" style="width:15%;"></div>
+            </div>
+          </div>
+
+          <!-- Sugestão não é escolha (Princípio 3) -->
+          <div style="margin-top:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.7);border:1px solid rgba(226,232,240,0.8);font-size:11.5px;color:var(--muted);line-height:1.4;">
+            💡 O app sugere o Cardápio 3 para variar sua semana. Toque para escolher ou registre uma refeição abaixo.
+          </div>
+
+          <div class="meal-tracker-box">
+            <span class="meal-counter-text">Nenhuma refeição registrada hoje</span>
+            <div class="meal-dots-row">
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- REFEIÇÃO 1: Limpa com Caixa à Direita -->
+        <article class="meal-card">
+          <div class="meal-top-row">
+            <div class="meal-icon-wrap">🥞</div>
+            <div class="meal-meta-col">
+              <div class="meal-title-line">Café da Manhã</div>
+              <div class="meal-dish-line">Ovos mexidos com torradas</div>
+              <div class="meal-tags-row">
+                <span class="meal-time-tag">⏰ ~08:00</span>
+                <span class="tag-pill">⚡ ~420 kcal</span>
+                <span class="tag-pill">🥩 28g prot</span>
+              </div>
+            </div>
+            <button type="button" class="meal-check-hit" aria-label="Registrar Café da Manhã"></button>
+          </div>
+          <div class="meal-foods-box">
+            <div class="food-line"><span class="f-name">Ovos mexidos</span><span class="f-qty">3 un</span></div>
+            <div class="food-line"><span class="f-name">Pão integral</span><span class="f-qty">2 fatias (50g)</span></div>
+          </div>
+          <div class="meal-card-footer">
+            <span style="font-size:11px;color:var(--muted);">Sugerido para ~08:00</span>
+            <button type="button" class="btn-register-link">Registrar refeição →</button>
+          </div>
+        </article>
+
+        <!-- REFEIÇÃO 2: Limpa -->
+        <article class="meal-card">
+          <div class="meal-top-row">
+            <div class="meal-icon-wrap">🍎</div>
+            <div class="meal-meta-col">
+              <div class="meal-title-line">Lanche da Manhã</div>
+              <div class="meal-tags-row">
+                <span class="meal-time-tag">⏰ ~10:30</span>
+                <span class="tag-pill">⚡ ~180 kcal</span>
+                <span class="tag-pill">🥩 8g prot</span>
+              </div>
+            </div>
+            <button type="button" class="meal-check-hit" aria-label="Registrar Lanche"></button>
+          </div>
+          <div class="meal-foods-box">
+            <div class="food-line"><span class="f-name">Maçã argentina</span><span class="f-qty">1 un</span></div>
+            <div class="food-line"><span class="f-name">Castanhas-do-Pará</span><span class="f-qty">15g</span></div>
+          </div>
+          <div class="meal-card-footer">
+            <span style="font-size:11px;color:var(--muted);">Sugerido para ~10:30</span>
+            <button type="button" class="btn-register-link">Registrar refeição →</button>
+          </div>
+        </article>
+
+      </main>
+    </div></div>
+  </div>
+
+  <!-- ============================================================
+       MOCKUP 2: APP DO ALUNO (360px) — CARDÁPIO ESCOLHIDO
+       Aluno escolheu Cardápio 3 · 2 refeições registradas hoje
+       ============================================================ -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:#059669;">APP · 360PX</span>
+      2. Cardápio de Hoje Escolhido (2 Registradas)
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span>11:30</span>
+        <span style="display:flex;gap:4px;align-items:center;">●●● 🔋</span>
+      </div>
+
+      <header class="user-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F55F16,#FF7A3D);color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;">
+            M
+          </div>
+          <div>
+            <h2 class="user-greeting">Olá, Mariana!</h2>
+            <div class="user-date">Sexta-feira, 16 de Outubro</div>
+          </div>
+        </div>
+      </header>
+
+      <nav class="user-tabs-bar">
+        <button type="button" class="user-tab-btn"><span>🏋️</span> Treino de Hoje</button>
+        <button type="button" class="user-tab-btn active"><span>🥗</span> Alimentação</button>
+      </nav>
+
+      <main class="app-body">
+        <!-- Seletor de Cardápios (Cardápio 3 ativo e escolhido) -->
+        <div class="menu-chips-scroll">
+          <button type="button" class="menu-chip">Cardápio 1</button>
+          <button type="button" class="menu-chip">Cardápio 2</button>
+          <button type="button" class="menu-chip active">Cardápio 3 · Hoje</button>
+          <button type="button" class="menu-chip">Cardápio 4</button>
+        </div>
+
+        <div class="nutrition-summary-card">
+          <div class="nutrition-header-row">
+            <div>
+              <span style="background:#059669;color:#FFF;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;">
+                Cardápio de hoje: 3
+              </span>
+              <h3 class="nutrition-title" style="margin-top:6px;">Rotina Ativa</h3>
+            </div>
+          </div>
+
+          <div class="macros-grid">
+            <span class="macro-pill">⚡ 2.150 kcal</span>
+            <span class="macro-pill" style="color:#2563EB;">🥩 145g prot</span>
+            <span class="macro-pill" style="color:#D97706;">🍞 230g carb</span>
+            <span class="macro-pill" style="color:#7C3AED;">🥑 65g gord</span>
+          </div>
+
+          <div class="macro-distribution-section" style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px;">
+              <span>Distribuição do cardápio</span>
+              <span>145g · 230g · 65g</span>
+            </div>
+            <div class="macro-proportion-track" aria-hidden="true" title="Distribuição do cardápio: 145g prot · 230g carb · 65g gord">
+              <div class="macro-bar-fill protein" style="width:33%;"></div>
+              <div class="macro-bar-fill carb" style="width:52%;"></div>
+              <div class="macro-bar-fill fat" style="width:15%;"></div>
+            </div>
+          </div>
+
+          <div class="meal-tracker-box">
+            <span class="meal-counter-text">2 refeições registradas hoje</span>
+            <div class="meal-dots-row">
+              <span class="meal-dot filled"></span>
+              <span class="meal-dot filled"></span>
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- REFEIÇÃO 1: REGISTRADA (Caixa Verde à Direita) -->
+        <article class="meal-card registered">
+          <div class="meal-top-row">
+            <div class="meal-icon-wrap">🥞</div>
+            <div class="meal-meta-col">
+              <div class="meal-title-line">Café da Manhã</div>
+              <div class="meal-tags-row">
+                <span class="tag-pill">~420 kcal</span>
+                <span class="tag-pill logged">✓ Registrada às 08:15</span>
+              </div>
+            </div>
+            <div class="meal-check-hit checked" title="Refeição Registrada">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="meal-foods-box">
+            <div class="food-line"><span class="f-name">Ovos mexidos</span><span class="f-qty">3 un</span></div>
+            <div class="food-line"><span class="f-name">Pão integral</span><span class="f-qty">2 fatias (50g)</span></div>
+          </div>
+          <div class="meal-card-footer">
+            <span style="font-size:11px;color:var(--muted);">Registrada hoje</span>
+            <button type="button" class="btn-unmark-link">Desfazer registro</button>
+          </div>
+        </article>
+
+        <!-- REFEIÇÃO 2: REGISTRADA -->
+        <article class="meal-card registered">
+          <div class="meal-top-row">
+            <div class="meal-icon-wrap">🍎</div>
+            <div class="meal-meta-col">
+              <div class="meal-title-line">Lanche da Manhã</div>
+              <div class="meal-tags-row">
+                <span class="tag-pill">~180 kcal</span>
+                <span class="tag-pill logged">✓ Registrada às 10:45</span>
+              </div>
+            </div>
+            <div class="meal-check-hit checked" title="Refeição Registrada">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="meal-foods-box">
+            <div class="food-line"><span class="f-name">Maçã argentina</span><span class="f-qty">1 un</span></div>
+            <div class="food-line"><span class="f-name">Castanhas-do-Pará</span><span class="f-qty">15g</span></div>
+          </div>
+          <div class="meal-card-footer">
+            <span style="font-size:11px;color:var(--muted);">Registrada hoje</span>
+            <button type="button" class="btn-unmark-link">Desfazer registro</button>
+          </div>
+        </article>
+
+        <!-- REFEIÇÃO 3: LIMPA (Caixa vazia à direita) -->
+        <article class="meal-card">
+          <div class="meal-top-row">
+            <div class="meal-icon-wrap">🥗</div>
+            <div class="meal-meta-col">
+              <div class="meal-title-line">Almoço</div>
+              <div class="meal-dish-line">Frango grelhado com arroz integral</div>
+              <div class="meal-tags-row">
+                <span class="meal-time-tag">⏰ ~12:30</span>
+                <span class="tag-pill">⚡ ~680 kcal</span>
+                <span class="tag-pill">🥩 42g prot</span>
+              </div>
+            </div>
+            <button type="button" class="meal-check-hit" aria-label="Registrar Almoço"></button>
+          </div>
+          <div class="meal-foods-box">
+            <div class="food-line"><span class="f-name">Peito de frango grelhado</span><span class="f-qty">150g</span></div>
+            <div class="food-line"><span class="f-name">Arroz integral cozido</span><span class="f-qty">120g</span></div>
+          </div>
+          <div class="meal-card-footer">
+            <span style="font-size:11px;color:var(--muted);">Sugerido para ~12:30</span>
+            <button type="button" class="btn-register-link">Registrar refeição →</button>
+          </div>
+        </article>
+
+      </main>
+    </div></div>
+  </div>
+
+  <!-- ============================================================
+       MOCKUP 3: APP DO ALUNO (360px) — TROCA DE CARDÁPIO NO MEIO DO DIA
+       Aluno trocou para o Cardápio 2 após registrar Café no Cardápio 3
+       ============================================================ -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:#2563EB;">APP · 360PX</span>
+      3. Troca de Cardápio no Meio do Dia (Sem Bloqueio)
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span>12:20</span>
+        <span style="display:flex;gap:4px;align-items:center;">●●● 🔋</span>
+      </div>
+
+      <header class="user-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F55F16,#FF7A3D);color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;">
+            M
+          </div>
+          <div>
+            <h2 class="user-greeting">Olá, Mariana!</h2>
+            <div class="user-date">Sexta-feira, 16 de Outubro</div>
+          </div>
+        </div>
+      </header>
+
+      <nav class="user-tabs-bar">
+        <button type="button" class="user-tab-btn"><span>🏋️</span> Treino de Hoje</button>
+        <button type="button" class="user-tab-btn active"><span>🥗</span> Alimentação</button>
+      </nav>
+
+      <main class="app-body">
+        <!-- Seletor: Cardápio 2 agora ativo -->
+        <div class="menu-chips-scroll">
+          <button type="button" class="menu-chip">Cardápio 1</button>
+          <button type="button" class="menu-chip active">Cardápio 2 · Hoje</button>
+          <button type="button" class="menu-chip">Cardápio 3</button>
+          <button type="button" class="menu-chip">Cardápio 4</button>
+        </div>
+
+        <div class="nutrition-summary-card">
+          <div class="nutrition-header-row">
+            <div>
+              <span style="background:#2563EB;color:#FFF;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;">
+                Cardápio de hoje: 2
+              </span>
+              <h3 class="nutrition-title" style="margin-top:6px;">Flexível & Almoço Fora</h3>
+            </div>
+          </div>
+
+          <div class="macros-grid">
+            <span class="macro-pill">⚡ 2.050 kcal</span>
+            <span class="macro-pill" style="color:#2563EB;">🥩 135g prot</span>
+            <span class="macro-pill" style="color:#D97706;">🍞 220g carb</span>
+            <span class="macro-pill" style="color:#7C3AED;">🥑 68g gord</span>
+          </div>
+
+          <div class="macro-distribution-section" style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px;">
+              <span>Distribuição do cardápio</span>
+              <span>135g · 220g · 68g</span>
+            </div>
+            <div class="macro-proportion-track" aria-hidden="true" title="Distribuição do cardápio: 135g prot · 220g carb · 68g gord">
+              <div class="macro-bar-fill protein" style="width:32%;"></div>
+              <div class="macro-bar-fill carb" style="width:52%;"></div>
+              <div class="macro-bar-fill fat" style="width:16%;"></div>
+            </div>
+          </div>
+
+          <!-- Nota informativa de continuidade (Princípio 1 e Briefing) -->
+          <div class="continuity-notice" style="margin-top:10px;">
+            <span>ℹ️</span>
+            <div>1 refeição registrada no <strong>Cardápio 3</strong> hoje. Ela continua válida e contabilizada no seu histórico.</div>
+          </div>
+
+          <!-- Contador com bolinhas do cardápio ativo -->
+          <div class="meal-tracker-box">
+            <span class="meal-counter-text">1 refeição registrada hoje</span>
+            <div class="meal-dots-row" title="Bolinhas do Cardápio 2">
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+              <span class="meal-dot empty"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Almoço do Cardápio 2 pronto para registrar -->
+        <article class="meal-card">
+          <div class="meal-top-row">
+            <div class="meal-icon-wrap">🥗</div>
+            <div class="meal-meta-col">
+              <div class="meal-title-line">Almoço</div>
+              <div class="meal-dish-line">Buffet livre: proteína magra + salada colorida</div>
+              <div class="meal-tags-row">
+                <span class="meal-time-tag">⏰ ~12:30</span>
+                <span class="tag-pill">⚡ ~620 kcal</span>
+                <span class="tag-pill">🥩 38g prot</span>
+              </div>
+            </div>
+            <button type="button" class="meal-check-hit" aria-label="Registrar Almoço"></button>
+          </div>
+          <div class="meal-foods-box">
+            <div class="food-line"><span class="f-name">Filé mignon grelhado</span><span class="f-qty">140g</span></div>
+            <div class="food-line"><span class="f-name">Salada de folhas e tomate</span><span class="f-qty">à vontade</span></div>
+          </div>
+          <div class="meal-card-footer">
+            <span style="font-size:11px;color:var(--muted);">Sugerido para ~12:30</span>
+            <button type="button" class="btn-register-link">Registrar refeição →</button>
+          </div>
+        </article>
+
+        <!-- Lanche do Cardápio 2 -->
+        <article class="meal-card">
+          <div class="meal-top-row">
+            <div class="meal-icon-wrap">🥪</div>
+            <div class="meal-meta-col">
+              <div class="meal-title-line">Lanche da Tarde</div>
+              <div class="meal-tags-row">
+                <span class="meal-time-tag">⏰ ~16:30</span>
+                <span class="tag-pill">⚡ ~290 kcal</span>
+                <span class="tag-pill">🥩 22g prot</span>
+              </div>
+            </div>
+            <button type="button" class="meal-check-hit" aria-label="Registrar Lanche"></button>
+          </div>
+          <div class="meal-foods-box">
+            <div class="food-line"><span class="f-name">Iogurte grego natural</span><span class="f-qty">150g</span></div>
+            <div class="food-line"><span class="f-name">Frutas vermelhas</span><span class="f-qty">50g</span></div>
+          </div>
+          <div class="meal-card-footer">
+            <span style="font-size:11px;color:var(--muted);">Sugerido para ~16:30</span>
+            <button type="button" class="btn-register-link">Registrar refeição →</button>
+          </div>
+        </article>
+
+      </main>
+    </div></div>
+  </div>
+
+  <!-- ============================================================
+       MOCKUP 4: APP DO ALUNO (360px) — TODAS REGISTRADAS NO CARDÁPIO
+       Discreto, sem fechamento do dia nem cobrança de sequência
+       ============================================================ -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:#065F46;">APP · 360PX</span>
+      4. Todas Registradas no Cardápio (Discreto)
+    </div>
+
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="status-bar">
+        <span>21:15</span>
+        <span style="display:flex;gap:4px;align-items:center;">●●● 🔋</span>
+      </div>
+
+      <header class="user-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F55F16,#FF7A3D);color:#FFF;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;">
+            M
+          </div>
+          <div>
+            <h2 class="user-greeting">Olá, Mariana!</h2>
+            <div class="user-date">Sexta-feira, 16 de Outubro</div>
+          </div>
+        </div>
+      </header>
+
+      <nav class="user-tabs-bar">
+        <button type="button" class="user-tab-btn"><span>🏋️</span> Treino de Hoje</button>
+        <button type="button" class="user-tab-btn active"><span>🥗</span> Alimentação</button>
+      </nav>
+
+      <main class="app-body">
+        <div class="menu-chips-scroll">
+          <button type="button" class="menu-chip">Cardápio 1</button>
+          <button type="button" class="menu-chip">Cardápio 2</button>
+          <button type="button" class="menu-chip active">Cardápio 3 · Hoje</button>
+          <button type="button" class="menu-chip">Cardápio 4</button>
+        </div>
+
+        <div class="nutrition-summary-card">
+          <div class="nutrition-header-row">
+            <div>
+              <span style="background:#059669;color:#FFF;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;padding:3px 9px;border-radius:999px;">
+                Cardápio de hoje: 3
+              </span>
+              <h3 class="nutrition-title" style="margin-top:6px;">Rotina Ativa</h3>
+            </div>
+          </div>
+
+          <div class="macros-grid">
+            <span class="macro-pill">⚡ 2.150 kcal</span>
+            <span class="macro-pill" style="color:#2563EB;">🥩 145g prot</span>
+            <span class="macro-pill" style="color:#D97706;">🍞 230g carb</span>
+            <span class="macro-pill" style="color:#7C3AED;">🥑 65g gord</span>
+          </div>
+
+          <div class="macro-distribution-section" style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px;">
+              <span>Distribuição do cardápio</span>
+              <span>145g · 230g · 65g</span>
+            </div>
+            <div class="macro-proportion-track" aria-hidden="true" title="Distribuição do cardápio: 145g prot · 230g carb · 65g gord">
+              <div class="macro-bar-fill protein" style="width:33%;"></div>
+              <div class="macro-bar-fill carb" style="width:52%;"></div>
+              <div class="macro-bar-fill fat" style="width:15%;"></div>
+            </div>
+          </div>
+
+          <div class="meal-tracker-box">
+            <span class="meal-counter-text">5 refeições registradas hoje</span>
+            <div class="meal-dots-row">
+              <span class="meal-dot filled"></span>
+              <span class="meal-dot filled"></span>
+              <span class="meal-dot filled"></span>
+              <span class="meal-dot filled"></span>
+              <span class="meal-dot filled"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aviso Discreto de Todas Registradas -->
+        <div class="all-registered-notice">
+          <span style="font-size:16px;">✓</span>
+          <span>Você registrou todas as refeições de hoje.</span>
+        </div>
+
+        <!-- Exemplo: Jantar Registrado com Caixa à Direita -->
+        <article class="meal-card registered">
+          <div class="meal-top-row">
+            <div class="meal-icon-wrap">🍽️</div>
+            <div class="meal-meta-col">
+              <div class="meal-title-line">Jantar</div>
+              <div class="meal-tags-row">
+                <span class="tag-pill">~540 kcal</span>
+                <span class="tag-pill logged">✓ Registrada às 20:12</span>
+              </div>
+            </div>
+            <div class="meal-check-hit checked">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="meal-foods-box">
+            <div class="food-line"><span class="f-name">Patinho moído</span><span class="f-qty">130g</span></div>
+            <div class="food-line"><span class="f-name">Batata doce cozida</span><span class="f-qty">140g</span></div>
+          </div>
+          <div class="meal-card-footer">
+            <span style="font-size:11px;color:var(--muted);">Registrada hoje</span>
+            <button type="button" class="btn-unmark-link">Desfazer registro</button>
+          </div>
+        </article>
+
+        <!-- Exemplo: Ceia Registrada com Caixa à Direita -->
+        <article class="meal-card registered">
+          <div class="meal-top-row">
+            <div class="meal-icon-wrap">🌙</div>
+            <div class="meal-meta-col">
+              <div class="meal-title-line">Ceia</div>
+              <div class="meal-tags-row">
+                <span class="tag-pill">~160 kcal</span>
+                <span class="tag-pill logged">✓ Registrada às 21:10</span>
+              </div>
+            </div>
+            <div class="meal-check-hit checked">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="meal-foods-box">
+            <div class="food-line"><span class="f-name">Chá de camomila</span><span class="f-qty">200ml</span></div>
+            <div class="food-line"><span class="f-name">Castanhas de caju</span><span class="f-qty">20g</span></div>
+          </div>
+          <div class="meal-card-footer">
+            <span style="font-size:11px;color:var(--muted);">Registrada hoje</span>
+            <button type="button" class="btn-unmark-link">Desfazer registro</button>
+          </div>
+        </article>
+
+      </main>
+    </div></div>
+  </div>
+
+  <!-- ============================================================
+       MOCKUP 5: DASHBOARD DA EQUIPE (720px) — ABA ATIVIDADE
+       Linha Agrupada por Dia com Cardápio Escolhido e Troca
+       ============================================================ -->
+  <div class="frame-wrap">
+    <div class="frame-title">
+      <span class="step-pill" style="background:#0F172A;">DASHBOARD</span>
+      5. Aba Atividade · Linhas Agrupadas por Dia com Cardápio do Dia
+    </div>
+
+    <div class="dash-panel-wrap">
+      <div class="dash-panel-header">
+        <div>
+          <span style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Acompanhamento Nutricional</span>
+          <h2 class="dash-panel-title">Refeições registradas por dia</h2>
+        </div>
+        <span style="font-size:11.5px;color:var(--muted);font-weight:600;">Fuso do aluno: America/Sao_Paulo</span>
+      </div>
+
+      <!-- DIA 1 (16/10 - HOJE): COM CARDÁPIO ESCOLHIDO (EXPANDIDO) -->
+      <div class="dash-day-row">
+        <div class="dash-day-summary" style="background:#F1F5F9;">
+          <div class="dash-day-date">
+            <span style="color:#059669;font-weight:900;">Hoje (16/10)</span>
+            <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#E2E8F0;font-weight:800;">Cardápio 3</span>
+          </div>
+          <div class="dash-day-meta">
+            <span style="color:#059669;font-weight:800;">3 de 5 refeições registradas</span>
+            <span style="color:var(--muted);">·</span>
+            <span>1.240 kcal registradas</span>
+            <span class="dash-day-chevron" style="transform:rotate(180deg);">▾</span>
+          </div>
+        </div>
+
+        <div class="dash-day-details">
+          <div class="dash-group-header">
+            <span>📋 REFEIÇÕES DO CARDÁPIO 3 (ROTINA ATIVA)</span>
+          </div>
+          <div class="dash-meal-item-row">
+            <div class="dash-meal-item-name">
+              <span>🥞</span>
+              <span>Café da Manhã · <span style="font-weight:500;color:var(--muted);">Ovos mexidos com torradas</span></span>
+            </div>
+            <div class="dash-meal-item-meta">
+              <span style="color:#059669;font-weight:700;">✓ Registrada às 08:15</span>
+              <span>420 kcal</span>
+            </div>
+          </div>
+
+          <div class="dash-meal-item-row">
+            <div class="dash-meal-item-name">
+              <span>🍎</span>
+              <span>Lanche da Manhã · <span style="font-weight:500;color:var(--muted);">Maçã com castanhas</span></span>
+            </div>
+            <div class="dash-meal-item-meta">
+              <span style="color:#059669;font-weight:700;">✓ Registrada às 10:45</span>
+              <span>180 kcal</span>
+            </div>
+          </div>
+
+          <div class="dash-meal-item-row">
+            <div class="dash-meal-item-name">
+              <span>🥗</span>
+              <span>Almoço · <span style="font-weight:500;color:var(--muted);">Frango grelhado com arroz integral</span></span>
+            </div>
+            <div class="dash-meal-item-meta">
+              <span style="color:#059669;font-weight:700;">✓ Registrada às 12:40</span>
+              <span>640 kcal</span>
+            </div>
+          </div>
+
+          <div class="dash-meal-item-row" style="background:#F8FAFC;opacity:0.65;">
+            <div class="dash-meal-item-name">
+              <span>🥪</span>
+              <span>Lanche da Tarde</span>
+            </div>
+            <div class="dash-meal-item-meta">
+              <span>Sem registro</span>
+              <span>~310 kcal prescrito</span>
+            </div>
+          </div>
+
+          <div class="dash-meal-item-row" style="background:#F8FAFC;opacity:0.65;">
+            <div class="dash-meal-item-name">
+              <span>🍽️</span>
+              <span>Jantar</span>
+            </div>
+            <div class="dash-meal-item-meta">
+              <span>Sem registro</span>
+              <span>~540 kcal prescrito</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIA 2 (15/10 - ONTEM): COM TROCA NO MEIO DO DIA (EXPANDIDO) -->
+      <div class="dash-day-row">
+        <div class="dash-day-summary" style="background:#F8FAFC;">
+          <div class="dash-day-date">
+            <span>Ontem (15/10)</span>
+            <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#DBEAFE;color:#1E40AF;font-weight:800;">Cardápio 2 (troca)</span>
+          </div>
+          <div class="dash-day-meta">
+            <span style="color:#059669;font-weight:800;">3 de 5 refeições registradas</span>
+            <span style="color:var(--muted);">·</span>
+            <span>1.180 kcal registradas</span>
+            <span class="dash-day-chevron" style="transform:rotate(180deg);">▾</span>
+          </div>
+        </div>
+
+        <div class="dash-day-details">
+          <!-- Bloco do Cardápio 3 anterior -->
+          <div class="dash-group-header">
+            <span>🔄 REGISTRADO NO CARDÁPIO 3 (ANTES DA TROCA)</span>
+          </div>
+          <div class="dash-meal-item-row">
+            <div class="dash-meal-item-name">
+              <span>🥞</span>
+              <span>Café da Manhã · <span style="font-weight:500;color:var(--muted);">Ovos mexidos com torradas</span></span>
+            </div>
+            <div class="dash-meal-item-meta">
+              <span style="color:#059669;font-weight:700;">✓ Registrada às 08:14</span>
+              <span>320 kcal</span>
+            </div>
+          </div>
+
+          <!-- Bloco do Cardápio 2 adotado -->
+          <div class="dash-group-header" style="margin-top:4px;">
+            <span>📋 REGISTRADO NO CARDÁPIO 2 (ADOTADO)</span>
+          </div>
+          <div class="dash-meal-item-row">
+            <div class="dash-meal-item-name">
+              <span>🥗</span>
+              <span>Almoço · <span style="font-weight:500;color:var(--muted);">Filé mignon com salada</span></span>
+            </div>
+            <div class="dash-meal-item-meta">
+              <span style="color:#059669;font-weight:700;">✓ Registrada às 12:35</span>
+              <span>580 kcal</span>
+            </div>
+          </div>
+
+          <div class="dash-meal-item-row">
+            <div class="dash-meal-item-name">
+              <span>🥪</span>
+              <span>Lanche da Tarde · <span style="font-weight:500;color:var(--muted);">Iogurte grego com frutas</span></span>
+            </div>
+            <div class="dash-meal-item-meta">
+              <span style="color:#059669;font-weight:700;">✓ Registrada às 16:10</span>
+              <span>280 kcal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIA 3 (14/10): SEM CARDÁPIO ESCOLHIDO (RECOLHIDO) -->
+      <div class="dash-day-row">
+        <div class="dash-day-summary">
+          <div class="dash-day-date">
+            <span>Quarta (14/10)</span>
+            <span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#F1F5F9;color:#64748B;font-weight:700;">cardápio não escolhido</span>
+          </div>
+          <div class="dash-day-meta">
+            <span style="font-weight:700;color:var(--text);">2 refeições registradas</span>
+            <span style="color:var(--muted);">·</span>
+            <span>650 kcal registradas</span>
+            <span class="dash-day-chevron">▾</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIA 4 (13/10): SEM REGISTROS NO DIA (NEUTRO) -->
+      <div class="dash-day-empty">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span>Terça (13/10)</span>
+        </div>
+        <div style="font-size:12px;color:#94A3B8;">Sem registros no dia</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

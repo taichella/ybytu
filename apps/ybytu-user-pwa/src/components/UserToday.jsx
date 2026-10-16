@@ -497,8 +497,10 @@ export default function UserToday({ mockPayload = null } = {}) {
         {activeTab === 'training' && (
           <>
             {trainingDays.length === 0 ? (
-              <div className="user-card" style={{ textAlign: 'center', color: 'var(--yb-muted, #718096)' }}>
-                Nenhum treino disponível no seu plano ativo.
+              <div className="user-empty-state-card">
+                <div className="user-empty-state-icon">🏋️</div>
+                <h3 className="user-empty-state-title">Nenhum treino disponível</h3>
+                <p className="user-empty-state-desc">Seu treinador ainda está organizando os treinos deste ciclo. Assim que for publicado, seu plano aparecerá aqui.</p>
               </div>
             ) : (
               <>
@@ -529,22 +531,22 @@ export default function UserToday({ mockPayload = null } = {}) {
                     <h2 className="workout-session-title">
                       {activeDay.title_ptbr || `Treino Dia ${activeDay.day_number}`}
                     </h2>
-                    <div className="workout-meta-row">
-                      {activeDay.estimated_minutes && (
-                        <span className="workout-meta-item">
-                          ⏱ ~{activeDay.estimated_minutes} min
-                        </span>
-                      )}
-                      {activeDay.exercises && (
-                        <span className="workout-meta-item">
-                          🎯 {activeDay.exercises.length} exercícios
-                        </span>
-                      )}
-                      {activeDay.weekday_ptbr && (
-                        <span className="workout-meta-item">
-                          📅 {activeDay.weekday_ptbr}
-                        </span>
-                      )}
+                    <div className="workout-meta-grid">
+                      <div className="workout-meta-box">
+                        <span className="workout-meta-icon" style={{ color: 'var(--yb-brand, #F55F16)' }}>⏱</span>
+                        <span className="workout-meta-val">{activeDay.estimated_minutes ? `~${activeDay.estimated_minutes} min` : '—'}</span>
+                        <span className="workout-meta-lbl">Duração</span>
+                      </div>
+                      <div className="workout-meta-box">
+                        <span className="workout-meta-icon" style={{ color: '#2563EB' }}>🎯</span>
+                        <span className="workout-meta-val">{activeDay.exercises ? `${activeDay.exercises.length} itens` : '—'}</span>
+                        <span className="workout-meta-lbl">Exercícios</span>
+                      </div>
+                      <div className="workout-meta-box">
+                        <span className="workout-meta-icon" style={{ color: '#D97706' }}>📅</span>
+                        <span className="workout-meta-val">{activeDay.weekday_ptbr || `Dia ${activeDay.day_number}`}</span>
+                        <span className="workout-meta-lbl">Planejado</span>
+                      </div>
                     </div>
                     <SessionProgress markedCount={checkin.markedCount} total={checkin.total} />
                   </div>
@@ -662,8 +664,10 @@ export default function UserToday({ mockPayload = null } = {}) {
         {activeTab === 'nutrition' && (
           <>
             {nutritionMenus.length === 0 ? (
-              <div className="user-card" style={{ textAlign: 'center', color: 'var(--yb-muted, #718096)' }}>
-                Nenhum plano alimentar cadastrado no momento.
+              <div className="user-empty-state-card">
+                <div className="user-empty-state-icon">🥗</div>
+                <h3 className="user-empty-state-title">Nenhum cardápio disponível</h3>
+                <p className="user-empty-state-desc">Sua nutricionista está finalizando a prescrição das suas refeições. Em breve seu plano estará disponível aqui.</p>
               </div>
             ) : (
               <>
@@ -708,14 +712,35 @@ export default function UserToday({ mockPayload = null } = {}) {
                         <h2 className="workout-session-title">
                           {payload.nutrition.name_ptbr || `Cardápio Dia ${activeMenu.menu_day}`}
                         </h2>
-                        {(payload.nutrition.daily_kcal_target || macros) && (
-                          <div className="ck-meal-macros">
-                            {payload.nutrition.daily_kcal_target && <span className="ck-pill">⚡ {payload.nutrition.daily_kcal_target} kcal</span>}
-                            {macros?.protein_g > 0 && <span className="ck-pill" style={{ color: '#2563EB' }}>🥩 {macros.protein_g}g prot</span>}
-                            {macros?.carb_g > 0 && <span className="ck-pill" style={{ color: '#D97706' }}>🍞 {macros.carb_g}g carb</span>}
-                            {macros?.fat_g > 0 && <span className="ck-pill" style={{ color: '#7C3AED' }}>🥑 {macros.fat_g}g gord</span>}
-                          </div>
-                        )}
+                        {(payload.nutrition.daily_kcal_target || macros) && (() => {
+                          const totalG = (macros?.protein_g || 0) + (macros?.carb_g || 0) + (macros?.fat_g || 0);
+                          const pctProt = totalG > 0 ? Math.round((macros.protein_g / totalG) * 100) : 0;
+                          const pctCarb = totalG > 0 ? Math.round((macros.carb_g / totalG) * 100) : 0;
+                          const pctFat = totalG > 0 ? Math.max(0, 100 - pctProt - pctCarb) : 0;
+                          return (
+                            <>
+                              <div className="ck-meal-macros">
+                                {payload.nutrition.daily_kcal_target && <span className="ck-pill">⚡ {payload.nutrition.daily_kcal_target} kcal</span>}
+                                {macros?.protein_g > 0 && <span className="ck-pill" style={{ color: '#2563EB' }}>🥩 {macros.protein_g}g prot</span>}
+                                {macros?.carb_g > 0 && <span className="ck-pill" style={{ color: '#D97706' }}>🍞 {macros.carb_g}g carb</span>}
+                                {macros?.fat_g > 0 && <span className="ck-pill" style={{ color: '#7C3AED' }}>🥑 {macros.fat_g}g gord</span>}
+                              </div>
+                              {totalG > 0 && (
+                                <div className="macro-distribution-section" style={{ marginTop: '10px' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--yb-muted, #718096)', fontWeight: 700, marginBottom: '4px' }}>
+                                    <span>Distribuição do cardápio</span>
+                                    <span>{macros.protein_g}g · {macros.carb_g}g · {macros.fat_g}g</span>
+                                  </div>
+                                  <div className="macro-proportion-track" aria-hidden="true" title={`Distribuição do cardápio: ${macros.protein_g}g prot · ${macros.carb_g}g carb · ${macros.fat_g}g gord`}>
+                                    <div className="macro-bar-fill protein" style={{ width: `${pctProt}%` }} />
+                                    <div className="macro-bar-fill carb" style={{ width: `${pctCarb}%` }} />
+                                    <div className="macro-bar-fill fat" style={{ width: `${pctFat}%` }} />
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                         <MealTracker registeredToday={completedMeals.length} dots={dots} />
                       </div>
 

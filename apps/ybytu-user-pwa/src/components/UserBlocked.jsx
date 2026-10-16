@@ -18,12 +18,12 @@ export default function UserBlocked() {
   };
 
   return (
-    <div className="user-pwa-container" style={{ justifyContent: 'center', padding: '24px 20px 40px' }}>
+    <div className="user-pwa-container user-blocked-page" style={{ justifyContent: 'center' }}>
       <div style={{ maxWidth: '380px', width: '100%', margin: '0 auto', textAlign: 'center' }}>
         
         {/* Ícone de Status do Protótipo */}
         <div style={{ display: 'inline-flex', marginBottom: '20px' }}>
-          <div style={{
+          <div className="blocked-wait-icon" style={{
             width: '68px',
             height: '68px',
             borderRadius: '50%',

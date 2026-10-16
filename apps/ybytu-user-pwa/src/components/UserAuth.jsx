@@ -230,8 +230,8 @@ export default function UserAuth() {
   const secondsLeft = (countdown % 60).toString().padStart(2, '0');
 
   return (
-    <div className="user-pwa-container" style={{ justifyContent: 'center', padding: '24px 20px 40px' }}>
-      <div style={{ maxWidth: '380px', width: '100%', margin: '0 auto' }}>
+    <div className="user-pwa-container user-auth-page" style={{ justifyContent: 'center' }}>
+      <div className="user-auth-box" style={{ maxWidth: '380px', width: '100%', margin: '0 auto' }}>
         
         {/* Cabeçalho de Identidade — Estilo Oficial do Protótipo */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '32px', textAlign: 'center' }}>
@@ -278,7 +278,7 @@ export default function UserAuth() {
 
         {/* ETAPA 1: SOLICITAÇÃO DO CÓDIGO */}
         {step === 'request' && (
-          <div className="user-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="user-card user-auth-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {method === 'whatsapp' ? (
               <div>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: 'var(--yb-muted, #718096)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
@@ -411,7 +411,7 @@ export default function UserAuth() {
 
         {/* ETAPA 2: VERIFICAÇÃO DO CÓDIGO */}
         {step === 'verify' && (
-          <div className="user-card" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+          <div className="user-card user-auth-card" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <div style={{ textAlign: 'center' }}>
               <p style={{ margin: 0, fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--yb-brand, #F55F16)' }}>
                 Código Enviado
