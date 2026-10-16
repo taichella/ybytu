@@ -7,7 +7,6 @@ import { invokeFunction } from '../services/apiClient.js';
 
 const WEEKS = 12;
 const HEAT_COLORS = ['var(--surface-2)', 'rgba(245,95,22,.3)', 'rgba(245,95,22,.6)', '#F55F16'];
-const LIST_LIMIT = 10;
 
 // Mesmo mapa de ícones da tela de nutrição do PWA (UserToday.jsx).
 const MEAL_ICONS = {
@@ -23,19 +22,6 @@ const MEAL_ICONS = {
 
 function localDayKey(date) {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-}
-
-function formatWhen(dateString) {
-  const date = new Date(dateString);
-  const time = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  const today = new Date();
-  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const diffDays = Math.round((startOfToday - startOfDate) / 86400000);
-  if (diffDays === 0) return `hoje, ${time}`;
-  if (diffDays === 1) return `ontem, ${time}`;
-  if (diffDays < 7) return `${diffDays} dias atrás`;
-  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
 
 function formatDateTime(dateString) {
@@ -187,6 +173,76 @@ function MealDayRow({ day, isToday, isYesterday, mealsById, timeZone }) {
   );
 }
 
+// ─── Treinos por dia (2026-10-16): mesmo formato das refeições ────────────────
+// Uma linha por data (fuso do aluno) com os treinos do dia; ao expandir, cada
+// sessão com os exercícios marcados e a carga registrada pelo aluno. Só dias
+// com treino (dia sem treino costuma ser descanso; o mapa de calor mostra a
+// frequência).
+function workoutMeta(w) {
+  return [
+    w.exercises_done != null && w.exercise_count
+      ? `${w.exercises_done} de ${w.exercise_count} exercícios`
+      : (w.exercise_count ? `${w.exercise_count} exercícios` : null),
+    w.auto_closed ? 'parcial · encerrado na virada do dia' : null,
+    w.day_number != null ? `Dia ${w.day_number}` : null,
+    w.is_current_plan === false ? 'plano anterior' : null,
+  ].filter(Boolean).join(' · ');
+}
+
+function WorkoutDayRow({ day, isToday, isYesterday, timeZone }) {
+  const [open, setOpen] = useState(false);
+  const clock = (iso) => new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone });
+  const first = day.workouts[0];
+  const summary = day.workouts.length === 1
+    ? [first.session_name || `Treino · Dia ${first.day_number ?? '—'}`, workoutMeta(first)].filter(Boolean).join(' · ')
+    : `${day.workouts.length} treinos`;
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', padding: '13px 22px', background: open ? 'var(--surface-2)' : 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', textAlign: 'left', font: 'inherit' }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 800 }}>
+          {dayLabel(day.date)}
+          {isToday && <span style={{ fontSize: '11px', fontWeight: 700, background: 'var(--brand-soft)', color: 'var(--brand)', padding: '2px 8px', borderRadius: '6px' }}>Hoje</span>}
+          {isYesterday && <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)' }}>Ontem</span>}
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: 'var(--muted)' }}>
+          <span style={{ fontWeight: 700, color: 'var(--text)' }}>{summary}</span>
+          <span style={{ display: 'inline-block', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▸</span>
+        </span>
+      </button>
+      {open && (
+        <div style={{ padding: '4px 22px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {day.workouts.map(w => (
+            <div key={w.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--muted)' }}>
+                {w.session_name || `Treino · Dia ${w.day_number ?? '—'}`} · concluído às {clock(w.completed_at)}
+              </div>
+              {day.workouts.length > 1 && <div style={{ fontSize: '12px', color: 'var(--muted)' }}>{workoutMeta(w)}</div>}
+              {w.exercises.length === 0 ? (
+                <div style={{ ...mealItemRow, background: 'var(--surface-2)', borderStyle: 'dashed', color: '#94A3B8' }}>
+                  <span style={{ fontWeight: 600 }}>Concluído sem marcação por exercício</span>
+                </div>
+              ) : w.exercises.map((e, i) => (
+                <div key={i} style={mealItemRow}>
+                  <span style={{ fontWeight: 700 }}>{e.name_ptbr || e.exercise_id}</span>
+                  <span style={{ fontSize: '11.5px', color: 'var(--muted)', fontWeight: 600 }}>
+                    Marcado às {clock(e.completed_at)}
+                    {e.load_kg != null && <> <span style={{ margin: '0 6px' }}>·</span><strong style={{ color: 'var(--text)' }}>{Number(e.load_kg).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} kg registrados</strong></>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const mealItemRow = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', padding: '6px 10px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', fontSize: '12.5px' };
 
 function MealDays({ mealDays, meals, todayLocal, timeZone, emptyText }) {
@@ -222,7 +278,6 @@ function MealDays({ mealDays, meals, todayLocal, timeZone, emptyText }) {
 }
 
 const sectionTitle = { margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' };
-const rowStyle = { display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 22px', borderBottom: '1px solid var(--border)' };
 const emptyStyle = { padding: '22px', fontSize: '13px', color: 'var(--muted)' };
 
 export default function UserActivityFeed({ userId }) {
@@ -266,7 +321,8 @@ export default function UserActivityFeed({ userId }) {
     );
   }
 
-  const { summary = {}, workouts = [], meals = [], meal_days: mealDays = [], today_local: todayLocal, timezone: studentTz } = data || {};
+  const { summary = {}, workouts = [], workout_days: workoutDays = [], meals = [], meal_days: mealDays = [], today_local: todayLocal, timezone: studentTz } = data || {};
+  const yesterdayLocal = todayLocal ? shiftYmd(todayLocal, -1) : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
@@ -289,32 +345,12 @@ export default function UserActivityFeed({ userId }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '18px' }}>
         {/* Treinos concluídos */}
         <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
-          <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)' }}><h3 style={sectionTitle}>Treinos Concluídos</h3></div>
+          <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)' }}><h3 style={sectionTitle}>Treinos Concluídos por Dia</h3></div>
           <div>
-            {workouts.length === 0 ? (
+            {workoutDays.length === 0 ? (
               <p style={emptyStyle}>{emptyMessage(summary.last_sign_in_at, 'workout')}</p>
-            ) : workouts.slice(0, LIST_LIMIT).map(w => (
-              <div key={w.id} style={rowStyle}>
-                <span style={{ width: 32, height: 32, borderRadius: 9, background: 'var(--brand-soft)', color: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: 700 }}>{w.session_name || `Treino · Dia ${w.day_number ?? '—'}`}</p>
-                  <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
-                    {[
-                      // Marcação por exercício (2026-10-15): 'N de M' quando o aluno marcou
-                      // exercício por exercício; parcial fechado pelo sistema na virada do dia.
-                      w.exercises_done != null && w.exercise_count
-                        ? `${w.exercises_done} de ${w.exercise_count} exercícios`
-                        : (w.exercise_count ? `${w.exercise_count} exercícios` : null),
-                      w.auto_closed ? 'parcial · encerrado na virada do dia' : null,
-                      w.day_number != null ? `Dia ${w.day_number}` : null,
-                      w.is_current_plan === false ? 'plano anterior' : null,
-                    ].filter(Boolean).join(' · ')}
-                  </p>
-                </div>
-                <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>{formatWhen(w.completed_at)}</span>
-              </div>
+            ) : workoutDays.slice(0, MEAL_DAYS_SHOWN).map(day => (
+              <WorkoutDayRow key={day.date} day={day} isToday={day.date === todayLocal} isYesterday={day.date === yesterdayLocal} timeZone={studentTz} />
             ))}
           </div>
         </section>

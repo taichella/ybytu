@@ -123,12 +123,16 @@ export function useExerciseCheckin({ payload, activeDay, completedWorkouts, setC
     return data;
   }
 
-  async function mark(ex) {
+  // typedLoad: carga que o aluno DIGITOU/ALTEROU no campo aberto e não chegou a
+  // confirmar antes de tocar na caixa (bug relatado 2026-10-16: o valor se
+  // perdia em silêncio). Sugestão intocada não chega aqui -- só vira registro
+  // o que o aluno mexeu (docs/PRINCIPIOS_DE_PRODUTO.md, regra 3).
+  async function mark(ex, typedLoad) {
     if (!planId || !ex.exercise_id || busy || closed) return;
     setBusy(true);
     let row = null;
     try {
-      row = await insertMark(ex, drafts[ex.exercise_id]);
+      row = await insertMark(ex, typedLoad !== undefined ? typedLoad : drafts[ex.exercise_id]);
       setMarks(prev => [...prev, row]);
     } catch (err) {
       handleError(err);
@@ -188,9 +192,9 @@ export function useExerciseCheckin({ payload, activeDay, completedWorkouts, setC
     });
   }
 
-  function toggle(ex) {
+  function toggle(ex, typedLoad) {
     const m = markByExercise.get(ex.exercise_id);
-    if (!m) return mark(ex);
+    if (!m) return mark(ex, typedLoad);
     return closed ? unmarkClosed(ex, m) : unmarkOpen(ex, m);
   }
 
@@ -243,12 +247,21 @@ export function SessionProgress({ markedCount, total }) {
   );
 }
 
-function LoadPanel({ ex, initial, fromLast, prescribed, onConfirm }) {
+// onEdit: avisa o cartão a cada mudança feita PELO ALUNO (digitar ou ±), para
+// marcar o exercício com o painel aberto gravar o valor mexido.
+function toKg(raw) {
+  const v = String(raw ?? '').replace(',', '.');
+  if (v === '' || Number.isNaN(Number(v))) return null;
+  return Math.max(0, Math.round(Number(v) * 100) / 100);
+}
+
+function LoadPanel({ ex, initial, fromLast, prescribed, onConfirm, onEdit }) {
   const [value, setValue] = useState(initial ?? '');
-  const step = (delta) => setValue(v => {
-    const n = Number(String(v).replace(',', '.')) || 0;
-    return String(Math.max(0, Math.round((n + delta) * 100) / 100));
-  });
+  const edit = (next) => { setValue(next); onEdit(toKg(next)); };
+  const step = (delta) => {
+    const n = Number(String(value).replace(',', '.')) || 0;
+    edit(String(Math.max(0, Math.round((n + delta) * 100) / 100)));
+  };
   const parsed = String(value).replace(',', '.');
   return (
     <div className="ck-load-panel">
@@ -267,7 +280,7 @@ function LoadPanel({ ex, initial, fromLast, prescribed, onConfirm }) {
           className="ck-load-input"
           inputMode="decimal"
           value={String(value).replace('.', ',')}
-          onChange={(e) => setValue(e.target.value.replace(/[^\d,.]/g, ''))}
+          onChange={(e) => edit(e.target.value.replace(/[^\d,.]/g, ''))}
           aria-label={`Carga usada em ${ex.name_ptbr}, em kg`}
         />
         <button type="button" className="ck-stepper-btn" onClick={() => step(0.5)}>+0,5</button>
@@ -285,6 +298,8 @@ function LoadPanel({ ex, initial, fromLast, prescribed, onConfirm }) {
 // botão de vídeo) que o UserToday já monta.
 export function ExerciseCheckinCard({ ex, checkin, thumb, onVideo, renderLoad }) {
   const [loadOpen, setLoadOpen] = useState(false);
+  // undefined = o aluno não mexeu no campo; número/null = valor que ele digitou.
+  const [typedLoad, setTypedLoad] = useState(undefined);
   const m = checkin.markByExercise.get(ex.exercise_id);
   const checked = !!m;
   const weighted = ex.load_type === 'weighted';
@@ -301,7 +316,11 @@ export function ExerciseCheckinCard({ ex, checkin, thumb, onVideo, renderLoad })
         <button
           type="button"
           className={`ck-check${checked ? ' checked' : ''}`}
-          onClick={() => checkin.toggle(ex)}
+          onClick={() => {
+            const typed = !checked && loadOpen ? typedLoad : undefined;
+            if (typed !== undefined) { setLoadOpen(false); setTypedLoad(undefined); }
+            checkin.toggle(ex, typed);
+          }}
           disabled={!canToggle}
           aria-pressed={checked}
           aria-label={checked ? `Desmarcar exercício ${ex.order}` : `Marcar exercício ${ex.order} como feito`}
@@ -333,7 +352,7 @@ export function ExerciseCheckinCard({ ex, checkin, thumb, onVideo, renderLoad })
               <button type="button" className="ck-vid-link" onClick={onVideo} aria-label={`Ver vídeo de ${ex.name_ptbr}`}>▶ Ver vídeo</button>
             )}
             {weighted && !checkin.closed && (
-              <button type="button" className="ck-load-toggle" onClick={() => setLoadOpen(o => !o)} aria-expanded={loadOpen}>
+              <button type="button" className="ck-load-toggle" onClick={() => { setLoadOpen(o => !o); setTypedLoad(undefined); }} aria-expanded={loadOpen}>
                 {checked ? 'Ajustar carga usada' : 'Anotar carga usada'}{suggestion != null ? ` (${formatKg(suggestion)})` : ''} {loadOpen ? '▴' : '▾'}
               </button>
             )}
@@ -346,7 +365,8 @@ export function ExerciseCheckinCard({ ex, checkin, thumb, onVideo, renderLoad })
           initial={suggestion}
           fromLast={last}
           prescribed={prescribed}
-          onConfirm={(kg) => { checkin.confirmLoad(ex, kg); setLoadOpen(false); }}
+          onConfirm={(kg) => { checkin.confirmLoad(ex, kg); setLoadOpen(false); setTypedLoad(undefined); }}
+          onEdit={setTypedLoad}
         />
       )}
     </article>

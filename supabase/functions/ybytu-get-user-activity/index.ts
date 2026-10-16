@@ -231,9 +231,44 @@ serve(async (req) => {
       }
     }
     const meal_days = [...dayMap.values()].sort((a, b) => b.date.localeCompare(a.date))
+
+    // Treinos por dia (2026-10-16), no mesmo fuso, com os exercícios marcados
+    // em cada sessão (completed_exercises.workout_id) e a carga registrada.
+    // Só dias COM treino: dia sem treino é descanso na maioria dos planos, o
+    // mapa de calor já mostra a frequência.
+    const workoutIds = workouts.map((w) => w.id)
+    const marksByWorkout = new Map<string, Array<{ exercise_id: string; name_ptbr: string | null; load_kg: number | null; completed_at: string }>>()
+    if (workoutIds.length) {
+      const { data: markRows, error: mkError } = await supabase
+        .from('completed_exercises')
+        .select('workout_id, exercise_id, load_kg, completed_at')
+        .in('workout_id', workoutIds)
+        .order('completed_at', { ascending: true })
+      if (mkError) throw mkError
+      const exIds = [...new Set((markRows ?? []).map((r) => r.exercise_id))]
+      const exName = new Map<string, string>()
+      if (exIds.length) {
+        const { data: exRows, error: exError } = await supabase.from('exercises').select('exercise_id, name_ptbr').in('exercise_id', exIds)
+        if (exError) throw exError
+        for (const e of exRows ?? []) exName.set(e.exercise_id, e.name_ptbr)
+      }
+      for (const r of markRows ?? []) {
+        const list = marksByWorkout.get(r.workout_id) ?? []
+        list.push({ exercise_id: r.exercise_id, name_ptbr: exName.get(r.exercise_id) ?? null, load_kg: r.load_kg != null ? Number(r.load_kg) : null, completed_at: r.completed_at })
+        marksByWorkout.set(r.workout_id, list)
+      }
+    }
+    const workoutDayMap = new Map<string, { date: string; workouts: Array<Record<string, unknown>> }>()
+    for (const w of workouts) {
+      const date = localDate.format(new Date(w.completed_at))
+      const d = workoutDayMap.get(date) ?? { date, workouts: [] }
+      d.workouts.push({ ...w, exercises: marksByWorkout.get(w.id) ?? [] })
+      workoutDayMap.set(date, d)
+    }
+    const workout_days = [...workoutDayMap.values()].sort((a, b) => b.date.localeCompare(a.date))
     const today_local = localDate.format(new Date())
 
-    return new Response(JSON.stringify({ summary, workouts, meals, meal_days, timezone: tz, today_local }), {
+    return new Response(JSON.stringify({ summary, workouts, workout_days, meals, meal_days, timezone: tz, today_local }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 
