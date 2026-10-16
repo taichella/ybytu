@@ -500,7 +500,7 @@ export default function UserToday({ mockPayload = null } = {}) {
               <div className="user-empty-state-card">
                 <div className="user-empty-state-icon">🏋️</div>
                 <h3 className="user-empty-state-title">Nenhum treino disponível</h3>
-                <p className="user-empty-state-desc">Seu treinador ainda está organizando os treinos deste ciclo. Assim que for publicado, seu plano aparecerá aqui.</p>
+                <p className="user-empty-state-desc">Seu plano não tem treinos no momento.</p>
               </div>
             ) : (
               <>
@@ -667,7 +667,7 @@ export default function UserToday({ mockPayload = null } = {}) {
               <div className="user-empty-state-card">
                 <div className="user-empty-state-icon">🥗</div>
                 <h3 className="user-empty-state-title">Nenhum cardápio disponível</h3>
-                <p className="user-empty-state-desc">Sua nutricionista está finalizando a prescrição das suas refeições. Em breve seu plano estará disponível aqui.</p>
+                <p className="user-empty-state-desc">Seu plano não tem cardápio no momento.</p>
               </div>
             ) : (
               <>

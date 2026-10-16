@@ -1106,6 +1106,20 @@
   align-items: flex-start;
   gap: 12px;
 }
+.ck-top-row > *:not(.ck-check):not(.ck-meta-col) {
+  order: 1;
+  flex-shrink: 0;
+}
+.ck-top-row > .ck-meta-col {
+  order: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.ck-top-row > .ck-check {
+  order: 3;
+  flex-shrink: 0;
+  margin-left: auto;
+}
 .ck-check {
   width: 34px;
   height: 34px;
@@ -1386,7 +1400,25 @@
   transition: all 0.2s ease;
 }
 .ck-meal-card.registered { border-color: rgba(22, 163, 74, 0.45); background: #F8FCF8; }
-.ck-meal-top { display: flex; align-items: flex-start; gap: 12px; }
+.ck-meal-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ck-meal-top > *:not(.ck-check):not(.ck-meta-col) {
+  order: 1;
+  flex-shrink: 0;
+}
+.ck-meal-top > .ck-meta-col {
+  order: 2;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.ck-meal-top > .ck-check {
+  order: 3;
+  flex-shrink: 0;
+  margin-left: auto;
+}
 .ck-meal-icon {
   width: 48px;
   height: 48px;
