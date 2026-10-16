@@ -21,11 +21,18 @@ Ninguém come tudo todo dia, e um aluno que pulou o lanche não fez nada de erra
 
 - Para o aluno: sem fração, sem porcentagem, sem "faltam N", sem cor de alerta. "3 refeições registradas
   hoje", com indicação neutra de quais foram registradas.
-- Sem "fechamento do dia" e sem aviso no dia seguinte sobre o que não foi registrado.
+- **Encerrar o registro do dia é ato do aluno** (2026-10-17): ele declara que terminou de REGISTRAR, não
+  que terminou de comer. Registrar a última refeição do cardápio encerra sozinho. O sistema nunca encerra
+  como "parcial": dia que o aluno não encerrou fica "registro não encerrado pelo aluno", neutro, e não há
+  aviso no dia seguinte sobre o que não foi registrado.
+- Comparação registrado x cardápio (ex.: "55g de 70g de proteína do cardápio") só no dashboard, só em dia
+  encerrado pelo aluno, sempre com "registrado". Para o aluno, o registrado aparece só em texto
+  ("Registrado hoje: 55g prot · …"), sem barra que enche (2026-10-17).
 - Para o profissional pode ser factual ("3 de 5 refeições registradas"), sempre com "registradas", nunca
   "feitas" ou "cumpridas".
 - No treino é diferente: a sessão aberta é um estado que precisa de desfecho, e não concluir é informação
-  real (treino parcial, fechado na virada do dia no fuso do aluno).
+  real (treino parcial, fechado na virada do dia no fuso do aluno). Na alimentação, "parcial" seria o
+  sistema afirmando que o dia ficou incompleto.
 
 ## 3. Nunca gravar sugestão como se fosse registro do aluno (2026-10-15)
 
