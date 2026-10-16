@@ -66,18 +66,6 @@ export function MealCard({ meal, match, saving, onRegister, onUndo }) {
   return (
     <article className={`ck-meal-card${registered ? ' registered' : ''}`}>
       <div className="ck-meal-top">
-        <button
-          type="button"
-          className={`ck-check${registered ? ' checked' : ''}`}
-          onClick={registered ? undefined : onRegister}
-          disabled={registered || saving}
-          aria-pressed={registered}
-          aria-label={registered ? `${typeName} registrada` : `Registrar ${typeName}`}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </button>
         <div className="ck-meal-icon" aria-hidden="true">{mealIcon(meal.name_ptbr)}</div>
         <div className="ck-meta-col">
           <h3 className="ck-meal-title">{typeName}</h3>
@@ -92,6 +80,21 @@ export function MealCard({ meal, match, saving, onRegister, onUndo }) {
               : (protein > 0 && <span className="ck-pill">{Math.round(protein)}g prot</span>)}
           </div>
         </div>
+        {/* Caixa no FIM do HTML (2026-10-16): leitor de tela e teclado chegam nela
+            depois do nome do item, na mesma ordem em que ela aparece na tela (à
+            direita, order: 3 no user.css). */}
+        <button
+          type="button"
+          className={`ck-check${registered ? ' checked' : ''}`}
+          onClick={registered ? undefined : onRegister}
+          disabled={registered || saving}
+          aria-pressed={registered}
+          aria-label={registered ? `${typeName} registrada` : `Registrar ${typeName}`}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </button>
       </div>
 
       {meal.ingredients?.length > 0 && (

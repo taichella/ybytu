@@ -313,22 +313,6 @@ export function ExerciseCheckinCard({ ex, checkin, thumb, onVideo, renderLoad })
   return (
     <article className={`ck-card${checked ? ' checked' : ''}`}>
       <div className="ck-top-row">
-        <button
-          type="button"
-          className={`ck-check${checked ? ' checked' : ''}`}
-          onClick={() => {
-            const typed = !checked && loadOpen ? typedLoad : undefined;
-            if (typed !== undefined) { setLoadOpen(false); setTypedLoad(undefined); }
-            checkin.toggle(ex, typed);
-          }}
-          disabled={!canToggle}
-          aria-pressed={checked}
-          aria-label={checked ? `Desmarcar exercício ${ex.order}` : `Marcar exercício ${ex.order} como feito`}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </button>
         {thumb}
         <div className="ck-meta-col">
           <h3 className="ck-title"><span className="ck-title-letter">{ex.order}</span> {ex.name_ptbr}</h3>
@@ -358,6 +342,25 @@ export function ExerciseCheckinCard({ ex, checkin, thumb, onVideo, renderLoad })
             )}
           </div>
         </div>
+        {/* Caixa no FIM do HTML (2026-10-16): leitor de tela e teclado chegam nela
+            depois do nome do item, na mesma ordem em que ela aparece na tela (à
+            direita, order: 3 no user.css). */}
+        <button
+          type="button"
+          className={`ck-check${checked ? ' checked' : ''}`}
+          onClick={() => {
+            const typed = !checked && loadOpen ? typedLoad : undefined;
+            if (typed !== undefined) { setLoadOpen(false); setTypedLoad(undefined); }
+            checkin.toggle(ex, typed);
+          }}
+          disabled={!canToggle}
+          aria-pressed={checked}
+          aria-label={checked ? `Desmarcar ${ex.order}, ${ex.name_ptbr}` : `Marcar ${ex.order}, ${ex.name_ptbr}, como feito`}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </button>
       </div>
       {loadOpen && weighted && !checkin.closed && (
         <LoadPanel
