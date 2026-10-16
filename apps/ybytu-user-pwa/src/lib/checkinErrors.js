@@ -24,6 +24,9 @@ export function describeCheckinError(err) {
   if (message.includes('workout_not_reopenable')) {
     return { kind: 'not_reopenable', text: 'Este treino foi fechado há mais de 3 horas e já está no seu histórico; não dá para reabrir.' };
   }
+  if (message.includes('meal_not_undoable')) {
+    return { kind: 'not_undoable', text: 'Só dá para desfazer o registro de uma refeição no mesmo dia. Depois disso ele fica no seu histórico.' };
+  }
   if (code === '23505') {
     return { kind: 'already_marked', text: 'Esse exercício já está marcado. Recarregue a página.' };
   }

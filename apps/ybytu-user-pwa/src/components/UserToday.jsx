@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { thumbSources } from '../lib/media';
@@ -104,6 +104,12 @@ export default function UserToday({ mockPayload = null } = {}) {
   const [completedMeals, setCompletedMeals] = useState(mockPayload?.activity_today?.completed_meals || []);
   const [checkingInMeal, setCheckingInMeal] = useState({});
   const [checkinError, setCheckinError] = useState(null);
+  // "Desfazer" por 4s depois de registrar refeição (2026-10-16), igual ao do
+  // treino. O banco só deixa desfazer no mesmo dia, no fuso do aluno
+  // (unmark_meal, migration 20261015190000).
+  const [mealToast, setMealToast] = useState(null);
+  const mealToastTimer = useRef(null);
+  useEffect(() => () => clearTimeout(mealToastTimer.current), []);
 
   // Modal de vídeo
   const [activeVideo, setActiveVideo] = useState(null); // { url, title }
@@ -281,6 +287,27 @@ export default function UserToday({ mockPayload = null } = {}) {
       if (insertErr) throw insertErr;
 
       setCompletedMeals(prev => [inserted, ...prev]);
+      clearTimeout(mealToastTimer.current);
+      setMealToast({
+        text: `Refeição registrada: ${mealName}`,
+        onUndo: async () => {
+          clearTimeout(mealToastTimer.current);
+          setMealToast(null);
+          const { error: undoErr } = await supabase.rpc('unmark_meal', { p_completed_meal_id: inserted.id });
+          if (undoErr) {
+            const { kind, text } = describeCheckinError(undoErr);
+            if (kind === 'session_expired') {
+              await supabase.auth.signOut();
+              navigate('/login', { replace: true });
+              return;
+            }
+            setCheckinError(`Registro não desfeito. ${text}`);
+            return;
+          }
+          setCompletedMeals(prev => prev.filter(cm => cm.id !== inserted.id));
+        },
+      });
+      mealToastTimer.current = setTimeout(() => setMealToast(null), 4000);
     } catch (err) {
       const { kind, text } = describeCheckinError(err);
       if (kind === 'session_expired') {
@@ -771,7 +798,7 @@ export default function UserToday({ mockPayload = null } = {}) {
 
       {/* Modal de Vídeo R2 */}
       <CheckinDialog dialog={checkin.dialog} onClose={checkin.closeDialog} />
-      <UndoToast toast={checkin.toast} />
+      <UndoToast toast={checkin.toast ?? mealToast} />
 
       {activeVideo && (
         <UserVideoModal
