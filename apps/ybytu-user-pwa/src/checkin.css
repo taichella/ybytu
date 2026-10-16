@@ -77,6 +77,8 @@
   color: transparent;
 }
 .ck-check:disabled { cursor: default; opacity: 0.6; }
+/* Refeição registrada: a caixa fica travada (desfazer é pelo rodapé), mas com o verde cheio do desenho. */
+.ck-check.checked:disabled { opacity: 1; }
 .ck-check.checked {
   background: #16a34a;
   border-color: #16a34a;
@@ -295,3 +297,96 @@
   letter-spacing: 0.04em;
   padding: 2px 6px;
 }
+
+/* ── Acompanhamento alimentar (2026-10-16) — designs/AlunoAlimentacaoCheckin.dc.html ── */
+.ck-meal-tracker {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(5, 150, 105, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ck-meal-counter { font-size: 13.5px; font-weight: 900; color: #065F46; letter-spacing: -0.01em; }
+.ck-meal-dots { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.ck-meal-dot { width: 12px; height: 12px; border-radius: 50%; box-sizing: border-box; }
+.ck-meal-dot.filled { background: #059669; box-shadow: 0 1px 4px rgba(5, 150, 105, 0.4); }
+.ck-meal-dot.empty { background: #FFFFFF; border: 2px solid #CBD5E1; }
+.ck-meal-macros { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+.ck-meal-all {
+  background: rgba(5, 150, 105, 0.10);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #065F46;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ck-meal-card {
+  background: var(--yb-surface, #FFFFFF);
+  border: 1.5px solid var(--yb-border, #E2E8F0);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+.ck-meal-card.registered { border-color: rgba(22, 163, 74, 0.45); background: #F8FCF8; }
+.ck-meal-top { display: flex; align-items: flex-start; gap: 12px; }
+.ck-meal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--yb-surface-2, #EDF2F7);
+  border: 1px solid var(--yb-border, #E2E8F0);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+.ck-meal-title { font-size: 15px; font-weight: 900; color: var(--yb-text, #1A202C); line-height: 1.25; margin: 0 0 3px; letter-spacing: -0.01em; }
+.ck-meal-dish { display: block; font-size: 12.5px; font-weight: 600; color: var(--yb-muted, #718096); margin: 0 0 4px; }
+.ck-meal-time {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--yb-muted, #718096);
+  background: var(--yb-surface-2, #EDF2F7);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-feature-settings: "tnum";
+  display: inline-block;
+}
+.ck-meal-foods {
+  background: #FFFFFF;
+  border: 1px solid var(--yb-border, #E2E8F0);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+}
+.ck-meal-food { display: flex; justify-content: space-between; gap: 10px; color: var(--yb-text, #1A202C); }
+.ck-meal-food-qty { color: var(--yb-muted, #718096); font-weight: 600; white-space: nowrap; }
+.ck-meal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--yb-border, #E2E8F0);
+}
+.ck-meal-footer-note { font-size: 11px; color: var(--yb-muted, #718096); }
+.ck-meal-unmark { background: none; border: none; color: #64748B; font-weight: 700; font-size: 12px; text-decoration: underline; cursor: pointer; padding: 4px 0; }
+.ck-meal-register { background: none; border: none; color: #059669; font-weight: 800; font-size: 12px; cursor: pointer; padding: 4px 0; }
+.ck-meal-unmark:disabled, .ck-meal-register:disabled { opacity: 0.6; cursor: default; }

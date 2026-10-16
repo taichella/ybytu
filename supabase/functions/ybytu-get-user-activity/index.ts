@@ -155,19 +155,85 @@ serve(async (req) => {
       } catch { /* fuso inválido: padrão */ }
     }
     const localDate = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' })
-    const dayMap = new Map<string, { date: string; registered: number; planned: number | null; kcal_registered: number; meal_ids: string[] }>()
+
+    // "Sem registro" na linha expandida (desenho AlunoAlimentacaoCheckin.dc.html):
+    // as refeições planejadas daquele dia de cardápio vêm do cardápio ATUAL
+    // (meal_plan_meals), porque o histórico só guarda quantas eram
+    // (meals_planned), não quais. Só listamos os nomes quando dá para provar
+    // que o cardápio daquele dia não mudou: mesma quantidade de refeições e
+    // todo prato registrado presente nele. Senão, só a contagem.
+    const pairKey = (planId: string, dayOrder: number) => `${planId}|${dayOrder}`
+    const pairs = [...new Set(meals.filter((m) => m.meal_plan_id).map((m) => pairKey(m.meal_plan_id, m.day_order)))]
+    const slotsByPair = new Map<string, Array<{ meal_order: number; meal_type_id: string; meal_id: string }>>()
+    const planIds = [...new Set(pairs.map((k) => k.split('|')[0]))]
+    if (planIds.length) {
+      const { data: slotRows, error: sError } = await supabase
+        .from('meal_plan_meals')
+        .select('meal_plan_id, day_order, meal_order, meal_type_id, meal_id')
+        .in('meal_plan_id', planIds)
+      if (sError) throw sError
+      for (const r of slotRows ?? []) {
+        const k = pairKey(r.meal_plan_id, r.day_order)
+        if (!pairs.includes(k)) continue
+        const list = slotsByPair.get(k) ?? []
+        list.push(r)
+        slotsByPair.set(k, list)
+      }
+      const extraTypes = [...new Set([...slotsByPair.values()].flat().map((r) => r.meal_type_id).filter((t) => t && !mealTypeNameBySlug.has(t)))]
+      if (extraTypes.length) {
+        const { data: typeRows, error: tError } = await supabase
+          .from('meal_types')
+          .select('meal_type_id, name_ptbr')
+          .in('meal_type_id', extraTypes)
+        if (tError) throw tError
+        for (const t of typeRows ?? []) mealTypeNameBySlug.set(t.meal_type_id, t.name_ptbr)
+      }
+    }
+
+    type DayGroup = { meal_plan_id: string | null; menu_day: number | null; registered_ids: string[]; unregistered: Array<{ meal_order: number; meal_type_ptbr: string | null }> | null; unregistered_count: number | null }
+    const dayMap = new Map<string, { date: string; registered: number; planned: number | null; kcal_registered: number; meal_ids: string[]; groups: DayGroup[] }>()
     for (const m of meals) {
       const date = localDate.format(new Date(m.completed_at))
-      const d = dayMap.get(date) ?? { date, registered: 0, planned: null, kcal_registered: 0, meal_ids: [] }
+      const d = dayMap.get(date) ?? { date, registered: 0, planned: null, kcal_registered: 0, meal_ids: [], groups: [] }
       d.registered += 1
       if (m.meals_planned != null) d.planned = Math.max(d.planned ?? 0, m.meals_planned)
       if (m.kcal != null) d.kcal_registered += Number(m.kcal)
       d.meal_ids.push(m.id)
+      let g = d.groups.find((x) => x.meal_plan_id === (m.meal_plan_id ?? null) && x.menu_day === (m.day_order ?? null))
+      if (!g) {
+        g = { meal_plan_id: m.meal_plan_id ?? null, menu_day: m.day_order ?? null, registered_ids: [], unregistered: null, unregistered_count: null }
+        d.groups.push(g)
+      }
+      g.registered_ids.push(m.id)
       dayMap.set(date, d)
     }
+    const mealById = new Map(meals.map((m) => [m.id, m]))
+    for (const d of dayMap.values()) {
+      for (const g of d.groups) {
+        const regs = g.registered_ids.map((id) => mealById.get(id)!)
+        const planned = Math.max(0, ...regs.map((r) => r.meals_planned ?? 0)) || null
+        const slots = g.meal_plan_id != null && g.menu_day != null ? (slotsByPair.get(pairKey(g.meal_plan_id, g.menu_day)) ?? []) : []
+        const regMealIds = regs.map((r) => r.meal_id).filter(Boolean)
+        const unchanged = planned != null && slots.length === planned && regMealIds.every((id) => slots.some((sl) => sl.meal_id === id))
+        if (unchanged) {
+          const used = new Set<string>()
+          g.unregistered = slots
+            .filter((sl) => {
+              if (regMealIds.includes(sl.meal_id) && !used.has(sl.meal_id)) { used.add(sl.meal_id); return false }
+              return true
+            })
+            .sort((a, b) => a.meal_order - b.meal_order)
+            .map((sl) => ({ meal_order: sl.meal_order, meal_type_ptbr: mealTypeNameBySlug.get(sl.meal_type_id) ?? null }))
+          g.unregistered_count = g.unregistered.length
+        } else if (planned != null) {
+          g.unregistered_count = Math.max(0, planned - regs.length)
+        }
+      }
+    }
     const meal_days = [...dayMap.values()].sort((a, b) => b.date.localeCompare(a.date))
+    const today_local = localDate.format(new Date())
 
-    return new Response(JSON.stringify({ summary, workouts, meals, meal_days, timezone: tz }), {
+    return new Response(JSON.stringify({ summary, workouts, meals, meal_days, timezone: tz, today_local }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 

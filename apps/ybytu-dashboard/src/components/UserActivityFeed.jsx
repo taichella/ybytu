@@ -87,6 +87,140 @@ function Heatmap({ workouts }) {
   return <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 4 }}>{columns}</div>;
 }
 
+// ─── Refeições por dia (2026-10-16, designs/AlunoAlimentacaoCheckin.dc.html) ──
+// Uma linha por data no fuso do ALUNO (ybytu-get-user-activity.meal_days),
+// recolhida/expandida. Regras (docs/PRINCIPIOS_DE_PRODUTO.md): contagem factual
+// "3 de 5 refeições registradas", kcal só do que foi registrado e NUNCA
+// comparada com a meta; dia sem registro aparece neutro ("Sem registros").
+const MEAL_DAYS_SHOWN = 14;
+
+function parseLocalDate(ymd) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function shiftYmd(ymd, days) {
+  const d = parseLocalDate(ymd);
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function dayLabel(ymd) {
+  const label = parseLocalDate(ymd).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' }).replace('.', '');
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function countLabel(registered, planned) {
+  const noun = (planned ?? registered) === 1 ? 'refeição registrada' : 'refeições registradas';
+  return planned ? `${registered} de ${planned} ${noun}` : `${registered} ${noun}`;
+}
+
+function MealDayRow({ day, isToday, isYesterday, mealsById, timeZone }) {
+  const [open, setOpen] = useState(false);
+  const clock = (iso) => new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone });
+  return (
+    <div style={{ borderBottom: '1px solid var(--border)' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', padding: '13px 22px', background: open ? 'var(--surface-2)' : 'transparent', border: 'none', cursor: 'pointer', color: 'inherit', textAlign: 'left', font: 'inherit' }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 800 }}>
+          {dayLabel(day.date)}
+          {isToday && <span style={{ fontSize: '11px', fontWeight: 700, background: 'rgba(5,150,105,0.12)', color: '#065F46', padding: '2px 8px', borderRadius: '6px' }}>Hoje</span>}
+          {isYesterday && <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)' }}>Ontem</span>}
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: 'var(--muted)', flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 700, color: 'var(--text)' }}>{countLabel(day.registered, day.planned)}</span>
+          <span>·</span>
+          <span>{day.kcal_registered.toLocaleString('pt-BR')} kcal registradas</span>
+          <span style={{ display: 'inline-block', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▸</span>
+        </span>
+      </button>
+      {open && (
+        <div style={{ padding: '4px 22px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {day.groups.map((g, gi) => {
+            const registered = g.registered_ids.map(id => mealsById.get(id)).filter(Boolean)
+              .map(m => ({ kind: 'reg', order: m.meal_order ?? 99, m }));
+            const missing = (g.unregistered || []).map(u => ({ kind: 'miss', order: u.meal_order, u }));
+            const rows = [...registered, ...missing].sort((a, b) => a.order - b.order);
+            return (
+              <div key={gi} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--muted)', marginTop: gi ? '8px' : 0 }}>
+                  Detalhamento do dia{g.menu_day != null ? ` (Cardápio ${g.menu_day})` : ''}{registered[0]?.m.is_current_plan === false ? ' · plano anterior' : ''}
+                </div>
+                {rows.map((r, i) => r.kind === 'reg' ? (
+                  <div key={i} title={r.m.meal_name || undefined} style={mealItemRow}>
+                    <span style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span>{MEAL_ICONS[r.m.meal_type_ptbr] || '🍽️'}</span>
+                      <span>{r.m.meal_type_ptbr || r.m.meal_name || `Refeição ${r.m.meal_order ?? '—'}`}</span>
+                    </span>
+                    <span style={{ fontSize: '11.5px', color: 'var(--muted)', fontWeight: 600 }}>
+                      Registrada às {clock(r.m.completed_at)}
+                      {r.m.kcal != null && <> <span style={{ margin: '0 6px' }}>·</span><strong style={{ color: 'var(--text)' }}>{r.m.kcal} kcal</strong></>}
+                    </span>
+                  </div>
+                ) : (
+                  <div key={i} style={{ ...mealItemRow, background: 'var(--surface-2)', borderStyle: 'dashed', color: '#94A3B8' }}>
+                    <span style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ opacity: 0.6 }}>{MEAL_ICONS[r.u.meal_type_ptbr] || '🍽️'}</span>
+                      <span>{r.u.meal_type_ptbr || `Refeição ${r.u.meal_order}`}</span>
+                    </span>
+                    <span style={{ fontSize: '11.5px', fontWeight: 600 }}>Sem registro</span>
+                  </div>
+                ))}
+                {/* Cardápio do dia mudou depois do registro: não dá para dizer QUAIS
+                    ficaram sem registro, só quantas. */}
+                {g.unregistered == null && g.unregistered_count > 0 && (
+                  <div style={{ ...mealItemRow, background: 'var(--surface-2)', borderStyle: 'dashed', color: '#94A3B8' }}>
+                    <span style={{ fontWeight: 700 }}>{g.unregistered_count} {g.unregistered_count === 1 ? 'refeição' : 'refeições'} do cardápio</span>
+                    <span style={{ fontSize: '11.5px', fontWeight: 600 }}>Sem registro</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const mealItemRow = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', padding: '6px 10px', borderRadius: '8px', background: 'var(--surface)', border: '1px solid var(--border)', fontSize: '12.5px' };
+
+function MealDays({ mealDays, meals, todayLocal, timeZone, emptyText }) {
+  if (!mealDays.length) return <p style={emptyStyle}>{emptyText}</p>;
+  const mealsById = new Map(meals.map(m => [m.id, m]));
+  const byDate = new Map(mealDays.map(d => [d.date, d]));
+  const oldest = mealDays[mealDays.length - 1].date;
+  const today = todayLocal || mealDays[0].date;
+  const dates = [];
+  for (let d = today; d >= oldest && dates.length < MEAL_DAYS_SHOWN; d = shiftYmd(d, -1)) dates.push(d);
+  const yesterday = shiftYmd(today, -1);
+  return (
+    <div>
+      {dates.map(date => {
+        const day = byDate.get(date);
+        if (!day) {
+          return (
+            <div key={date} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap', padding: '12px 22px', borderBottom: '1px solid var(--border)', fontSize: '12.5px', color: '#64748B' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontWeight: 700 }}>{dayLabel(date)}</span>
+                {date === today && <span style={{ fontSize: '11px', fontWeight: 700 }}>Hoje</span>}
+                <span>·</span>
+                <span>Sem registros</span>
+              </span>
+              <span style={{ fontSize: '11.5px', color: '#94A3B8' }}>Nenhuma refeição registrada pelo aluno</span>
+            </div>
+          );
+        }
+        return <MealDayRow key={date} day={day} isToday={date === today} isYesterday={date === yesterday} mealsById={mealsById} timeZone={timeZone} />;
+      })}
+    </div>
+  );
+}
+
 const sectionTitle = { margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' };
 const rowStyle = { display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 22px', borderBottom: '1px solid var(--border)' };
 const emptyStyle = { padding: '22px', fontSize: '13px', color: 'var(--muted)' };
@@ -132,7 +266,7 @@ export default function UserActivityFeed({ userId }) {
     );
   }
 
-  const { summary = {}, workouts = [], meals = [] } = data || {};
+  const { summary = {}, workouts = [], meals = [], meal_days: mealDays = [], today_local: todayLocal, timezone: studentTz } = data || {};
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
@@ -185,30 +319,21 @@ export default function UserActivityFeed({ userId }) {
           </div>
         </section>
 
-        {/* Refeições registradas */}
+        {/* Refeições registradas por dia */}
         <section style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '18px', overflow: 'hidden' }}>
-          <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)' }}><h3 style={sectionTitle}>Refeições Registradas</h3></div>
-          <div>
-            {meals.length === 0 ? (
-              <p style={emptyStyle}>{emptyMessage(summary.last_sign_in_at, 'meal')}</p>
-            ) : meals.slice(0, LIST_LIMIT).map(m => (
-              <div key={m.id} style={rowStyle}>
-                <span style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(22,163,74,.12)', color: '#16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '15px' }}>
-                  {MEAL_ICONS[m.meal_type_ptbr] || '🍽️'}
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: 700 }}>{m.meal_name || m.meal_type_ptbr || `Refeição ${m.meal_order ?? '—'}`}</p>
-                  <p style={{ margin: '2px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
-                    {[
-                      m.kcal != null ? `${m.kcal} kcal consumidas` : m.meal_type_ptbr,
-                      m.is_current_plan === false ? 'plano anterior' : null,
-                    ].filter(Boolean).join(' · ')}
-                  </p>
-                </div>
-                <span style={{ fontSize: '12px', color: 'var(--muted)', fontWeight: 600, whiteSpace: 'nowrap' }}>{formatWhen(m.completed_at)}</span>
-              </div>
-            ))}
+          <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
+            <h3 style={sectionTitle}>Refeições Registradas por Dia</h3>
+            <p style={{ margin: '3px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+              Histórico diário com contagem factual. Kcal representam estritamente o que foi registrado.
+            </p>
           </div>
+          <MealDays
+            mealDays={mealDays}
+            meals={meals}
+            todayLocal={todayLocal}
+            timeZone={studentTz}
+            emptyText={emptyMessage(summary.last_sign_in_at, 'meal')}
+          />
         </section>
       </div>
     </div>
