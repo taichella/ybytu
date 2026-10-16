@@ -167,7 +167,9 @@ serve(async (req) => {
         .filter((id): id is string => !!id),
     )]
 
-    const [workoutsRes, mealsRes, lastWorkoutRes, openMarksRes, loadsRes, autoClosedRes] = await Promise.all([
+    const mealPlanUuid = (payload.nutrition as { id?: string } | null)?.id ?? null
+
+    const [workoutsRes, mealsRes, lastWorkoutRes, openMarksRes, loadsRes, autoClosedRes, lastMealRes] = await Promise.all([
       supabase
         .from('completed_workouts')
         .select('id, day_number, session_name, completed_at')
@@ -218,6 +220,19 @@ serve(async (req) => {
         .eq('auto_closed', true)
         .gte('completed_at', new Date(Date.now() - 48 * 3600_000).toISOString())
         .order('completed_at', { ascending: false }),
+      // Último cardápio em que o aluno registrou refeição NESTE plano (qualquer
+      // data): o app abre no cardápio de hoje ou no próximo da sequência,
+      // como o treino abre no dia de hoje ou no próximo (2026-10-17).
+      mealPlanUuid
+        ? supabase
+          .from('completed_meals')
+          .select('day_order, completed_at')
+          .eq('user_id', userId)
+          .eq('meal_plan_id', mealPlanUuid)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        : Promise.resolve({ data: null }),
     ])
 
     // Mais recente por exercício (a lista já vem do mais novo para o mais velho).
@@ -237,6 +252,7 @@ serve(async (req) => {
       exercise_marks: openMarksRes.data ?? [],
       last_exercise_loads: lastLoads,
       auto_closed_workouts: autoClosedRes.data ?? [],
+      last_registered_meal: lastMealRes.data ?? null,
     }
 
     return new Response(JSON.stringify(responsePayload), {

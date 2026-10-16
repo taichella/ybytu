@@ -4,9 +4,11 @@ import '../checkin.css';
 // designs/AlunoAlimentacaoCheckin.dc.html. Regras (docs/PRINCIPIOS_DE_PRODUTO.md):
 // registrar é acompanhar, não cumprir — contador sem fração nem porcentagem,
 // bolinhas em vez de barra, sem fechamento do dia, refeição não registrada fica
-// limpa (sem "pendente", sem cor de alerta). Desfazer: aviso de 4s logo depois
-// de registrar e link "Desfazer registro" no rodapé do cartão, os dois só no
-// mesmo dia (unmark_meal).
+// limpa (sem "pendente", sem cor de alerta). Desde 2026-10-17 a caixa é o
+// único controle do cartão, como no treino: toca para registrar, toca de novo
+// para desfazer (só no mesmo dia, unmark_meal); o aviso de 4s permite voltar
+// atrás nos dois sentidos. O rodapé com "Registrar refeição →" / "Desfazer
+// registro" saiu (decisão da Taina).
 
 const MEAL_ICONS = {
   'Café da manhã': '🥞',
@@ -59,7 +61,7 @@ export function AllRegisteredNotice() {
   );
 }
 
-export function MealCard({ meal, match, saving, onRegister, onUndo }) {
+export function MealCard({ meal, match, saving, onToggle }) {
   const registered = !!match;
   const typeName = meal.name_ptbr || meal.meal_name_ptbr || `Refeição ${meal.meal_order}`;
   const protein = meal.macros?.protein_g;
@@ -86,10 +88,10 @@ export function MealCard({ meal, match, saving, onRegister, onUndo }) {
         <button
           type="button"
           className={`ck-check${registered ? ' checked' : ''}`}
-          onClick={registered ? undefined : onRegister}
-          disabled={registered || saving}
+          onClick={onToggle}
+          disabled={saving}
           aria-pressed={registered}
-          aria-label={registered ? `${typeName} registrada` : `Registrar ${typeName}`}
+          aria-label={registered ? `Desfazer registro de ${typeName}` : `Registrar ${typeName}`}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="20 6 9 17 4 12" />
@@ -113,22 +115,6 @@ export function MealCard({ meal, match, saving, onRegister, onUndo }) {
           <strong>Preparo:</strong> {meal.prep_ptbr}
         </div>
       )}
-
-      <div className="ck-meal-footer">
-        {registered ? (
-          <>
-            <span className="ck-meal-footer-note">Registrada hoje</span>
-            <button type="button" className="ck-meal-unmark" onClick={onUndo} disabled={saving}>Desfazer registro</button>
-          </>
-        ) : (
-          <>
-            <span className="ck-meal-footer-note">{meal.time_ptbr ? `Sugerido para ~${meal.time_ptbr}` : ''}</span>
-            <button type="button" className="ck-meal-register" onClick={onRegister} disabled={saving}>
-              {saving ? 'Registrando…' : 'Registrar refeição →'}
-            </button>
-          </>
-        )}
-      </div>
     </article>
   );
 }

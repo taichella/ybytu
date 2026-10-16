@@ -58,6 +58,26 @@ function chooseDefaultDayIndex(data) {
 }
 
 /**
+ * Cardápio que a aba de alimentação abre (2026-10-17), mesma lógica do treino:
+ * 1. cardápio em que o aluno já registrou refeição HOJE (o mais recente);
+ * 2. senão, o PRÓXIMO cardápio depois do último em que ele registrou neste
+ *    plano (last_registered_meal);
+ * 3. senão, o primeiro. O aluno escolhe o cardápio do dia tocando nele e
+ *    registrando -- é o que define "o cardápio de hoje".
+ */
+function chooseDefaultMenuIndex(data) {
+  const menus = data?.nutrition?.menus || [];
+  if (!menus.length) return 0;
+  const indexOfMenu = (dayOrder) => menus.findIndex(m => Number(m.menu_day) === Number(dayOrder));
+  const today = (data?.activity_today?.completed_meals || [])
+    .slice().sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
+  if (today.length && indexOfMenu(today[0].day_order) !== -1) return indexOfMenu(today[0].day_order);
+  const last = data?.last_registered_meal;
+  if (last && indexOfMenu(last.day_order) !== -1) return (indexOfMenu(last.day_order) + 1) % menus.length;
+  return 0;
+}
+
+/**
  * Casa os check-ins de refeição de HOJE com as refeições do cardápio de um dia
  * pelo PRATO (meal_id), não pela posição (2026-10-15): se a nutricionista
  * reordenar ou editar o cardápio durante o dia, o ✓ continua no prato que o
@@ -105,7 +125,7 @@ export default function UserToday({ mockPayload = null } = {}) {
   }, [mockPayload]);
 
   const [selectedDayIdx, setSelectedDayIdx] = useState(initialDayIdx);
-  const [selectedMenuIdx, setSelectedMenuIdx] = useState(0);
+  const [selectedMenuIdx, setSelectedMenuIdx] = useState(() => (mockPayload ? chooseDefaultMenuIndex(mockPayload) : 0));
 
   // Status de check-in de hoje
   const [completedWorkouts, setCompletedWorkouts] = useState(mockPayload?.activity_today?.completed_workouts || []);
@@ -183,6 +203,7 @@ export default function UserToday({ mockPayload = null } = {}) {
         // Dia padrão ao abrir: sessão em andamento > treino feito hoje >
         // próximo depois do último concluído (chooseDefaultDayIndex).
         setSelectedDayIdx(chooseDefaultDayIndex(data));
+        setSelectedMenuIdx(chooseDefaultMenuIndex(data));
 
       } catch (err) {
         if (!cancelled) {
@@ -756,8 +777,9 @@ export default function UserToday({ mockPayload = null } = {}) {
                               meal={meal}
                               match={match}
                               saving={!!checkingInMeal[mealKey]}
-                              onRegister={() => handleCheckinMeal(meal, activeMenu.menu_day)}
-                              onUndo={() => handleUndoMeal(meal, match, activeMenu.menu_day)}
+                              onToggle={() => (match
+                                ? handleUndoMeal(meal, match, activeMenu.menu_day)
+                                : handleCheckinMeal(meal, activeMenu.menu_day))}
                             />
                           );
                         })}
