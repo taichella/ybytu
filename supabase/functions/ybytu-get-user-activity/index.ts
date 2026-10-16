@@ -43,7 +43,7 @@ serve(async (req) => {
     // 1. Perfil para cruzar plano ativo e frequência combinada
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, current_training_plan_id, current_meal_plan_id, training_days_per_week, timezone')
+      .select('id, current_training_plan_id, current_meal_plan_id, training_days_per_week, timezone, created_at')
       .eq('id', userId)
       .maybeSingle()
 
@@ -266,9 +266,36 @@ serve(async (req) => {
       workoutDayMap.set(date, d)
     }
     const workout_days = [...workoutDayMap.values()].sort((a, b) => b.date.localeCompare(a.date))
+
+    // Frequência semanal de treino (2026-10-16, Opção A aprovada pela Taina):
+    // semanas de segunda a domingo no fuso do aluno, a atual e as 3 anteriores.
+    // Conta treinos REGISTRADOS (treino sem registro não é treino não feito);
+    // parcial conta e vem separado. A comparação é só com
+    // training_days_per_week (combinado), a única meta de treino que existe.
+    // Primeira semana do aluno: só a partir da data de cadastro (since).
+    const ymdToUtc = (ymd: string) => { const [y, m, d] = ymd.split('-').map(Number); return Date.UTC(y, m - 1, d) }
+    const utcToYmd = (t: number) => new Date(t).toISOString().slice(0, 10)
+    const mondayOf = (ymd: string) => { const t = ymdToUtc(ymd); const dow = (new Date(t).getUTCDay() + 6) % 7; return utcToYmd(t - dow * 86400000) }
+    const todayYmd = localDate.format(new Date())
+    const currentMonday = mondayOf(todayYmd)
+    const startYmd = profile.created_at ? localDate.format(new Date(profile.created_at)) : null
+    const isPartial = (w: any) => w.auto_closed === true || (w.exercises_done != null && w.exercise_count != null && w.exercises_done < w.exercise_count)
+    const training_weeks = [3, 2, 1, 0].map((back) => {
+      const weekStart = utcToYmd(ymdToUtc(currentMonday) - back * 7 * 86400000)
+      const weekEnd = utcToYmd(ymdToUtc(weekStart) + 6 * 86400000)
+      const inWeek = workouts.filter((w) => { const d = localDate.format(new Date(w.completed_at)); return d >= weekStart && d <= weekEnd })
+      return {
+        week_start: weekStart,
+        is_current: back === 0,
+        registered: inWeek.length,
+        partial: inWeek.filter(isPartial).length,
+        since: startYmd && startYmd > weekStart && startYmd <= weekEnd ? startYmd : null,
+        before_start: !!(startYmd && startYmd > weekEnd),
+      }
+    }).filter((w) => !w.before_start).reverse()
     const today_local = localDate.format(new Date())
 
-    return new Response(JSON.stringify({ summary, workouts, workout_days, meals, meal_days, timezone: tz, today_local }), {
+    return new Response(JSON.stringify({ summary, workouts, workout_days, training_weeks, meals, meal_days, timezone: tz, today_local }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
 

@@ -277,6 +277,53 @@ function MealDays({ mealDays, meals, todayLocal, timeZone, emptyText }) {
   );
 }
 
+// ─── Frequência semanal de treino (2026-10-16, Opção A aprovada) ─────────────
+// Fatos lado a lado, sem placar: "Esta semana: 2 treinos registrados ·
+// combinado: 4 por semana". "Atingida" só aparece quando é verdade; nenhum
+// texto diz "faltam", "atrasado" ou "não atingida". A nota "treino sem registro
+// não é treino não feito" fica UMA vez, no cabeçalho do cartão.
+function shortDate(ymd) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
+function weekText(w) {
+  const label = w.since
+    ? `Primeira semana (desde ${dayLabel(w.since).toLowerCase()})`
+    : (w.is_current ? 'Esta semana' : `Semana de ${shortDate(w.week_start)}`);
+  if (w.registered === 0) return `${label}: nenhum treino registrado${w.is_current ? ' ainda' : ''}`;
+  const noun = w.registered === 1 ? 'treino registrado' : 'treinos registrados';
+  const partial = w.partial ? ` (${w.partial} ${w.partial === 1 ? 'parcial' : 'parciais'})` : '';
+  return `${label}: ${w.registered} ${noun}${partial}`;
+}
+
+function WeeklyFrequency({ weeks, combined }) {
+  if (!weeks.length) return null;
+  const current = weeks.find(w => w.is_current);
+  const previous = weeks.filter(w => !w.is_current);
+  const side = (w, long) => {
+    if (combined && w.registered >= combined) return <span style={{ color: '#16a34a', fontWeight: 800 }}>✓ frequência combinada atingida</span>;
+    if (combined) return <span>combinado: {combined}{long ? ' por semana' : ''}</span>;
+    return null;
+  };
+  return (
+    <div style={{ marginBottom: '18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {current && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', padding: '12px 14px', borderRadius: '12px', background: 'var(--surface-2)' }}>
+          <span style={{ fontSize: '14px', fontWeight: 800 }}>{weekText(current)}</span>
+          <span style={{ fontSize: '12.5px', color: 'var(--muted)', fontWeight: 600 }}>{side(current, true)}</span>
+        </div>
+      )}
+      {previous.map(w => (
+        <div key={w.week_start} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', padding: '0 14px', fontSize: '12.5px', color: 'var(--muted)' }}>
+          <span style={{ fontWeight: 700, color: 'var(--text)' }}>{weekText(w)}</span>
+          <span style={{ fontWeight: 600 }}>{side(w, false)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const sectionTitle = { margin: 0, fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.02em' };
 const emptyStyle = { padding: '22px', fontSize: '13px', color: 'var(--muted)' };
 
@@ -321,7 +368,7 @@ export default function UserActivityFeed({ userId }) {
     );
   }
 
-  const { summary = {}, workouts = [], workout_days: workoutDays = [], meals = [], meal_days: mealDays = [], today_local: todayLocal, timezone: studentTz } = data || {};
+  const { summary = {}, workouts = [], workout_days: workoutDays = [], training_weeks: trainingWeeks = [], meals = [], meal_days: mealDays = [], today_local: todayLocal, timezone: studentTz } = data || {};
   const yesterdayLocal = todayLocal ? shiftYmd(todayLocal, -1) : null;
 
   return (
@@ -332,6 +379,7 @@ export default function UserActivityFeed({ userId }) {
           <div>
             <h3 style={sectionTitle}>Adesão aos Treinos</h3>
             <p style={{ margin: '3px 0 0', fontSize: '13px', color: 'var(--muted)' }}>Treinos concluídos nas últimas 12 semanas</p>
+            <p style={{ margin: '3px 0 0', fontSize: '12px', color: '#94A3B8' }}>Conta só o que o aluno marcou no app; treino sem registro não é treino não feito.</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '12px', color: 'var(--muted)', fontWeight: 700 }}>
             Menos
@@ -339,6 +387,7 @@ export default function UserActivityFeed({ userId }) {
             Mais
           </div>
         </div>
+        <WeeklyFrequency weeks={trainingWeeks} combined={summary.training_days_per_week} />
         <Heatmap workouts={workouts} />
       </section>
 

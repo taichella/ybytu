@@ -690,7 +690,15 @@ export default function UserToday({ mockPayload = null } = {}) {
                   const matches = matchMealCheckins(activeMenu.meals || [], completedMeals, activeMenu.menu_day);
                   const dots = (activeMenu.meals || []).map(m => matches.has(Number(m.meal_order)));
                   const allRegistered = dots.length > 0 && dots.every(Boolean);
-                  const macros = payload?.nutrition?.macro_distribution;
+                  // Macros DESTE cardápio (soma das refeições dele). macro_distribution
+                  // do payload é a média de todos os cardápios do plano -- mostrada
+                  // aqui ficava errada para cada cardápio (achado 2026-10-16).
+                  const macros = (activeMenu.meals || []).reduce((acc, m) => ({
+                    protein_g: acc.protein_g + (Number(m.macros?.protein_g) || 0),
+                    carb_g: acc.carb_g + (Number(m.macros?.carb_g) || 0),
+                    fat_g: acc.fat_g + (Number(m.macros?.fat_g) || 0),
+                  }), { protein_g: 0, carb_g: 0, fat_g: 0 });
+                  macros.protein_g = Math.round(macros.protein_g); macros.carb_g = Math.round(macros.carb_g); macros.fat_g = Math.round(macros.fat_g);
                   return (
                     <>
                       <div className="workout-summary-card" style={{ background: 'linear-gradient(140deg, rgba(5, 150, 105, 0.07) 0%, rgba(5, 150, 105, 0.02) 100%)', borderColor: 'rgba(5, 150, 105, 0.20)' }}>
