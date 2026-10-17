@@ -672,7 +672,10 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
     // ── 10. Cria meal_plan: is_active=false não entra no pool de match direto;
     // created_by_ai=true marca para auditoria e o gate de revisão do nutricionista.
     const aiPlanSlug = `mp_ai_${crypto.randomUUID().replace(/-/g, '').slice(0, 8)}`
-    const planName   = `Plano IA – ${goalLabelPtbr(primaryGoal)} – ${targetCalories} kcal`
+    // Sem kcal no nome (2026-10-17): o nome é gravado uma vez e prometia a meta,
+    // que nenhum cardápio atinge (docs/POS_PILOTO.md, "Gerador de cardápio").
+    // A faixa real é calculada na hora no /plano/ e no dashboard.
+    const planName   = `Plano IA – ${goalLabelPtbr(primaryGoal)}`
 
     // Observabilidade (2026-08-27) -- antes só ia na resposta HTTP, nunca
     // persistia. Sem isso, degradação de qualidade (cota estourada, IA fora

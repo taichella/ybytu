@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import ExerciseThumb from './ExerciseThumb.jsx';
+import { menuKcal, menuKcalRange, formatKcalRange, formatKcalBetween } from '../lib/menuKcal';
 
 const MEAL_ICONS = {
   'Café da manhã': '🥞',
@@ -563,7 +564,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                 <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg></div><p className="l">Frequência</p><p className="v">{training ? `${training.days_per_week} dias / semana` : '—'}</p></div>
                 <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></div><p className="l">Gasto médio</p><p className="v">{training?.avg_estimated_kcal_per_session ? `~${training.avg_estimated_kcal_per_session} kcal / sessão` : '—'}</p></div>
                 <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20"></path></svg></div><p className="l">Preferência alimentar</p><p className="v">{nutrition?.preference_ptbr || '—'}</p></div>
-                <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V3M7 3v18M21 15V3a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z"></path></svg></div><p className="l">Nutrição</p><p className="v">{nutrition ? `${nutrition.daily_kcal_target} kcal · ${nutrition.meals_per_day} ref.` : '—'}</p></div>
+                <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V3M7 3v18M21 15V3a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z"></path></svg></div><p className="l">Nutrição</p><p className="v">{nutrition ? [formatKcalRange(menuKcalRange(nutrition)), `${nutrition.meals_per_day} ref.`].filter(Boolean).join(' · ') : '—'}</p></div>
               </div>
 
               <div className="body">
@@ -875,7 +876,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
 
                 {/* ============ 4 · PLANO DE REFEIÇÕES ============ */}
                 <section className="section">
-                  <div className="sec-head"><span className="idx"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V3M7 3v18M21 15V3a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z"></path></svg></span><div><h2>Plano de Refeições</h2><p className="d">{nutrition ? `Cardápio de ${nutrition.daily_kcal_target} kcal em ${nutrition.meals_per_day} refeições — um menu para cada dia-tipo do treino.` : 'Plano alimentar personalizado.'}</p></div></div>
+                  <div className="sec-head"><span className="idx"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V3M7 3v18M21 15V3a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z"></path></svg></span><div><h2>Plano de Refeições</h2><p className="d">{nutrition ? `${menuKcalRange(nutrition) ? `Cada cardápio ${formatKcalBetween(menuKcalRange(nutrition))}` : 'Cardápios'}, em ${nutrition.meals_per_day} refeições — um menu para cada dia-tipo do treino.` : 'Plano alimentar personalizado.'}</p></div></div>
 
                   {!nutrition ? (
                     <div className="note">
@@ -895,9 +896,9 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
 
                       <div className="grid g2" style={{ marginBottom: '16px' }}>
                         <div className="card">
-                          <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20"></path></svg> Meta Diária</h3>
+                          <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20"></path></svg> Calorias dos cardápios</h3>
                           <div className="grid g2" style={{ gap: '10px' }}>
-                            <div className="stat" style={{ boxShadow: 'none' }}><p className="lab">Calorias</p><p className="num" style={{ fontSize: '21px' }}>{nutrition.daily_kcal_target}<small> kcal</small></p></div>
+                            <div className="stat" style={{ boxShadow: 'none' }}><p className="lab">Por cardápio</p><p className="num" style={{ fontSize: '21px' }}>{formatKcalRange(menuKcalRange(nutrition)) || '—'}</p></div>
                             <div className="stat" style={{ boxShadow: 'none' }}><p className="lab">Refeições</p><p className="num" style={{ fontSize: '21px' }}>{nutrition.meals_per_day}<small>/dia</small></p></div>
                           </div>
                         </div>
@@ -929,7 +930,8 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
                               <span className="tagn">{menu.menu_day}</span>
                               <div>
                                 <p className="t">Cardápio {menu.menu_day}</p>
-                                {calInfo && <p className="m">{calInfo.weekday_ptbr} · Treino {calInfo.training_day_ref}</p>}
+                                {/* Soma real das refeições deste cardápio (2026-10-17). */}
+                                <p className="m">{[calInfo ? `${calInfo.weekday_ptbr} · Treino ${calInfo.training_day_ref}` : null, menuKcal(menu) > 0 ? `~${menuKcal(menu).toLocaleString('pt-BR')} kcal` : null].filter(Boolean).join(' · ')}</p>
                               </div>
                             </div>
                             <div style={{ padding: '16px 18px' }}>

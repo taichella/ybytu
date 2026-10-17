@@ -5,6 +5,7 @@ import { StaffContext } from '../lib/staffContextCore';
 import ThemeToggle from './ThemeToggle';
 import UserLimitationsList from './UserLimitationsList';
 import UserActivityFeed from './UserActivityFeed';
+import { menuKcalRange, formatKcalRange } from '../lib/menuKcal';
 
 const VALID_TABS = new Set(['overview', 'health', 'plans', 'activity']);
 
@@ -622,7 +623,7 @@ export default function UserDetail() {
                                 )}
                               </div>
                               <p style={{ margin: '3px 0 0', fontSize: '17px', fontWeight: 900, letterSpacing: '-.01em' }}>{planPayload.nutrition.name_ptbr || resolvedLabels.dietaryPreference || 'Plano alimentar'}</p>
-                              <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 500 }}>{MEALS_PER_DAY_LABELS[userData.meals_per_day] || `${planPayload.nutrition.meals_per_day} refeições`}/dia · meta {planPayload.nutrition.daily_kcal_target} kcal</p>
+                              <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: 'var(--muted)', fontWeight: 500 }}>{MEALS_PER_DAY_LABELS[userData.meals_per_day] || `${planPayload.nutrition.meals_per_day} refeições`}/dia · meta {planPayload.nutrition.daily_kcal_target} kcal{menuKcalRange(planPayload.nutrition) ? ` · cardápios ${formatKcalRange(menuKcalRange(planPayload.nutrition))}` : ''}</p>
                               {aiSlotsLabel(planPayload.nutrition.ai_filled_slots, planPayload.nutrition.deterministic_fallback_slots) && (
                                 <p style={{ margin: '3px 0 0', fontSize: '11.5px', color: 'var(--faint, var(--muted))', fontWeight: 600 }}>{aiSlotsLabel(planPayload.nutrition.ai_filled_slots, planPayload.nutrition.deterministic_fallback_slots)}</p>
                               )}
