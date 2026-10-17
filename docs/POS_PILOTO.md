@@ -544,7 +544,7 @@ grava a marca na mesma transação. Decisão de produto em aberto: o app do alun
 ## 🔴 BLOQUEIO CLÍNICO — o piso de segurança vale para a META, não para o que o cardápio entrega (2026-10-17)
 
 Apontado pelo parecer da IA nutricionista. `calcTargetCalories` (ybytu-generate-meal-plan) aplica o piso de
-**1.500 kcal (homem) / 1.200 kcal (mulher, não binário, não declarado)** sobre a meta. Nada confere a soma de cada
+**1.500 kcal (homem) / 1.200 kcal (mulher, não binário, não declarado)** sobre a meta. **Desde 2026-10-17 (decisão da Taina): 1.200 só para mulher; homem, não binário, não declarado e vazio = 1.500** (errar para cima só recusa planos a mais). Nada confere a soma de cada
 cardápio. Com o desvio medido (até −13%), uma mulher com meta no piso (1.200) receberia cardápio de ~1.044 kcal —
 abaixo do piso que o sistema diz garantir.
 

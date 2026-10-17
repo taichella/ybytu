@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { TOKEN_LABEL_PTBR } from '../_shared/allergenLabels.ts'
-import { SAFETY_FLOOR_KCAL_DEFAULT, safetyFloorForPlan, menuTotalsByDay, daysBelowFloor, belowFloorReason } from '../_shared/safetyFloor.ts'
+import { SAFETY_FLOOR_KCAL_FEMALE, safetyFloorForPlan, menuTotalsByDay, daysBelowFloor, belowFloorReason } from '../_shared/safetyFloor.ts'
 
 // CRUD de `meal_plans` + `meal_plan_meals` (dashboard pro). Papel exigido:
 // nutricionista ou admin.
@@ -72,7 +72,7 @@ async function checkSafetyFloor(
 ): Promise<{ ok: true } | { ok: false; message: string; floor: number; days: unknown }> {
   const { floor, students } = planUuid
     ? await safetyFloorForPlan(supabase, planUuid)
-    : { floor: SAFETY_FLOOR_KCAL_DEFAULT, students: 0 }
+    : { floor: SAFETY_FLOOR_KCAL_FEMALE, students: 0 } // plano novo, sem aluno (mesmo critério de safetyFloorForPlan)
   if (!willBeActive && students === 0) return { ok: true }
 
   let rows: Array<{ day_order: number; meal_id: string }> = slots ?? []

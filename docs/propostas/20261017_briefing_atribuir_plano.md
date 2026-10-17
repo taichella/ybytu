@@ -43,7 +43,7 @@ com as restrições de saúde do aluno no lugar das alimentares).
 
 ### 2.4 Plano escolhido fora das regras — dois bloqueios, cada um com texto próprio
 1. **Abaixo do piso de segurança.** Correção no rascunho: o piso **não é calculado por aluno** — é fixo,
-   **1.200 kcal** (mulher, não binário, não declarado) ou **1.500 kcal** (homem). E vale para **cada cardápio**,
+   **1.200 kcal** só para mulher; **1.500 kcal** para homem, não binário, não declarado ou sexo vazio (decisão da Taina 2026-10-17: errar para cima só recusa planos a mais; para baixo é risco clínico). E vale para **cada cardápio**,
    não para a média nem para o número do plano. Texto que o sistema já gera:
    "Cardápio abaixo do piso de segurança (1.200 kcal): cardápio 3 com 1.140 kcal."
    O plano aparece na lista, marcado, e não pode ser confirmado. (55 dos 300 planos de catálogo estão nessa

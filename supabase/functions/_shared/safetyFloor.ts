@@ -9,13 +9,20 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 //      próprio pool seguro; sem conserto, não entrega);
 //   2. ybytu-generate-meal-plan, fallback de plano de catálogo;
 //   3. ybytu-admin-meal-plans, construtor do dashboard (bloqueia salvar).
-// non_binary/not_declared usam o piso feminino, como a fórmula da meta.
+//
+// 1.200 SÓ para "female"; todo o resto -- male, non_binary, not_declared, vazio
+// ou desconhecido -- recebe 1.500 (decisão da Taina 2026-10-17). Antes o padrão
+// era 1.200 para tudo que não fosse "male": um homem que não declarou o sexo
+// podia receber cardápio abaixo do mínimo dele. Errar para cima só recusa
+// planos a mais; errar para baixo é risco clínico. Vale nos quatro lugares que
+// usam o piso (gerador, construtor, onboarding, atribuição) porque todos passam
+// por esta função.
 
-export const SAFETY_FLOOR_KCAL_MALE = 1500
-export const SAFETY_FLOOR_KCAL_DEFAULT = 1200
+export const SAFETY_FLOOR_KCAL_FEMALE = 1200
+export const SAFETY_FLOOR_KCAL_DEFAULT = 1500
 
 export function safetyFloorForGender(genderSlug: string | null | undefined): number {
-  return genderSlug === 'male' ? SAFETY_FLOOR_KCAL_MALE : SAFETY_FLOOR_KCAL_DEFAULT
+  return genderSlug === 'female' ? SAFETY_FLOOR_KCAL_FEMALE : SAFETY_FLOOR_KCAL_DEFAULT
 }
 
 export interface DayBelowFloor { day: number; kcal: number }
@@ -45,19 +52,25 @@ export function belowFloorReason(days: DayBelowFloor[], floor: number): string {
 
 // Piso de um plano já existente: o maior piso entre os alunos que têm este
 // plano como atual (um plano de catálogo pode servir a vários). Sem aluno,
-// o piso padrão.
+// o piso feminino (ninguém recebe; a atribuição confere com o aluno).
 export async function safetyFloorForPlan(supabase: SupabaseClient, planUuid: string): Promise<{ floor: number; students: number }> {
   const { data: users, error } = await supabase
     .from('profiles')
     .select('gender_id')
     .eq('current_meal_plan_id', planUuid)
   if (error) throw new Error(`Lookup de alunos do plano falhou: ${error.message}`)
-  const genderIds = [...new Set((users ?? []).map((u: any) => u.gender_id).filter(Boolean))]
-  let floor = SAFETY_FLOOR_KCAL_DEFAULT
+  const list = (users ?? []) as Array<{ gender_id: string | null }>
+  // Sem aluno: plano de catálogo/rascunho, ninguém recebe -- o piso mais baixo;
+  // a atribuição confere de novo com o aluno de verdade.
+  if (list.length === 0) return { floor: SAFETY_FLOOR_KCAL_FEMALE, students: 0 }
+  const genderIds = [...new Set(list.map((u) => u.gender_id).filter((g): g is string => !!g))]
+  const nameById = new Map<string, string>()
   if (genderIds.length > 0) {
     const { data: genders, error: gErr } = await supabase.from('genders').select('id, name').in('id', genderIds)
     if (gErr) throw new Error(`Lookup de gênero falhou: ${gErr.message}`)
-    for (const g of genders ?? []) floor = Math.max(floor, safetyFloorForGender(g.name))
+    for (const g of genders ?? []) nameById.set(g.id, g.name)
   }
-  return { floor, students: (users ?? []).length }
+  // Aluno sem gênero gravado conta como desconhecido (1.500).
+  const floor = Math.max(...list.map((u) => safetyFloorForGender(u.gender_id ? nameById.get(u.gender_id) : null)))
+  return { floor, students: list.length }
 }
