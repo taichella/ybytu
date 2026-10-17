@@ -520,6 +520,27 @@ Mudar só a divisão das cotas, sem repovoar o catálogo, **piora** o déficit: 
 passam para almoço e jantar, onde o catálogo é ainda mais fraco (jantar mediano 345 kcal). Se for preciso escolher,
 **o catálogo vem primeiro** (corrigir e reativar as 99–100 refeições desativadas, item N2; receitas maiores).
 
+## ⚠️ A "IA nutricionista" não é segunda opinião: valores dela no banco precisam da marca "análise preliminar sem validação de CRN" (2026-10-17)
+
+Decisão da Taina: a IA nutricionista que deu o parecer de 2026-10-17 é **a mesma** que gerou as recomendações da
+Sessão 1 — não é uma revisão independente. Qualquer valor dela que entre no banco fica marcado como **análise
+preliminar sem validação de CRN**.
+
+**Situação medida em 2026-10-17 (somente leitura): a regra NÃO é cumprida hoje.** A Seção A da Sessão 1 foi
+aplicada em produção em 2026-09-13 (`scripts/aplicacao_sessao1_20260904.sql`) sobre esse parecer, e a proveniência
+ficou **só no cabeçalho do script e em `docs/ENCERRAMENTO_SESSAO1_20260913.md`**. No banco:
+- **37 alimentos** mudaram de `unreviewed` para `reviewed_none` (34) ou `reviewed_has_allergens` (3) — o mesmo
+  valor que uma revisão com CRN gravaria. `foods` não tem coluna de proveniência da revisão
+  (`food_source_id`/`food_facts_source_id` são a fonte do dado nutricional, não da revisão).
+- `meals.restriction_tags` foi recalculado a partir desses alimentos; o encerramento registra 64 refeições que
+  passaram a mostrar alergênico "real" ao aluno em vez de "não verificado".
+- O parecer de 2026-10-17 não gravou nada no banco (só documentos, nome dos planos e a remoção do "Gasto médio").
+
+**Proposta (não implementada):** coluna `foods.allergen_review_basis` (`preliminar_sem_crn` | `crn`), preenchida
+com `preliminar_sem_crn` nos 37 a partir de `foods_backup_20260904`; todo script futuro que grave valor vindo da IA
+grava a marca na mesma transação. Decisão de produto em aberto: o app do aluno deve tratar esses 37 como
+"não verificado" até a nutricionista com CRN confirmar?
+
 ## 🔴 BLOQUEIO CLÍNICO — o piso de segurança vale para a META, não para o que o cardápio entrega (2026-10-17)
 
 Apontado pelo parecer da IA nutricionista. `calcTargetCalories` (ybytu-generate-meal-plan) aplica o piso de
