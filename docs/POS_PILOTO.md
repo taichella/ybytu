@@ -514,3 +514,45 @@ visível no link /plano/ e no dashboard) promete um número que nenhum cardápio
 Para decidir com a nutricionista: (1) a divisão 20%/40% das cotas, sobretudo com 4 refeições; (2) qual tolerância
 do total do dia é aceitável (±5%? ±10%?) e se o gerador deve rejeitar/refazer cardápios fora dela; (3) se o nome
 do plano deve mostrar a meta ou a faixa real dos cardápios.
+
+## 📋 Pendências que dependem dos profissionais — lista única (levantada 2026-10-17)
+
+Para levar numa conversa só com o personal e a nutricionista. Nenhum item é bloqueio técnico: o material está
+pronto e falta a decisão. "Dias parado" contados até 2026-10-17 a partir do registro mais antigo do item.
+
+### Personal
+
+| # | Item | Desde | Dias parado | O que trava | Material |
+|---|---|---|---|---|---|
+| P1 | Vídeos e imagens: 102 exercícios com vídeo no Drive, 8 sem vídeo, 109 sem imagem | 2026-09-08 | 39 | Vídeo não toca no app do aluno para esses exercícios; miniaturas dependem do vídeo escolhido | `docs/APROVACAO_PERSONAL_VIDEOS_R2_20260908.md` (todas as caixas em branco) |
+| P2 | 19 pares de exercícios duplicados por nome (fusão) | 2026-09-19 (padrão visto desde 07-28) | 28 (81) | Gerador colapsa por nome como paliativo; músculos/nível divergentes em parte dos pares | seção "Catálogo de exercícios — 19 pares duplicados" acima |
+| P3 | Divisões de treino de 2, 5, 6 e 7 dias | 2026-07-30 | 79 | Usadas pelo gerador sem validação profissional | `docs/SPLITS_PERGUNTA_PERSONAL_20260906.md` |
+| P4 | Repetições padronizadas por papel do exercício (séries já são) | 2026-08-26 | 52 | Reps herdadas do exercício, não do papel | — |
+| P5 | Cadência padrão 2-0-2-0 em todos os moldes | 2026-07-26 | 83 | Valor único aplicado a todo exercício | — |
+| P6 | Quase nenhum exercício de academia para iniciante | 2026-07-20 | 89 | Iniciante recebe só peso corporal | — |
+| P7 | Condicionamento e rotina saudável usam a estrutura do emagrecimento | jul/2026 | ~80 | Sem molde próprio para esses objetivos | — |
+| P8 | 323 propostas de cautela geradas por IA, 15,3% sem revisão | 2026-09-03 | 44 | Avisos de cautela que ninguém validou; não há tela de revisão | `exercise_condition_proposals` |
+| P9 | Ideias a validar: faixa de adesão e aviso de carga muito acima da prescrita | 2026-10-04 | 13 | Não bloqueiam; ficam fora até o personal opinar | seções próprias acima |
+
+### Nutricionista
+
+| # | Item | Desde | Dias parado | O que trava | Material |
+|---|---|---|---|---|---|
+| N1 | Sessão 1 enviada e sem resposta (inclui coco como castanha e 5 alimentos sem dado) | 2026-09-05 | 42 | Decisões de alergênico que removeriam proteção não foram tomadas sem ela | `docs/SESSAO_1_NUTRICIONISTA_PARA_ENVIO_20260905.md` |
+| N2 | **100 de 200 refeições desativadas** por ingrediente errado, nunca corrigidas | 2026-08-26 | 52 | Catálogo reduzido à metade: pouca variedade e **causa direta dos cardápios abaixo da meta** (item abaixo) | `docs/ANALISE_PADROES_SUBSTITUICAO_NUTRICAO.md`, `docs/NUTRICIONISTA_SUBSTITUICOES_INGREDIENTES_20260901.csv` |
+| N3 | Variedade: vegano/jantar com 3 opções; pescetariano sem café da manhã | 2026-08-26 / 09-01 | 52 / 46 | Cardápios repetitivos ou impossíveis para essas preferências | `docs/PEDIDO_RECEITAS_NUTRICIONISTA_LACUNAS_COBERTURA_20260901.md`, `docs/VALIDACAO_7_REFEICOES_VEGANAS_PROPOSTAS_20260901.csv` |
+| N4 | 195 alimentos sem revisão de alergênico (lote de 486) | 2026-09-01 | 46 | Baixa urgência hoje (fora de refeições ativas), mas é o lote da próxima sessão | `docs/REVISAO_NUTRICIONISTA_ALERGENOS_486_FOODS_20260901.md` |
+| N5 | Gerador: cardápios abaixo da meta de kcal (cotas 20/40%, tolerância do total do dia, nome do plano) | 2026-10-17 | 0 | Média −6%; em ganho de massa o catálogo atual não alcança a meta nem no melhor caso | seção "Gerador de cardápio" acima |
+| N6 | Ideia a validar: "dias com algum registro nos últimos 7" | 2026-10-15 | 2 | Não bloqueia | seção própria acima |
+| N7 | Revisão geral da base nutricional montada com IA (gate de lançamento) | jul/2026 | ~80 | Pré-requisito para abrir para aluno real em escala | — |
+
+### Os dois
+
+| # | Item | Desde | Dias parado | O que trava | Material |
+|---|---|---|---|---|---|
+| A1 | Condições de saúde: quais aparecem para treino, nutrição ou os dois (ansiedade, depressão, asma, equilíbrio) | 2026-09-19 | 28 | Classificação provisória no card de parecer | seção "Classificação clínica de condições de saúde" acima |
+| A2 | `exercises.calories`: o que a coluna significa (soma por sessão dá 960–1.265 kcal, irreal) | 2026-07-28 | 81 | Por isso o app não mostra gasto calórico de treino | — |
+
+**Leitura de conjunto:** os 100 pratos desativados (N2) e os vídeos (P1) são o mesmo tipo de gargalo — decisão
+profissional parada sobre material já preparado —, cada um com um profissional. N2 é o que mais pesa hoje: além da
+variedade, é a principal causa do déficit de kcal dos cardápios.
