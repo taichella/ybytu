@@ -4,38 +4,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
 import { safetyFloorForGender, menuTotalsByDay, daysBelowFloor, belowFloorReason } from '../_shared/safetyFloor.ts'
+import { resolveNutritionProfile, checkMealCounts, belowFloorForMealCountReason } from '../_shared/mealFeasibility.ts'
 
-// ─── Mifflin-St Jeor + safety floor ──────────────────────────────────────────
-// non_binary/not_declared → female formula (conservative)
-function calcTargetCalories(p: {
-  gender_slug: string
-  age: number
-  weight_kg: number
-  height_cm: number
-  activity_slug: string
-  goal_slugs: string[]
-}): number {
-  const base = 10 * p.weight_kg + 6.25 * p.height_cm - 5 * p.age
-  const bmr  = p.gender_slug === 'male' ? base + 5 : base - 161
-
-  const activityFactor: Record<string, number> = {
-    sedentary:      1.200,
-    lightly_active: 1.375,
-    active:         1.550,
-    very_active:    1.725,
-  }
-  const tdee = bmr * (activityFactor[p.activity_slug] ?? 1.375)
-
-  // weight_loss beats hypertrophy on conflict (safety wins)
-  const goalFactor = p.goal_slugs.includes('weight_loss') ? 0.80
-                   : p.goal_slugs.includes('hypertrophy')  ? 1.10
-                   : 1.00
-
-  const raw   = Math.round(tdee * goalFactor)
-  // Piso da META. O piso da SOMA ENTREGUE é conferido depois do rodízio
-  // (_shared/safetyFloor.ts) -- a meta no piso não garante cardápio no piso.
-  return Math.max(raw, safetyFloorForGender(p.gender_slug))
-}
+// Meta de kcal (Mifflin-St Jeor + piso da meta): _shared/mealFeasibility.ts
+// (calcTargetCalories), compartilhada com o onboarding desde 2026-10-17.
 
 // ─── Meta de proteína por objetivo — SINAL pra IA, nunca filtro ──────────────
 // Mesma precedência do goalFactor calórico acima (weight_loss bate hypertrophy
@@ -328,44 +300,11 @@ serve(async (req) => {
     // 'failed' por padrão, o que é o resultado correto.
     await markPlanGenerationStatus(supabase, userId, 'failed', 'Geração iniciada — se este texto persistir, a function foi interrompida pelo runtime antes de concluir (timeout ou limite de recursos), não por uma exceção capturável.')
 
-    // ── PASSO 0: traduzir UUIDs → slugs em paralelo ──────────────────────────
-    const [genderRes, activityRes, preferenceRes, restrictionsRes, goalsRes] = await Promise.all([
-      profile.gender_id
-        ? supabase.from('genders').select('name').eq('id', profile.gender_id).single()
-        : Promise.resolve({ data: { name: 'not_declared' }, error: null }),
-
-      profile.activity_level_id
-        ? supabase.from('activity_levels').select('name').eq('id', profile.activity_level_id).single()
-        : Promise.resolve({ data: { name: 'sedentary' }, error: null }),
-
-      profile.dietary_preference_id
-        ? supabase.from('dietary_preferences').select('dietary_preference_id').eq('id', profile.dietary_preference_id).single()
-        : Promise.resolve({ data: { dietary_preference_id: 'omnivore' }, error: null }),
-
-      profile.dietary_restrictions_ids?.length > 0
-        ? supabase.from('dietary_restrictions').select('dietary_restriction_id').in('id', profile.dietary_restrictions_ids)
-        : Promise.resolve({ data: [], error: null }),
-
-      profile.goals_ids?.length > 0
-        ? supabase.from('goals').select('goal_id').in('id', profile.goals_ids)
-        : Promise.resolve({ data: [], error: null }),
-    ])
-
-    const genderSlug       = genderRes.data?.name                       ?? 'not_declared'
-    const activitySlug     = activityRes.data?.name                     ?? 'sedentary'
-    const preferenceSlug   = preferenceRes.data?.dietary_preference_id  ?? 'omnivore'
-    const restrictionSlugs = (restrictionsRes.data ?? []).map((r: any) => r.dietary_restriction_id)
-    const goalSlugs        = (goalsRes.data        ?? []).map((g: any) => g.goal_id)
-    const primaryGoal      = goalSlugs[0] ?? 'health_routine'
-
-    const targetCalories = calcTargetCalories({
-      gender_slug:   genderSlug,
-      age:           profile.age       ?? 30,
-      weight_kg:     profile.weight_kg ?? 70,
-      height_cm:     profile.height_cm ?? 170,
-      activity_slug: activitySlug,
-      goal_slugs:    goalSlugs,
-    })
+    // ── PASSO 0: UUIDs → slugs + meta (_shared/mealFeasibility.ts, mesma
+    // tradução que o onboarding usa para checar o número de refeições) ──────
+    const nutritionProfile = await resolveNutritionProfile(supabase, profile)
+    const { genderSlug, preferenceSlug, restrictionSlugs, goalSlugs, targetCalories } = nutritionProfile
+    const primaryGoal = goalSlugs[0] ?? 'health_routine'
 
     const mealsPerDay    = profile.meals_per_day ?? 3
     const nutritionDays  = profile.nutrition_days_per_week ?? 7 // full-week default — espelha o padrão de 7 dias do catálogo
@@ -379,6 +318,25 @@ serve(async (req) => {
       goal_slugs:            goalSlugs,
       meals_per_day:         mealsPerDay,
       nutrition_days_per_week: nutritionDays,
+    }
+
+    // ── Viabilidade do número de refeições (2026-10-17): se nem o máximo
+    // possível com as opções seguras alcança o piso, não adianta compor --
+    // falha já, com o mesmo motivo que o onboarding usa para oferecer ajuste.
+    // missing_type segue: o caminho do plano de catálogo decide abaixo.
+    {
+      const { floor, checks } = await checkMealCounts(supabase, nutritionProfile, [mealsPerDay])
+      if (checks[0]?.result === 'below_floor') {
+        const reason = belowFloorForMealCountReason(mealsPerDay, floor)
+        await markPlanGenerationStatus(supabase, userId, 'failed', reason)
+        return new Response(JSON.stringify({
+          success: false,
+          status:  'below_safety_floor',
+          message: reason,
+          reason_ptbr: reason,
+          profile_context: profileContext,
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
     }
 
     // ── CAMADA PRINCIPAL: compor do pool seguro (invertida — antes era fallback) ─

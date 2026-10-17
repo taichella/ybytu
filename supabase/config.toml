@@ -490,3 +490,10 @@ entrypoint = "./functions/ybytu-auth-request-otp/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/ybytu-auth-verify-otp/index.ts"
+
+# Onboarding consulta antes de criar a conta (2026-10-17): sem sessão; a chave
+# sb_publishable_ não é JWT. Só leitura, não devolve dado de aluno.
+[functions.ybytu-meal-feasibility]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/ybytu-meal-feasibility/index.ts"
