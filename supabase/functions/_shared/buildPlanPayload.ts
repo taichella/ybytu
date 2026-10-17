@@ -7,6 +7,7 @@
 // o JSON" mora aqui. Ver [[project_staff_role_system_design]].
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { formatLoadPtbr } from './loadDisplay.ts'
+import { TOKEN_LABEL_PTBR } from './allergenLabels.ts'
 
 // ─── MET por papel do slot (fórmula de gasto calórico, PENDENTE de aprovação) ─
 // kcal_slot = MET × peso_kg × (7min / 60). O "7min/slot" não é inventado aqui:
@@ -59,19 +60,7 @@ const MET_BY_ROLE: Record<string, number> = {
 // ─── Rótulo pt-BR por token de alérgeno (badges derivados no card de refeição) ─
 // restriction_tokens não tem coluna de nome traduzido, só o código -- mapa
 // fixo aqui.
-const TOKEN_LABEL_PTBR: Record<string, string> = {
-  milk: 'leite', gluten: 'glúten', wheat: 'trigo', rye: 'centeio',
-  egg: 'ovo', soy: 'soja', peanuts: 'amendoim', tree_nuts: 'castanhas',
-  nuts: 'castanhas', fish: 'peixe', shellfish: 'crustáceos',
-  crustacean: 'crustáceos', mollusk: 'moluscos', sesame: 'gergelim',
-  lupin: 'tremoço', mustard: 'mostarda', sulfites: 'sulfitos',
-  pork: 'carne suína', red_meat: 'carne vermelha',
-  // coco: token próprio desde a Sessão 1 (2026-09-12) -- antes disso coco
-  // usava tree_nuts, decisão de produto revertida porque cobria a população
-  // errada (excluía coco de quem é alérgico a castanha, não de quem é
-  // alérgico a coco). Ver scripts/aplicacao_sessao1_20260904.sql Bloco 2b.
-  coco: 'coco',
-}
+// Nomes em português: _shared/allergenLabels.ts (compartilhado com o construtor, 2026-10-17).
 // Tokens que contam como "alérgeno confirmado presente" (badge "Contém").
 // pork e red_meat ficam fora daqui -- não são alérgeno clínico, viram o
 // badge separado "preferência de carne" (ver MEAT_PREFERENCE_TOKENS).
@@ -711,7 +700,11 @@ async function buildNutritionSection(
     let crossContact = false
     for (const ing of ingredientsJson ?? []) {
       if (!resolvedFoodIds.has(ing.id)) { unverified = true; continue }
-      if (foodReviewStatusBySlug.get(ing.id) === 'unreviewed') { unverified = true; continue }
+      // Não verificado NÃO apaga as marcas que o ingrediente já tem (2026-10-17,
+      // decisão da Taina): depois da reversão dos 37 alimentos sem CRN, o peito de
+      // peru defumado (soja) mostrava só "não verificado". Marca conhecida aparece
+      // em "Contém", junto com o selo de não verificado.
+      if (foodReviewStatusBySlug.get(ing.id) === 'unreviewed') unverified = true
       for (const token of tokensByFoodId.get(ing.id) ?? []) {
         if (ALLERGEN_TOKENS_FOR_BADGE.has(token)) containsSet.add(token)
         if (MEAT_PREFERENCE_TOKENS.has(token)) meatSet.add(token)

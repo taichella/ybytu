@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
+import { TOKEN_LABEL_PTBR } from '../_shared/allergenLabels.ts'
 import { SAFETY_FLOOR_KCAL_DEFAULT, safetyFloorForPlan, menuTotalsByDay, daysBelowFloor, belowFloorReason } from '../_shared/safetyFloor.ts'
 
 // CRUD de `meal_plans` + `meal_plan_meals` (dashboard pro). Papel exigido:
@@ -90,6 +91,72 @@ async function checkSafetyFloor(
   const below = daysBelowFloor(menuTotalsByDay(rows.map((r) => ({ day: r.day_order, kcal: kcalById.get(r.meal_id) }))), floor)
   if (below.length === 0) return { ok: true }
   return { ok: false, message: belowFloorReason(below, floor) + ' Ajuste o cardápio antes de salvar.', floor, days: below }
+}
+
+// Restrições do aluno no construtor (2026-10-17, decisão da Taina): recusa
+// salvar prato que o aluno não pode receber. Mesmo critério do gerador -- a
+// regra mora em ybytu_meals_incompatible / ybytu_forbidden_tokens (migração
+// 20261017210000), que ybytu_match_meals também usa. Vale para todo aluno que
+// tem este plano como atual (plano de catálogo pode servir a vários).
+const PREFERENCE_LABEL_PTBR: Record<string, string> = {
+  vegan: 'vegana', vegetarian: 'vegetariana', pescetarian: 'pescetariana',
+}
+async function checkStudentRestrictions(
+  supabase: any,
+  planUuid: string,
+  slots: Array<{ meal_id: string }> | null,
+): Promise<{ ok: true } | { ok: false; message: string; conflicts: unknown[] }> {
+  const { data: students, error } = await supabase
+    .from('profiles')
+    .select('id, dietary_preference_id, dietary_restrictions_ids')
+    .eq('current_meal_plan_id', planUuid)
+  if (error) throw new Error(`Lookup de alunos do plano falhou: ${error.message}`)
+  if (!students || students.length === 0) return { ok: true }
+
+  let mealIds: string[]
+  if (slots) {
+    mealIds = [...new Set(slots.map((s) => s.meal_id).filter(Boolean))]
+  } else {
+    const { data, error: mErr } = await supabase.from('meal_plan_meals').select('meal_id').eq('meal_plan_id', planUuid)
+    if (mErr) throw new Error(`Falha ao ler meal_plan_meals: ${mErr.message}`)
+    mealIds = [...new Set<string>(((data ?? []) as any[]).map((r) => String(r.meal_id)))]
+  }
+  if (mealIds.length === 0) return { ok: true }
+
+  const conflicts: Array<{ student_id: string; meal: string; tokens: string[]; preference: boolean }> = []
+  const messages: string[] = []
+  for (const st of students) {
+    let pref = 'omnivore'
+    if (st.dietary_preference_id) {
+      const { data } = await supabase.from('dietary_preferences').select('dietary_preference_id').eq('id', st.dietary_preference_id).maybeSingle()
+      pref = data?.dietary_preference_id ?? 'omnivore'
+    }
+    let restrictions: string[] = []
+    const rIds = Array.isArray(st.dietary_restrictions_ids) ? st.dietary_restrictions_ids : []
+    if (rIds.length > 0) {
+      const { data } = await supabase.from('dietary_restrictions').select('dietary_restriction_id').in('id', rIds)
+      restrictions = (data ?? []).map((r: any) => r.dietary_restriction_id)
+    }
+    const { data: bad, error: rpcErr } = await supabase.rpc('ybytu_meals_incompatible', {
+      p_dietary_preference: pref, p_restriction_ids: restrictions, p_meal_uuids: mealIds,
+    })
+    if (rpcErr) throw new Error(`ybytu_meals_incompatible: ${rpcErr.message}`)
+    for (const b of bad ?? []) {
+      const tokens = (b.forbidden_tokens ?? []) as string[]
+      conflicts.push({ student_id: st.id, meal: b.meal_name, tokens, preference: b.preference_conflict })
+      const why = [
+        ...(tokens.length ? [`contém ${[...new Set(tokens.map((t) => TOKEN_LABEL_PTBR[t] ?? t))].join(', ')}`] : []),
+        ...(b.preference_conflict ? [`não serve para dieta ${PREFERENCE_LABEL_PTBR[pref] ?? pref}`] : []),
+      ].join(' e ')
+      messages.push(`"${b.meal_name}" (${why})`)
+    }
+  }
+  if (conflicts.length === 0) return { ok: true }
+  return {
+    ok: false,
+    message: `Prato incompatível com as restrições do aluno: ${[...new Set(messages)].join('; ')}. Troque o prato antes de salvar.`,
+    conflicts,
+  }
 }
 
 serve(async (req) => {
@@ -201,6 +268,8 @@ serve(async (req) => {
         const { data: current, error: curErr } = await supabase.from('meal_plans').select('is_active').eq('id', id).single()
         if (curErr) throw curErr
         const willBeActive = 'is_active' in payload ? payload.is_active === true : current.is_active === true
+        const restrictionCheck = await checkStudentRestrictions(supabase, id, Array.isArray(body?.slots) ? body.slots : null)
+        if (!restrictionCheck.ok) return json({ error: 'incompatible_with_student', message: restrictionCheck.message, conflicts: restrictionCheck.conflicts }, 409, corsHeaders)
         const floorCheck = await checkSafetyFloor(supabase, id, Array.isArray(body?.slots) ? body.slots : null, willBeActive)
         if (!floorCheck.ok) return json({ error: 'below_safety_floor', message: floorCheck.message, floor: floorCheck.floor, days: floorCheck.days }, 409, corsHeaders)
       }
