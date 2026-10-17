@@ -101,9 +101,46 @@ function countLabel(registered, planned) {
   return planned ? `${registered} de ${planned} ${noun}` : `${registered} ${noun}`;
 }
 
+// Encerramento do registro do dia (2026-10-17, desenho
+// designs/AlunoAlimentacaoCheckin.dc.html, estado 5): encerrado pelo aluno,
+// encerrado ao registrar a última refeição, não encerrado (neutro, cinza) e sem
+// registros. Comparação de macros com o cardápio SÓ em dia encerrado, sempre
+// com "registrado" -- nunca "comeu", "consumiu", "parcial", "meta".
+const DAY_BADGE = {
+  closed: { label: 'Encerrado pelo aluno', style: { background: 'rgba(5,150,105,0.12)', color: '#065F46', border: '1px solid rgba(5,150,105,0.3)' } },
+  full: { label: 'Todas registradas', style: { background: '#059669', color: '#FFFFFF' } },
+  unclosed: { label: 'Registro não encerrado', style: { background: 'rgba(100,116,139,0.14)', color: '#475569', border: '1px solid rgba(100,116,139,0.25)' } },
+};
+function DayBadge({ kind }) {
+  const b = DAY_BADGE[kind];
+  return <span style={{ padding: '3px 8px', borderRadius: '6px', fontSize: '10.5px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', whiteSpace: 'nowrap', ...b.style }}>{b.label}</span>;
+}
+
+function MacroComparison({ comparison }) {
+  const items = [
+    ['Proteína registrada', comparison.registered.protein_g, comparison.menu.protein_g, '#2563EB'],
+    ['Carboidrato registrado', comparison.registered.carb_g, comparison.menu.carb_g, '#D97706'],
+    ['Gordura registrada', comparison.registered.fat_g, comparison.menu.fat_g, '#7C3AED'],
+  ];
+  return (
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '12px', padding: '12px 14px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
+      {items.map(([label, reg, menu, color]) => (
+        <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span style={{ fontSize: '10.5px', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</span>
+          <span style={{ fontSize: '12.5px', fontWeight: 900, color }}>{reg}g</span>
+          <span style={{ fontSize: '10.5px', fontWeight: 600, color: '#64748B' }}>de {menu}g do cardápio</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function MealDayRow({ day, isToday, isYesterday, mealsById, timeZone }) {
   const [open, setOpen] = useState(false);
   const clock = (iso) => new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone });
+  const closure = day.closure;
+  const badgeKind = !closure ? 'unclosed' : (closure.closed_by === 'auto_last_meal' ? 'full' : 'closed');
+  const menuDay = closure?.menu_day ?? (day.groups.length === 1 ? day.groups[0].menu_day : null);
   return (
     <div style={{ borderBottom: '1px solid var(--border)' }}>
       <button
@@ -118,14 +155,39 @@ function MealDayRow({ day, isToday, isYesterday, mealsById, timeZone }) {
           {isYesterday && <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--muted)' }}>Ontem</span>}
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: 'var(--muted)', flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 700, color: 'var(--text)' }}>{countLabel(day.registered, day.planned)}</span>
+          {menuDay != null && <><span>Cardápio {menuDay}</span><span>·</span></>}
+          {closure && <><strong style={{ color: 'var(--text)' }}>Registro encerrado pelo aluno às {clock(closure.closed_at)}</strong><span>·</span></>}
+          <span style={{ fontWeight: 700, color: 'var(--text)' }}>
+            {badgeKind === 'full'
+              ? `todas as ${day.registered} refeições do cardápio registradas`
+              : countLabel(day.registered, day.planned)}
+          </span>
+          {!closure && <span>(<strong>registro não encerrado pelo aluno</strong>)</span>}
           <span>·</span>
           <span>{day.kcal_registered.toLocaleString('pt-BR')} kcal registradas</span>
+          <DayBadge kind={badgeKind} />
           <span style={{ display: 'inline-block', transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}>▸</span>
         </span>
       </button>
       {open && (
         <div style={{ padding: '4px 22px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {closure && day.macro_comparison && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--muted)' }}>Distribuição de macros registrados vs prescrito no cardápio</span>
+                <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>✓ Declarado encerrado pelo aluno</span>
+              </div>
+              <MacroComparison comparison={day.macro_comparison} />
+            </>
+          )}
+          {closure && !day.macro_comparison && (
+            <div style={{ fontSize: '11.5px', color: 'var(--muted)' }}>Sem comparação com o cardápio: ele foi alterado depois dos registros deste dia.</div>
+          )}
+          {!closure && (
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '8px 12px', fontSize: '11.5px', color: 'var(--muted)' }}>
+              ℹ️ <strong>Registro não encerrado pelo aluno:</strong> este dia não exibe comparação de macros ou cumprimento de cardápio, pois ausência de registro não significa ausência de consumo.
+            </div>
+          )}
           {day.groups.map((g, gi) => {
             const registered = g.registered_ids.map(id => mealsById.get(id)).filter(Boolean)
               .map(m => ({ kind: 'reg', order: m.meal_order ?? 99, m }));

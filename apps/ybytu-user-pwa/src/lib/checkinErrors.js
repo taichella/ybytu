@@ -27,6 +27,11 @@ export function describeCheckinError(err) {
   if (message.includes('meal_not_undoable')) {
     return { kind: 'not_undoable', text: 'Só dá para desfazer o registro de uma refeição no mesmo dia. Depois disso ele fica no seu histórico.' };
   }
+  // Dia alimentar encerrado (20261017220000): o app reabre antes, então isto só
+  // aparece se o estado da tela ficou velho (outro aparelho encerrou).
+  if (message.includes('meal_day_closed')) {
+    return { kind: 'meal_day_closed', text: 'O registro de hoje está encerrado. Recarregue a página e reabra para registrar.' };
+  }
   if (code === '23505') {
     return { kind: 'already_marked', text: 'Esse exercício já está marcado. Recarregue a página.' };
   }

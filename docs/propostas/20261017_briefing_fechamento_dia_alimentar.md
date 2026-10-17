@@ -3,7 +3,9 @@
 **Data:** 17 de outubro de 2026
 **Para:** Antigravity (desenho das telas)
 **Aprovado por:** Taina, 2026-10-17
-**Implementação:** Claude, depois do desenho
+**Implementação:** Claude, depois do desenho — **FEITA 2026-10-17** (migração 20261017220000; app: MealCheckin.jsx/UserToday.jsx/mealDay.css; dashboard: UserActivityFeed.jsx). Testada com contas descartáveis no banco real e no navegador a 360px.
+
+**Diferenças em relação ao desenho, aguardando a Taina:** (1) o desenho traz de volta o rodapé dos cartões ("Desfazer registro" / "Registrar refeição →"), que saiu por decisão de 2026-10-17 (a caixa é o único controle) — mantido sem rodapé; (2) na linha expandida do dashboard o desenho lista só as refeições registradas, sem as linhas "Sem registro" — mantidas as linhas "Sem registro" que já existiam; (3) dia encerrado cujo cardápio foi editado depois dos registros: sem comparação de macros, com a frase "Sem comparação com o cardápio: ele foi alterado depois dos registros deste dia." (caso não desenhado).
 
 Substitui, neste ponto, o "sem fechamento do dia" do briefing de 16/10
 (`20261016_briefing_cardapio_do_dia.md`) e do princípio 2 de `docs/PRINCIPIOS_DE_PRODUTO.md`

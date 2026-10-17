@@ -8,7 +8,7 @@ import YbytuLogo from './YbytuLogo';
 import UserVideoModal from './UserVideoModal';
 import { useExerciseCheckin, SessionProgress, ExerciseCheckinCard, CheckinDialog, UndoToast, AutoClosedNotice } from './ExerciseCheckin';
 import { describeCheckinError } from '../lib/checkinErrors';
-import { MealTracker, AllRegisteredNotice, MealCard, mealWithArticle } from './MealCheckin';
+import { MealTracker, MealCard, mealWithArticle, MealDayClosedBanner, CloseMealDayControl, MealDayClosedFooter, ReopenMealDayDialog } from './MealCheckin';
 import '../user.css';
 
 /**
@@ -138,6 +138,14 @@ export default function UserToday({ mockPayload = null } = {}) {
   const [mealToast, setMealToast] = useState(null);
   const mealToastTimer = useRef(null);
   useEffect(() => () => clearTimeout(mealToastTimer.current), []);
+  // Encerramento do registro do dia alimentar de hoje (2026-10-17, migration
+  // 20261017220000): { closed_at, closed_by, day_order, ... } ou null. closed_at
+  // nulo = reaberto. Ref para os avisos de 4s lerem o estado atual.
+  const [mealDay, setMealDay] = useState(mockPayload?.meal_day_today || null);
+  const mealDayRef = useRef(mealDay);
+  useEffect(() => { mealDayRef.current = mealDay; }, [mealDay]);
+  const [mealDayDialog, setMealDayDialog] = useState(null);
+  const [mealDaySaving, setMealDaySaving] = useState(false);
 
   // Modal de vídeo
   const [activeVideo, setActiveVideo] = useState(null); // { url, title }
@@ -199,6 +207,7 @@ export default function UserToday({ mockPayload = null } = {}) {
         const todayWorkouts = data.activity_today?.completed_workouts || [];
         setCompletedWorkouts(todayWorkouts);
         setCompletedMeals(data.activity_today?.completed_meals || []);
+        setMealDay(data.meal_day_today || null);
 
         // Dia padrão ao abrir: sessão em andamento > treino feito hoje >
         // próximo depois do último concluído (chooseDefaultDayIndex).
@@ -272,6 +281,47 @@ export default function UserToday({ mockPayload = null } = {}) {
     checkin.closeSession();
   };
 
+  // Erro de check-in de refeição: sessão vencida vai para o login.
+  const reportMealError = async (err, prefix) => {
+    const { kind, text } = describeCheckinError(err);
+    if (kind === 'session_expired') {
+      await supabase.auth.signOut();
+      navigate('/login', { replace: true });
+      return;
+    }
+    setCheckinError(kind === 'plan_changed' || kind === 'meal_day_closed' ? text : `${prefix} ${text}`);
+  };
+
+  // Encerrar o registro de hoje: sem diálogo (decisão da Taina 2026-10-17 --
+  // reversível no mesmo dia, o diálogo vira atrito).
+  const closeMealDay = async (dayOrder, closedBy = 'student') => {
+    setMealDaySaving(true);
+    try {
+      const { data, error } = await supabase.rpc('close_meal_day', {
+        p_meal_plan_id: payload?.nutrition?.id || null,
+        p_day_order: Number(dayOrder),
+        p_closed_by: closedBy,
+      });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      setMealDay(prev => ({ ...(prev || {}), day_order: Number(dayOrder), closed_at: row?.closed_at ?? new Date().toISOString(), closed_by: row?.closed_by ?? closedBy }));
+    } catch (err) {
+      await reportMealError(err, 'Registro do dia não encerrado.');
+    } finally {
+      setMealDaySaving(false);
+    }
+  };
+
+  // Reabre (só hoje, até a meia-noite do aluno -- o banco garante). true = aberto.
+  const reopenMealDay = async () => {
+    if (!mealDayRef.current?.closed_at) return true;
+    const { error } = await supabase.rpc('reopen_meal_day');
+    if (error) { await reportMealError(error, 'Registro do dia não reaberto.'); return false; }
+    setMealDay(prev => (prev ? { ...prev, closed_at: null } : prev));
+    mealDayRef.current = mealDayRef.current ? { ...mealDayRef.current, closed_at: null } : null;
+    return true;
+  };
+
   // Check-in de Refeição
   const handleCheckinMeal = async (meal, dayOrder, { silent = false } = {}) => {
     const mealKey = `${dayOrder}_${meal.meal_order}`;
@@ -309,6 +359,13 @@ export default function UserToday({ mockPayload = null } = {}) {
       if (insertErr) throw insertErr;
 
       setCompletedMeals(prev => [inserted, ...prev]);
+      // Registrou a última refeição do cardápio: encerra sozinho, como o treino
+      // ao marcar o último exercício (briefing, estado 3).
+      const menu = (payload?.nutrition?.menus || []).find(mn => Number(mn.menu_day) === Number(dayOrder));
+      const menuMeals = menu?.meals || [];
+      if (menuMeals.length > 0 && matchMealCheckins(menuMeals, [inserted, ...completedMeals], dayOrder).size >= menuMeals.length) {
+        await closeMealDay(dayOrder, 'auto_last_meal');
+      }
       if (silent) return;
       clearTimeout(mealToastTimer.current);
       setMealToast({
@@ -316,6 +373,8 @@ export default function UserToday({ mockPayload = null } = {}) {
         onUndo: async () => {
           clearTimeout(mealToastTimer.current);
           setMealToast(null);
+          // Se o registro encerrou o dia sozinho, desfazer reabre antes.
+          if (!(await reopenMealDay())) return;
           const { error: undoErr } = await supabase.rpc('unmark_meal', { p_completed_meal_id: inserted.id });
           if (undoErr) {
             const { kind, text } = describeCheckinError(undoErr);
@@ -714,7 +773,6 @@ export default function UserToday({ mockPayload = null } = {}) {
                 {activeMenu && (() => {
                   const matches = matchMealCheckins(activeMenu.meals || [], completedMeals, activeMenu.menu_day);
                   const dots = (activeMenu.meals || []).map(m => matches.has(Number(m.meal_order)));
-                  const allRegistered = dots.length > 0 && dots.every(Boolean);
                   // Macros DESTE cardápio (soma das refeições dele). macro_distribution
                   // do payload é a média de todos os cardápios do plano -- mostrada
                   // aqui ficava errada para cada cardápio (achado 2026-10-16).
@@ -742,6 +800,7 @@ export default function UserToday({ mockPayload = null } = {}) {
                   return (
                     <>
                       <div className="workout-summary-card" style={{ background: 'linear-gradient(140deg, rgba(5, 150, 105, 0.07) 0%, rgba(5, 150, 105, 0.02) 100%)', borderColor: 'rgba(5, 150, 105, 0.20)' }}>
+                        <MealDayClosedBanner closure={mealDay} registeredToday={completedMeals.length} />
                         <span className="workout-session-badge" style={{ background: '#059669' }}>
                           Cardápio {activeMenu.menu_day}
                         </span>
@@ -785,8 +844,6 @@ export default function UserToday({ mockPayload = null } = {}) {
                         <MealTracker registeredToday={completedMeals.length} dots={dots} />
                       </div>
 
-                      {allRegistered && <AllRegisteredNotice />}
-
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {(activeMenu.meals || []).map((meal) => {
                           const match = matches.get(Number(meal.meal_order));
@@ -797,13 +854,28 @@ export default function UserToday({ mockPayload = null } = {}) {
                               meal={meal}
                               match={match}
                               saving={!!checkingInMeal[mealKey]}
-                              onToggle={() => (match
-                                ? handleUndoMeal(meal, match, activeMenu.menu_day)
-                                : handleCheckinMeal(meal, activeMenu.menu_day))}
+                              onToggle={() => {
+                                const typeName = meal.name_ptbr || meal.meal_name_ptbr || `Refeição ${meal.meal_order}`;
+                                // Dia encerrado: tocar na caixa pede para reabrir (estado 4 do
+                                // desenho); ao confirmar, o toque vale -- registra ou desfaz.
+                                if (mealDay?.closed_at) {
+                                  setMealDayDialog(match
+                                    ? { unmarkMealName: typeName, onConfirm: async () => { if (await reopenMealDay()) await handleUndoMeal(meal, match, activeMenu.menu_day); } }
+                                    : { registerMealName: typeName, onConfirm: async () => { if (await reopenMealDay()) await handleCheckinMeal(meal, activeMenu.menu_day); } });
+                                  return;
+                                }
+                                return match
+                                  ? handleUndoMeal(meal, match, activeMenu.menu_day)
+                                  : handleCheckinMeal(meal, activeMenu.menu_day);
+                              }}
                             />
                           );
                         })}
                       </div>
+
+                      {mealDay?.closed_at
+                        ? <MealDayClosedFooter closure={mealDay} onReopen={() => setMealDayDialog({ onConfirm: reopenMealDay })} />
+                        : <CloseMealDayControl saving={mealDaySaving} onClose={() => closeMealDay(activeMenu.menu_day)} />}
                     </>
                   );
                 })()}
@@ -817,6 +889,7 @@ export default function UserToday({ mockPayload = null } = {}) {
       {/* Modal de Vídeo R2 */}
       <CheckinDialog dialog={checkin.dialog} onClose={checkin.closeDialog} />
       <UndoToast toast={checkin.toast ?? mealToast} />
+      <ReopenMealDayDialog dialog={mealDayDialog} onClose={() => setMealDayDialog(null)} />
 
       {activeVideo && (
         <UserVideoModal

@@ -1,9 +1,10 @@
 import '../checkin.css';
+import '../mealDay.css';
 
 // Acompanhamento alimentar no app (2026-10-16) — desenho:
 // designs/AlunoAlimentacaoCheckin.dc.html. Regras (docs/PRINCIPIOS_DE_PRODUTO.md):
 // registrar é acompanhar, não cumprir — contador sem fração nem porcentagem,
-// bolinhas em vez de barra, sem fechamento do dia, refeição não registrada fica
+// bolinhas em vez de barra, refeição não registrada fica
 // limpa (sem "pendente", sem cor de alerta). Desde 2026-10-17 a caixa é o
 // único controle do cartão, como no treino: toca para registrar, toca de novo
 // para desfazer (só no mesmo dia, unmark_meal); o aviso de 4s permite voltar
@@ -52,11 +53,80 @@ export function MealTracker({ registeredToday, dots }) {
   );
 }
 
-export function AllRegisteredNotice() {
+// Encerrar o registro do dia (2026-10-17, briefing
+// docs/propostas/20261017_briefing_fechamento_dia_alimentar.md): o aluno declara
+// que terminou de REGISTRAR -- nunca "comeu", "concluiu", "parcial". Sem fração,
+// sem destacar o que ficou sem registro. Registrar a última refeição do cardápio
+// encerra sozinho (substitui o antigo aviso "Você registrou todas as refeições").
+
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+export function MealDayClosedBanner({ closure, registeredToday }) {
+  if (!closure?.closed_at) return null;
+  const auto = closure.closed_by === 'auto_last_meal';
+  const clock = formatClock(closure.closed_at);
   return (
-    <div className="ck-meal-all" role="status">
-      <span aria-hidden="true">✓</span>
-      <span>Você registrou todas as refeições de hoje.</span>
+    <div className={`md-closed-banner${auto ? ' full' : ''}`} role="status">
+      <span className="md-closed-icon" aria-hidden="true">✓</span>
+      <div>
+        <div className="md-closed-title">{auto ? 'Registro de hoje encerrado' : `Registro de hoje encerrado às ${clock}`}</div>
+        <div className="md-closed-sub">
+          {auto
+            ? `Todas as refeições do cardápio registradas às ${clock}`
+            : [plural(registeredToday, 'refeição registrada', 'refeições registradas'), closure.day_order != null ? `Cardápio ${closure.day_order}` : null].filter(Boolean).join(' · ')}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function CloseMealDayControl({ onClose, saving }) {
+  return (
+    <div className="md-close-box">
+      <button type="button" className="md-close-btn" onClick={onClose} disabled={saving}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+        Encerrar o registro de hoje
+      </button>
+      <span className="md-close-hint">Use quando terminar de registrar as refeições de hoje.</span>
+    </div>
+  );
+}
+
+export function MealDayClosedFooter({ closure, onReopen }) {
+  if (!closure?.closed_at) return null;
+  const auto = closure.closed_by === 'auto_last_meal';
+  return (
+    <div className="md-closed-footer">
+      <span className={`md-closed-footer-text${auto ? ' full' : ''}`}>{auto ? 'Todas as refeições do cardápio registradas.' : 'Registro de hoje encerrado.'}</span>
+      <button type="button" className="md-reopen-link" onClick={onReopen}>{auto ? 'Reabrir se precisar ajustar algo' : 'Reabrir registro do dia'}</button>
+      {!auto && <span className="md-closed-footer-hint">Você pode reabrir para registrar ou desfazer até meia-noite.</span>}
+    </div>
+  );
+}
+
+// Folha de confirmação para reabrir (mesmo padrão visual do "Deseja reabrir
+// este treino?"). registerMealName: tocou numa refeição NÃO registrada -- ao
+// confirmar ela já entra registrada (briefing, estado 4).
+export function ReopenMealDayDialog({ dialog, onClose }) {
+  if (!dialog) return null;
+  return (
+    <div className="ck-dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="md-reopen-title" onClick={onClose}>
+      <div className="ck-dialog-sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="md-dialog-icon" aria-hidden="true">🔄</div>
+        <h4 className="ck-dialog-title" id="md-reopen-title">Reabrir o registro de hoje?</h4>
+        <p className="ck-dialog-text">Você volta a poder registrar e desfazer refeições de hoje até o fim do dia (meia-noite no seu horário local).</p>
+        {dialog.registerMealName && (() => {
+          const theMeal = mealWithArticle(dialog.registerMealName).slice(1); // "o jantar" / "a ceia"
+          return <div className="md-dialog-feedback">Ao confirmar, {theMeal} será registrad{theMeal.startsWith('a ') ? 'a' : 'o'} imediatamente no seu histórico.</div>;
+        })()}
+        {dialog.unmarkMealName && (
+          <div className="md-dialog-feedback">Ao confirmar, o registro {mealWithArticle(dialog.unmarkMealName)} será desfeito.</div>
+        )}
+        <div className="ck-dialog-actions">
+          <button type="button" className="ck-dialog-cancel" onClick={onClose}>Manter encerrado</button>
+          <button type="button" className="md-dialog-confirm" onClick={() => { onClose(); dialog.onConfirm(); }}>Reabrir registro</button>
+        </div>
+      </div>
     </div>
   );
 }
