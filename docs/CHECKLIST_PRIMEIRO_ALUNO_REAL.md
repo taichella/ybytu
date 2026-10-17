@@ -14,6 +14,18 @@ ali — perfil nunca é salvo, plano nunca é gerado. Agora loga um `console.err
 (antes era silencioso), mas o comportamento de quebrar o onboarding continua sendo o mesmo enquanto
 esse fluxo depender de sessão imediata pós-signup.
 
+## 🔴 Pré-requisitos BLOQUEANTES — antes de abrir para o primeiro aluno real
+
+- [ ] **Atribuição manual de plano construída e testada** (decisão da Taina 2026-10-17, obrigatória).
+  Desde 2026-10-17 o gerador recusa cardápio abaixo do piso de segurança e o onboarding oferece ao aluno
+  "manter" um número de refeições que não cabe. Nesses casos o aluno termina o cadastro sem plano
+  alimentar; sem a atribuição manual ninguém consegue dar plano a ele (o botão "Atribuir" do dashboard
+  está desativado). Briefing do desenho: `docs/propostas/20261017_briefing_atribuir_plano.md`.
+  Ver também o texto da tela de viabilidade do onboarding ("a nutricionista monta meu plano alimentar
+  pessoalmente"), que promete essa montagem.
+
+---
+
 Uma página. Confira nesta ordem depois que a primeira pessoa de verdade completar o onboarding com
 um plano que vai ser usado (não teste, não Marina/E2E). Cada item diz onde olhar, o que deveria ter
 acontecido, e o que indicaria problema.
