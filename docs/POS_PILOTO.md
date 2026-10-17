@@ -541,6 +541,22 @@ com `preliminar_sem_crn` nos 37 a partir de `foods_backup_20260904`; todo script
 grava a marca na mesma transação. Decisão de produto em aberto: o app do aluno deve tratar esses 37 como
 "não verificado" até a nutricionista com CRN confirmar?
 
+## 🔴 Aluna com gravidez declarada tem exercício "evitar" no plano ativo (achado 2026-10-17, NÃO corrigido)
+
+Achado ao implementar a recusa no construtor de treino (consulta só de leitura). A aluna `9492db6c…` tem
+**gravidez** declarada e o plano atual `tr_ai_4b3fdaf2` (gerado pela IA em 2026-09-22, com parecer do personal
+aprovado) tem **"Supino inclinado com halteres" (ex_190), marcado como EVITAR para gravidez** (confirmado no
+catálogo desde pelo menos 2026-09-03), no dia 2.
+
+Causa provável: a gravidez foi declarada **depois** da geração -- o plano foi gerado sem nenhuma condição (avisos
+de cautela vazios, raciocínio da IA sem menção a gravidez). **Nada reconfere o plano quando o perfil muda**: é um
+segundo buraco, diferente do construtor (fechado em 2026-10-17). A outra aluna com condição (pós-parto) tem só
+"cautela" no plano (15 exercícios), sem "evitar".
+
+**Decisão pendente (Taina + personal):** trocar o exercício nesse plano. Proposta técnica para o buraco: quando
+condições de saúde/dores mudarem no perfil, reconferir o plano ativo com `ybytu_exercise_restrictions` e
+alertar a equipe (mesmo alerta do plano não gerado).
+
 ## 🔴 BLOQUEIO CLÍNICO — o piso de segurança vale para a META, não para o que o cardápio entrega (2026-10-17)
 
 Apontado pelo parecer da IA nutricionista. `calcTargetCalories` (ybytu-generate-meal-plan) aplica o piso de
