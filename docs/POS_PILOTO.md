@@ -606,6 +606,7 @@ pronto e falta a decisão. "Dias parado" contados até 2026-10-17 a partir do re
 | N6 | Ideia a validar: "dias com algum registro nos últimos 7" | 2026-10-15 | 2 | Não bloqueia | seção própria acima |
 | N7 | Revisão geral da base nutricional montada com IA (gate de lançamento) | jul/2026 | ~80 | Pré-requisito para abrir para aluno real em escala | — |
 | N8 | **37 alimentos revertidos para "não verificado"**: já foram marcados uma vez como revisados (Sessão 1, 2026-09-13) com análise preliminar da IA, sem CRN, e foram revertidos (decisão 2026-10-17). Precisam de confirmação de nutricionista com CRN (34 "sem alergênico", 3 com soja/trigo/glúten — as marcas de alergênico dos 3 foram mantidas) | 2026-10-17 | 0 | 64 refeições ativas voltam a "não verificado"; nos 3 com alergênico o aluno vê "não verificado" no lugar de "Contém soja" | `scripts/reversao_37_alimentos_sem_crn_20261017.sql` (lista via `foods.allergen_review_basis = 'revertido_sem_crn'`) |
+| N9 | **55 planos de catálogo com algum cardápio abaixo de 1.200 kcal** (mínimo 540; 154 abaixo de 1.500), anteriores ao gerador de IA e nunca verificados. É **correção de catálogo**: nenhum foi atribuído a aluno no histórico disponível (banco desde 2026-09-22 + backups de 09-21/09-22; antes de 2026-07-11 não há registro) | 2026-10-17 | 0 | Desde 10-17 o gerador não atribui plano abaixo do piso e o construtor não salva; continuam no pool de fallback, pulados | consulta em `docs/POS_PILOTO.md`, "BLOQUEIO CLÍNICO" |
 
 ### Os dois
 

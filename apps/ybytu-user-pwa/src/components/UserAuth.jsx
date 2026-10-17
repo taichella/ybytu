@@ -11,13 +11,14 @@ import {
 } from '../lib/phone.js';
 import '../user.css';
 
-const WHATSAPP_SUPPORT_NUMBER = '5511955026812';
+// Suporte por e-mail (2026-10-17): o número de WhatsApp é o da API da Meta,
+// que está desligada, e ninguém responde por ali (docs/POS_PILOTO.md).
+const SUPPORT_EMAIL = 'contato@ybytu.app';
 
 // Login por código no WhatsApp DESLIGADO (2026-10-11, decisão da Taina): a Meta
 // aceita o envio mas não entrega (131042, conta com pagamento pendente), então o
 // aluno ficava esperando um código que nunca chega. E-mail (Resend) vira o único
 // caminho na tela. O fluxo de WhatsApp continua no código; para religar, true.
-// O link de suporte no rodapé (wa.me) é conversa humana, não depende da API.
 const WHATSAPP_LOGIN_ENABLED = false;
 
 export default function UserAuth() {
@@ -503,9 +504,7 @@ export default function UserAuth() {
             Mudou de número ou precisa de ajuda para entrar?
           </p>
           <a
-            href={`https://wa.me/${WHATSAPP_SUPPORT_NUMBER}?text=${encodeURIComponent('Olá! Preciso de ajuda para acessar minha conta no app Ybytu.')}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Ajuda para entrar no app')}&body=${encodeURIComponent('Olá! Preciso de ajuda para acessar minha conta no app Ybytu.')}`}
             style={{
               fontSize: '13px',
               fontWeight: 700,
@@ -516,7 +515,7 @@ export default function UserAuth() {
               gap: '4px',
             }}
           >
-            Falar com suporte no WhatsApp →
+            Falar com o suporte por e-mail →
           </a>
         </div>
 
