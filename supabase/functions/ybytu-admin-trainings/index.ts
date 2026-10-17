@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { formatLoadPtbr } from '../_shared/loadDisplay.ts'
+import { conditionLabel } from '../_shared/conditionLabels.ts'
 
 // CRUD de `training_plans` + `training_plan_exercises` (dashboard pro).
 // Papel exigido: personal ou admin.
@@ -158,6 +159,53 @@ async function replaceSlots(supabase: any, planBusinessId: string, slots: unknow
   })
   const { error: insErr } = await supabase.from('training_plan_exercises').insert(rows)
   if (insErr) throw new Error(`Falha ao gravar training_plan_exercises: ${insErr.message}`)
+}
+
+// Limitações do aluno no construtor (2026-10-17, decisão da Taina): "evitar"
+// é contraindicação -- BLOQUEIA salvar; "cautela" é julgamento clínico --
+// AVISA nomeando a condição e o profissional decide. Mesma regra do gerador:
+// ybytu_student_condition_slugs + ybytu_exercise_restrictions (migração
+// 20261017230000), com o "irmão" de mesmo nome. Vale para todo aluno que tem
+// este plano como atual. O aviso de cautela cobre só os exercícios que ENTRARAM
+// neste salvamento -- senão repetiria a cada edição de um plano que já tem
+// cautelas aceitas.
+async function checkStudentConditions(
+  supabase: any,
+  planUuid: string,
+  slots: Array<{ exercise_id: string }>,
+  previousExerciseIds: Set<string>,
+): Promise<{ blocked: string[]; cautionNotices: string[] }> {
+  const { data: students, error } = await supabase.from('profiles').select('id').eq('current_training_plan_id', planUuid)
+  if (error) throw new Error(`Lookup de alunos do plano falhou: ${error.message}`)
+  const exerciseIds = [...new Set(slots.map((s) => s.exercise_id).filter(Boolean))]
+  if (!students?.length || exerciseIds.length === 0) return { blocked: [], cautionNotices: [] }
+
+  const { data: exRows, error: exErr } = await supabase.from('exercises').select('exercise_id, name_ptbr').in('exercise_id', exerciseIds)
+  if (exErr) throw new Error(`Lookup de exercícios falhou: ${exErr.message}`)
+  const nameOf = new Map<string, string>((exRows ?? []).map((e: any) => [e.exercise_id, e.name_ptbr ?? e.exercise_id]))
+
+  const blocked = new Set<string>()
+  const cautionByCondition = new Map<string, Set<string>>()
+  for (const st of students) {
+    const { data: slugs, error: sErr } = await supabase.rpc('ybytu_student_condition_slugs', { p_user: st.id })
+    if (sErr) throw new Error(`ybytu_student_condition_slugs: ${sErr.message}`)
+    if (!slugs?.length) continue
+    const { data: rows, error: rErr } = await supabase.rpc('ybytu_exercise_restrictions', { p_condition_slugs: slugs, p_exercise_ids: exerciseIds })
+    if (rErr) throw new Error(`ybytu_exercise_restrictions: ${rErr.message}`)
+    for (const r of (rows ?? []) as any[]) {
+      const name = nameOf.get(r.exercise_id) ?? r.exercise_id
+      if (r.tipo === 'avoid') {
+        blocked.add(`"${name}" (contraindicado para ${conditionLabel(r.condition_slug)})`)
+      } else if (r.tipo === 'caution' && !previousExerciseIds.has(r.exercise_id)) {
+        const label = conditionLabel(r.condition_slug)
+        const set = cautionByCondition.get(label) ?? new Set<string>()
+        set.add(name)
+        cautionByCondition.set(label, set)
+      }
+    }
+  }
+  const cautionNotices = [...cautionByCondition.entries()].map(([label, names]) => `Cautela para ${label}: ${[...names].join(', ')}.`)
+  return { blocked: [...blocked], cautionNotices }
 }
 
 serve(async (req) => {
@@ -330,10 +378,24 @@ serve(async (req) => {
       const slotsLoadError = validateSlotLoads(body?.slots)
       if (slotsLoadError) return json({ error: slotsLoadError }, 400, corsHeaders)
 
+      let cautionNotices: string[] = []
+      if (Array.isArray(body?.slots)) {
+        const { data: prevRows, error: prevErr } = await supabase.from('training_plan_exercises').select('exercise_id').eq('training_plan_id', existing.training_plan_id)
+        if (prevErr) throw prevErr
+        const check = await checkStudentConditions(supabase, id, body.slots, new Set((prevRows ?? []).map((r: any) => r.exercise_id)))
+        if (check.blocked.length > 0) {
+          return json({
+            error: 'contraindicated_for_student',
+            message: `Exercício incompatível com limitação do aluno: ${check.blocked.join('; ')}. Troque o exercício antes de salvar.`,
+          }, 409, corsHeaders)
+        }
+        cautionNotices = check.cautionNotices
+      }
+
       const { data, error } = await supabase.from('training_plans').update(payload).eq('id', id).select().single()
       if (error) throw error
       if (Array.isArray(body?.slots)) await replaceSlots(supabase, existing.training_plan_id, body.slots, auth.staff.userId)
-      return json({ training_plan: data }, 200, corsHeaders)
+      return json({ training_plan: data, caution_notices: cautionNotices }, 200, corsHeaders)
     }
 
     if (action === 'set_active') {

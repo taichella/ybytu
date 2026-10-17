@@ -49,6 +49,9 @@ export default function TrainingPlanCreator() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  // Avisos de cautela depois de salvar (2026-10-17): "Cautela para gravidez: …".
+  // Não bloqueia; a tela espera o profissional ler antes de voltar.
+  const [cautionNotices, setCautionNotices] = useState(null);
 
   // Filtros da Biblioteca de Exercícios
   const [allExercises, setAllExercises] = useState([]);
@@ -336,7 +339,11 @@ export default function TrainingPlanCreator() {
         const created = await trainingService.create(payload, allSlots);
         navigate(`/training-creator/${created.id}`);
       } else {
-        await trainingService.update(id, payload, allSlots);
+        const { cautionNotices: notices } = await trainingService.update(id, payload, allSlots);
+        if (notices.length > 0) {
+          setCautionNotices(notices);
+          return;
+        }
         navigate(isStudentPlan ? `/users/${forUser}/plano` : '/trainings');
       }
     } catch (e) {
@@ -547,6 +554,14 @@ export default function TrainingPlanCreator() {
         </div>
       )}
       {error && <p style={{ color: '#ef4444', padding: '8px 24px 0', margin: 0, fontSize: '13px' }}>{error}</p>}
+      {cautionNotices && (
+        <div role="status" style={{ margin: '8px 24px 0', padding: '12px 14px', borderRadius: '12px', background: 'rgba(217,119,6,.10)', border: '1px solid rgba(217,119,6,.35)', fontSize: '13px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <strong style={{ color: '#b45309' }}>Plano salvo. Exercícios novos com cautela para uma condição do aluno:</strong>
+          {cautionNotices.map((n) => <span key={n}>{n}</span>)}
+          <span style={{ color: 'var(--muted)' }}>Cautela não bloqueia: a decisão é sua. Revise se esses exercícios fazem sentido para este aluno.</span>
+          <button type="button" onClick={() => navigate(isStudentPlan ? `/users/${forUser}/plano` : '/trainings')} style={{ alignSelf: 'flex-start', marginTop: '4px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: '10px', padding: '8px 14px', fontWeight: 800, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>Entendi, voltar</button>
+        </div>
+      )}
 
       {/* CONFIGURAÇÕES DO PLANO: EXPANDIDO OU SUMÁRIO RECOLHIDO */}
       {settings ? (

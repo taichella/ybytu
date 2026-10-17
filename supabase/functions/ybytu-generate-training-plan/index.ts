@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
-import { collapseDuplicateNames, filterAvoidedIncludingSiblings, findDuplicateNameIds, normalizeExerciseName } from './exerciseNames.ts'
+import { collapseDuplicateNames, findDuplicateNameIds, normalizeExerciseName } from './exerciseNames.ts'
 import { allowedEquipmentForEnvironment } from '../_shared/exerciseEnvironment.ts'
 
 // ─── Gate de acesso (piloto) ──────────────────────────────────────────────────
@@ -700,7 +700,7 @@ serve(async (req) => {
     await markPlanGenerationStatus(supabase, userId, 'failed', 'Geração iniciada — se este texto persistir, a function foi interrompida pelo runtime antes de concluir (timeout ou limite de recursos), não por uma exceção capturável.')
 
     // ── PASSO 0: traduzir UUIDs → slugs (1 hop) em paralelo ──────────────────
-    const [levelRes, envRes, goalsRes, healthRes, activityRes] = await Promise.all([
+    const [levelRes, envRes, goalsRes, activityRes] = await Promise.all([
       profile.exercise_level_id
         ? supabase.from('exercise_levels').select('exercise_level_id').eq('id', profile.exercise_level_id).single()
         : Promise.resolve({ data: { exercise_level_id: 'beginner' }, error: null }),
@@ -715,10 +715,6 @@ serve(async (req) => {
 
       profile.goals_ids?.length > 0
         ? supabase.from('goals').select('goal_id').in('id', profile.goals_ids)
-        : Promise.resolve({ data: [], error: null }),
-
-      profile.health_conditions_ids?.length > 0
-        ? supabase.from('health_conditions').select('health_condition_id').in('id', profile.health_conditions_ids)
         : Promise.resolve({ data: [], error: null }),
 
       // BLOCO 2 (ponto 2): sinal de personalização pra IA, NÃO um novo filtro
@@ -751,10 +747,6 @@ serve(async (req) => {
     }
     const environmentSlug: string = envRes.data.exercise_environment_id
     const goalSlugs = (goalsRes.data ?? []).map((g: any) => g.goal_id)
-    const healthConditionSlugs = (healthRes.data ?? [])
-      .map((h: any) => h.health_condition_id)
-      .filter((s: string) => s && s !== 'none' && s !== 'other')
-
     const userAge: number | null = profile.age ?? null
     const activityLevelSlug: string | null = activityRes.data?.name ?? null
 
@@ -779,44 +771,12 @@ serve(async (req) => {
       }
     }
 
-    // ── PASSO 0: physical conditions — 3 hops (onboarding → physical_conditions → bridge) ─
-    let physicalConditionSlugs: string[] = []
-    if (profile.physical_conditions_ids?.length > 0) {
-      const { data: onboardingPain } = await supabase
-        .from('onboarding_physical_conditions')
-        .select('main_physical_conditions_ids')
-        .in('id', profile.physical_conditions_ids)
-
-      // main_physical_conditions_ids é TEXT (1 uuid por linha), não array — apesar do nome no plural
-      const finePainIds = [...new Set(
-        (onboardingPain ?? []).map((row: any) => row.main_physical_conditions_ids).filter(Boolean)
-      )]
-
-      if (finePainIds.length > 0) {
-        const { data: finePain } = await supabase
-          .from('physical_conditions')
-          .select('physical_condition_id')
-          .in('id', finePainIds)
-
-        const painSlugs = (finePain ?? []).map((p: any) => p.physical_condition_id).filter(Boolean)
-
-        if (painSlugs.length > 0) {
-          // Bridge: physical_condition_id não é o mesmo slug usado em exercises —
-          // ex: 'neck' expande para ['cervical_hernia','neck_pain'].
-          const { data: bridgeRows } = await supabase
-            .from('physical_condition_exercise_slugs')
-            .select('exercise_condition_slugs')
-            .in('physical_condition_id', painSlugs)
-
-          physicalConditionSlugs = [...new Set(
-            (bridgeRows ?? []).flatMap((r: any) => r.exercise_condition_slugs ?? [])
-          )]
-        }
-      }
-    }
-
-    const userConditionSlugs = [...new Set([...healthConditionSlugs, ...physicalConditionSlugs])]
-      .filter(s => s && s !== 'none' && s !== 'other')
+    // ── PASSO 0: condições do aluno (saúde + dores, pela ponte de slugs) ─────
+    // Regra no banco desde 2026-10-17 (ybytu_student_condition_slugs, migração
+    // 20261017230000) -- a mesma que o construtor de treino usa ao salvar.
+    const { data: conditionSlugsData, error: conditionSlugsError } = await supabase.rpc('ybytu_student_condition_slugs', { p_user: userId })
+    if (conditionSlugsError) throw new Error('Condition lookup failed: ' + conditionSlugsError.message)
+    const userConditionSlugs: string[] = (conditionSlugsData ?? []) as string[]
 
     // ── PASSO 0: foco muscular (REGRA 2) — 2 hops (onboarding grouping → slug fino) ─
     let focusMuscleGroupSlugs: string[] = []
@@ -864,33 +824,28 @@ serve(async (req) => {
     // SEGURANÇA — roda ANTES de qualquer montagem, igual ao alérgeno na nutrição.
     // Exclui quem tem 'avoid' pra qualquer condição do usuário via a view
     // exercise_effective_cautions (nunca lê exercises.avoid_*_ids direto).
+    // Regra no banco desde 2026-10-17 (ybytu_exercise_restrictions): avoid
+    // direto + o "irmão" de mesmo nome (via_sibling), a mesma que o construtor
+    // usa. Conferida equivalente à lógica anterior em todas as condições.
     let avoidExerciseIds = new Set<string>()
+    const siblingAvoidIds = new Set<string>()
     if (userConditionSlugs.length > 0) {
-      const { data: avoidRows, error: avoidError } = await supabase
-        .from('exercise_effective_cautions')
-        .select('exercise_id')
-        .eq('tipo', 'avoid')
-        .in('condition_slug', userConditionSlugs)
+      const { data: restrictionRows, error: avoidError } = await supabase.rpc('ybytu_exercise_restrictions', {
+        p_condition_slugs: userConditionSlugs, p_exercise_ids: null,
+      })
       if (avoidError) throw new Error('Avoid lookup failed: ' + avoidError.message)
-      avoidExerciseIds = new Set((avoidRows ?? []).map((r: any) => r.exercise_id))
-    }
-
-    // O avoid vale pro par inteiro de mesmo nome (ver filterAvoidedIncludingSiblings):
-    // busca o nome dos exercícios com avoid no catálogo inteiro, não só no pool.
-    const avoidedNames = new Set<string>()
-    if (avoidExerciseIds.size > 0) {
-      const { data: avoidedRows, error: avoidedNamesError } = await supabase
-        .from('exercises')
-        .select('exercise_id, name_ptbr')
-        .in('exercise_id', [...avoidExerciseIds])
-      if (avoidedNamesError) throw new Error('Avoid name lookup failed: ' + avoidedNamesError.message)
-      for (const r of (avoidedRows ?? [])) {
-        if (r.name_ptbr) avoidedNames.add(normalizeExerciseName(r.name_ptbr))
+      for (const r of (restrictionRows ?? []) as any[]) {
+        if (r.tipo !== 'avoid') continue
+        if (r.via_sibling) siblingAvoidIds.add(r.exercise_id)
+        else avoidExerciseIds.add(r.exercise_id)
       }
     }
-
-    const { pool: poolAfterAvoid, removedViaSibling } = filterAvoidedIncludingSiblings(
-      (candidatePool ?? []) as any[], avoidExerciseIds, avoidedNames)
+    const removedViaSibling: string[] = []
+    const poolAfterAvoid = ((candidatePool ?? []) as any[]).filter((ex) => {
+      if (avoidExerciseIds.has(ex.exercise_id)) return false
+      if (siblingAvoidIds.has(ex.exercise_id)) { removedViaSibling.push(ex.exercise_id); return false }
+      return true
+    })
     if (removedViaSibling.length > 0) {
       console.log('[ybytu-generate-training-plan] pool: removidos por avoid do irmão de mesmo nome', JSON.stringify(removedViaSibling))
     }
