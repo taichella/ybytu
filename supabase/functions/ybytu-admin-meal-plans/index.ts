@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveStaffFromRequest, requireRole } from '../_shared/staffAuth.ts'
 import { corsHeadersFor } from '../_shared/cors.ts'
+import { SAFETY_FLOOR_KCAL_DEFAULT, safetyFloorForPlan, menuTotalsByDay, daysBelowFloor, belowFloorReason } from '../_shared/safetyFloor.ts'
 
 // CRUD de `meal_plans` + `meal_plan_meals` (dashboard pro). Papel exigido:
 // nutricionista ou admin.
@@ -53,6 +54,42 @@ async function replaceSlots(supabase: any, planId: string, slots: unknown) {
   }))
   const { error: insErr } = await supabase.from('meal_plan_meals').insert(rows)
   if (insErr) throw new Error(`Falha ao gravar meal_plan_meals: ${insErr.message}`)
+}
+
+// Piso de segurança no construtor (2026-10-17, decisão da Taina): BLOQUEIA
+// salvar, sem campo de justificativa ("justificativa vira campo que alguém
+// preenche com qualquer coisa para passar"). Vale para plano que o aluno pode
+// receber: ativo (pool do catálogo) ou atual de algum aluno. Rascunho sem
+// aluno pode ser salvo incompleto -- senão não dá para montar um plano aos
+// poucos; o bloqueio pega na hora de ativar. Piso do plano = o maior entre os
+// alunos que o têm como atual (_shared/safetyFloor.ts).
+async function checkSafetyFloor(
+  supabase: any,
+  planUuid: string | null,
+  slots: Array<{ day_order: number; meal_id: string }> | null,
+  willBeActive: boolean,
+): Promise<{ ok: true } | { ok: false; message: string; floor: number; days: unknown }> {
+  const { floor, students } = planUuid
+    ? await safetyFloorForPlan(supabase, planUuid)
+    : { floor: SAFETY_FLOOR_KCAL_DEFAULT, students: 0 }
+  if (!willBeActive && students === 0) return { ok: true }
+
+  let rows: Array<{ day_order: number; meal_id: string }> = slots ?? []
+  if (!slots) {
+    const { data, error } = await supabase.from('meal_plan_meals').select('day_order, meal_id').eq('meal_plan_id', planUuid)
+    if (error) throw new Error(`Falha ao ler meal_plan_meals: ${error.message}`)
+    rows = data ?? []
+  }
+  const mealIds = [...new Set(rows.map((r) => r.meal_id).filter(Boolean))]
+  const kcalById = new Map<string, number>()
+  if (mealIds.length > 0) {
+    const { data: meals, error } = await supabase.from('meals').select('id, calories').in('id', mealIds)
+    if (error) throw new Error(`Falha ao ler kcal das refeições: ${error.message}`)
+    for (const m of meals ?? []) kcalById.set(m.id, Number(m.calories) || 0)
+  }
+  const below = daysBelowFloor(menuTotalsByDay(rows.map((r) => ({ day: r.day_order, kcal: kcalById.get(r.meal_id) }))), floor)
+  if (below.length === 0) return { ok: true }
+  return { ok: false, message: belowFloorReason(below, floor) + ' Ajuste o cardápio antes de salvar.', floor, days: below }
 }
 
 serve(async (req) => {
@@ -146,6 +183,10 @@ serve(async (req) => {
     if (action === 'create') {
       const payload = sanitizePlan(body?.data ?? {})
       if (!payload.name_ptbr) return json({ error: 'missing_name_ptbr' }, 400, corsHeaders)
+      if (Array.isArray(body?.slots) || payload.is_active === true) {
+        const floorCheck = await checkSafetyFloor(supabase, null, Array.isArray(body?.slots) ? body.slots : [], payload.is_active === true)
+        if (!floorCheck.ok) return json({ error: 'below_safety_floor', message: floorCheck.message, floor: floorCheck.floor, days: floorCheck.days }, 409, corsHeaders)
+      }
       const { data, error } = await supabase.from('meal_plans').insert([payload]).select().single()
       if (error) throw error
       if (Array.isArray(body?.slots)) await replaceSlots(supabase, data.id, body.slots)
@@ -156,6 +197,13 @@ serve(async (req) => {
       const id = typeof body?.id === 'string' ? body.id : ''
       if (!id) return json({ error: 'missing_id' }, 400, corsHeaders)
       const payload = sanitizePlan(body?.data ?? {})
+      {
+        const { data: current, error: curErr } = await supabase.from('meal_plans').select('is_active').eq('id', id).single()
+        if (curErr) throw curErr
+        const willBeActive = 'is_active' in payload ? payload.is_active === true : current.is_active === true
+        const floorCheck = await checkSafetyFloor(supabase, id, Array.isArray(body?.slots) ? body.slots : null, willBeActive)
+        if (!floorCheck.ok) return json({ error: 'below_safety_floor', message: floorCheck.message, floor: floorCheck.floor, days: floorCheck.days }, 409, corsHeaders)
+      }
       const { data, error } = await supabase.from('meal_plans').update(payload).eq('id', id).select().single()
       if (error) throw error
       if (Array.isArray(body?.slots)) await replaceSlots(supabase, id, body.slots)
@@ -167,6 +215,10 @@ serve(async (req) => {
       const id = typeof body?.id === 'string' ? body.id : ''
       const isActive = body?.is_active === true
       if (!id) return json({ error: 'missing_id' }, 400, corsHeaders)
+      if (isActive) {
+        const floorCheck = await checkSafetyFloor(supabase, id, null, true)
+        if (!floorCheck.ok) return json({ error: 'below_safety_floor', message: floorCheck.message, floor: floorCheck.floor, days: floorCheck.days }, 409, corsHeaders)
+      }
       const { data, error } = await supabase.from('meal_plans').update({ is_active: isActive }).eq('id', id).select().single()
       if (error) throw error
       return json({ meal_plan: data }, 200, corsHeaders)

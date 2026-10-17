@@ -30,6 +30,7 @@ const KIND_LABEL: Record<string, string> = {
   staff_review_reminder: 'Lembrete de parecer (staff)',
   admin_new_onboarding: 'Novo aluno (admin)',
   admin_email_alert: 'Alerta de e-mail (admin)',
+  admin_plan_failure_alert: 'Alerta de plano não gerado (admin)',
 }
 
 function summary(h: EmailHealth): string {

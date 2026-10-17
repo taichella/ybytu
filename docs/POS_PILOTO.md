@@ -553,8 +553,20 @@ alunas (piso 1.200), metas de 1.467 a 1.798; o cardápio mais baixo tem **1.316 
 116 acima do piso. Nenhuma meta está no piso, então o caso ainda não aconteceu — mas qualquer aluna nova de
 baixa estatura/sedentária com objetivo de emagrecer cai nele.
 
-**Proposta (não implementada):** o piso vira regra dura sobre a **soma entregue de cada cardápio**, não margem
-percentual:
+**IMPLEMENTADO 2026-10-17** (aprovado pela Taina; construtor com BLOQUEIO, sem justificativa — "justificativa vira
+campo que alguém preenche com qualquer coisa para passar"). Código: `_shared/safetyFloor.ts`; falha avisa os admins na
+primeira vez (banner + e-mail, `_shared/planFailureAlert.ts`) e fecha o alerta quando uma tentativa automática der
+certo. Medido 10-17: **55 dos 300 planos de catálogo ativos têm algum cardápio abaixo de 1.200 kcal** (mínimo 540)
+e 154 abaixo de 1.500 — o fallback testa até 5 candidatos; no construtor, esses planos só salvam depois de corrigidos.
+
+**⚠️ Lacuna achada ao implementar: não existe como atribuir um plano montado à mão a um aluno.** O botão
+"Atribuir" do dashboard está desativado ("precisa ser construída"); o construtor só edita o plano que o aluno JÁ
+tem. Aluno cuja geração falhou fica sem `current_meal_plan_id` e a única saída hoje é o botão "Tentar de novo" de
+Planos que falharam (que repete o gerador). Além disso, a fila de parecer só lista `plan_generation_status = 'ok'`.
+Construir: atribuir plano (catálogo ou montado à mão) a um aluno → grava `current_meal_plan_id` + `user_meal_plans`,
+`plan_generation_status = 'ok'`, entra na fila de parecer.
+
+Regra (como estava proposta):
 1. Gerador: depois de montar o rodízio, somar cada dia; dia abaixo do piso → trocar refeições do dia por opções
    mais calóricas do mesmo tipo; sem solução → **não entregar**: `plan_generation_status = failed` com motivo,
    aparece na tela de planos com falha, e a equipe monta à mão.

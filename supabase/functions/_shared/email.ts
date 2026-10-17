@@ -22,6 +22,7 @@ export type EmailKind =
   | 'user_login_code'
   | 'user_onboarding_received'
   | 'admin_email_alert'
+  | 'admin_plan_failure_alert'
 
 export async function sendEmail(
   supabase: SupabaseClient,

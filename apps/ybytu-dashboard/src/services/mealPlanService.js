@@ -3,6 +3,9 @@ import { invokeFunction } from './apiClient.js';
 async function invoke(action, extra = {}) {
   return invokeFunction('ybytu-admin-meal-plans', {
     body: { action, ...extra },
+    // below_safety_floor (2026-10-17): a function manda o motivo legível em
+    // message ("Cardápio abaixo do piso de segurança (1.200 kcal): …").
+    formatError: (body) => body?.message || null,
   });
 }
 

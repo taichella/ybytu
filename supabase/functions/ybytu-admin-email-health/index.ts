@@ -52,11 +52,15 @@ serve(async (req) => {
       })
     }
 
-    const [health, openAlert, cronFailures] = await Promise.all([
+    // plan_failures (2026-10-17): incidentes abertos de plano não gerado, um por
+    // aluno (_shared/planFailureAlert.ts). Banner próprio, link para FailedPlans.
+    const [health, openAlert, cronFailures, planAlerts] = await Promise.all([
       computeEmailHealth(supabase),
       supabase.from('system_alerts').select('id, opened_at, last_seen_at, detail').eq('kind', 'email_delivery').is('resolved_at', null).maybeSingle(),
       supabase.rpc('cron_auth_failures', { p_hours: CRON_FAILURE_WINDOW_HOURS }),
+      supabase.from('system_alerts').select('opened_at, detail').like('kind', 'plan_generation:%').is('resolved_at', null).order('opened_at', { ascending: false }),
     ])
+    if (planAlerts.error) throw new Error(`Lookup de alertas de plano falhou: ${planAlerts.error.message}`)
     if (openAlert.error) throw new Error(`Lookup de system_alerts falhou: ${openAlert.error.message}`)
     if (cronFailures.error) throw new Error(`Lookup de cron_auth_failures falhou: ${cronFailures.error.message}`)
 
@@ -78,6 +82,7 @@ serve(async (req) => {
       students_without_link: health.studentsWithoutLink,
       cron_failure_window_hours: CRON_FAILURE_WINDOW_HOURS,
       cron_failures: [...byCron.values()],
+      plan_failures: (planAlerts.data ?? []).map((a: any) => ({ user_id: a.detail?.user_id ?? null, reason: a.detail?.reason ?? null, opened_at: a.opened_at })),
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

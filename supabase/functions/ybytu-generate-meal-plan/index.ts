@@ -3,6 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 import { corsHeadersFor } from '../_shared/cors.ts'
 import { isInternalServiceCall } from '../_shared/internalAuth.ts'
+import { safetyFloorForGender, menuTotalsByDay, daysBelowFloor, belowFloorReason } from '../_shared/safetyFloor.ts'
 
 // ─── Mifflin-St Jeor + safety floor ──────────────────────────────────────────
 // non_binary/not_declared → female formula (conservative)
@@ -31,8 +32,9 @@ function calcTargetCalories(p: {
                    : 1.00
 
   const raw   = Math.round(tdee * goalFactor)
-  const floor = p.gender_slug === 'male' ? 1500 : 1200
-  return Math.max(raw, floor)
+  // Piso da META. O piso da SOMA ENTREGUE é conferido depois do rodízio
+  // (_shared/safetyFloor.ts) -- a meta no piso não garante cardápio no piso.
+  return Math.max(raw, safetyFloorForGender(p.gender_slug))
 }
 
 // ─── Meta de proteína por objetivo — SINAL pra IA, nunca filtro ──────────────
@@ -463,7 +465,7 @@ serve(async (req) => {
         p_target_calories:    targetCalories,
         p_goal_slugs:         goalSlugs,
         p_meals_per_day:      mealsPerDay,
-        p_limit:              1,
+        p_limit:              5, // até 5 candidatos: o primeiro que passar no piso de segurança (2026-10-17)
       })
       if (plansError) throw new Error('ybytu_match_meal_plans: ' + plansError.message)
 
@@ -478,15 +480,45 @@ serve(async (req) => {
         }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
       }
 
-      const chosen = plans[0]
-
-      const { data: catalogRows, error: catalogErr } = await supabase
-        .from('meal_plan_meals')
-        .select('day_order, meal_order, meal_type_id, meals ( meal_id, name_ptbr, calories, protein_g )')
-        .eq('meal_plan_id', chosen.id)
-        .order('day_order', { ascending: true })
-        .order('meal_order', { ascending: true })
-      if (catalogErr) throw new Error('Catalog composition lookup failed: ' + catalogErr.message)
+      // Piso de segurança sobre a soma entregue (2026-10-17). Plano de catálogo
+      // é compartilhado -- não dá para trocar refeição dele por aluno. Testa os
+      // candidatos na ordem do match e usa o primeiro que não tenha nenhum
+      // cardápio abaixo do piso (medido 10-17: 55 dos 300 têm dia < 1.200).
+      const catalogFloor = safetyFloorForGender(genderSlug)
+      let chosen: any = null
+      let catalogRows: any[] | null = null
+      let catalogBelow: Array<{ day: number; kcal: number }> = []
+      let firstRejected: { plan: any; below: Array<{ day: number; kcal: number }> } | null = null
+      for (const candidate of plans) {
+        const { data: rows, error: catalogErr } = await supabase
+          .from('meal_plan_meals')
+          .select('day_order, meal_order, meal_type_id, meals ( meal_id, name_ptbr, calories, protein_g )')
+          .eq('meal_plan_id', candidate.id)
+          .order('day_order', { ascending: true })
+          .order('meal_order', { ascending: true })
+        if (catalogErr) throw new Error('Catalog composition lookup failed: ' + catalogErr.message)
+        const below = daysBelowFloor(
+          menuTotalsByDay((rows ?? []).map((r: any) => ({ day: r.day_order, kcal: r.meals?.calories }))),
+          catalogFloor,
+        )
+        if (below.length === 0) { chosen = candidate; catalogRows = rows; break }
+        if (!firstRejected) firstRejected = { plan: candidate, below }
+      }
+      if (!chosen && firstRejected) {
+        chosen = firstRejected.plan
+        catalogBelow = firstRejected.below
+      }
+      if (catalogBelow.length > 0) {
+        const reason = belowFloorReason(catalogBelow, catalogFloor) + ` Faltou opção segura para ${missingTypes.join(', ')} e nenhum dos ${plans.length} planos de catálogo compatíveis alcança o piso (o mais próximo: ${chosen.meal_plan_id}).`
+        await markPlanGenerationStatus(supabase, userId, 'failed', reason)
+        return new Response(JSON.stringify({
+          success: false,
+          status:  'below_safety_floor',
+          message: reason,
+          reason_ptbr: reason,
+          profile_context: profileContext,
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
 
       // ybytu_match_meal_plans não retorna days_per_week — deriva do maior
       // day_order realmente presente na composição, em vez de mentir com null
@@ -652,6 +684,67 @@ Return ONLY valid JSON: { "options": { ${optionsSchema} } }`
         rotationRows.push({ day, type, meal: pickForDay(optionsByType[type], pickIndex), slotIndex })
       })
     }
+
+    // ── 7b. PISO DE SEGURANÇA sobre a soma entregue (2026-10-17) ─────────────
+    // Regra dura, sem margem: nenhum cardápio abaixo do piso (1.500 homem /
+    // 1.200 demais). Dia abaixo -> troca refeições do dia por opções MAIS
+    // calóricas do mesmo tipo, só de dentro do pool seguro (byType, já filtrado
+    // por preferência e restrição). Prefere não-evitado e refeição ainda não
+    // usada no dia; entre as trocas que fecham a diferença, a de menor ganho
+    // (fica mais perto do planejado). Sem conserto possível -> não entrega.
+    const safetyFloor = safetyFloorForGender(genderSlug)
+    const floorSwaps: Array<{ day: number; type: string; from: string; to: string }> = []
+    for (let day = 1; day <= nutritionDays; day++) {
+      const rowsForDay = rotationRows.filter(r => r.day === day)
+      let total = rowsForDay.reduce((s, r) => s + (Number(r.meal.calories) || 0), 0)
+      while (total < safetyFloor) {
+        const gap = safetyFloor - total
+        let best: { row: typeof rowsForDay[number]; meal: any; gain: number } | null = null
+        for (const allowDisliked of [false, true]) {
+          for (const row of rowsForDay) {
+            const usedToday = new Set(rowsForDay.filter(o => o !== row).map(o => o.meal.meal_id))
+            for (const cand of byType[row.type] ?? []) {
+              if (cand.disliked && !allowDisliked) continue
+              if (usedToday.has(cand.meal_id)) continue
+              const gain = (Number(cand.calories) || 0) - (Number(row.meal.calories) || 0)
+              if (gain <= 0) continue
+              const closes = gain >= gap
+              const bestCloses = best ? best.gain >= gap : false
+              if (!best
+                || (closes && !bestCloses)
+                || (closes && bestCloses && gain < best.gain)
+                || (!closes && !bestCloses && gain > best.gain)) {
+                best = { row, meal: cand, gain }
+              }
+            }
+          }
+          if (best) break
+        }
+        // cast: o TS estreita `best` para never por ser atribuído só dentro dos laços
+        const swap = best as { row: typeof rowsForDay[number]; meal: any; gain: number } | null
+        if (!swap) break
+        floorSwaps.push({ day, type: swap.row.type, from: swap.row.meal.meal_id, to: swap.meal.meal_id })
+        swap.row.meal = swap.meal
+        total += swap.gain
+      }
+    }
+    const belowFloor = daysBelowFloor(
+      menuTotalsByDay(rotationRows.map(r => ({ day: r.day, kcal: r.meal.calories }))),
+      safetyFloor,
+    )
+    if (belowFloor.length > 0) {
+      const reason = belowFloorReason(belowFloor, safetyFloor) + ' Nenhuma troca dentro das opções seguras para este aluno alcança o piso.'
+      console.error('[ybytu-generate-meal-plan] below safety floor:', reason)
+      await markPlanGenerationStatus(supabase, userId, 'failed', reason)
+      return new Response(JSON.stringify({
+        success: false,
+        status:  'below_safety_floor',
+        message: reason,
+        reason_ptbr: reason,
+        profile_context: profileContext,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    if (floorSwaps.length > 0) console.log('[ybytu-generate-meal-plan] safety floor swaps:', JSON.stringify(floorSwaps))
 
     // ── 8. Lookup slug → UUID (meal_plan_meals guarda UUIDs, não slugs) ──────
     const allChosenSlugs = [...new Set(rotationRows.map(r => r.meal.meal_id))]

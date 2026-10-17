@@ -1,4 +1,5 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { reportPlanGenerationOutcome } from './planFailureAlert.ts'
 
 // Núcleo compartilhado da geração pós-onboarding -- usado por
 // ybytu-onboarding-complete (chamada pelo widget logo após o cadastro),
@@ -90,6 +91,11 @@ async function invokeGeneratorInternal(
   if (!body || typeof body !== 'object') {
     return { ok: false, error: `${fnName}: corpo de resposta vazio ou não é JSON` }
   }
+  // Motivo legível do gerador (2026-10-17, ex.: piso de segurança): vai do
+  // jeito que está para "Planos que falharam" e para o alerta.
+  if (body.success === false && typeof body.reason_ptbr === 'string') {
+    return { ok: false, error: body.reason_ptbr }
+  }
   if (body.success === false || body.access_denied === true) {
     return { ok: false, error: `${fnName}: success=false${body.status ? ` (${body.status})` : ''} -- ${body.message || body.error || 'sem detalhe'}` }
   }
@@ -177,13 +183,20 @@ export async function runGenerationAndVerify(
 
   if (hasTraining && hasMeal) {
     await supabase.from('profiles').update({ plan_generation_status: 'ok', plan_generation_error: null }).eq('id', userId)
+    await reportPlanGenerationOutcome(supabase, userId, { status: 'ok' })
     return { status: 'ok' }
   }
 
   const missing: string[] = []
   if (isTraining && !hasTraining) missing.push('treino')
   if (isMeal && !hasMeal) missing.push('nutrição')
-  const finalError = [...errors, `sem linha nova em: ${missing.join(', ')}`].join(' | ')
+  // Legível (2026-10-17): é o texto de "Planos que falharam" e do alerta. O
+  // erro de cada gerador já diz o que faltou; "sem plano novo" só quando
+  // nenhum gerador explicou nada.
+  const finalError = errors.length > 0
+    ? errors.join(' · ')
+    : `Sem plano novo de: ${missing.join(', ')} (nenhum gerador informou o motivo).`
   await supabase.from('profiles').update({ plan_generation_status: 'failed', plan_generation_error: finalError }).eq('id', userId)
+  await reportPlanGenerationOutcome(supabase, userId, { status: 'failed', reason: finalError })
   return { status: 'failed', error: finalError }
 }
