@@ -1,48 +1,48 @@
-// Reordenação de itens nos construtores (treino e alimentação), 2026-10-15.
-// Desenho: designs/ConstrutorPlano.dc.html usa a alça de arrastar (6 pontos,
-// cursor:grab) à esquerda da letra. Arrastar não funciona bem no toque, então
-// no celular (≤860px, mesmo corte de index.css) a alça some e aparecem ▲▼
-// (decisão da revisão de 2026-10-04). As classes .yb-reorder-grip /
-// .yb-reorder-arrows trocam um pelo outro em index.css.
+// Reordenação de itens nos construtores (treino e alimentação).
+// 2026-10-15: alça de arrastar no computador, ▲▼ no celular.
+// 2026-10-17 (decisão da Taina): SÓ ▲▼, no computador e no celular. Arrastar
+// brigava com a rolagem no celular e quebrava fácil no computador; com ~6 itens,
+// dois cliques bastam. Desenho atualizado: designs/ConstrutorPlano.dc.html.
+//
+// - "Subir" do primeiro item e "descer" do último ficam DESABILITADAS, não
+//   escondidas: esconder mudaria o alinhamento da lista a cada item.
+// - Depois de mover, o foco acompanha o item (mesma seta, na nova posição), para
+//   dar vários cliques seguidos sem procurar o botão. Se a seta ficou
+//   desabilitada (chegou ao topo/fim), o foco vai para a outra seta do item.
 //
 // A ordem gravada é a posição na lista: o save dos dois construtores já manda
 // order_within_day / meal_order = índice + 1.
 
-export function DragGrip({ index, onDragStart, onDragEnd, label }) {
-  return (
-    <span
-      className="yb-reorder-grip"
-      draggable
-      onDragStart={(e) => {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', String(index)); // Firefox só arrasta com setData
-        onDragStart(index);
-      }}
-      onDragEnd={onDragEnd}
-      title={`Arraste para mudar a ordem (${label})`}
-      aria-label={`Arrastar ${label}`}
-      style={{ color: 'var(--muted)', cursor: 'grab', display: 'flex', flexShrink: 0 }}
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="9" cy="6" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="18" r="1" />
-        <circle cx="15" cy="6" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="18" r="1" />
-      </svg>
-    </span>
-  );
-}
-
 const arrowStyle = (disabled) => ({
-  background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px', padding: '4px 8px',
+  background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '6px',
+  minWidth: '30px', minHeight: '28px', padding: '4px 8px',
   cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.3 : 1, color: 'var(--text)', fontSize: '11px', lineHeight: 1,
 });
 
-export function MoveArrows({ index, count, onMove, label }) {
+function focusArrow(itemId, dir) {
+  // Espera o React reposicionar o item na lista.
+  requestAnimationFrame(() => {
+    const pick = (d) => document.querySelector(`[data-reorder-item="${CSS.escape(String(itemId))}"][data-reorder-dir="${d}"]`);
+    const same = pick(dir);
+    const other = pick(dir === 'up' ? 'down' : 'up');
+    if (same && !same.disabled) same.focus();
+    else if (other && !other.disabled) other.focus();
+  });
+}
+
+export function MoveArrows({ index, count, onMove, label, itemId }) {
   const first = index === 0;
   const last = index === count - 1;
+  const move = (to, dir) => {
+    onMove(index, to);
+    if (itemId != null) focusArrow(itemId, dir);
+  };
   return (
-    <div className="yb-reorder-arrows" style={{ alignItems: 'center', gap: '3px', flexShrink: 0 }}>
-      <button type="button" disabled={first} onClick={() => onMove(index, index - 1)} style={arrowStyle(first)} aria-label={`Mover ${label} para cima`}>▲</button>
-      <button type="button" disabled={last} onClick={() => onMove(index, index + 1)} style={arrowStyle(last)} aria-label={`Mover ${label} para baixo`}>▼</button>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flexShrink: 0 }}>
+      <button type="button" disabled={first} onClick={() => move(index - 1, 'up')} style={arrowStyle(first)}
+        data-reorder-item={itemId} data-reorder-dir="up" aria-label={`Mover ${label} para cima`} title="Mover para cima">▲</button>
+      <button type="button" disabled={last} onClick={() => move(index + 1, 'down')} style={arrowStyle(last)}
+        data-reorder-item={itemId} data-reorder-dir="down" aria-label={`Mover ${label} para baixo`} title="Mover para baixo">▼</button>
     </div>
   );
 }

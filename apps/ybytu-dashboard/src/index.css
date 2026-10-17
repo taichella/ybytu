@@ -29,13 +29,8 @@ a {
 
 /* ---- Responsive Shell Rules ---- */
 .yb-mnav { display: none !important; }
-/* Reordenação nos construtores (ReorderControls.jsx): alça de arrastar no
-   computador, ▲▼ no celular. */
-.yb-reorder-arrows { display: none; }
 
 @media(max-width: 860px) {
-  .yb-reorder-grip { display: none !important; }
-  .yb-reorder-arrows { display: flex; }
   .yb-side { display: none !important; }
   .yb-mnav { display: flex !important; }
   .yb-main-content { padding-bottom: 92px !important; }

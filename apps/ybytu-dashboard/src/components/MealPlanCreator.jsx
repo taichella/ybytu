@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { mealPlanService } from '../services/mealPlanService.js';
 import ChipMultiSelect from './ChipMultiSelect.jsx';
 import ThemeToggle from './ThemeToggle';
-import { DragGrip, MoveArrows } from './ReorderControls';
+import { MoveArrows } from './ReorderControls';
 import { moveInList } from '../lib/moveInList';
 
 const EMPTY_PLAN = {
@@ -102,7 +102,6 @@ export default function MealPlanCreator() {
   // gravada é a posição (o save manda meal_order = índice + 1). Seguro para o
   // aluno: o check-in guarda o prato (meal_id, 2026-10-04) e o app casa o ✓ de
   // hoje pelo prato (2026-10-15); o horário segue o tipo da refeição.
-  const [dragFrom, setDragFrom] = useState(null);
   const moveSlot = (from, to) => {
     setSlotsByDay((prev) => ({
       ...prev,
@@ -268,16 +267,13 @@ export default function MealPlanCreator() {
               {currentSlots.map((s, i) => (
                 <div
                   key={s.uniqueId}
-                  onDragOver={(e) => { if (dragFrom !== null) e.preventDefault(); }}
-                  onDrop={(e) => { e.preventDefault(); if (dragFrom !== null) moveSlot(dragFrom, i); setDragFrom(null); }}
-                  style={{ background: 'var(--surface)', border: dragFrom !== null && dragFrom !== i ? '1px dashed var(--brand)' : '1px solid var(--border)', borderRadius: '16px', padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '13px', opacity: dragFrom === i ? 0.5 : 1 }}
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '16px', padding: '13px 16px', display: 'flex', alignItems: 'center', gap: '13px' }}
                 >
-                  <DragGrip index={i} onDragStart={setDragFrom} onDragEnd={() => setDragFrom(null)} label={s.meal?.name_ptbr ?? 'refeição'} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ margin: 0, fontWeight: 700, fontSize: '14px' }}>{s.meal?.name_ptbr}</p>
                     <p style={{ margin: '1px 0 0', fontSize: '11px', color: 'var(--muted)' }}>{mealTypeName(s.meal_type_id)} · {s.meal?.calories ?? 0} kcal</p>
                   </div>
-                  <MoveArrows index={i} count={currentSlots.length} onMove={moveSlot} label={s.meal?.name_ptbr ?? 'refeição'} />
+                  <MoveArrows index={i} count={currentSlots.length} onMove={moveSlot} label={s.meal?.name_ptbr ?? 'refeição'} itemId={s.uniqueId} />
                   <button onClick={() => removeSlot(s.uniqueId)} style={{ color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
                 </div>
               ))}

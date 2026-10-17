@@ -180,10 +180,11 @@
 
         <div style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;">
           <sc-for list="{{ library }}" as="lib" hint-placeholder-count="7">
-          <div draggable="true" style="display:flex;align-items:center;gap:11px;padding:10px;border:1px solid var(--border);border-radius:11px;background:var(--field);cursor:grab;" style-hover="border-color:var(--brand);background:var(--brand-soft);">
+          <!-- 2026-10-17: biblioteca adiciona por clique (botão +), sem arrastar -->
+          <div style="display:flex;align-items:center;gap:11px;padding:10px;border:1px solid var(--border);border-radius:11px;background:var(--field);cursor:pointer;" style-hover="border-color:var(--brand);background:var(--brand-soft);">
             <span style="width:34px;height:34px;border-radius:8px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></span>
             <div style="flex:1;min-width:0;"><p style="margin:0;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ lib.name }}</p><p style="margin:1px 0 0;font-size:11px;color:var(--muted);">{{ lib.group }}</p></div>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg>
+            <span style="width:28px;height:28px;border-radius:8px;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0;">+</span>
           </div>
           </sc-for>
         </div>
@@ -211,10 +212,14 @@
             <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="3">
             <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
               <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--field);">
-                <span style="color:var(--muted);cursor:grab;display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg></span>
                 <span style="width:28px;height:28px;border-radius:8px;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">{{ b.letter }}</span>
                 <div style="flex:1;min-width:0;"><p style="margin:0;font-weight:800;font-size:15px;">{{ b.name }}</p><p style="margin:1px 0 0;font-size:12px;color:var(--muted);">{{ b.group }}</p></div>
                 <sc-if value="{{ b.hasTag }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:4px 9px;border-radius:6px;background:var(--brand-soft);color:var(--brand);">{{ b.tag }}</span></sc-if>
+                <!-- Reordenar: SÓ setas ▲▼ (2026-10-17), no computador e no celular; sem alça de arrastar. "Subir" do 1º item e "descer" do último ficam desabilitadas (opacidade .3), nunca escondidas; depois de mover, o foco segue o item. -->
+                <span style="display:flex;align-items:center;gap:3px;flex-shrink:0;">
+                  <button aria-label="Mover para cima" style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;min-width:30px;min-height:28px;padding:4px 8px;cursor:pointer;color:var(--text);font-size:11px;line-height:1;">▲</button>
+                  <button aria-label="Mover para baixo" style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;min-width:30px;min-height:28px;padding:4px 8px;cursor:pointer;color:var(--text);font-size:11px;line-height:1;">▼</button>
+                </span>
                 <button style="color:var(--muted);background:none;border:none;cursor:pointer;display:flex;padding:5px;border-radius:7px;" style-hover="color:#ef4444;background:rgba(239,68,68,.08);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path></svg></button>
               </div>
               <div style="padding:8px 16px 14px;">
