@@ -99,6 +99,15 @@ export default function App() {
 
   // Trava de duplo clique para submissão
   const submittingRef = useRef(false);
+  // Viabilidade do número de refeições (2026-10-17, versão curta aprovada pela
+  // Taina): no FIM, com todas as respostas, o onboarding pergunta ao servidor
+  // (ybytu-meal-feasibility, mesma regra do gerador) quais números de refeições
+  // cabem no piso de segurança. Se o escolhido não couber, oferece ajustar --
+  // sem mostrar cálculo. O aluno pode manter o número e terminar mesmo assim:
+  // o plano alimentar cai na montagem manual (alerta para a equipe).
+  const [mealPrompt, setMealPrompt] = useState(null); // { min, chosen }
+  const [mealPromptChoice, setMealPromptChoice] = useState(null); // adjust | keep
+  const mealCountAcceptedRef = useRef(false);
 
   // Fecha modal de países com a tecla Escape
   useEffect(() => {
@@ -515,6 +524,35 @@ export default function App() {
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank', 'noopener');
   };
 
+  // Números de refeições que cabem no piso para estas respostas; null se a
+  // consulta falhar (aí segue sem perguntar -- o gerador continua protegendo).
+  const fetchViableMealCounts = async () => {
+    try {
+      const result = await Promise.race([
+        supabase.functions.invoke('ybytu-meal-feasibility', {
+          body: {
+            gender_id: answers.gender_id,
+            age: answers.age,
+            weight_kg: answers.weight_kg,
+            height_cm: answers.height_cm,
+            activity_level_id: answers.activity_level_id,
+            goals_ids: answers.goals_ids || [],
+            dietary_preference_id: answers.dietary_preference_id,
+            dietary_restrictions_ids: (answers.dietary_restrictions_ids || []).filter(
+              (id) => !getBlockedRestrictionIds(answers.dietary_preference_id).includes(id)
+            ),
+          },
+        }),
+        new Promise((resolve) => setTimeout(() => resolve(null), 8000)),
+      ]);
+      const viable = result?.data?.viable;
+      return Array.isArray(viable) ? viable.map(Number) : null;
+    } catch (e) {
+      console.error('ybytu-meal-feasibility falhou -- seguindo sem a checagem:', e);
+      return null;
+    }
+  };
+
   const nextStep = async () => {
     setPhoneTouched(true);
     if (isNextDisabled()) return;
@@ -523,6 +561,20 @@ export default function App() {
       setCurrentStep(currentStep + 1);
     } else {
       if (submittingRef.current) return;
+      if (!mealCountAcceptedRef.current && answers.meals_per_day) {
+        setLoading(true);
+        const viable = await fetchViableMealCounts();
+        setLoading(false);
+        const chosen = Number(answers.meals_per_day);
+        const higher = (viable || []).filter((n) => n > chosen);
+        // Nenhum número maior cabe: não há o que oferecer -- segue e cai na
+        // montagem manual.
+        if (viable && !viable.includes(chosen) && higher.length > 0) {
+          setMealPromptChoice(null);
+          setMealPrompt({ min: Math.min(...higher), chosen });
+          return;
+        }
+      }
       submittingRef.current = true;
       setLoading(true);
       try {
@@ -756,6 +808,71 @@ export default function App() {
                 <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.45 9.9-9.91S17.5 2 12.04 2Z" />
               </svg>
               Falar com a equipe no WhatsApp (opcional)
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (mealPrompt) {
+    const mealsStepIndex = visibleSteps.findIndex((s) => s.id === 'meals_per_day');
+    const promptOptions = [
+      { id: 'adjust', label: `Ajustar minha rotina para pelo menos ${mealPrompt.min} refeições por dia` },
+      { id: 'keep', label: `Manter ${mealPrompt.chosen} refeições: a nutricionista monta meu plano alimentar pessoalmente` },
+    ];
+    const continuePrompt = () => {
+      if (mealPromptChoice === 'adjust') {
+        setMealPrompt(null);
+        if (mealsStepIndex >= 0) setCurrentStep(mealsStepIndex);
+      } else if (mealPromptChoice === 'keep') {
+        mealCountAcceptedRef.current = true;
+        setMealPrompt(null);
+        nextStep();
+      }
+    };
+    return (
+      <div className="onboarding-app">
+        <div className="onboarding-card">
+          <div className="onboarding-header">
+            <div className="progress-track">
+              <div className="progress-fill" style={{ width: '100%' }} />
+            </div>
+            <span className="step-label">Rotina alimentar</span>
+          </div>
+          <div className="onboarding-content">
+            <h2 className="step-title">Sua rotina alimentar vai precisar mudar</h2>
+            <p className="step-subtitle">
+              Com o seu perfil, o plano alimentar precisa de pelo menos {mealPrompt.min} refeições por dia para garantir a
+              quantidade mínima de energia que consideramos segura. Você marcou {mealPrompt.chosen}: isso muda a sua rotina, com
+              mais momentos para comer ao longo do dia.
+            </p>
+            <div className="options-grid">
+              {promptOptions.map((opt) => (
+                <button
+                  type="button"
+                  key={opt.id}
+                  onClick={() => setMealPromptChoice(opt.id)}
+                  className={`option-item ${mealPromptChoice === opt.id ? 'selected' : ''}`}
+                >
+                  <span className="option-label">{opt.label}</span>
+                  <div className="option-check check-single">
+                    {mealPromptChoice === opt.id && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="onboarding-footer">
+            <button type="button" onClick={() => setMealPrompt(null)} className="btn-back">
+              VOLTAR
+            </button>
+            <button type="button" onClick={continuePrompt} disabled={!mealPromptChoice} className="btn-next">
+              CONTINUAR
             </button>
           </div>
         </div>

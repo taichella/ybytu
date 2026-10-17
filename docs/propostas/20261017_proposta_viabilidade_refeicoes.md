@@ -2,7 +2,7 @@
 
 **Data:** 17 de outubro de 2026
 **Pedido por:** Taina, 2026-10-17 ("nem plano abaixo do piso nem aluno esperando")
-**Estado:** proposta, NADA aplicado
+**Estado:** a proposta COMPLETA abaixo fica para depois do catálogo corrigido (decisão da Taina). **Versão curta FEITA 2026-10-17:** a checagem roda no FIM do onboarding, sem reordenar perguntas; se o número escolhido não couber, a tela "Sua rotina alimentar vai precisar mudar" oferece ajustar (volta para a pergunta) ou manter (termina e o plano alimentar cai na montagem manual, com alerta). Regra única em `supabase/functions/_shared/mealFeasibility.ts`, usada pelo gerador e por `ybytu-meal-feasibility`.
 
 ---
 
