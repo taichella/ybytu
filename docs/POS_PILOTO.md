@@ -536,7 +536,7 @@ ficou **só no cabeçalho do script e em `docs/ENCERRAMENTO_SESSAO1_20260913.md`
   passaram a mostrar alergênico "real" ao aluno em vez de "não verificado".
 - O parecer de 2026-10-17 não gravou nada no banco (só documentos, nome dos planos e a remoção do "Gasto médio").
 
-**Proposta (não implementada):** coluna `foods.allergen_review_basis` (`preliminar_sem_crn` | `crn`), preenchida
+**APLICADO 2026-10-17** (aprovado pela Taina): coluna criada (migração 20261017200000) e os 37 revertidos para `unreviewed` com origem `revertido_sem_crn` (`scripts/reversao_37_alimentos_sem_crn_20261017.sql`). Marcas de alergênico dos 3 mantidas. Refeições ativas verificadas: 82 → 18 de 100. Proposta original: coluna `foods.allergen_review_basis` (`preliminar_sem_crn` | `crn`), preenchida
 com `preliminar_sem_crn` nos 37 a partir de `foods_backup_20260904`; todo script futuro que grave valor vindo da IA
 grava a marca na mesma transação. Decisão de produto em aberto: o app do aluno deve tratar esses 37 como
 "não verificado" até a nutricionista com CRN confirmar?

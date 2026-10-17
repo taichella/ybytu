@@ -1,4 +1,5 @@
 -- ============================================================================
+-- APLICADO EM PRODUÇÃO 2026-10-17 (depois da migração 20261017200000), aprovado pela Taina.
 -- 2026-10-17 -- REVERSÃO dos 37 alimentos marcados como revisados na Sessão 1
 -- (2026-09-13) com análise preliminar sem validação de CRN.
 -- Decisão da Taina (2026-10-17): voltam a "não verificado" até uma
