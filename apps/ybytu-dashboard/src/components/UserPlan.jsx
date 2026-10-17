@@ -247,7 +247,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
         .pill.ok::before { content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
 
         /* ---------- program summary band ---------- */
-        .summary { margin:26px 52px 0; background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:8px 8px; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); }
+        .summary { margin:26px 52px 0; background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:8px 8px; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); }
         .summary .cell { padding:14px 16px; position:relative; }
         .summary .cell + .cell::before { content:""; position:absolute; left:0; top:14px; bottom:14px; width:1px; background:var(--line); }
         .summary .ic { width:30px; height:30px; border-radius:9px; background:var(--brand-soft); color:var(--brand); display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
@@ -562,7 +562,7 @@ export default function UserPlan({ payload, editable = false, onSaveLoads, embed
               <div className="summary">
                 <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div><p className="l">Ambiente de treino</p><p className="v">{training?.environment_ptbr || '—'}</p></div>
                 <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4M8 2v4M3 10h18"></path></svg></div><p className="l">Frequência</p><p className="v">{training ? `${training.days_per_week} dias / semana` : '—'}</p></div>
-                <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></div><p className="l">Gasto médio</p><p className="v">{training?.avg_estimated_kcal_per_session ? `~${training.avg_estimated_kcal_per_session} kcal / sessão` : '—'}</p></div>
+                {/* "Gasto médio ~X kcal/sessão" removido (2026-10-17): estimativa nunca revisada (exercises.calories), numa tela que o aluno vê. */}
                 <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 0 20"></path></svg></div><p className="l">Preferência alimentar</p><p className="v">{nutrition?.preference_ptbr || '—'}</p></div>
                 <div className="cell"><div className="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v7c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2V3M7 3v18M21 15V3a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Z"></path></svg></div><p className="l">Nutrição</p><p className="v">{nutrition ? [formatKcalRange(menuKcalRange(nutrition)), `${nutrition.meals_per_day} ref.`].filter(Boolean).join(' · ') : '—'}</p></div>
               </div>

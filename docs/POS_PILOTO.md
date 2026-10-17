@@ -513,7 +513,34 @@ visível no link /plano/ e no dashboard) promete um número que nenhum cardápio
 
 Para decidir com a nutricionista: (1) a divisão 20%/40% das cotas, sobretudo com 4 refeições; (2) qual tolerância
 do total do dia é aceitável (±5%? ±10%?) e se o gerador deve rejeitar/refazer cardápios fora dela; (3) se o nome
-do plano deve mostrar a meta ou a faixa real dos cardápios.
+do plano deve mostrar a meta ou a faixa real dos cardápios. (3) decidido 2026-10-17: o nome não leva kcal.
+
+**Ordem de correção (parecer da IA nutricionista, registrado 2026-10-17): régua nova e catálogo entram JUNTOS.**
+Mudar só a divisão das cotas, sem repovoar o catálogo, **piora** o déficit: as kcal que hoje faltam no lanche
+passam para almoço e jantar, onde o catálogo é ainda mais fraco (jantar mediano 345 kcal). Se for preciso escolher,
+**o catálogo vem primeiro** (corrigir e reativar as 99–100 refeições desativadas, item N2; receitas maiores).
+
+## 🔴 BLOQUEIO CLÍNICO — o piso de segurança vale para a META, não para o que o cardápio entrega (2026-10-17)
+
+Apontado pelo parecer da IA nutricionista. `calcTargetCalories` (ybytu-generate-meal-plan) aplica o piso de
+**1.500 kcal (homem) / 1.200 kcal (mulher, não binário, não declarado)** sobre a meta. Nada confere a soma de cada
+cardápio. Com o desvio medido (até −13%), uma mulher com meta no piso (1.200) receberia cardápio de ~1.044 kcal —
+abaixo do piso que o sistema diz garantir.
+
+**Medido em 2026-10-17 (somente leitura), nos 5 planos de aluno:** nenhum cardápio abaixo do piso. Os 5 são de
+alunas (piso 1.200), metas de 1.467 a 1.798; o cardápio mais baixo tem **1.316 kcal** (mp_ai_4cc9bf08, meta 1.467),
+116 acima do piso. Nenhuma meta está no piso, então o caso ainda não aconteceu — mas qualquer aluna nova de
+baixa estatura/sedentária com objetivo de emagrecer cai nele.
+
+**Proposta (não implementada):** o piso vira regra dura sobre a **soma entregue de cada cardápio**, não margem
+percentual:
+1. Gerador: depois de montar o rodízio, somar cada dia; dia abaixo do piso → trocar refeições do dia por opções
+   mais calóricas do mesmo tipo; sem solução → **não entregar**: `plan_generation_status = failed` com motivo,
+   aparece na tela de planos com falha, e a equipe monta à mão.
+2. O mesmo teste no caminho que atribui plano de catálogo (mp_001–mp_300) ao aluno.
+3. Construtor de plano do dashboard: salvar cardápio abaixo do piso → bloqueado (ou aviso explícito com
+   justificativa — decisão da nutricionista).
+A margem percentual (pergunta da nutricionista) continua valendo **acima** do piso; o piso não tem margem.
 
 ## 📋 Pendências que dependem dos profissionais — lista única (levantada 2026-10-17)
 
@@ -556,6 +583,11 @@ pronto e falta a decisão. "Dias parado" contados até 2026-10-17 a partir do re
 **Leitura de conjunto:** os 100 pratos desativados (N2) e os vídeos (P1) são o mesmo tipo de gargalo — decisão
 profissional parada sobre material já preparado —, cada um com um profissional. N2 é o que mais pesa hoje: além da
 variedade, é a principal causa do déficit de kcal dos cardápios.
+
+**N2 — a correção reprocessa alergênicos, não só macros (registrado 2026-10-17).** Corrigir o ingrediente de um
+prato muda o que ele contém: trocar cuscuz por quinoa **tira** glúten; o inverso **coloca**. Ao corrigir cada uma
+das refeições desativadas, recalcular macros **e** as marcas de alergênico/restrição do prato (`restriction_tags`)
+a partir dos ingredientes novos, antes de reativar. Reativar com a marca antiga pode servir glúten a quem é celíaco.
 
 ## 🔴 RISCO DE PRODUTO — Plano de ganho de massa entrega até 31% menos kcal do que promete (medido 2026-10-17)
 
