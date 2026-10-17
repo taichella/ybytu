@@ -169,7 +169,13 @@ serve(async (req) => {
 
     const mealPlanUuid = (payload.nutrition as { id?: string } | null)?.id ?? null
 
-    const [workoutsRes, mealsRes, lastWorkoutRes, openMarksRes, loadsRes, autoClosedRes, lastMealRes] = await Promise.all([
+    // Data local de hoje no fuso do aluno -- a mesma que o banco usa em
+    // meal_day_closures (student_timezone, gravado logo acima).
+    let localTz = 'America/Sao_Paulo'
+    if (validTimezone) localTz = validTimezone
+    const todayLocal = new Intl.DateTimeFormat('en-CA', { timeZone: localTz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+
+    const [workoutsRes, mealsRes, lastWorkoutRes, openMarksRes, loadsRes, autoClosedRes, lastMealRes, mealDayRes] = await Promise.all([
       supabase
         .from('completed_workouts')
         .select('id, day_number, session_name, completed_at')
@@ -233,6 +239,14 @@ serve(async (req) => {
           .limit(1)
           .maybeSingle()
         : Promise.resolve({ data: null }),
+      // Encerramento do registro do dia alimentar de HOJE (2026-10-17,
+      // migration 20261017220000). Sem linha = não encerrado.
+      supabase
+        .from('meal_day_closures')
+        .select('local_date, meal_plan_id, day_order, closed_at, closed_by, reopen_count')
+        .eq('user_id', userId)
+        .eq('local_date', todayLocal)
+        .maybeSingle(),
     ])
 
     // Mais recente por exercício (a lista já vem do mais novo para o mais velho).
@@ -253,6 +267,7 @@ serve(async (req) => {
       last_exercise_loads: lastLoads,
       auto_closed_workouts: autoClosedRes.data ?? [],
       last_registered_meal: lastMealRes.data ?? null,
+      meal_day_today: mealDayRes.data ?? null,
     }
 
     return new Response(JSON.stringify(responsePayload), {

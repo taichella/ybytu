@@ -230,7 +230,65 @@ serve(async (req) => {
         }
       }
     }
-    const meal_days = [...dayMap.values()].sort((a, b) => b.date.localeCompare(a.date))
+    // Encerramento do registro do dia (2026-10-17, migration 20261017220000,
+    // briefing docs/propostas/20261017_briefing_fechamento_dia_alimentar.md).
+    // closure: só quando o aluno encerrou (closed_at não nulo); sem closure =
+    // "registro não encerrado pelo aluno". Comparação de macros com o cardápio
+    // SÓ em dia encerrado, e só quando dá para provar que o cardápio daquele
+    // dia não mudou (mesmo critério do "sem registro" acima) -- comparar com um
+    // cardápio editado depois seria comparar com algo que o aluno não viu.
+    // Sempre "registrado", nunca "comeu" (princípio 2).
+    const windowStartLocal = localDate.format(new Date(windowStart))
+    const { data: closureRows, error: cError } = await supabase
+      .from('meal_day_closures')
+      .select('local_date, meal_plan_id, day_order, closed_at, closed_by, reopen_count')
+      .eq('user_id', userId)
+      .gte('local_date', windowStartLocal)
+    if (cError) throw cError
+    const closureByDate = new Map((closureRows ?? []).filter((c) => c.closed_at).map((c) => [c.local_date as string, c]))
+
+    const macroMealIds = new Set<string>()
+    for (const d of dayMap.values()) {
+      const c = closureByDate.get(d.date)
+      if (!c) continue
+      for (const id of d.meal_ids) { const mm = mealById.get(id)?.meal_id; if (mm) macroMealIds.add(mm) }
+      for (const sl of slotsByPair.get(pairKey(c.meal_plan_id, c.day_order)) ?? []) macroMealIds.add(sl.meal_id)
+    }
+    const macrosByMealId = new Map<string, { protein_g: number; carb_g: number; fat_g: number }>()
+    if (macroMealIds.size) {
+      const { data: macroRows, error: mmError } = await supabase
+        .from('meals')
+        .select('id, protein_g, carbs_g, fat_g')
+        .in('id', [...macroMealIds])
+      if (mmError) throw mmError
+      for (const r of macroRows ?? []) macrosByMealId.set(r.id, { protein_g: Number(r.protein_g) || 0, carb_g: Number(r.carbs_g) || 0, fat_g: Number(r.fat_g) || 0 })
+    }
+    const sumMacros = (ids: string[]) => ids.reduce((acc, id) => {
+      const m = macrosByMealId.get(id)
+      return m ? { protein_g: acc.protein_g + m.protein_g, carb_g: acc.carb_g + m.carb_g, fat_g: acc.fat_g + m.fat_g } : acc
+    }, { protein_g: 0, carb_g: 0, fat_g: 0 })
+    const roundMacros = (m: { protein_g: number; carb_g: number; fat_g: number }) => ({ protein_g: Math.round(m.protein_g), carb_g: Math.round(m.carb_g), fat_g: Math.round(m.fat_g) })
+
+    const meal_days = [...dayMap.values()].sort((a, b) => b.date.localeCompare(a.date)).map((d) => {
+      const c = closureByDate.get(d.date)
+      if (!c) return { ...d, closure: null, macro_comparison: null }
+      const g = d.groups.find((x) => x.meal_plan_id === c.meal_plan_id && x.menu_day === c.day_order)
+      let macro_comparison = null
+      // unregistered != null <=> o cardápio daquele dia provadamente não mudou
+      if (g && g.unregistered != null) {
+        const slots = slotsByPair.get(pairKey(c.meal_plan_id, c.day_order)) ?? []
+        const registeredIds = g.registered_ids.map((id) => mealById.get(id)?.meal_id).filter((x): x is string => !!x)
+        macro_comparison = {
+          registered: roundMacros(sumMacros(registeredIds)),
+          menu: roundMacros(sumMacros(slots.map((sl) => sl.meal_id))),
+        }
+      }
+      return {
+        ...d,
+        closure: { closed_at: c.closed_at, closed_by: c.closed_by, menu_day: c.day_order, reopen_count: c.reopen_count },
+        macro_comparison,
+      }
+    })
 
     // Treinos por dia (2026-10-16), no mesmo fuso, com os exercícios marcados
     // em cada sessão (completed_exercises.workout_id) e a carga registrada.
