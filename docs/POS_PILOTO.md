@@ -559,6 +559,24 @@ primeira vez (banner + e-mail, `_shared/planFailureAlert.ts`) e fecha o alerta q
 certo. Medido 10-17: **55 dos 300 planos de catálogo ativos têm algum cardápio abaixo de 1.200 kcal** (mínimo 540)
 e 154 abaixo de 1.500 — o fallback testa até 5 candidatos; no construtor, esses planos só salvam depois de corrigidos.
 
+**🔴 Perfis que o catálogo atual NUNCA leva ao piso (medido 2026-10-17, pool que o gerador recebe):**
+
+| Perfil | Máximo possível por dia | Piso | Resultado |
+|---|---|---|---|
+| Homem, 3 refeições (qualquer preferência) | 1.433 (onívoro) | 1.500 | sempre falha |
+| Vegana(o), 3 refeições | 1.083 | 1.200 | sempre falha |
+| Vegano homem, 4 refeições | 1.425 | 1.500 | sempre falha |
+| Vegetariano homem, 3 refeições | 1.267 | 1.500 | sempre falha |
+
+Antes de 10-17 esses perfis recebiam cardápio abaixo do piso em silêncio; agora não recebem plano (alerta aos
+admins). Nem plano montado à mão resolve: o maior café da manhã ativo tem 357 kcal, almoço 480, jantar 596.
+Só resolve catálogo (receitas maiores, porções ajustáveis) ou decisão da nutricionista sobre o número de
+refeições. Os 5 alunos atuais (mulheres, 4–5 refeições) não são afetados.
+
+**Teste de ponta a ponta (2026-10-17, conta descartável, já apagada):** homem, 3 refeições → falha com motivo
+legível, incidente aberto, e-mail aos admins aceito pelo Resend; perfil trocado para mulher/5 refeições → a
+retomada automática gerou o plano (mínimo 1.767 kcal) em ~13 min, incidente fechado, e-mail "resolvido" enviado.
+
 **⚠️ Lacuna achada ao implementar: não existe como atribuir um plano montado à mão a um aluno.** O botão
 "Atribuir" do dashboard está desativado ("precisa ser construída"); o construtor só edita o plano que o aluno JÁ
 tem. Aluno cuja geração falhou fica sem `current_meal_plan_id` e a única saída hoje é o botão "Tentar de novo" de
