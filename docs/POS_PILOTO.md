@@ -556,3 +556,29 @@ pronto e falta a decisão. "Dias parado" contados até 2026-10-17 a partir do re
 **Leitura de conjunto:** os 100 pratos desativados (N2) e os vídeos (P1) são o mesmo tipo de gargalo — decisão
 profissional parada sobre material já preparado —, cada um com um profissional. N2 é o que mais pesa hoje: além da
 variedade, é a principal causa do déficit de kcal dos cardápios.
+
+## 🔴 RISCO DE PRODUTO — Plano de ganho de massa entrega até 31% menos kcal do que promete (medido 2026-10-17)
+
+**Não vender nem aceitar aluno com objetivo de ganho de massa (hipertrofia pura) enquanto isto não for resolvido.**
+
+O que acontece: com hipertrofia como objetivo (sem emagrecer junto), a meta de kcal é o gasto diário estimado
+× 1,10 — para um homem de 80 kg, 1,80 m, ativo, ≈ 3.000 kcal. O catálogo atual de refeições **não alcança** metas
+assim nem no melhor caso possível (o prato mais próximo da cota em cada refeição, sem variedade):
+
+| Meta | 4 refeições/dia | 5 refeições/dia |
+|---|---|---|
+| 2.000 kcal | −9% | −8% |
+| 2.500 kcal | **−20%** | −5% |
+| 3.000 kcal | **−31%** | **−13%** |
+
+Os planos reais (2–3 opções em rodízio) ficam abaixo desse melhor caso. Num objetivo que depende de superávit
+calórico, o cardápio entregaria déficit — **o contrário do objetivo**, sem nenhum aviso ao aluno nem ao
+profissional. Hoje nenhum plano de aluno é de hipertrofia pura (os 5 são de emagrecimento; 2 têm hipertrofia como
+objetivo secundário, e nesse caso o emagrecimento vence), então o risco ainda não se materializou.
+
+Por que o catálogo não alcança: maior café da manhã ativo tem 357 kcal, maior lanche 650; 100 das 200 refeições
+estão desativadas (ver "Gerador de cardápio" e a lista de pendências dos profissionais, item N2).
+
+O que resolve (depende da nutricionista): reativar e corrigir as refeições desativadas, criar receitas maiores, ou
+porções ajustáveis ("1,5 porção", funcionalidade nova). Enquanto isso, o mínimo é o gerador **avisar** quando a
+meta não cabe no catálogo, em vez de entregar o plano em silêncio (proposta na conversa de 2026-10-17).
