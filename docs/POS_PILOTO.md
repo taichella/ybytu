@@ -489,3 +489,28 @@ O telefone continua obrigatório no onboarding: é o canal de volta.
    `user_plan_email_sent_at` vs `user_notified_ready_at`).
 4. Login: `WHATSAPP_LOGIN_ENABLED = true` no `UserAuth.jsx` e push do PWA.
 5. Antes de religar, ter o alerta de falha de entrega do WhatsApp (olhando `delivery_status`), senão repete o silêncio.
+
+## ⚠️ Gerador de cardápio: os cardápios ficam abaixo da meta de kcal que ele mesmo define (medido 2026-10-17)
+
+Achado ao trocar o título do card do cardápio no app pelas kcal do cardápio: a meta do plano (`meal_plans.calories`,
+ex.: 1.525) e a soma dos cardápios (1.370 a 1.507) não batem. Medido nos 5 planos gerados por IA hoje no banco:
+**21 de 22 cardápios abaixo da meta**, desvio médio **−6%**, pior −13,3% (e um +12,9%), **5 de 22 fora de ±10%**.
+
+Causas (duas no gerador, uma no catálogo):
+
+1. **Cota do lanche com 4 refeições/dia.** `ybytu_match_meals` e o gerador dividem a meta em 20% para cada
+   refeição principal e 40% para os lanches. Com 4 refeições, o único lanche precisa carregar 40% do dia
+   (ex.: 719 kcal numa meta de 1.798) — o maior lanche ativo do catálogo tem 650 kcal; a média escolhida ficou em 600.
+2. **Nenhuma checagem do total do dia.** O gerador escolhe 2–3 opções por tipo "próximas da cota" (instrução no
+   prompt) e rotaciona as opções entre os dias, mas não confere se a soma de cada dia fica perto da meta.
+3. **Catálogo abaixo das cotas.** Com 5 refeições (cota de 20% ≈ 305 kcal), café da manhã tem mediana 247 kcal
+   (máx. 357) e jantar 345; com 99 de 200 refeições desativadas (ver alergênicos/ingredientes), sobram menos
+   opções perto da cota.
+
+Efeito para o aluno hoje: nenhum na tela (a meta saiu do card; o app mostra as kcal do cardápio). Efeito real: o
+cardápio prescrito entrega em média 6% menos kcal do que o plano diz, e o nome do plano ("Plano IA – … – 1525 kcal",
+visível no link /plano/ e no dashboard) promete um número que nenhum cardápio atinge.
+
+Para decidir com a nutricionista: (1) a divisão 20%/40% das cotas, sobretudo com 4 refeições; (2) qual tolerância
+do total do dia é aceitável (±5%? ±10%?) e se o gerador deve rejeitar/refazer cardápios fora dela; (3) se o nome
+do plano deve mostrar a meta ou a faixa real dos cardápios.

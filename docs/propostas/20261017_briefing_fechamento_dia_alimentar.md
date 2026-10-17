@@ -71,9 +71,8 @@ do plano.
   do cardápio, **encerrado em / por** (aluno ou automático ao registrar a última), reaberturas.
 - **Não existe:** o que o aluno comeu fora do registro, porções, motivo de não registrar.
 
-## 5. Duas decisões da Taina antes de desenhar
+## 5. Decisões da Taina (2026-10-17)
 
-1. **Prazo para reabrir:** até o fim do mesmo dia (no fuso do aluno, igual ao desfazer de
-   refeição) — recomendação de Claude — ou 3h como no treino?
-2. **Confirmação ao encerrar com refeições sem registro:** sem diálogo (recomendação: encerrar é
-   reversível no mesmo dia, um diálogo a mais vira atrito) ou com um aviso leve?
+1. **Reabrir até o fim do mesmo dia**, no fuso do aluno (igual ao desfazer de refeição).
+2. **Sem diálogo de confirmação ao encerrar**, mesmo com refeições sem registro: é reversível no mesmo dia e
+   o diálogo vira atrito.
